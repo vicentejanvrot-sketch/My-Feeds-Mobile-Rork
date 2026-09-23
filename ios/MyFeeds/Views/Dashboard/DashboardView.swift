@@ -146,7 +146,7 @@ struct DashboardView: View {
                         .frame(height: 38)
                         .frame(minWidth: 90)
                         .padding(.horizontal, 14)
-                        .background(Theme.accentGradient)
+                        .background(Theme.success)
                         .clipShape(.rect(cornerRadius: 10))
                     }
                     .disabled(overlay.pendingId != nil)
