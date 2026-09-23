@@ -477,10 +477,8 @@ struct WatchTimeStatsSection: View {
         do {
             var startISO: String?
             if let days = period.days {
-                let start = Calendar.current.date(
-                    byAdding: .day, value: -days,
-                    to: Calendar.current.startOfDay(for: Date())
-                ) ?? Date()
+                // Same window as the web app: exactly N days back from now.
+                let start = Calendar.current.date(byAdding: .day, value: -days, to: Date()) ?? Date()
                 startISO = ISO8601DateFormatter().string(from: start)
             }
             async let itemsTask = service.fetchStatsItems(startISO: startISO)
