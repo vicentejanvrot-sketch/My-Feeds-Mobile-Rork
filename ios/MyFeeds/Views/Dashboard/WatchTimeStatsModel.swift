@@ -71,6 +71,15 @@ nonisolated enum WatchTimeStatsBuilder {
         status == .watched || status == .liked
     }
 
+    /// Day a video counts toward, matching the web app: watched/liked videos
+    /// count on the day they were watched, everything else on its publish date.
+    private static func bucketDate(_ item: StatsItem) -> Date? {
+        if isWatched(item.userStatus) {
+            return Format.parseDate(item.watchedAt ?? item.publishedAt ?? item.createdAt)
+        }
+        return Format.parseDate(item.publishedAt ?? item.createdAt)
+    }
+
     static func build(
         items: [StatsItem],
         agentNames: [String: String],
@@ -93,14 +102,16 @@ nonisolated enum WatchTimeStatsBuilder {
             }
         }
 
-        // Date range for the daily trend (published_at fallback created_at)
+        // Date range for the daily trend. Same window as the web app:
+        // now minus N days, with one bar per calendar day in that window.
         let startOfToday = calendar.startOfDay(for: now)
         var startDate: Date
         if let days = period.days {
-            startDate = calendar.date(byAdding: .day, value: -days, to: startOfToday) ?? startOfToday
+            let windowStart = calendar.date(byAdding: .day, value: -days, to: now) ?? now
+            startDate = calendar.startOfDay(for: windowStart)
         } else {
             let earliest = items
-                .compactMap { Format.parseDate($0.publishedAt ?? $0.createdAt) }
+                .compactMap { bucketDate($0) }
                 .min() ?? startOfToday
             startDate = calendar.startOfDay(for: earliest)
         }
@@ -124,7 +135,7 @@ nonisolated enum WatchTimeStatsBuilder {
         }
 
         for item in items {
-            guard let itemDate = Format.parseDate(item.publishedAt ?? item.createdAt) else { continue }
+            guard let itemDate = bucketDate(item) else { continue }
             let key = dayKeyFormatter.string(from: itemDate)
             guard var bucket = buckets[key] else { continue }
             let duration = durations[item.id] ?? 0
@@ -139,22 +150,24 @@ nonisolated enum WatchTimeStatsBuilder {
         }
         data.dailyTrend = buckets.values.sorted { $0.date < $1.date }
 
-        // Weekly comparison (Monday-based, uses created_at)
+        // Weekly comparison (Monday-based). Same rules as the web app: each
+        // video counts on the same day it counts toward in the daily trend.
         var mondayCalendar = Calendar(identifier: .iso8601)
         mondayCalendar.firstWeekday = 2
         let thisWeekStart = mondayCalendar.dateInterval(of: .weekOfYear, for: now)?.start ?? startOfToday
         let lastWeekStart = mondayCalendar.date(byAdding: .weekOfYear, value: -1, to: thisWeekStart) ?? thisWeekStart
+        let lastWeekEnd = calendar.date(byAdding: .day, value: -1, to: thisWeekStart) ?? thisWeekStart
 
         for item in items {
-            guard let created = Format.parseDate(item.createdAt) else { continue }
+            guard let itemDate = bucketDate(item) else { continue }
             let duration = durations[item.id] ?? 0
-            if created >= thisWeekStart {
+            if itemDate >= thisWeekStart {
                 data.weekly.thisWeekTotalCount += 1
                 if isWatched(item.userStatus) {
                     data.weekly.thisWeekWatchedCount += 1
                     data.weekly.thisWeekWatchedSeconds += duration
                 }
-            } else if created >= lastWeekStart {
+            } else if itemDate >= lastWeekStart && itemDate <= lastWeekEnd {
                 data.weekly.lastWeekTotalCount += 1
                 if isWatched(item.userStatus) {
                     data.weekly.lastWeekWatchedCount += 1
@@ -166,6 +179,8 @@ nonisolated enum WatchTimeStatsBuilder {
             let diff = Double(data.weekly.thisWeekWatchedSeconds - data.weekly.lastWeekWatchedSeconds)
                 / Double(data.weekly.lastWeekWatchedSeconds) * 100
             data.weekly.watchedTimeDiffPct = Int(diff.rounded())
+        } else {
+            data.weekly.watchedTimeDiffPct = data.weekly.thisWeekWatchedSeconds > 0 ? 100 : 0
         }
 
         // By agent with nested channels
