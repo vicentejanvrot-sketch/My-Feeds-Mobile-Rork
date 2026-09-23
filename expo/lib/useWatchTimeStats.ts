@@ -77,7 +77,8 @@ export function formatDuration(totalSeconds: number): string {
   if (totalSeconds <= 0) return "0m";
   const h = Math.floor(totalSeconds / 3600);
   const m = Math.floor((totalSeconds % 3600) / 60);
-  if (h > 0) return `${h}h ${m}m`;
+  // Same format as the web app: "3h", "3h 5m", "5m".
+  if (h > 0) return m > 0 ? `${h}h ${m}m` : `${h}h`;
   return `${m}m`;
 }
 
@@ -367,14 +368,20 @@ export function useWatchTimeStats(period: TimePeriod = "all") {
           unwatchedSeconds: a.unwatchedSeconds,
           watchedCount: a.watchedCount,
           totalCount: a.totalCount,
-          channels: Array.from(a.channels.entries()).map(([chId, ch]) => ({
-            channelId: chId,
-            channelName: ch.channelName,
-            watchedSeconds: ch.watchedSeconds,
-            unwatchedSeconds: ch.unwatchedSeconds,
-            watchedCount: ch.watchedCount,
-            totalCount: ch.totalCount,
-          })),
+          // Same order as the web app: most total time first.
+          channels: Array.from(a.channels.entries())
+            .map(([chId, ch]) => ({
+              channelId: chId,
+              channelName: ch.channelName,
+              watchedSeconds: ch.watchedSeconds,
+              unwatchedSeconds: ch.unwatchedSeconds,
+              watchedCount: ch.watchedCount,
+              totalCount: ch.totalCount,
+            }))
+            .sort(
+              (x, y) =>
+                y.watchedSeconds + y.unwatchedSeconds - (x.watchedSeconds + x.unwatchedSeconds),
+            ),
         }),
       );
 
