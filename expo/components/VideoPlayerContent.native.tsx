@@ -1,6 +1,6 @@
 import YoutubeIframe, { YoutubeIframeRef } from "react-native-youtube-iframe";
-import React, { useRef, useImperativeHandle, forwardRef, useCallback, useState } from "react";
-import { View, Platform } from "react-native";
+import React, { useRef, useImperativeHandle, forwardRef, useCallback, useState, useEffect } from "react";
+import { View, Platform, AppState } from "react-native";
 import type WebView from "react-native-webview";
 
 // ── Public ref API ─────────────────────────────────────────────────
@@ -66,6 +66,7 @@ const INJECTED_JS = `
       if (!d || !d.eventName) return;
       switch (d.eventName) {
         case 'setPlaybackRate':
+          window.__myfeedsDesiredRate = d.meta.playbackRate;
           applyToPlayer(function(p) { p.setPlaybackRate(d.meta.playbackRate); });
           break;
         case 'setVolume':
@@ -95,6 +96,16 @@ const INJECTED_JS = `
   // becomes available (covers the gap between message arrival and onReady).
   setInterval(function() {
     if (!window.player || typeof window.player.setVolume !== 'function') return;
+    // YouTube drops back to 1x after the app is backgrounded/resumed while the
+    // selected speed stays highlighted. Keep enforcing the last requested rate.
+    var desiredRate = window.__myfeedsDesiredRate;
+    if (typeof desiredRate === 'number' && typeof window.player.getPlaybackRate === 'function') {
+      try {
+        if (Math.abs(window.player.getPlaybackRate() - desiredRate) > 0.01) {
+          window.player.setPlaybackRate(desiredRate);
+        }
+      } catch(_) {}
+    }
     if (pendingVolume !== undefined) {
       try { window.player.setVolume(pendingVolume); } catch(_) {}
       pendingVolume = undefined;
@@ -173,6 +184,35 @@ const VideoPlayerContent = forwardRef<VideoPlayerHandle, VideoPlayerContentProps
         webViewRef.current.injectJavaScript(code);
       }
     }, []);
+
+    /** Last requested speed. Stored in the page as window.__myfeedsDesiredRate
+     *  so the injected poll can re-apply it whenever YouTube resets to 1x. */
+    const playbackRateRef = useRef(playbackRate);
+    const applyPlaybackRate = useCallback((rate: number) => {
+      injectPlayerJS(
+        `window.__myfeedsDesiredRate=${rate};try{if(window.player&&player.setPlaybackRate){player.setPlaybackRate(${rate});}}catch(e){} true;`,
+      );
+    }, [injectPlayerJS]);
+
+    useEffect(() => {
+      playbackRateRef.current = playbackRate;
+      applyPlaybackRate(playbackRate);
+    }, [playbackRate, applyPlaybackRate]);
+
+    // Re-apply the selected speed when the app comes back to the foreground.
+    useEffect(() => {
+      const sub = AppState.addEventListener("change", (state) => {
+        if (state === "active") {
+          applyPlaybackRate(playbackRateRef.current);
+        }
+      });
+      return () => sub.remove();
+    }, [applyPlaybackRate]);
+
+    const handleReady = useCallback(() => {
+      applyPlaybackRate(playbackRateRef.current);
+      onReady?.();
+    }, [applyPlaybackRate, onReady]);
 
     // Force the player into an exact 16:9 box derived from width only.
     // The incoming height prop is accepted for backward compat but NOT
@@ -290,7 +330,7 @@ const VideoPlayerContent = forwardRef<VideoPlayerHandle, VideoPlayerContentProps
           volume={nativeVolume}
           mute={nativeMuted}
           playbackRate={playbackRate}
-          onReady={onReady}
+          onReady={handleReady}
           onError={onError}
           onChangeState={handleStateChange}
           webViewProps={{
