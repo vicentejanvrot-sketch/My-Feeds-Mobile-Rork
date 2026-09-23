@@ -116,6 +116,15 @@ struct FeedView: View {
                 router.feedRequest = nil
             }
         }
+        .onChange(of: router.lastStatusChange) { _, change in
+            // Status set from the player: apply it right away so the video
+            // leaves the list without waiting for the reload below.
+            guard let change,
+                  let index = items.firstIndex(where: { $0.id == change.itemId }) else { return }
+            withAnimation(.easeOut(duration: 0.2)) {
+                items[index].userStatus = change.status
+            }
+        }
         .onChange(of: router.playerRequest == nil) { wasClosed, isClosed in
             if !wasClosed && isClosed {
                 Task { await load() }
@@ -437,7 +446,17 @@ struct FeedView: View {
         // independently so a failure in optional agent/channel metadata never
         // leaves the iOS feed blank.
         do {
-            items = try await service.fetchFeedItems(limit: 500)
+            var fetched = try await service.fetchFeedItems(limit: 500)
+            // Keep statuses that are still being saved, so the reload can't
+            // bring a just-watched video back for a moment.
+            if !router.pendingStatuses.isEmpty {
+                for index in fetched.indices {
+                    if let pending = router.pendingStatuses[fetched[index].id] {
+                        fetched[index].userStatus = pending
+                    }
+                }
+            }
+            items = fetched
         } catch {
             toasts.show("Couldn't load videos: \(error.localizedDescription)", type: .error)
         }
