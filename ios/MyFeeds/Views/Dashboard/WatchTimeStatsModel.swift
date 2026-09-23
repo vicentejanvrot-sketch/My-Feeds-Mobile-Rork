@@ -217,8 +217,11 @@ nonisolated enum WatchTimeStatsBuilder {
         data.byAgent = agentBuckets.values
             .map { agent in
                 var copy = agent
+                // Same order as the web app: most total time first.
                 copy.channels = (channelBuckets[agent.id]?.values.map { $0 } ?? [])
-                    .sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
+                    .sorted {
+                        ($0.watchedSeconds + $0.unwatchedSeconds) > ($1.watchedSeconds + $1.unwatchedSeconds)
+                    }
                 return copy
             }
             .sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
