@@ -381,7 +381,7 @@ struct WatchTimeStatsSection: View {
                                 Text(agent.name)
                                     .font(.system(size: 13, weight: .bold))
                                     .foregroundStyle(Theme.textPrimary)
-                                Text("(\(agent.watchedCount)/\(agent.totalCount))")
+                                Text("(\(agent.watchedCount)/\(agent.totalCount) videos)")
                                     .font(.system(size: 11))
                                     .foregroundStyle(Theme.textMuted)
                                 Spacer()
@@ -402,7 +402,12 @@ struct WatchTimeStatsSection: View {
                                 }
                                 .foregroundStyle(Theme.textMuted)
                             }
-                            progressBar(watched: agent.watchedCount, total: agent.totalCount, color: agentColor(agent.id))
+                            // Bar fill = share of time watched, same as the web app
+                            progressBar(
+                                watched: agent.watchedSeconds,
+                                total: agent.watchedSeconds + agent.unwatchedSeconds,
+                                color: agentColor(agent.id)
+                            )
                         }
                         .contentShape(Rectangle())
                     }
@@ -422,15 +427,20 @@ struct WatchTimeStatsSection: View {
                                             .font(.system(size: 10))
                                             .foregroundStyle(Theme.textMuted)
                                     }
-                                    HStack(spacing: 12) {
-                                        Text("Watched \(Format.watchDuration(channel.watchedSeconds))")
-                                            .font(.system(size: 10))
+                                    HStack(spacing: 4) {
+                                        Text(Format.watchDuration(channel.watchedSeconds))
                                             .foregroundStyle(Theme.success)
-                                        Text("Not watched \(Format.watchDuration(channel.unwatchedSeconds))")
-                                            .font(.system(size: 10))
+                                        Text("/")
+                                            .foregroundStyle(Theme.textMuted)
+                                        Text(Format.watchDuration(channel.unwatchedSeconds))
                                             .foregroundStyle(Theme.textMuted)
                                     }
-                                    progressBar(watched: channel.watchedCount, total: channel.totalCount, color: Theme.success)
+                                    .font(.system(size: 10))
+                                    progressBar(
+                                        watched: channel.watchedSeconds,
+                                        total: channel.watchedSeconds + channel.unwatchedSeconds,
+                                        color: Theme.success
+                                    )
                                 }
                                 .padding(.top, 8)
                                 .overlay(alignment: .top) {
