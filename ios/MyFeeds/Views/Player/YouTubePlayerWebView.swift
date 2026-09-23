@@ -19,6 +19,11 @@ final class YouTubePlayerController {
     var onFirstPlay: (() -> Void)?
     fileprivate var firedFirstPlay = false
 
+    /// Last speed the app asked for. YouTube silently drops back to 1x when the
+    /// app returns from the background or the embed reloads, so this value is
+    /// pushed back into the page and enforced there (see bridgeScript).
+    @ObservationIgnored private(set) var desiredRate: Double = 1
+
     private func evaluate(_ js: String) {
         webView?.evaluateJavaScript(js, completionHandler: nil)
     }
@@ -41,7 +46,15 @@ final class YouTubePlayerController {
         let target = max(0, min(currentTime + delta, duration > 0 ? duration : .greatestFiniteMagnitude))
         seek(to: target)
     }
-    func setRate(_ rate: Double) { evaluate("player.setPlaybackRate(\(rate));") }
+    func setRate(_ rate: Double) {
+        desiredRate = rate
+        evaluate("""
+        window.__myfeedsDesiredRate = \(rate);
+        if (window.player && player.setPlaybackRate) { player.setPlaybackRate(\(rate)); }
+        """)
+    }
+    /// Re-sends the last requested speed (after foregrounding or a page reload).
+    func reapplyRate() { setRate(desiredRate) }
     func setQuality(_ quality: String) { evaluate("player.setPlaybackQuality('\(quality)');") }
     func mute() { evaluate("player.mute();") }
     func unmute() { evaluate("player.unMute();") }
@@ -148,6 +161,18 @@ struct YouTubePlayerWebView: UIViewRepresentable {
         }
       }, true);
       installCaptionLock();
+      function enforceRate(p) {
+        var r = window.__myfeedsDesiredRate;
+        if (typeof r !== 'number') { return; }
+        try {
+          if (typeof p.getPlaybackRate === 'function' && Math.abs(p.getPlaybackRate() - r) > 0.01) {
+            p.setPlaybackRate(r);
+          }
+        } catch (e) {}
+      }
+      document.addEventListener('visibilitychange', function() {
+        if (!document.hidden && window.player) { enforceRate(window.player); }
+      });
       var attached = false;
       function attach() {
         var p = document.getElementById('movie_player');
@@ -158,6 +183,7 @@ struct YouTubePlayerWebView: UIViewRepresentable {
         try {
           p.addEventListener('onStateChange', function(state) {
             disableCaptions(p);
+            if (state === 1 || state === 3) { enforceRate(p); }
             post({event: 'state', state: state});
           });
           p.addEventListener('onApiChange', function() {
@@ -171,6 +197,7 @@ struct YouTubePlayerWebView: UIViewRepresentable {
         setInterval(function() {
           try {
             disableCaptions(p);
+            enforceRate(p);
             post({event: 'time', time: p.getCurrentTime(), duration: p.getDuration()});
           } catch (e) {}
         }, 500);
@@ -193,6 +220,25 @@ struct YouTubePlayerWebView: UIViewRepresentable {
 
         init(controller: YouTubePlayerController) {
             self.controller = controller
+            super.init()
+            NotificationCenter.default.addObserver(
+                self,
+                selector: #selector(appDidBecomeActive),
+                name: UIApplication.didBecomeActiveNotification,
+                object: nil
+            )
+        }
+
+        deinit {
+            NotificationCenter.default.removeObserver(self)
+        }
+
+        /// Returning from the background resets YouTube's playback rate to 1x
+        /// even though the selected speed pill stays highlighted. Push it back.
+        @objc nonisolated func appDidBecomeActive() {
+            Task { @MainActor [controller] in
+                controller.reapplyRate()
+            }
         }
 
         nonisolated func userContentController(
@@ -211,6 +257,7 @@ struct YouTubePlayerWebView: UIViewRepresentable {
                     controller.isReady = true
                     if let duration { controller.duration = duration }
                     controller.onReady?()
+                    controller.reapplyRate()
                 case "time":
                     if let time { controller.currentTime = time }
                     if let duration, duration > 0 { controller.duration = duration }
