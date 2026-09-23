@@ -23,7 +23,7 @@ enum ToastType {
     }
 }
 
-/// Global single-toast presenter, auto-dismissing after 3.2s.
+/// Global single-toast presenter, auto-dismissing after 1.8s.
 @Observable
 final class ToastCenter {
     struct Toast: Identifiable, Equatable {
@@ -40,16 +40,16 @@ final class ToastCenter {
     func show(_ message: String, type: ToastType = .success) {
         dismissTask?.cancel()
         let toast = Toast(message: message, type: type)
-        withAnimation(.easeIn(duration: 0.18)) { current = toast }
+        withAnimation(.easeIn(duration: 0.12)) { current = toast }
         switch type {
         case .success: UINotificationFeedbackGenerator().notificationOccurred(.success)
         case .error: UINotificationFeedbackGenerator().notificationOccurred(.error)
         case .info: break
         }
         dismissTask = Task { [weak self] in
-            try? await Task.sleep(for: .seconds(3.2))
+            try? await Task.sleep(for: .seconds(1.8))
             guard !Task.isCancelled else { return }
-            withAnimation(.easeOut(duration: 0.25)) { self?.current = nil }
+            withAnimation(.easeOut(duration: 0.18)) { self?.current = nil }
         }
     }
 }
