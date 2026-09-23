@@ -271,6 +271,11 @@ struct SettingsView: View {
                         .foregroundStyle(Theme.textSecondary)
                         .lineSpacing(5)
                         .padding(.top, 12)
+                    Text("Running or walking with the phone in your pocket? Tap the lock icon in the video player to turn on Pocket Lock. The screen goes dark and ignores every touch while the video keeps playing. Press and hold the lock for 2 seconds to unlock.")
+                        .font(.system(size: 13))
+                        .foregroundStyle(Theme.textSecondary)
+                        .lineSpacing(5)
+                        .padding(.top, 10)
                 }
             }
             .padding(16)
