@@ -219,9 +219,14 @@ final class SupabaseService {
             .eq("id", value: runId).execute()
     }
 
+    /// Deletes in batches of 100. Sending every id in one request (~2,000
+    /// of them) made the URL too long and the server returned Bad Request.
     func clearRuns(ids: [String]) async throws {
         guard !ids.isEmpty else { return }
-        try await db.from("runs").delete().in("id", values: ids).execute()
+        for start in stride(from: 0, to: ids.count, by: 100) {
+            let batch = Array(ids[start..<min(start + 100, ids.count)])
+            try await db.from("runs").delete().in("id", values: batch).execute()
+        }
     }
 
     // MARK: - Channels & recipients
