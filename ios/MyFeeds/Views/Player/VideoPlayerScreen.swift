@@ -30,6 +30,10 @@ struct VideoPlayerScreen: View {
     @State private var landscapeControlsHeight: CGFloat = 112
     @State private var landscapeControlsTask: Task<Void, Never>?
     @State private var savePositionTask: Task<Void, Never>?
+    // Pocket Lock: blocks every touch and dims the screen while the video keeps playing
+    @State private var isPocketLocked = false
+    @State private var unlockProgress: CGFloat = 0
+    @State private var brightnessBeforeLock: CGFloat?
 
     private var watchURL: String { "https://www.youtube.com/watch?v=\(request.videoId)" }
 
@@ -50,17 +54,24 @@ struct VideoPlayerScreen: View {
                 if showWatchedOverlay {
                     watchedOverlay
                 }
+
+                if isPocketLocked {
+                    pocketLockOverlay
+                }
             }
             .onAppear { updateFullscreen(for: geometry.size) }
             .onChange(of: geometry.size) { _, newSize in
                 updateFullscreen(for: newSize)
             }
         }
-        .statusBarHidden(isFullscreen)
+        .statusBarHidden(isFullscreen || isPocketLocked)
         .sheet(isPresented: $showGearSheet) { gearSheet }
         .sheet(isPresented: $showShareSheet) { shareSheet }
         .onAppear { startPlayerLifecycle() }
         .onDisappear {
+            if isPocketLocked {
+                restoreAfterPocketLock()
+            }
             landscapeControlsTask?.cancel()
             savePositionTask?.cancel()
             persistPosition()
@@ -182,8 +193,20 @@ struct VideoPlayerScreen: View {
     private var fullscreenCloseButton: some View {
         ZStack {
             VStack {
-                HStack {
+                HStack(spacing: 10) {
                     Spacer()
+                    Button {
+                        enablePocketLock()
+                    } label: {
+                        ZStack {
+                            Circle().fill(.black.opacity(0.55)).frame(width: 40, height: 40)
+                            Image(systemName: "lock")
+                                .font(.system(size: 17, weight: .semibold))
+                                .foregroundStyle(.white)
+                        }
+                    }
+                    .padding(.top, 8)
+                    .accessibilityLabel("Pocket Lock")
                     Button {
                         isFullscreen = false
                         dismissPlayer()
@@ -217,6 +240,79 @@ struct VideoPlayerScreen: View {
             .allowsHitTesting(areLandscapeControlsVisible)
     }
 
+    // MARK: - Pocket Lock
+
+    /// Full-screen shield for running with the phone in a pocket: the video
+    /// keeps playing, the screen stays on but dimmed, and every touch is
+    /// ignored until the lock is held for 2 seconds.
+    private var pocketLockOverlay: some View {
+        ZStack {
+            Color.black.opacity(0.94)
+                .ignoresSafeArea()
+                .contentShape(Rectangle())
+                .onTapGesture {}
+
+            VStack(spacing: 14) {
+                ZStack {
+                    Circle()
+                        .stroke(.white.opacity(0.15), lineWidth: 4)
+                    Circle()
+                        .trim(from: 0, to: unlockProgress)
+                        .stroke(Theme.success, style: StrokeStyle(lineWidth: 4, lineCap: .round))
+                        .rotationEffect(.degrees(-90))
+                    Image(systemName: "lock.fill")
+                        .font(.system(size: 26, weight: .semibold))
+                        .foregroundStyle(.white.opacity(0.8))
+                }
+                .frame(width: 76, height: 76)
+                .contentShape(Circle())
+                .onLongPressGesture(minimumDuration: 2, maximumDistance: 30) {
+                    unlockPocketLock()
+                } onPressingChanged: { pressing in
+                    withAnimation(pressing ? .linear(duration: 2) : .easeOut(duration: 0.2)) {
+                        unlockProgress = pressing ? 1 : 0
+                    }
+                }
+                .accessibilityLabel("Unlock. Press and hold for 2 seconds")
+
+                Text("Pocket Lock on")
+                    .font(.system(size: 15, weight: .semibold))
+                    .foregroundStyle(.white.opacity(0.7))
+                Text("Press and hold the lock for 2 seconds to unlock")
+                    .font(.system(size: 12))
+                    .foregroundStyle(.white.opacity(0.45))
+                    .multilineTextAlignment(.center)
+            }
+            .padding(.horizontal, 32)
+        }
+        .transition(.opacity)
+    }
+
+    private func enablePocketLock() {
+        UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+        // Keep the screen on so the video keeps playing, but dim it to save battery.
+        UIApplication.shared.isIdleTimerDisabled = true
+        brightnessBeforeLock = UIScreen.main.brightness
+        UIScreen.main.brightness = 0.05
+        unlockProgress = 0
+        withAnimation(.easeInOut(duration: 0.2)) { isPocketLocked = true }
+    }
+
+    private func unlockPocketLock() {
+        UINotificationFeedbackGenerator().notificationOccurred(.success)
+        restoreAfterPocketLock()
+        unlockProgress = 0
+        withAnimation(.easeInOut(duration: 0.2)) { isPocketLocked = false }
+    }
+
+    private func restoreAfterPocketLock() {
+        if let brightness = brightnessBeforeLock {
+            UIScreen.main.brightness = brightness
+            brightnessBeforeLock = nil
+        }
+        UIApplication.shared.isIdleTimerDisabled = prefs.keepScreenOn
+    }
+
     // MARK: - Header & rows
 
     private var header: some View {
@@ -235,6 +331,15 @@ struct VideoPlayerScreen: View {
                 .foregroundStyle(Theme.textPrimary)
             Spacer()
             HStack(spacing: 4) {
+                Button {
+                    enablePocketLock()
+                } label: {
+                    Image(systemName: "lock")
+                        .font(.system(size: 17))
+                        .foregroundStyle(Theme.textSecondary)
+                        .frame(width: 36, height: 36)
+                }
+                .accessibilityLabel("Pocket Lock")
                 Button {
                     showShareSheet = true
                 } label: {
