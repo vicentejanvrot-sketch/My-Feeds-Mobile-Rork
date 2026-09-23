@@ -45,7 +45,16 @@ final class RunningOverlayStore {
         await runInternal(agent: agent)
     }
 
-    /// Run every agent sequentially; per-agent failures don't stop the loop.
+    /// Result of one agent run inside Run All.
+    nonisolated private struct BatchOutcome: Sendable {
+        let agentName: String
+        let failed: Bool
+        let newCount: Int
+    }
+
+    /// Run every agent at the same time, like the web app. Running them one
+    /// after another made Run All take the sum of every agent's duration.
+    /// Per-agent failures don't stop the others.
     func runAll(agents: [Agent]) async {
         guard pendingId == nil, !agents.isEmpty else { return }
         UIImpactFeedbackGenerator(style: .medium).impactOccurred()
@@ -54,10 +63,73 @@ final class RunningOverlayStore {
             pendingId = nil
             runCompletionCounter += 1
         }
-        for agent in agents {
-            await runInternal(agent: agent)
+
+        let label = "All agents (\(agents.count))"
+        state = OverlayState(
+            agentName: label, runId: Self.batchRunId, phase: .running,
+            channelsTotal: agents.count, channelsScanned: 0, currentChannelName: nil
+        )
+
+        var finished = 0
+        var newTotal = 0
+        var failedNames: [String] = []
+        await withTaskGroup(of: BatchOutcome.self) { group in
+            for agent in agents {
+                group.addTask { await self.runQuiet(agent: agent) }
+            }
+            for await outcome in group {
+                finished += 1
+                if outcome.failed {
+                    failedNames.append(outcome.agentName)
+                } else {
+                    newTotal += outcome.newCount
+                }
+                state?.channelsScanned = finished
+                state?.currentChannelName = "\(outcome.agentName) finished"
+            }
         }
-        state = nil
+
+        let found = newTotal > 0 ? "Found \(newTotal) new videos" : "No new videos found"
+        if failedNames.isEmpty {
+            state = OverlayState(agentName: label, runId: Self.batchRunId, phase: .success(message: found))
+            try? await Task.sleep(for: .seconds(2.5))
+            if case .success = state?.phase { state = nil }
+        } else {
+            let message = "\(found). Failed: \(failedNames.joined(separator: ", "))"
+            state = OverlayState(agentName: label, runId: Self.batchRunId, phase: .error(message: message))
+            await holdThenClearIfError(seconds: 4)
+        }
+    }
+
+    /// Marks the overlay as showing Run All progress (agents, not channels).
+    static let batchRunId = "all"
+
+    /// Start one agent run and wait for it to finish without touching the overlay.
+    private func runQuiet(agent: Agent) async -> BatchOutcome {
+        let service = SupabaseService.shared
+        guard let run = try? await service.startRun(agentId: agent.id) else {
+            return BatchOutcome(agentName: agent.name, failed: true, newCount: 0)
+        }
+        do {
+            try await service.invokeRunAgent(agentId: agent.id, runId: run.id)
+        } catch {
+            try? await service.markRunFailed(runId: run.id, message: extractEdgeErrorMessage(error))
+            return BatchOutcome(agentName: agent.name, failed: true, newCount: 0)
+        }
+        while !Task.isCancelled {
+            if let current = try? await service.fetchRun(id: run.id) {
+                switch current.runStatus {
+                case .success, .partial:
+                    return BatchOutcome(agentName: agent.name, failed: false, newCount: current.videosNewCount ?? 0)
+                case .failed, .cancelled:
+                    return BatchOutcome(agentName: agent.name, failed: true, newCount: 0)
+                case .running:
+                    break
+                }
+            }
+            try? await Task.sleep(for: .seconds(1.5))
+        }
+        return BatchOutcome(agentName: agent.name, failed: true, newCount: 0)
     }
 
     private func runInternal(agent: Agent) async {
@@ -190,7 +262,7 @@ struct RunningOverlayView: View {
                 if state.channelsTotal > 0 {
                     VStack(spacing: 8) {
                         HStack {
-                            Text("Scanning channels")
+                            Text(state.runId == RunningOverlayStore.batchRunId ? "Agents finished" : "Scanning channels")
                             Spacer()
                             Text("\(state.channelsScanned) / \(state.channelsTotal)")
                                 .monospacedDigit()
