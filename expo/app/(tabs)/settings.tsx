@@ -21,7 +21,6 @@ import { router } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
 import * as Haptics from "expo-haptics";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { activateKeepAwakeAsync, deactivateKeepAwake } from "expo-keep-awake";
 import {
   Mail,
   Monitor,
@@ -129,16 +128,10 @@ export default function SettingsScreen() {
   const handleKeepScreenOn = useCallback(
     async (val: boolean) => {
       setKeepScreenOn(val);
+      // Only save the preference. The video player reads it and keeps the
+      // screen awake while a video is open (turning it on here kept the whole
+      // app awake until restart, and was lost after a restart).
       await AsyncStorage.setItem("@settings/keep_screen_on", String(val));
-      try {
-        if (val) {
-          await activateKeepAwakeAsync();
-        } else {
-          deactivateKeepAwake();
-        }
-      } catch {
-        // Keep-awake may fail silently on certain devices
-      }
     },
     [],
   );
