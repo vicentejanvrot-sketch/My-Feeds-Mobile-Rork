@@ -165,6 +165,23 @@ function useRunningOverlayState() {
     [cleanupChannel, clearHideTimer],
   );
 
+  /** Run All progress: several agents running at once, so there is no single
+   *  run row to follow. progress counts finished agents instead of channels. */
+  const showBatchProgress = useCallback(
+    (agentName: string, done: number, total: number, message: string) => {
+      cleanupChannel();
+      clearHideTimer();
+      setState({
+        status: "running",
+        agentName,
+        runId: null,
+        message,
+        progress: { channelsTotal: total, channelsScanned: done, currentChannelName: null },
+      });
+    },
+    [cleanupChannel, clearHideTimer],
+  );
+
   /** Manually show a success result. */
   const showSuccess = useCallback(
     (agentName: string, message: string) => {
@@ -226,6 +243,7 @@ function useRunningOverlayState() {
   return {
     state,
     showRunning,
+    showBatchProgress,
     showSuccess,
     showError,
     hideOverlay,
@@ -394,7 +412,9 @@ function RunningCard({ state }: { state: OverlayState }) {
       {channelsTotal > 0 ? (
         <View style={cardStyles.progressBlock}>
           <View style={cardStyles.progressHeader}>
-            <Text style={cardStyles.progressLabel}>Scanning channels</Text>
+            <Text style={cardStyles.progressLabel}>
+              {state.runId === null ? "Agents finished" : "Scanning channels"}
+            </Text>
             <Text style={cardStyles.progressCount}>
               {channelsScanned} / {channelsTotal}
             </Text>
