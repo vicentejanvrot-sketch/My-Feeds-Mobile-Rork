@@ -572,13 +572,9 @@ private struct FeedItemCard: View {
         Color(Theme.input)
             .aspectRatio(16 / 9, contentMode: .fit)
             .overlay {
-                if let urlString = item.thumbnailUrl, let url = URL(string: urlString) {
-                    AsyncImage(url: url) { phase in
-                        if let image = phase.image {
-                            image.resizable().aspectRatio(contentMode: .fill)
-                        }
-                    }
-                    .allowsHitTesting(false)
+                if !thumbnailCandidates.isEmpty {
+                    FeedThumbnailImage(candidates: thumbnailCandidates)
+                        .allowsHitTesting(false)
                 }
             }
             .overlay {
@@ -591,6 +587,24 @@ private struct FeedItemCard: View {
                 .allowsHitTesting(false)
             }
             .clipped()
+    }
+
+    /// Stored thumbnail first (forced to https), then YouTube's standard
+    /// sizes as fallbacks for rows whose stored URL is missing or broken.
+    private var thumbnailCandidates: [URL] {
+        var urls: [URL] = []
+        if var raw = item.thumbnailUrl, !raw.isEmpty {
+            if raw.hasPrefix("http://") { raw = "https://" + raw.dropFirst("http://".count) }
+            if let url = URL(string: raw) { urls.append(url) }
+        }
+        if let videoId = item.resolvedVideoId {
+            for size in ["hqdefault", "mqdefault"] {
+                if let url = URL(string: "https://i.ytimg.com/vi/\(videoId)/\(size).jpg"), !urls.contains(url) {
+                    urls.append(url)
+                }
+            }
+        }
+        return urls
     }
 
     private var body12: some View {
@@ -691,5 +705,78 @@ private struct FeedItemCard: View {
                 .monospacedDigit()
         }
         .foregroundStyle(Theme.textMuted)
+    }
+}
+
+// MARK: - Thumbnails
+
+/// Shared thumbnail cache. AsyncImage has no cache and, inside a LazyVStack,
+/// gives up for good when its load is cancelled mid-scroll, which left cards
+/// showing only the title and details.
+private final class ThumbnailCache {
+    static let shared = ThumbnailCache()
+
+    private let memory = NSCache<NSURL, UIImage>()
+    private let session: URLSession
+
+    private init() {
+        memory.countLimit = 400
+        let config = URLSessionConfiguration.default
+        config.requestCachePolicy = .returnCacheDataElseLoad
+        config.urlCache = URLCache(memoryCapacity: 20 * 1024 * 1024, diskCapacity: 150 * 1024 * 1024)
+        config.timeoutIntervalForRequest = 15
+        session = URLSession(configuration: config)
+    }
+
+    func cached(_ url: URL) -> UIImage? {
+        memory.object(forKey: url as NSURL)
+    }
+
+    func load(_ url: URL) async -> UIImage? {
+        if let image = cached(url) { return image }
+        guard let result = try? await session.data(from: url),
+              let http = result.1 as? HTTPURLResponse, http.statusCode == 200,
+              let image = UIImage(data: result.0) else { return nil }
+        memory.setObject(image, forKey: url as NSURL)
+        return image
+    }
+}
+
+/// Loads a card thumbnail through ThumbnailCache, trying each candidate URL
+/// and retrying once. The load restarts whenever the card scrolls back on
+/// screen, and cached images show instantly.
+private struct FeedThumbnailImage: View {
+    let candidates: [URL]
+    @State private var image: UIImage?
+
+    init(candidates: [URL]) {
+        self.candidates = candidates
+        _image = State(initialValue: candidates.lazy.compactMap { ThumbnailCache.shared.cached($0) }.first)
+    }
+
+    var body: some View {
+        ZStack {
+            if let image {
+                Image(uiImage: image)
+                    .resizable()
+                    .aspectRatio(contentMode: .fill)
+                    .transition(.opacity)
+            }
+        }
+        .task(id: candidates) { await load() }
+    }
+
+    private func load() async {
+        if image != nil { return }
+        for attempt in 0..<2 {
+            for url in candidates {
+                if Task.isCancelled { return }
+                if let loaded = await ThumbnailCache.shared.load(url) {
+                    withAnimation(.easeIn(duration: 0.15)) { image = loaded }
+                    return
+                }
+            }
+            if attempt == 0 { try? await Task.sleep(for: .milliseconds(700)) }
+        }
     }
 }
