@@ -83,7 +83,8 @@ export function formatDuration(totalSeconds: number): string {
 
 /** Compute percentage change of this vs last. Returns null if last is 0. */
 function pctChange(thisVal: number, lastVal: number): number | null {
-  if (lastVal === 0) return thisVal > 0 ? null : 0;
+  // Same rule as the web app: growth from zero shows as +100%.
+  if (lastVal === 0) return thisVal > 0 ? 100 : 0;
   return Math.round(((thisVal - lastVal) / lastVal) * 100);
 }
 
@@ -103,11 +104,12 @@ export function useWatchTimeStats(period: TimePeriod = "all") {
       const now = new Date();
       const todayStart = startOfDay(now);
 
+      // Same window as the web app: exactly N days back from now.
       let startDate: string | null = null;
       if (period === "7d") {
-        startDate = subDays(todayStart, 7).toISOString();
+        startDate = subDays(now, 7).toISOString();
       } else if (period === "30d") {
-        startDate = subDays(todayStart, 30).toISOString();
+        startDate = subDays(now, 30).toISOString();
       }
 
       // Weekly comparison: Monday-based weeks
@@ -118,12 +120,14 @@ export function useWatchTimeStats(period: TimePeriod = "all") {
       // ── Fetch items ──────────────────────────────────────────
       let itemsQuery = supabase
         .from("items")
-        .select("id, agent_id, channel_id, channel_name, user_status, created_at, published_at")
+        .select("id, agent_id, channel_id, channel_name, user_status, created_at, published_at, watched_at")
         .order("created_at", { ascending: false });
 
+      // Watched videos count by when they were watched (watched_at is set by
+      // a database trigger), everything else by publish date — as on the web.
       if (startDate) {
         itemsQuery = itemsQuery.or(
-          `published_at.gte.${startDate},and(published_at.is.null,created_at.gte.${startDate})`,
+          `watched_at.gte.${startDate},and(watched_at.is.null,published_at.gte.${startDate}),and(watched_at.is.null,published_at.is.null,created_at.gte.${startDate})`,
         );
       }
 
@@ -138,7 +142,14 @@ export function useWatchTimeStats(period: TimePeriod = "all") {
         user_status: string | null;
         created_at: string;
         published_at: string | null;
+        watched_at: string | null;
       }>;
+
+      /** Day a video counts toward: watch date for watched/liked, else publish date. */
+      const bucketDate = (r: (typeof itemRows)[number]): Date =>
+        isWatched(r.user_status)
+          ? new Date(r.watched_at ?? r.published_at ?? r.created_at)
+          : new Date(r.published_at ?? r.created_at);
 
       if (itemRows.length === 0) {
         return emptyResult();
@@ -148,7 +159,7 @@ export function useWatchTimeStats(period: TimePeriod = "all") {
       if (period === "all") {
         let earliestMs = Infinity;
         for (const r of itemRows) {
-          const t = new Date(r.published_at ?? r.created_at).getTime();
+          const t = bucketDate(r).getTime();
           if (t < earliestMs) earliestMs = t;
         }
         if (earliestMs !== Infinity) {
@@ -252,8 +263,7 @@ export function useWatchTimeStats(period: TimePeriod = "all") {
       for (const item of itemRows) {
         const duration = durationMap.get(item.id) ?? 0;
         const watched = isWatched(item.user_status);
-        const itemDate = new Date(item.published_at ?? item.created_at);
-        const created = new Date(item.created_at);
+        const itemDate = bucketDate(item);
         const agentId = item.agent_id;
         const channelId = item.channel_id ?? "unknown";
         const channelName = item.channel_name ?? "Unknown Channel";
@@ -321,8 +331,8 @@ export function useWatchTimeStats(period: TimePeriod = "all") {
           ch.unwatchedSeconds += duration;
         }
 
-        // Weekly comparison
-        const createdTime = created.getTime();
+        // Weekly comparison (same day the item counts toward in the daily trend)
+        const createdTime = itemDate.getTime();
         const thisWeekStartTime = thisWeekStart.getTime();
         const lastWeekStartTime = lastWeekStart.getTime();
         const lastWeekEndTime = lastWeekEnd.getTime();
