@@ -24,7 +24,7 @@ export const [ToastProvider, useToastState] = createContextHook(() => {
     } else if (type === "success") {
       void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     }
-    timer.current = setTimeout(() => setToast(null), 3200);
+    timer.current = setTimeout(() => setToast(null), 1800);
   }, []);
 
   return { toast, show };
@@ -44,7 +44,7 @@ export function ToastHost() {
     if (toast) {
       Animated.timing(opacity, {
         toValue: 1,
-        duration: 180,
+        duration: 120,
         useNativeDriver: true,
       }).start();
     } else {
