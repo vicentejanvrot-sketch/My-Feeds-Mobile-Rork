@@ -682,7 +682,9 @@ function AgentBreakdownRow({
   expanded: boolean;
   onToggle: () => void;
 }) {
-  const pct = agent.totalCount > 0 ? Math.round((agent.watchedCount / agent.totalCount) * 100) : 0;
+  // Bar fill = share of time watched, same as the web app
+  const agentTotalSeconds = agent.watchedSeconds + agent.unwatchedSeconds;
+  const pct = agentTotalSeconds > 0 ? Math.round((agent.watchedSeconds / agentTotalSeconds) * 100) : 0;
 
   return (
     <View style={[styles.breakdownAgent, { borderLeftColor: color, borderLeftWidth: 3 }]}>
@@ -696,7 +698,7 @@ function AgentBreakdownRow({
           {agent.agentName}
         </Text>
         <Text style={styles.breakdownAgentCount}>
-          ({agent.watchedCount}/{agent.totalCount})
+          ({agent.watchedCount}/{agent.totalCount} videos)
         </Text>
       </Pressable>
       {/* collapsed stats */}
@@ -732,8 +734,9 @@ function AgentBreakdownRow({
 }
 
 function ChannelRow({ channel }: { channel: ChannelBucket }) {
-  const pct = channel.totalCount > 0
-    ? Math.round((channel.watchedCount / channel.totalCount) * 100)
+  const channelTotalSeconds = channel.watchedSeconds + channel.unwatchedSeconds;
+  const pct = channelTotalSeconds > 0
+    ? Math.round((channel.watchedSeconds / channelTotalSeconds) * 100)
     : 0;
 
   return (
@@ -744,19 +747,15 @@ function ChannelRow({ channel }: { channel: ChannelBucket }) {
       <Text style={styles.channelCount}>
         ({channel.watchedCount}/{channel.totalCount})
       </Text>
+      {/* "watched / not watched", same as the web app */}
       <View style={styles.breakdownStats}>
-        <View style={styles.breakdownStatItem}>
-          <Eye size={10} color={Colors.success} />
-          <Text style={[styles.breakdownStatVal, { color: Colors.success, fontSize: 10 }]}>
-            {formatDuration(channel.watchedSeconds)}
-          </Text>
-        </View>
-        <View style={styles.breakdownStatItem}>
-          <EyeOff size={10} color={Colors.textMuted} />
-          <Text style={[styles.breakdownStatVal, { color: Colors.textMuted, fontSize: 10 }]}>
-            {formatDuration(channel.unwatchedSeconds)}
-          </Text>
-        </View>
+        <Text style={[styles.breakdownStatVal, { color: Colors.success, fontSize: 10 }]}>
+          {formatDuration(channel.watchedSeconds)}
+        </Text>
+        <Text style={[styles.breakdownStatVal, { color: Colors.textMuted, fontSize: 10 }]}>/</Text>
+        <Text style={[styles.breakdownStatVal, { color: Colors.textMuted, fontSize: 10 }]}>
+          {formatDuration(channel.unwatchedSeconds)}
+        </Text>
       </View>
       <View style={styles.progressBarBg}>
         <View
