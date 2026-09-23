@@ -302,7 +302,7 @@ export default function DashboardScreen() {
               disabled={pendingId !== null}
             >
               <LinearGradient
-                colors={Colors.accentGradient as unknown as readonly [string, string, ...string[]]}
+                colors={[Colors.success, Colors.success]}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 0 }}
                 style={StyleSheet.absoluteFill}
