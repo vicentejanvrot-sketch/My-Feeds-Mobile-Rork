@@ -135,11 +135,17 @@ final class SupabaseService {
 
     // MARK: - Watch time stats
 
+    /// Same filter as the web app: watched items count by when they were
+    /// watched, everything else by publish date (fallback created date).
     func fetchStatsItems(startISO: String?) async throws -> [StatsItem] {
         var query = db.from("items")
-            .select("id, agent_id, channel_id, channel_name, user_status, created_at, published_at")
+            .select("id, agent_id, channel_id, channel_name, user_status, created_at, published_at, watched_at")
         if let startISO {
-            query = query.or("published_at.gte.\(startISO),and(published_at.is.null,created_at.gte.\(startISO))")
+            query = query.or(
+                "watched_at.gte.\(startISO),"
+                + "and(watched_at.is.null,published_at.gte.\(startISO)),"
+                + "and(watched_at.is.null,published_at.is.null,created_at.gte.\(startISO))"
+            )
         }
         return try await query.order("created_at", ascending: false).execute().value
     }
