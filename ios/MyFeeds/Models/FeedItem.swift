@@ -72,6 +72,8 @@ nonisolated struct StatsItem: Codable, Identifiable, Hashable, Sendable {
     var userStatus: ItemStatus?
     var createdAt: String?
     var publishedAt: String?
+    /// Set by the database trigger when an item becomes watched/liked.
+    var watchedAt: String?
 }
 
 /// Lightweight projection of item_analysis used by watch-time statistics.
