@@ -91,7 +91,9 @@ nonisolated enum Format {
         if seconds <= 0 { return "0m" }
         let h = seconds / 3600
         let m = (seconds % 3600) / 60
-        return h > 0 ? "\(h)h \(m)m" : "\(m)m"
+        // Same format as the web app: "3h", "3h 5m", "5m".
+        if h > 0 { return m > 0 ? "\(h)h \(m)m" : "\(h)h" }
+        return "\(m)m"
     }
 
     /// Player time "m:ss" / "h:mm:ss".
