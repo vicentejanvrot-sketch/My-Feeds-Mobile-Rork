@@ -146,6 +146,57 @@ export default function DashboardScreen() {
   }, [runList]);
 
   // ── run triggers ────────────────────────────────────────────────
+  type RunResult = { failed: boolean; newCount: number; error?: string };
+
+  /** Invoke run-agent for an existing run row and wait until it finishes.
+   *  Does not touch the overlay, so Run All can use it for every agent at once. */
+  const executeRun = useCallback(
+    async (agentId: string, runId: string): Promise<RunResult> => {
+      const { error } = await supabase.functions.invoke("run-agent", {
+        body: { agentId, runId },
+      });
+      if (error) {
+        const message = await extractEdgeFunctionErrorMessage(error);
+        await supabase
+          .from("runs")
+          .update({
+            status: "failed",
+            finished_at: new Date().toISOString(),
+            error_summary: message,
+          })
+          .eq("id", runId);
+        return { failed: true, newCount: 0, error: message };
+      }
+
+      // Poll the runs table until the edge function finishes processing.
+      // "partial" is a finished run too; it used to be missed here, which
+      // left Run All waiting forever.
+      while (true) {
+        const { data: polled } = await supabase
+          .from("runs")
+          .select("status, videos_new_count, error_summary")
+          .eq("id", runId)
+          .single();
+
+        if (polled) {
+          const count = (polled.videos_new_count as number) ?? 0;
+          if (polled.status === "success" || polled.status === "partial") {
+            return { failed: false, newCount: count };
+          }
+          if (polled.status === "failed" || polled.status === "cancelled") {
+            return {
+              failed: true,
+              newCount: 0,
+              error: (polled.error_summary as string) || "An unknown error occurred",
+            };
+          }
+        }
+        await new Promise((r) => setTimeout(r, 1500));
+      }
+    },
+    [],
+  );
+
   const runOne = useCallback(
     async (agentId: string, agentName: string) => {
       // Insert the run row first so we have a runId for the overlay + Realtime.
@@ -153,63 +204,18 @@ export default function DashboardScreen() {
       // Show the overlay immediately; live progress arrives via Realtime.
       overlay.showRunning(agentName, run.id);
 
-      // Invoke the existing edge function.
-      const { error } = await supabase.functions.invoke("run-agent", {
-        body: { agentId, runId: run.id },
-      });
-      if (error) {
-        await supabase
-          .from("runs")
-          .update({
-            status: "failed",
-            finished_at: new Date().toISOString(),
-            error_summary: await extractEdgeFunctionErrorMessage(error),
-          })
-          .eq("id", run.id);
-        overlay.showError(agentName, await extractEdgeFunctionErrorMessage(error));
-        void queryClient.invalidateQueries({ queryKey: qk.runs });
-        return;
+      const result = await executeRun(agentId, run.id);
+      if (result.failed) {
+        overlay.showError(agentName, result.error ?? "An unknown error occurred");
+      } else {
+        overlay.showSuccess(
+          agentName,
+          result.newCount > 0 ? `Found ${result.newCount} new videos` : "No new videos found",
+        );
       }
-
-      // Poll the runs table until the edge function finishes processing.
-      // The realtime subscription in showRunning updates the overlay UI;
-      // we just need to detect completion so "Run All" can sequence agents.
-      while (true) {
-        await new Promise((r) => setTimeout(r, 1500));
-        const { data: polled } = await supabase
-          .from("runs")
-          .select("status, videos_new_count, error_summary")
-          .eq("id", run.id)
-          .single();
-
-        if (!polled) continue;
-
-        if (polled.status === "success") {
-          // The realtime subscription may have already shown success.
-          // Show it explicitly to guarantee the green card is visible.
-          const count = (polled.videos_new_count as number) ?? 0;
-          overlay.showSuccess(
-            agentName,
-            count > 0 ? `Found ${count} new videos` : "No new videos found",
-          );
-          // Brief pause so the user can see the green completion card.
-          await new Promise((r) => setTimeout(r, 2000));
-          break;
-        }
-
-        if (polled.status === "failed" || polled.status === "cancelled") {
-          overlay.showError(
-            agentName,
-            (polled.error_summary as string) || "An unknown error occurred",
-          );
-          await new Promise((r) => setTimeout(r, 2000));
-          break;
-        }
-      }
-
       void queryClient.invalidateQueries({ queryKey: qk.runs });
     },
-    [runAgent, overlay, queryClient],
+    [runAgent, overlay, queryClient, executeRun],
   );
 
   const triggerRun = useCallback(
@@ -234,16 +240,40 @@ export default function DashboardScreen() {
     if (list.length === 0) return;
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     setPendingId("all");
-    // Process each agent in turn — the overlay shows progress per agent.
-    for (const agent of list) {
-      try {
-        await runOne(agent.id, agent.name);
-      } catch (e) {
-        overlay.showError(agent.name, e instanceof Error ? e.message : "Run failed");
-      }
+
+    // Start every agent at the same time, like the web app. Running them one
+    // after another made Run All take the sum of every agent's duration.
+    const total = list.length;
+    const label = `All agents (${total})`;
+    let done = 0;
+    let newTotal = 0;
+    const failedNames: string[] = [];
+    overlay.showBatchProgress(label, 0, total, "Running every agent at once…");
+
+    await Promise.all(
+      list.map(async (agent) => {
+        try {
+          const run = await runAgent.mutateAsync(agent.id);
+          const result = await executeRun(agent.id, run.id);
+          if (result.failed) failedNames.push(agent.name);
+          else newTotal += result.newCount;
+        } catch {
+          failedNames.push(agent.name);
+        }
+        done += 1;
+        overlay.showBatchProgress(label, done, total, `${agent.name} finished`);
+      }),
+    );
+
+    void queryClient.invalidateQueries({ queryKey: qk.runs });
+    const found = newTotal > 0 ? `Found ${newTotal} new videos` : "No new videos found";
+    if (failedNames.length > 0) {
+      overlay.showError(label, `${found}. Failed: ${failedNames.join(", ")}`);
+    } else {
+      overlay.showSuccess(label, found);
     }
     setPendingId(null);
-  }, [list, runOne, overlay]);
+  }, [list, runAgent, executeRun, overlay, queryClient]);
 
   const handleDelete = useCallback(
     (agentId: string, agentName: string) => {
