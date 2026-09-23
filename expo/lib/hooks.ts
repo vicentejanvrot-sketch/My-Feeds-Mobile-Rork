@@ -843,11 +843,14 @@ export function useClearRuns() {
       if (!runIds || runIds.length === 0) return;
       // Delete ONLY the runs passed in (the ones shown on the History screen).
       // RLS still scopes deletes to the signed-in user's rows.
-      const { error } = await supabase
-        .from("runs")
-        .delete()
-        .in("id", runIds);
-      if (error) throw error;
+      // Delete in batches of 100: sending every id in one request (~2,000 of
+      // them) made the URL too long and the server returned Bad Request.
+      const BATCH_SIZE = 100;
+      for (let i = 0; i < runIds.length; i += BATCH_SIZE) {
+        const batch = runIds.slice(i, i + BATCH_SIZE);
+        const { error } = await supabase.from("runs").delete().in("id", batch);
+        if (error) throw error;
+      }
     },
     onSettled: () => {
       void queryClient.invalidateQueries({ queryKey: qk.runs });
