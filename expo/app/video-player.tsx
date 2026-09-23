@@ -445,29 +445,25 @@ export default function VideoPlayerScreen() {
       // Auto-mark as watched when the video finishes naturally
       if (event === "ended" && itemIdStr && !autoWatchedRef.current) {
         autoWatchedRef.current = true;
-        updateStatus
-          .mutateAsync({ id: itemIdStr, status: "watched" })
-          .then(() => {
-            setWatchedOverlayVisible(true);
-            Animated.timing(watchedOverlayOpacity, {
-              toValue: 1,
-              duration: 300,
-              useNativeDriver: true,
-            }).start();
-            overlayTimerRef.current = setTimeout(() => {
-              Animated.timing(watchedOverlayOpacity, {
-                toValue: 0,
-                duration: 300,
-                useNativeDriver: true,
-              }).start(() => {
-                setWatchedOverlayVisible(false);
-                router.back();
-              });
-            }, 3000);
-          })
-          .catch(() => {
-            // Silently ignore
+        // Don't wait on the network: the feed cache is updated optimistically
+        // by useUpdateItemStatus, so show the overlay and close right away.
+        updateStatus.mutate({ id: itemIdStr, status: "watched" });
+        setWatchedOverlayVisible(true);
+        Animated.timing(watchedOverlayOpacity, {
+          toValue: 1,
+          duration: 150,
+          useNativeDriver: true,
+        }).start();
+        overlayTimerRef.current = setTimeout(() => {
+          Animated.timing(watchedOverlayOpacity, {
+            toValue: 0,
+            duration: 200,
+            useNativeDriver: true,
+          }).start(() => {
+            setWatchedOverlayVisible(false);
+            router.back();
           });
+        }, 1200);
       }
     },
     [itemIdStr, videoIdStr, updateStatus, watchedOverlayOpacity],
@@ -554,38 +550,34 @@ export default function VideoPlayerScreen() {
       void Haptics.selectionAsync();
 
       // "watched" triggers the same overlay + close flow as video-ended
+      const onError = () => showToast("Couldn't update status", "error");
+
       if (status === "watched") {
         autoWatchedRef.current = true;
-        try {
-          await updateStatus.mutateAsync({ id: itemIdStr, status: "watched" });
-          setWatchedOverlayVisible(true);
+        // Show the overlay immediately and write in the background; the feed
+        // cache is updated optimistically so the video is already gone.
+        updateStatus.mutate({ id: itemIdStr, status: "watched" }, { onError });
+        setWatchedOverlayVisible(true);
+        Animated.timing(watchedOverlayOpacity, {
+          toValue: 1,
+          duration: 150,
+          useNativeDriver: true,
+        }).start();
+        overlayTimerRef.current = setTimeout(() => {
           Animated.timing(watchedOverlayOpacity, {
-            toValue: 1,
-            duration: 300,
+            toValue: 0,
+            duration: 200,
             useNativeDriver: true,
-          }).start();
-          overlayTimerRef.current = setTimeout(() => {
-            Animated.timing(watchedOverlayOpacity, {
-              toValue: 0,
-              duration: 300,
-              useNativeDriver: true,
-            }).start(() => {
-              setWatchedOverlayVisible(false);
-              router.back();
-            });
-          }, 3000);
-        } catch {
-          showToast("Couldn't update status", "error");
-        }
+          }).start(() => {
+            setWatchedOverlayVisible(false);
+            router.back();
+          });
+        }, 1200);
         return;
       }
 
-      try {
-        await updateStatus.mutateAsync({ id: itemIdStr, status });
-        showToast(`Marked as ${STATUS_ICONS[status].label}`, "success");
-      } catch {
-        showToast("Couldn't update status", "error");
-      }
+      showToast(`Marked as ${STATUS_ICONS[status].label}`, "success");
+      updateStatus.mutate({ id: itemIdStr, status }, { onError });
     },
     [itemIdStr, updateStatus, showToast, watchedOverlayOpacity],
   );
