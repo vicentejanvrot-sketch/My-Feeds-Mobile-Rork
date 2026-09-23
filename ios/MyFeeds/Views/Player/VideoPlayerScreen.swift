@@ -9,6 +9,7 @@ struct VideoPlayerScreen: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(ToastCenter.self) private var toasts
     @Environment(VideoPrefs.self) private var prefs
+    @Environment(AppRouter.self) private var router
     @Environment(\.openURL) private var openURL
     @Environment(\.verticalSizeClass) private var verticalSizeClass
 
@@ -912,43 +913,44 @@ struct VideoPlayerScreen: View {
 
     private func setStatus(_ status: ItemStatus) {
         UISelectionFeedbackGenerator().selectionChanged()
-        guard let itemId = request.itemId else {
-            toasts.show("Marked as \(status.actionLabel)", type: .info)
+        if status == .watched {
+            markWatchedAndDismiss()
             return
         }
+        // Show the popup straight away; the Supabase write runs in the
+        // background instead of holding up the feedback.
+        toasts.show("Marked as \(status.actionLabel)", type: .info)
+        saveStatus(status)
+    }
+
+    /// Updates the feed immediately through the router, then writes the
+    /// status to Supabase in the background.
+    private func saveStatus(_ status: ItemStatus) {
+        guard let itemId = request.itemId else { return }
+        router.reportStatusChange(itemId: itemId, status: status)
         Task {
             do {
                 try await SupabaseService.shared.updateItemStatus(id: itemId, status: status)
-                if status == .watched {
-                    showWatchedThenDismiss()
-                } else {
-                    toasts.show("Marked as \(status.actionLabel)", type: .info)
-                }
             } catch {
                 toasts.show("Couldn't update status", type: .error)
             }
+            router.settleStatusChange(itemId: itemId)
         }
     }
 
     private func markWatchedAndDismiss() {
         guard !markedWatchedOnce else { return }
         markedWatchedOnce = true
-        guard let itemId = request.itemId else {
-            dismiss()
-            return
-        }
-        Task {
-            try? await SupabaseService.shared.updateItemStatus(id: itemId, status: .watched)
-            showWatchedThenDismiss()
-        }
+        saveStatus(.watched)
+        showWatchedThenDismiss()
     }
 
     private func showWatchedThenDismiss() {
-        withAnimation(.easeIn(duration: 0.3)) { showWatchedOverlay = true }
+        withAnimation(.easeIn(duration: 0.15)) { showWatchedOverlay = true }
         Task {
-            try? await Task.sleep(for: .seconds(3))
-            withAnimation(.easeOut(duration: 0.3)) { showWatchedOverlay = false }
-            try? await Task.sleep(for: .seconds(0.35))
+            try? await Task.sleep(for: .seconds(1.2))
+            withAnimation(.easeOut(duration: 0.2)) { showWatchedOverlay = false }
+            try? await Task.sleep(for: .seconds(0.2))
             dismiss()
         }
     }
