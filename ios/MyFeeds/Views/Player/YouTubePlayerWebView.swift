@@ -169,6 +169,16 @@ struct YouTubePlayerWebView: UIViewRepresentable {
             p.setPlaybackRate(r);
           }
         } catch (e) {}
+        // After the app comes back from the background, iOS can reset the
+        // underlying <video> to 1x while the YouTube player still reports the
+        // old rate, so the check above passes. Enforce it on the element too.
+        try {
+          var v = document.querySelector('video');
+          if (v && Math.abs(v.playbackRate - r) > 0.01) {
+            v.defaultPlaybackRate = r;
+            v.playbackRate = r;
+          }
+        } catch (e) {}
       }
       document.addEventListener('visibilitychange', function() {
         if (!document.hidden && window.player) { enforceRate(window.player); }
