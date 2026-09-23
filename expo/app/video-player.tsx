@@ -3,6 +3,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Animated,
+  BackHandler,
   Linking,
   Modal,
   PanResponder,
@@ -21,6 +22,7 @@ import * as Clipboard from "expo-clipboard";
 import * as ScreenOrientation from "expo-screen-orientation";
 import { StatusBar } from "expo-status-bar";
 import { LinearGradient } from "expo-linear-gradient";
+import { activateKeepAwakeAsync, deactivateKeepAwake } from "expo-keep-awake";
 import VideoPlayerContent from "@/components/VideoPlayerContent";
 import type { VideoPlayerHandle } from "@/components/VideoPlayerContent";
 import {
@@ -31,6 +33,7 @@ import {
   ExternalLink,
   FastForward,
   Heart,
+  Lock,
   Maximize,
   Minimize2,
   MessageCircle,
@@ -78,6 +81,9 @@ const STATUS_ENTRIES = Object.entries(STATUS_ICONS) as [
   ItemStatus,
   (typeof STATUS_ICONS)[ItemStatus],
 ][];
+
+/** expo-keep-awake tag used while Pocket Lock is on. */
+const POCKET_LOCK_TAG = "pocket-lock";
 
 /** Compact labels for the inline speed pill row. */
 const SPEED_PILL_LABELS: Record<SpeedKey, string> = {
@@ -205,6 +211,38 @@ export default function VideoPlayerScreen() {
   const errorTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const watchedOverlayOpacity = useRef(new Animated.Value(0)).current;
   const [watchedOverlayVisible, setWatchedOverlayVisible] = useState(false);
+
+  // ── Pocket Lock ─────────────────────────────────────────────
+  // Blocks every touch (and Android back) while the video keeps playing with
+  // the screen on. Unlock by holding the lock for 2 seconds.
+  const [pocketLocked, setPocketLocked] = useState(false);
+  const unlockProgress = useRef(new Animated.Value(0)).current;
+
+  const enablePocketLock = useCallback(() => {
+    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    void activateKeepAwakeAsync(POCKET_LOCK_TAG);
+    unlockProgress.setValue(0);
+    setPocketLocked(true);
+  }, [unlockProgress]);
+
+  const disablePocketLock = useCallback(() => {
+    void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    void deactivateKeepAwake(POCKET_LOCK_TAG);
+    unlockProgress.setValue(0);
+    setPocketLocked(false);
+  }, [unlockProgress]);
+
+  useEffect(() => {
+    if (!pocketLocked) return;
+    const sub = BackHandler.addEventListener("hardwareBackPress", () => true);
+    return () => sub.remove();
+  }, [pocketLocked]);
+
+  useEffect(() => {
+    return () => {
+      void deactivateKeepAwake(POCKET_LOCK_TAG);
+    };
+  }, []);
 
   // Reset loadError when videoId changes (fresh load)
   useEffect(() => {
@@ -929,7 +967,7 @@ export default function VideoPlayerScreen() {
 
   return (
     <View style={[styles.root, !isFullscreen && { marginTop: insets.top }]}>
-      <StatusBar hidden={isFullscreen} style="light" />
+      <StatusBar hidden={isFullscreen || pocketLocked} style="light" />
       {/* Chrome: hidden in fullscreen */}
       {!isFullscreen && (
         <>
@@ -941,6 +979,15 @@ export default function VideoPlayerScreen() {
               </Pressable>
             </Animated.View>
             <Text style={styles.headerTitle}>Video Player</Text>
+            {/* Pocket Lock */}
+            <Pressable
+              onPress={enablePocketLock}
+              hitSlop={12}
+              style={styles.closeBtn}
+              accessibilityLabel="Pocket Lock"
+            >
+              <Lock size={20} color={Colors.textSecondary} />
+            </Pressable>
             {/* Share icon */}
             <Pressable
               onPress={() => {
@@ -1467,6 +1514,25 @@ export default function VideoPlayerScreen() {
         </Animated.View>
       )}
 
+      {/* Fullscreen Pocket Lock button, left of the close button */}
+      {isFullscreen && !isAutoLandscapeFullscreen && (
+        <Animated.View
+          style={[
+            styles.fullscreenCloseBtnRoot,
+            { top: insets.top + 8, right: Math.max(12, insets.right) + 64, opacity: controlsOpacity },
+          ]}
+        >
+          <Pressable
+            onPress={enablePocketLock}
+            style={styles.fullscreenCloseBtnInner}
+            hitSlop={12}
+            accessibilityLabel="Pocket Lock"
+          >
+            <Lock size={20} color={Colors.white} />
+          </Pressable>
+        </Animated.View>
+      )}
+
       {/* Tap overlay — reveals controls when hidden. Rendered at root level
           with high zIndex so it sits above ALL other content elements. */}
       {controlsHidden && !isAutoLandscapeFullscreen && (
@@ -1573,6 +1639,41 @@ export default function VideoPlayerScreen() {
         </View>
       </Modal>
 
+      {/* ── Pocket Lock shield: swallows every touch ────────── */}
+      {pocketLocked && (
+        <View style={styles.pocketLockOverlay} onStartShouldSetResponder={() => true}>
+          <Pressable
+            onPressIn={() => {
+              Animated.timing(unlockProgress, {
+                toValue: 1,
+                duration: 2000,
+                useNativeDriver: true,
+              }).start();
+            }}
+            onPressOut={() => {
+              Animated.timing(unlockProgress, {
+                toValue: 0,
+                duration: 200,
+                useNativeDriver: true,
+              }).start();
+            }}
+            onLongPress={disablePocketLock}
+            delayLongPress={2000}
+            style={styles.pocketLockButton}
+            accessibilityLabel="Unlock. Press and hold for 2 seconds"
+          >
+            <Animated.View
+              style={[styles.pocketLockFill, { transform: [{ scale: unlockProgress }] }]}
+            />
+            <Lock size={28} color="rgba(255,255,255,0.85)" />
+          </Pressable>
+          <Text style={styles.pocketLockTitle}>Pocket Lock on</Text>
+          <Text style={styles.pocketLockHint}>
+            Press and hold the lock for 2 seconds to unlock
+          </Text>
+        </View>
+      )}
+
       {/* ── Auto-watched confirmation overlay ──────────────── */}
       {watchedOverlayVisible && (
         <Animated.View
@@ -1676,6 +1777,46 @@ export default function VideoPlayerScreen() {
 // ── Styles ─────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
+  // ── Pocket Lock ─────────────────────────────────────────────
+  pocketLockOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(0,0,0,0.94)",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 32,
+    // Above every other layer, including the tap-to-show-controls overlay (9999)
+    zIndex: 10000,
+    elevation: 30,
+  },
+  pocketLockButton: {
+    width: 76,
+    height: 76,
+    borderRadius: 38,
+    borderWidth: 3,
+    borderColor: "rgba(255,255,255,0.2)",
+    alignItems: "center",
+    justifyContent: "center",
+    overflow: "hidden",
+    marginBottom: 14,
+  },
+  pocketLockFill: {
+    ...StyleSheet.absoluteFillObject,
+    borderRadius: 38,
+    backgroundColor: Colors.success,
+    opacity: 0.45,
+  },
+  pocketLockTitle: {
+    color: "rgba(255,255,255,0.7)",
+    fontSize: 15,
+    fontWeight: "600",
+    marginBottom: 6,
+  },
+  pocketLockHint: {
+    color: "rgba(255,255,255,0.45)",
+    fontSize: 12,
+    textAlign: "center",
+  },
+
   root: {
     flex: 1,
     backgroundColor: Colors.background,
