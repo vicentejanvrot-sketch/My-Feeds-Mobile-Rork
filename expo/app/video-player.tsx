@@ -84,6 +84,8 @@ const STATUS_ENTRIES = Object.entries(STATUS_ICONS) as [
 
 /** expo-keep-awake tag used while Pocket Lock is on. */
 const POCKET_LOCK_TAG = "pocket-lock";
+/** expo-keep-awake tag used while the player is open and "Keep screen on" is enabled. */
+const KEEP_SCREEN_ON_TAG = "keep-screen-on";
 
 /** Compact labels for the inline speed pill row. */
 const SPEED_PILL_LABELS: Record<SpeedKey, string> = {
@@ -241,6 +243,25 @@ export default function VideoPlayerScreen() {
   useEffect(() => {
     return () => {
       void deactivateKeepAwake(POCKET_LOCK_TAG);
+    };
+  }, []);
+
+  // "Keep screen on while playing" (Settings): keep the device awake while
+  // the player is open, and let it sleep normally again when it closes.
+  useEffect(() => {
+    let active = false;
+    let closed = false;
+    AsyncStorage.getItem("@settings/keep_screen_on")
+      .then((v) => {
+        if (v === "true" && !closed) {
+          active = true;
+          void activateKeepAwakeAsync(KEEP_SCREEN_ON_TAG);
+        }
+      })
+      .catch(() => {});
+    return () => {
+      closed = true;
+      if (active) void deactivateKeepAwake(KEEP_SCREEN_ON_TAG);
     };
   }, []);
 
