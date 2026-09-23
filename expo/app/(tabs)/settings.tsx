@@ -116,7 +116,7 @@ export default function SettingsScreen() {
 
   const accordionHeight = accordionAnim.interpolate({
     inputRange: [0, 1],
-    outputRange: [0, 140],
+    outputRange: [0, 320],
   });
   const chevronRotate = accordionAnim.interpolate({
     inputRange: [0, 1],
@@ -325,6 +325,12 @@ export default function SettingsScreen() {
                   both the operating system and the official YouTube embedded player
                   enforce this to preserve battery and comply with platform policies.
                   It is not a bug in the app.
+                </Text>
+                <Text style={[styles.accordionText, { marginTop: 10 }]}>
+                  Running or walking with the phone in your pocket? Tap the lock icon in
+                  the video player to turn on Pocket Lock. The screen goes dark and
+                  ignores every touch while the video keeps playing. Press and hold the
+                  lock for 2 seconds to unlock.
                 </Text>
               </Animated.View>
             </Pressable>
