@@ -461,7 +461,12 @@ export default function FeedScreen() {
               </Text>
             </View>
           }
-          removeClippedSubviews={true}
+          // Clipping detached expo-image views mid-scroll and left cards
+          // with no thumbnail, so keep them mounted within the window.
+          removeClippedSubviews={false}
+          initialNumToRender={6}
+          maxToRenderPerBatch={6}
+          windowSize={11}
           renderItem={renderFeedCard}
         />
       )}
@@ -663,6 +668,29 @@ const FeedCard = React.memo(function FeedCard({
       ranking_score: realAnalysis.ranking_score,
     };
   }, [item.id, realAnalysis]);
+
+  // Stored thumbnail first (forced to https), then YouTube's standard sizes
+  // as fallbacks when the stored URL is missing or fails to load.
+  const thumbCandidates = useMemo(() => {
+    const urls: string[] = [];
+    if (item.thumbnail_url) {
+      urls.push(item.thumbnail_url.replace(/^http:\/\//, "https://"));
+    }
+    const fromUrl = item.url?.match(/(?:v=|youtu\.be\/|embed\/|shorts\/)([\w-]{11})/)?.[1];
+    const videoId = item.video_id && /^[\w-]{11}$/.test(item.video_id) ? item.video_id : fromUrl;
+    if (videoId) {
+      for (const size of ["hqdefault", "mqdefault"]) {
+        const uri = `https://i.ytimg.com/vi/${videoId}/${size}.jpg`;
+        if (!urls.includes(uri)) urls.push(uri);
+      }
+    }
+    return urls;
+  }, [item.thumbnail_url, item.video_id, item.url]);
+  const [thumbIndex, setThumbIndex] = useState(0);
+  useEffect(() => {
+    setThumbIndex(0);
+  }, [thumbCandidates]);
+  const thumbUri = thumbCandidates[thumbIndex];
   const status = (item.user_status ?? "not_watched") as ItemStatus;
   const [statusOpen, setStatusOpen] = useState(false);
 
@@ -682,12 +710,15 @@ const FeedCard = React.memo(function FeedCard({
     >
       {/* Thumbnail */}
       <View style={styles.thumbWrap}>
-        {item.thumbnail_url ? (
+        {thumbUri ? (
           <Image
-            source={{ uri: item.thumbnail_url }}
+            source={{ uri: thumbUri }}
             style={styles.thumb}
             contentFit="cover"
             transition={150}
+            cachePolicy="memory-disk"
+            recyclingKey={item.id}
+            onError={() => setThumbIndex((i) => i + 1)}
           />
         ) : (
           <View style={[styles.thumb, styles.thumbFallback]} />
