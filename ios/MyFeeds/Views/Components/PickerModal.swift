@@ -7,6 +7,9 @@ struct PickerModal<Content: View>: View {
     let onDismiss: () -> Void
     @ViewBuilder let content: Content
 
+    @State private var contentHeight: CGFloat = 0
+    private let maxListHeight: CGFloat = 340
+
     var body: some View {
         ZStack {
             Color.black.opacity(0.55)
@@ -22,20 +25,21 @@ struct PickerModal<Content: View>: View {
                     .padding(.top, 16)
                     .padding(.bottom, 8)
 
-                // Size to the rows when they fit; only scroll when the list is
-                // taller than 340pt. A bare ScrollView is greedy and always took
-                // the full 340pt, leaving an empty block under short lists.
-                ViewThatFits(in: .vertical) {
+                // Measure the rows and give the ScrollView exactly that height
+                // (capped at 340pt). A ScrollView / ViewThatFits otherwise fills
+                // the whole 340pt and leaves empty space around short lists.
+                ScrollView {
                     VStack(spacing: 0) {
                         content
                     }
-                    ScrollView {
-                        VStack(spacing: 0) {
-                            content
-                        }
+                    .onGeometryChange(for: CGFloat.self) { proxy in
+                        proxy.size.height
+                    } action: { height in
+                        contentHeight = height
                     }
                 }
-                .frame(maxHeight: 340)
+                .scrollBounceBehavior(.basedOnSize)
+                .frame(height: min(contentHeight, maxListHeight))
             }
             .frame(maxWidth: 320)
             .background(Theme.card)
