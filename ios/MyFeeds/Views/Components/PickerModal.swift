@@ -22,9 +22,17 @@ struct PickerModal<Content: View>: View {
                     .padding(.top, 16)
                     .padding(.bottom, 8)
 
-                ScrollView {
+                // Size to the rows when they fit; only scroll when the list is
+                // taller than 340pt. A bare ScrollView is greedy and always took
+                // the full 340pt, leaving an empty block under short lists.
+                ViewThatFits(in: .vertical) {
                     VStack(spacing: 0) {
                         content
+                    }
+                    ScrollView {
+                        VStack(spacing: 0) {
+                            content
+                        }
                     }
                 }
                 .frame(maxHeight: 340)
