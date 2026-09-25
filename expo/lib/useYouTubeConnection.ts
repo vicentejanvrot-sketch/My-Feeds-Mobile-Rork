@@ -16,6 +16,7 @@ export interface YouTubeConnectionState {
   channelName: string | null;
   channelThumbnail: string | null;
   error: string | null;
+  connecting: boolean;
   connect: () => Promise<void>;
   disconnect: () => Promise<void>;
   syncAction: (videoId: string, action: YouTubeAction) => Promise<void>;
@@ -34,6 +35,55 @@ const REDIRECT = "https://webapp.myfeeds.ca/youtube-auth-callback";
 // (rork-app://youtube-auth in builds, exp://.../--/youtube-auth in dev).
 const APP_RETURN_URL = Linking.createURL("youtube-auth");
 
+// YouTube no longer lets apps write to the real Watch Later list, so
+// "Save to YouTube" goes into this private playlist (created on first use).
+const SAVE_PLAYLIST_TITLE = "My Feeds - Watch Later";
+
+interface StoredConnection {
+  channelName?: string | null;
+  channelThumbnail?: string | null;
+  email?: string | null;
+  accessToken?: string | null;
+  refreshToken?: string | null;
+  expiresAt?: number | null;
+  savePlaylistId?: string | null;
+}
+
+async function readStored(): Promise<StoredConnection | null> {
+  try {
+    const raw = await AsyncStorage.getItem(STORAGE_KEY);
+    return raw ? (JSON.parse(raw) as StoredConnection) : null;
+  } catch {
+    return null;
+  }
+}
+
+async function writeStored(patch: StoredConnection): Promise<void> {
+  const current = (await readStored()) ?? {};
+  await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify({ ...current, ...patch }));
+}
+
+// Calls the web app's youtube-api edge function and throws on any error.
+async function callYouTubeApi<T = any>(body: Record<string, unknown>): Promise<T> {
+  const { data, error } = await supabase.functions.invoke("youtube-api", { body });
+  if (error) {
+    // Non-2xx responses carry the real message in the response body.
+    let message = error.message || "YouTube request failed";
+    try {
+      const ctx = (error as any).context;
+      if (ctx && typeof ctx.json === "function") {
+        const payload = await ctx.json();
+        if (payload?.error) message = payload.error;
+      }
+    } catch {
+      // keep the generic message
+    }
+    throw new Error(message);
+  }
+  if ((data as any)?.error) throw new Error((data as any).error);
+  return data as T;
+}
+
 // ── Context Hook ───────────────────────────────────────────────────
 
 export const [YouTubeConnectionProvider, useYouTubeConnection] =
@@ -49,6 +99,7 @@ export const [YouTubeConnectionProvider, useYouTubeConnection] =
     const [channelName, setChannelName] = useState<string | null>(null);
     const [channelThumbnail, setChannelThumbnail] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
+    const [connecting, setConnecting] = useState(false);
     const connectingRef = useRef(false);
 
     // ── Restore persisted connection on mount / user change ────────
@@ -86,6 +137,7 @@ export const [YouTubeConnectionProvider, useYouTubeConnection] =
     const connect = useCallback(async () => {
       if (connectingRef.current) return;
       connectingRef.current = true;
+      setConnecting(true);
       setError(null);
 
       try {
@@ -183,51 +235,102 @@ export const [YouTubeConnectionProvider, useYouTubeConnection] =
         notify(message, "error");
       } finally {
         connectingRef.current = false;
+        setConnecting(false);
       }
+    }, []);
+
+    // ── Access token (refreshed when close to expiry) ───────────
+
+    const getAccessToken = useCallback(async (): Promise<string> => {
+      const stored = await readStored();
+      if (!stored?.accessToken) {
+        throw new Error("Reconnect YouTube to use this");
+      }
+      const expiresAt = stored.expiresAt ?? 0;
+      if (expiresAt > Date.now() + 5 * 60 * 1000) {
+        return stored.accessToken;
+      }
+      if (!stored.refreshToken) {
+        throw new Error("YouTube session expired — reconnect YouTube");
+      }
+      const refreshed = await callYouTubeApi<{ access_token: string; expires_in: number }>({
+        action: "refresh",
+        refreshToken: stored.refreshToken,
+      });
+      await writeStored({
+        accessToken: refreshed.access_token,
+        expiresAt: Date.now() + (refreshed.expires_in ?? 3600) * 1000,
+      });
+      return refreshed.access_token;
+    }, []);
+
+    // Find or create the private playlist "Save to YouTube" writes into.
+    const getSavePlaylistId = useCallback(async (accessToken: string): Promise<string> => {
+      const stored = await readStored();
+      if (stored?.savePlaylistId) return stored.savePlaylistId;
+
+      const { playlists } = await callYouTubeApi<{ playlists: { id: string; title: string }[] }>({
+        action: "get_playlists",
+        accessToken,
+      });
+      let id = playlists?.find((p) => p.title === SAVE_PLAYLIST_TITLE)?.id;
+      if (!id) {
+        const created = await callYouTubeApi<{ playlist: { id: string } }>({
+          action: "create_playlist",
+          accessToken,
+          playlistTitle: SAVE_PLAYLIST_TITLE,
+        });
+        id = created.playlist.id;
+      }
+      await writeStored({ savePlaylistId: id });
+      return id;
     }, []);
 
     // ── Disconnect ──────────────────────────────────────────────
 
     const disconnect = useCallback(async () => {
-      try {
-        const { error: disconnectError } = await supabase.functions.invoke(
-          "youtube-api",
-          { body: { action: "disconnect" } },
-        );
-
-        if (disconnectError) {
-          throw new Error(disconnectError.message || "Failed to disconnect");
-        }
-
-        setStatus("disconnected");
-        setChannelName(null);
-        setChannelThumbnail(null);
-        setError(null);
-        await AsyncStorage.removeItem(STORAGE_KEY);
-        notify("YouTube disconnected", "success");
-      } catch (err: any) {
-        notify(err?.message ?? "Failed to disconnect", "error");
-      }
+      // Tokens only live on this device, so disconnecting is local.
+      setStatus("disconnected");
+      setChannelName(null);
+      setChannelThumbnail(null);
+      setError(null);
+      await AsyncStorage.removeItem(STORAGE_KEY).catch(() => {});
+      notify("YouTube disconnected", "success");
     }, []);
 
     // ── Sync a video action to YouTube ──────────────────────────
+    // Throws on failure so the caller can show the right toast.
 
     const syncAction = useCallback(
       async (videoId: string, action: YouTubeAction) => {
-        if (status !== "connected") return;
-        try {
-          const { error: syncError } = await supabase.functions.invoke(
-            "youtube-api",
-            { body: { action, videoId } },
-          );
-          if (syncError) {
-            console.warn("[youtube-sync] Failed:", syncError.message);
-          }
-        } catch (err: any) {
-          console.warn("[youtube-sync] Failed:", err?.message);
+        if (status !== "connected") throw new Error("YouTube is not connected");
+        const accessToken = await getAccessToken();
+
+        if (action === "rate") {
+          await callYouTubeApi({ action: "rate_video", accessToken, videoId, rating: "like" });
+          return;
         }
+
+        if (action === "watch_later") {
+          const playlistId = await getSavePlaylistId(accessToken);
+          try {
+            await callYouTubeApi({ action: "add_to_playlist", accessToken, videoId, playlistId });
+          } catch (err: any) {
+            // Playlist was deleted on YouTube — forget it and create a fresh one.
+            if (/not ?found/i.test(err?.message ?? "")) {
+              await writeStored({ savePlaylistId: null });
+              const freshId = await getSavePlaylistId(accessToken);
+              await callYouTubeApi({ action: "add_to_playlist", accessToken, videoId, playlistId: freshId });
+              return;
+            }
+            throw err;
+          }
+          return;
+        }
+
+        // "unwatch_later" has no YouTube API equivalent; nothing to do.
       },
-      [status],
+      [status, getAccessToken, getSavePlaylistId],
     );
 
     return {
@@ -235,6 +338,7 @@ export const [YouTubeConnectionProvider, useYouTubeConnection] =
       channelName,
       channelThumbnail,
       error,
+      connecting,
       connect,
       disconnect,
       syncAction,
