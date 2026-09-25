@@ -34,6 +34,7 @@ import {
   FastForward,
   Heart,
   Lock,
+  LogIn,
   Maximize,
   Minimize2,
   MessageCircle,
@@ -711,14 +712,19 @@ export default function VideoPlayerScreen() {
 
   // ── YouTube sync actions ─────────────────────────────────────
 
+  const handleConnectYoutube = useCallback(async () => {
+    void Haptics.selectionAsync();
+    await youtubeConn.connect();
+  }, [youtubeConn]);
+
   const handleSaveToWatchLater = useCallback(async () => {
     if (!videoIdStr || youtubeConn.status !== "connected") return;
     void Haptics.selectionAsync();
     try {
       await youtubeConn.syncAction(videoIdStr, "watch_later");
-      showToast("Saved to Watch Later on YouTube", "success");
-    } catch {
-      showToast("Couldn't save to Watch Later", "error");
+      showToast("Saved to \"My Feeds - Watch Later\" on YouTube", "success");
+    } catch (err: any) {
+      showToast(err?.message ? `Couldn't save: ${err.message}` : "Couldn't save to YouTube", "error");
     }
   }, [videoIdStr, youtubeConn, showToast]);
 
@@ -728,8 +734,8 @@ export default function VideoPlayerScreen() {
     try {
       await youtubeConn.syncAction(videoIdStr, "rate");
       showToast("Liked on YouTube", "success");
-    } catch {
-      showToast("Couldn't like on YouTube", "error");
+    } catch (err: any) {
+      showToast(err?.message ? `Couldn't like: ${err.message}` : "Couldn't like on YouTube", "error");
     }
   }, [videoIdStr, youtubeConn, showToast]);
 
@@ -1108,6 +1114,22 @@ export default function VideoPlayerScreen() {
 
           {youtubeConn.status !== "connected" && (
             <View style={styles.openYoutubeRow}>
+              <Pressable
+                style={({ pressed }) => [
+                  styles.openYoutubeInline,
+                  pressed && styles.pressed,
+                  youtubeConn.connecting && styles.connectDisabled,
+                ]}
+                onPress={handleConnectYoutube}
+                disabled={youtubeConn.connecting || youtubeConn.status === "loading"}
+              >
+                {youtubeConn.connecting ? (
+                  <ActivityIndicator size="small" color={Colors.accent} />
+                ) : (
+                  <LogIn size={16} color={Colors.accent} />
+                )}
+                <Text style={styles.openYoutubeInlineText}>Connect YouTube to save & like</Text>
+              </Pressable>
               <Pressable
                 style={({ pressed }) => [
                   styles.openYoutubeInline,
@@ -2245,6 +2267,9 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: Colors.accent,
     fontWeight: "500" as const,
+  },
+  connectDisabled: {
+    opacity: 0.6,
   },
 
   // ── Gear modal ──────────────────────────────────────────────
