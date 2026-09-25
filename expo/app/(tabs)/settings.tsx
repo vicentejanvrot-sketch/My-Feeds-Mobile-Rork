@@ -26,6 +26,7 @@ import {
   Monitor,
   Save,
   ChevronDown,
+  LogIn,
   LogOut,
   User,
   ChevronRight,
@@ -40,6 +41,7 @@ import { useAuth } from "@/lib/auth-provider";
 import { useUserSettings, useUpdateSettings, useUserSettingsSafe, useDeleteAccount } from "@/lib/hooks";
 import { useToast } from "@/components/Toast";
 import { useVideoQuality, QUALITY_KEYS, QUALITY_LABELS } from "@/lib/useVideoQuality";
+import { useYouTubeConnection } from "@/lib/useYouTubeConnection";
 // ── Constants ─────────────────────────────────────────────────────
 
 /** Minimal email format check — matches the web app's validator. */
@@ -74,6 +76,7 @@ export default function SettingsScreen() {
   );
 
   const deleteAccount = useDeleteAccount();
+  const youtube = useYouTubeConnection();
 
   // Shared video quality pref (synced with in-player gear menu)
   const { quality: videoQuality, setQuality: persistQuality, ready: qualityReady } = useVideoQuality();
@@ -304,6 +307,60 @@ export default function SettingsScreen() {
                   thumbColor={keepScreenOn ? Colors.white : Colors.textSecondary}
                 />
               </View>
+            </View>
+
+            {/* ═══ YouTube account ═══ */}
+            <View style={styles.card}>
+              <View style={styles.cardHeader}>
+                <LogIn size={18} color={Colors.accent} />
+                <Text style={styles.cardTitle}>YouTube Account</Text>
+              </View>
+              <Text style={styles.cardDesc}>
+                Connect your YouTube account to save videos to a playlist and like them from the video player.
+              </Text>
+              {youtube.status === "connected" ? (
+                <>
+                  <Text style={styles.fieldLabel}>Connected</Text>
+                  <Text style={styles.helperText} numberOfLines={1}>
+                    {youtube.channelName ?? "YouTube account"}
+                  </Text>
+                  <Pressable
+                    style={({ pressed }) => [styles.youtubeBtn, pressed && styles.pressed]}
+                    onPress={() => {
+                      void Haptics.selectionAsync();
+                      void youtube.disconnect();
+                    }}
+                  >
+                    <LogOut size={16} color={Colors.destructive} />
+                    <Text style={[styles.youtubeBtnText, { color: Colors.destructive }]}>
+                      Disconnect YouTube
+                    </Text>
+                  </Pressable>
+                </>
+              ) : (
+                <Pressable
+                  style={({ pressed }) => [
+                    styles.youtubeBtn,
+                    pressed && styles.pressed,
+                    (youtube.connecting || youtube.status === "loading") && styles.disabled,
+                  ]}
+                  onPress={() => {
+                    void Haptics.selectionAsync();
+                    void youtube.connect();
+                  }}
+                  disabled={youtube.connecting || youtube.status === "loading"}
+                >
+                  {youtube.connecting ? (
+                    <ActivityIndicator size="small" color={Colors.accent} />
+                  ) : (
+                    <LogIn size={16} color={Colors.accent} />
+                  )}
+                  <Text style={styles.youtubeBtnText}>Connect YouTube</Text>
+                </Pressable>
+              )}
+              {youtube.error && youtube.status !== "connected" ? (
+                <Text style={[styles.helperText, { color: Colors.destructive }]}>{youtube.error}</Text>
+              ) : null}
             </View>
 
             {/* ═══ Card 3: About background playback (accordion) ═══ */}
@@ -719,6 +776,23 @@ const styles = StyleSheet.create({
   },
   pressed: { opacity: 0.85, transform: [{ scale: 0.99 }] },
   disabled: { opacity: 0.7 },
+  youtubeBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    marginTop: 12,
+    paddingVertical: 12,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    backgroundColor: Colors.input,
+  },
+  youtubeBtnText: {
+    fontSize: 14,
+    fontWeight: "600" as const,
+    color: Colors.accent,
+  },
 
   // Sign out
 
