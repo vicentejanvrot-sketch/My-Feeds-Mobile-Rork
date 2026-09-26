@@ -1,7 +1,8 @@
 // In-app reader for X posts and Reddit threads — the mobile twin of the web
 // PostReaderModal, so reading works the same everywhere.
 import { useEffect, useState } from "react";
-import { ActivityIndicator, Pressable, ScrollView, Share, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, Platform as RNPlatform, Pressable, ScrollView, Share, StyleSheet, Text, View } from "react-native";
+import { WebView } from "react-native-webview";
 import { useLocalSearchParams, router } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Image } from "expo-image";
@@ -62,7 +63,39 @@ type PostEmbed = {
   image?: string | null;
   title?: string | null;
   preview?: string | null;
+  // Playable video: MP4, and an HLS stream (plays with sound on iOS).
+  video_url?: string | null;
+  hls_url?: string | null;
 };
+
+function escapeAttr(value: string): string {
+  return value.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;");
+}
+
+// Plays a post's video in place, like on X and Reddit. iOS plays the HLS
+// stream; Android gets the MP4.
+function PostVideo({ media }: { media: PostEmbed }) {
+  const src =
+    (RNPlatform.OS === "ios" ? media.hls_url || media.video_url : media.video_url || media.hls_url) || "";
+  if (!src) return null;
+  const poster = media.url || media.image || "";
+  const html = `<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<style>html,body{margin:0;padding:0;background:#000;height:100%}video{width:100%;height:100%;object-fit:contain;background:#000}</style></head>
+<body><video src="${escapeAttr(src)}"${poster ? ` poster="${escapeAttr(poster)}"` : ""} controls playsinline webkit-playsinline preload="metadata"></video></body></html>`;
+  return (
+    <View style={styles.video}>
+      <WebView
+        source={{ html }}
+        originWhitelist={["*"]}
+        allowsInlineMediaPlayback
+        mediaPlaybackRequiresUserAction
+        allowsFullscreenVideo
+        scrollEnabled={false}
+        style={styles.videoWeb}
+      />
+    </View>
+  );
+}
 
 function formatPostDate(iso: string): string {
   const d = new Date(iso);
@@ -140,6 +173,7 @@ export default function PostReaderScreen() {
   const metrics = (item.metrics ?? {}) as PostMetrics;
   const embeds = (item.media ?? []) as PostEmbed[];
   const quote = embeds.find((m) => m.type === "quote" || m.type === "article") ?? null;
+  const video = embeds.find((m) => m.type !== "quote" && m.type !== "article" && (m.video_url || m.hls_url)) ?? null;
   const image =
     embeds.find((m) => m.type !== "video" && m.type !== "quote" && m.type !== "article")?.url ??
     (!quote ? item.thumbnail_url : null) ??
@@ -171,7 +205,11 @@ export default function PostReaderScreen() {
           <Text style={platform === "x" ? styles.bodyLarge : styles.body}>{item.body}</Text>
         ) : null}
 
-        {image ? <Image source={{ uri: image }} style={styles.image} contentFit="cover" /> : null}
+        {video ? (
+          <PostVideo media={video} />
+        ) : image ? (
+          <Image source={{ uri: image }} style={styles.image} contentFit="cover" />
+        ) : null}
 
         {quote ? <QuoteCard quote={quote} /> : null}
 
@@ -325,7 +363,11 @@ function QuoteCard({ quote }: { quote: PostEmbed }) {
         </Text>
       </View>
       {!isArticle && quote.text ? <Text style={styles.quoteText}>{quote.text}</Text> : null}
-      {quote.image ? <Image source={{ uri: quote.image }} style={styles.quoteImage} contentFit="cover" /> : null}
+      {quote.video_url || quote.hls_url ? (
+        <PostVideo media={{ ...quote, url: quote.image || "" }} />
+      ) : quote.image ? (
+        <Image source={{ uri: quote.image }} style={styles.quoteImage} contentFit="cover" />
+      ) : null}
       {isArticle && quote.title ? <Text style={styles.quoteTitle}>{quote.title}</Text> : null}
       {isArticle && quote.preview ? (
         <Text style={styles.quoteText} numberOfLines={3}>{quote.preview}</Text>
@@ -408,6 +450,8 @@ const styles = StyleSheet.create({
   xBar: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
   dateLine: { color: Colors.textSecondary, fontSize: 13, paddingHorizontal: 4 },
   dateLineStrong: { color: Colors.textPrimary, fontWeight: "700" },
+  video: { width: "100%", aspectRatio: 16 / 9, borderRadius: 12, overflow: "hidden", backgroundColor: "#000" },
+  videoWeb: { flex: 1, backgroundColor: "#000" },
   quoteCard: { borderWidth: 1, borderColor: Colors.border, borderRadius: 16, padding: 12, gap: 8 },
   quoteHeader: { flexDirection: "row", alignItems: "center", gap: 6 },
   quoteAvatar: { width: 20, height: 20, borderRadius: 10 },
