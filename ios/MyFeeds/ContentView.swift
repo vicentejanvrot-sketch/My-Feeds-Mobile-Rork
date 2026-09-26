@@ -32,6 +32,10 @@ struct ContentView: View {
         .fullScreenCover(item: $router.playerRequest) { request in
             VideoPlayerScreen(request: request)
         }
+        .sheet(item: $router.postRequest) { request in
+            PostReaderView(request: request)
+                .presentationDragIndicator(.visible)
+        }
         .task {
             auth.start()
         }
