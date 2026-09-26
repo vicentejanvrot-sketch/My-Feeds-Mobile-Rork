@@ -103,6 +103,14 @@ function AuthGate() {
           options={{ presentation: "modal", headerShown: false }}
         />
         <Stack.Screen
+          name="post-reader"
+          options={{
+            presentation: "modal",
+            headerShown: false,
+            contentStyle: { backgroundColor: Colors.background },
+          }}
+        />
+        <Stack.Screen
           name="video-player"
           options={{
             presentation: "modal",
