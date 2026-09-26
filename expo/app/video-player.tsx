@@ -3,6 +3,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Animated,
+  AppState,
   BackHandler,
   Linking,
   Modal,
@@ -600,6 +601,20 @@ export default function VideoPlayerScreen() {
     },
     [itemIdStr, videoIdStr, updateStatus, watchedOverlayOpacity],
   );
+
+  // Leaving the app (home button, app switcher, lock screen, closing the app):
+  // save the position immediately so web/iOS/Android can pick up from here.
+  useEffect(() => {
+    const sub = AppState.addEventListener("change", (state) => {
+      if (state === "active" || !videoIdStr) return;
+      const t = currentTimeRef.current;
+      const d = durationRef.current;
+      if (d > 0 && t > 0 && t / d < NEAR_END_THRESHOLD) {
+        saveResumePosition(videoIdStr, t, d);
+      }
+    });
+    return () => sub.remove();
+  }, [videoIdStr]);
 
   // Restore orientation / exit fullscreen on unmount
   useEffect(() => {
