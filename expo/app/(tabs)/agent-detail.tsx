@@ -49,6 +49,7 @@ import {
   useToggleChannel,
   useDeleteChannel,
   useAddChannel,
+  useAddSource,
   useAddRecipient,
   useDeleteRecipient,
   useCancelRun,
@@ -68,6 +69,8 @@ import {
 } from "@/components/ChannelStatusPill";
 import { timeAgo } from "@/lib/format";
 import { openExternalLink } from "@/lib/open-link";
+import { PlatformBadge } from "@/components/PlatformBadge";
+import { PLATFORMS, PLATFORM_META, platformOf, type Platform } from "@/lib/platforms";
 
 // ── Helpers ────────────────────────────────────────────────────────
 
@@ -551,6 +554,8 @@ export default function AgentDetailScreen() {
   const [showAddChannel, setShowAddChannel] = useState(false);
   const [newChannelUrl, setNewChannelUrl] = useState("");
   const [newChannelPriority, setNewChannelPriority] = useState(3);
+  const [newPlatform, setNewPlatform] = useState<Platform>("youtube");
+  const addSource = useAddSource(agentId ?? "");
   const [showAddRecipient, setShowAddRecipient] = useState(false);
   const [newRecipientEmail, setNewRecipientEmail] = useState("");
 
@@ -658,25 +663,36 @@ export default function AgentDetailScreen() {
 
   // ── Add channel ──────────────────────────────────────────────────
   const handleAddChannel = useCallback(async () => {
-    const url = newChannelUrl.trim();
-    if (!url) {
-      showToast("Enter a channel URL", "error");
+    const value = newChannelUrl.trim();
+    if (!value) {
+      showToast(`Enter a ${PLATFORM_META[newPlatform].sourceNoun.toLowerCase()}`, "error");
       return;
     }
     try {
-      await addChannel.mutateAsync({
-        channel_url: url,
-        priority: newChannelPriority,
-      });
-      showToast("Channel added", "success");
+      if (newPlatform === "youtube") {
+        await addChannel.mutateAsync({
+          channel_url: value,
+          priority: newChannelPriority,
+        });
+        showToast("Channel added", "success");
+      } else {
+        // X accounts and subreddits are checked and named by the add-source function
+        const channel = await addSource.mutateAsync({
+          platform: newPlatform,
+          value,
+          priority: newChannelPriority,
+        });
+        showToast(`${channel.channel_name ?? "Source"} added`, "success");
+      }
       setNewChannelUrl("");
       setNewChannelPriority(3);
+      setNewPlatform("youtube");
       setShowAddChannel(false);
     } catch (e) {
-      const msg = e instanceof Error ? e.message : "Failed to add channel";
+      const msg = e instanceof Error ? e.message : "Failed to add source";
       showToast(msg, "error");
     }
-  }, [newChannelUrl, newChannelPriority, addChannel, showToast]);
+  }, [newChannelUrl, newChannelPriority, newPlatform, addChannel, addSource, showToast]);
 
   // ── Add recipient ────────────────────────────────────────────────
   const handleAddRecipient = useCallback(async () => {
@@ -920,7 +936,7 @@ export default function AgentDetailScreen() {
         <SectionHeader
           title={`Channels (${allChannels.length})`}
           onAdd={() => setShowAddChannel(true)}
-          addLabel="Add Channel"
+          addLabel="Add Source"
           badge={
             channelFilter !== "all"
               ? `${filteredChannels.length} of ${allChannels.length}`
@@ -1204,7 +1220,7 @@ export default function AgentDetailScreen() {
             onPress={() => {}}
           >
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Add Channel</Text>
+              <Text style={styles.modalTitle}>Add Source</Text>
               <Pressable
                 onPress={() => setShowAddChannel(false)}
                 hitSlop={8}
@@ -1213,10 +1229,29 @@ export default function AgentDetailScreen() {
               </Pressable>
             </View>
 
-            <Text style={styles.formLabel}>Channel URL</Text>
+            <Text style={styles.formLabel}>Platform</Text>
+            <View style={sourceStyles.platformRow}>
+              {PLATFORMS.map((p) => {
+                const active = newPlatform === p;
+                return (
+                  <Pressable
+                    key={p}
+                    onPress={() => setNewPlatform(p)}
+                    style={[sourceStyles.platformBtn, active && sourceStyles.platformBtnActive]}
+                    accessibilityRole="button"
+                    accessibilityState={{ selected: active }}
+                  >
+                    <PlatformBadge platform={p} size="md" />
+                    <Text style={sourceStyles.platformText}>{PLATFORM_META[p].label}</Text>
+                  </Pressable>
+                );
+              })}
+            </View>
+
+            <Text style={[styles.formLabel, { marginTop: 14 }]}>{PLATFORM_META[newPlatform].sourceNoun}</Text>
             <TextInput
               style={styles.formInput}
-              placeholder="https://www.youtube.com/@ChannelName"
+              placeholder={PLATFORM_META[newPlatform].addPlaceholder}
               placeholderTextColor={Colors.textMuted}
               value={newChannelUrl}
               onChangeText={setNewChannelUrl}
@@ -1224,6 +1259,7 @@ export default function AgentDetailScreen() {
               autoCorrect={false}
               returnKeyType="done"
             />
+            <Text style={sourceStyles.help}>{PLATFORM_META[newPlatform].addHelp}</Text>
 
             <Text style={[styles.formLabel, { marginTop: 14 }]}>Priority</Text>
             <PriorityPicker
@@ -1239,12 +1275,12 @@ export default function AgentDetailScreen() {
                 pressed && styles.pressed,
               ]}
               onPress={() => void handleAddChannel()}
-              disabled={!newChannelUrl.trim() || addChannel.isPending}
+              disabled={!newChannelUrl.trim() || addChannel.isPending || addSource.isPending}
             >
-              {addChannel.isPending ? (
+              {addChannel.isPending || addSource.isPending ? (
                 <ActivityIndicator size="small" color={Colors.white} />
               ) : (
-                <Text style={styles.modalConfirmText}>Add Channel</Text>
+                <Text style={styles.modalConfirmText}>Add Source</Text>
               )}
             </Pressable>
           </Pressable>
@@ -1270,6 +1306,7 @@ function ChannelCard({
     channel_name: string | null;
     channel_url: string | null;
     priority: number | null;
+    platform?: string | null;
     is_enabled: boolean | null;
     last_scanned_at: string | null;
     user_status: import("@/lib/database").ChannelStatus | null;
@@ -1292,7 +1329,11 @@ function ChannelCard({
           />
         ) : (
           <View style={styles.channelThumbPlaceholder}>
-            <ImageOff size={18} color={Colors.textMuted} />
+            {channel.platform && channel.platform !== "youtube" ? (
+              <PlatformBadge platform={platformOf(channel.platform)} size="md" />
+            ) : (
+              <ImageOff size={18} color={Colors.textMuted} />
+            )}
           </View>
         )}
       </View>
@@ -1736,4 +1777,22 @@ const styles = StyleSheet.create({
   ml4: { marginLeft: 4 },
   mr8: { marginRight: 8 },
   iconBtn: { padding: 4 },
+});
+
+// Platform picker in the Add Source modal
+const sourceStyles = StyleSheet.create({
+  platformRow: { flexDirection: "row", gap: 8 },
+  platformBtn: {
+    flex: 1,
+    alignItems: "center",
+    gap: 6,
+    paddingVertical: 10,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    backgroundColor: Colors.input,
+  },
+  platformBtnActive: { borderColor: Colors.accent, backgroundColor: "rgba(14, 165, 233, 0.10)" },
+  platformText: { color: Colors.textPrimary, fontSize: 12, fontWeight: "700" },
+  help: { color: Colors.textMuted, fontSize: 12, marginTop: 6 },
 });
