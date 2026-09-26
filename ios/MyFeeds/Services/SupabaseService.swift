@@ -83,6 +83,23 @@ final class SupabaseService {
         }
     }
 
+    /// One item with its analysis, for the post reader.
+    func fetchItem(id: String) async throws -> FeedItem {
+        do {
+            return try await db.from("items").select("*, item_analysis(*)")
+                .eq("id", value: id).single().execute().value
+        } catch {
+            return try await db.from("items").select().eq("id", value: id).single().execute().value
+        }
+    }
+
+    /// Summary and transcript key moments for one video, for the player.
+    func fetchItemAnalysis(itemId: String) async throws -> ItemAnalysis? {
+        let rows: [ItemAnalysis] = try await db.from("item_analysis").select()
+            .eq("item_id", value: itemId).limit(1).execute().value
+        return rows.first
+    }
+
     func fetchRunItemStatuses(runIds: [String]) async throws -> [RunItemStatus] {
         guard !runIds.isEmpty else { return [] }
         return try await db.from("items").select("run_id, user_status")
@@ -245,6 +262,34 @@ final class SupabaseService {
             .execute()
     }
 
+    /// Adds an X account or subreddit through the add-source edge function,
+    /// which checks it exists and fills in its name and picture (same flow as
+    /// the web and Expo apps). YouTube channels still use `addChannel`.
+    @discardableResult
+    func addSource(agentId: String, platform: SourcePlatform, value: String, priority: Int) async throws -> Channel {
+        let decoder = JSONDecoder()
+        decoder.keyDecodingStrategy = .convertFromSnakeCase
+        let fallback = "Couldn't add this \(platform.sourceNoun.lowercased())."
+        let response: AddSourceResponse
+        do {
+            response = try await client.functions.invoke(
+                "add-source",
+                options: FunctionInvokeOptions(
+                    body: AddSourcePayload(agentId: agentId, platform: platform.rawValue, value: value, priority: priority)
+                ),
+                decoder: decoder
+            )
+        } catch FunctionsError.httpError(_, let data) {
+            // The function explains what went wrong (not found, already added...) in {"error": "..."}.
+            let message = (try? decoder.decode(AddSourceResponse.self, from: data))?.error
+            throw SourceError(message: message ?? fallback)
+        }
+        guard let channel = response.channel else {
+            throw SourceError(message: response.error ?? fallback)
+        }
+        return channel
+    }
+
     func updateChannelPriority(id: String, priority: Int) async throws {
         try await db.from("channels").update(["priority": priority]).eq("id", value: id).execute()
     }
@@ -301,4 +346,23 @@ nonisolated struct AddChannelPayload: Codable, Sendable {
     var agentId: String
     var channelUrl: String
     var priority: Int
+}
+
+/// Body for the add-source edge function (camelCase, as the function expects).
+nonisolated struct AddSourcePayload: Codable, Sendable {
+    var agentId: String
+    var platform: String
+    var value: String
+    var priority: Int
+}
+
+nonisolated struct AddSourceResponse: Codable, Sendable {
+    var channel: Channel?
+    var error: String?
+}
+
+/// Readable error from add-source, shown to the user as is.
+nonisolated struct SourceError: LocalizedError, Sendable {
+    let message: String
+    var errorDescription: String? { message }
 }
