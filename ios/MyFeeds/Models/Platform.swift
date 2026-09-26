@@ -151,10 +151,12 @@ nonisolated struct ItemMetrics: Codable, Hashable, Sendable {
     var reposts: Int?
     var replies: Int?
     var views: Int?
+    var bookmarks: Int?
+    var quotes: Int?
     var score: Int?
     var comments: Int?
 
-    enum CodingKeys: String, CodingKey { case likes, reposts, replies, views, score, comments }
+    enum CodingKeys: String, CodingKey { case likes, reposts, replies, views, bookmarks, quotes, score, comments }
 
     init(from decoder: Decoder) throws {
         guard let c = try? decoder.container(keyedBy: CodingKeys.self) else { return }
@@ -162,21 +164,61 @@ nonisolated struct ItemMetrics: Codable, Hashable, Sendable {
         reposts = decodeLenientInt(c, .reposts)
         replies = decodeLenientInt(c, .replies)
         views = decodeLenientInt(c, .views)
+        bookmarks = decodeLenientInt(c, .bookmarks)
+        quotes = decodeLenientInt(c, .quotes)
         score = decodeLenientInt(c, .score)
         comments = decodeLenientInt(c, .comments)
     }
 }
 
-/// An image or video attached to a post (items.media).
+/// An image attached to a post, or a quoted post / X article shown as a card
+/// (type "quote" / "article") — items.media.
 nonisolated struct ItemMedia: Codable, Hashable, Sendable {
     var type: String?
     var url: String?
+    var authorName: String?
+    var authorHandle: String?
+    var authorAvatar: String?
+    var verified: Bool?
+    var createdAt: String?
+    var text: String?
+    var image: String?
+    var title: String?
+    var preview: String?
+    /// Playable video: MP4, and an HLS stream (plays with sound).
+    var videoUrl: String?
+    var hlsUrl: String?
 
-    enum CodingKeys: String, CodingKey { case type, url }
+    /// Keys arrive snake_case; the service decoder converts them.
+    enum CodingKeys: String, CodingKey {
+        case type, url, authorName, authorHandle, authorAvatar, verified, createdAt, text, image, title, preview, videoUrl, hlsUrl
+    }
 
     init(from decoder: Decoder) throws {
         guard let c = try? decoder.container(keyedBy: CodingKeys.self) else { return }
         type = try? c.decodeIfPresent(String.self, forKey: .type)
         url = try? c.decodeIfPresent(String.self, forKey: .url)
+        authorName = try? c.decodeIfPresent(String.self, forKey: .authorName)
+        authorHandle = try? c.decodeIfPresent(String.self, forKey: .authorHandle)
+        authorAvatar = try? c.decodeIfPresent(String.self, forKey: .authorAvatar)
+        verified = try? c.decodeIfPresent(Bool.self, forKey: .verified)
+        createdAt = try? c.decodeIfPresent(String.self, forKey: .createdAt)
+        text = try? c.decodeIfPresent(String.self, forKey: .text)
+        image = try? c.decodeIfPresent(String.self, forKey: .image)
+        title = try? c.decodeIfPresent(String.self, forKey: .title)
+        preview = try? c.decodeIfPresent(String.self, forKey: .preview)
+        videoUrl = try? c.decodeIfPresent(String.self, forKey: .videoUrl)
+        hlsUrl = try? c.decodeIfPresent(String.self, forKey: .hlsUrl)
     }
+
+    /// HLS first (it has sound for Reddit videos), MP4 otherwise.
+    var playableURL: URL? {
+        for raw in [hlsUrl, videoUrl] {
+            if let raw, !raw.isEmpty, let url = URL(string: raw) { return url }
+        }
+        return nil
+    }
+
+    var isEmbed: Bool { type == "quote" || type == "article" }
+    var isArticle: Bool { type == "article" }
 }
