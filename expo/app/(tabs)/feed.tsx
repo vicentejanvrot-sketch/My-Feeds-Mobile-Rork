@@ -45,6 +45,8 @@ import {
 } from "@/lib/hooks";
 import { useToast } from "@/components/Toast";
 import { timeAgo, compactNumber, formatDuration } from "@/lib/format";
+import { PlatformBadge } from "@/components/PlatformBadge";
+import { PLATFORMS, PLATFORM_META, platformOf, isPostVideoId, type Platform } from "@/lib/platforms";
 
 /** Extract YouTube video ID from a watch URL (fallback when video_id is null). */
 function extractYoutubeId(url: string | null): string | null {
@@ -149,6 +151,7 @@ export default function FeedScreen() {
     (params.status as StatusFilter) || "not_watched",
   );
   const [sortMode, setSortMode] = useState<SortMode>("recent");
+  const [platformFilter, setPlatformFilter] = useState<Platform | "all">("all");
 
   const listUnsorted = agents.data ?? [];
   const agentList = useMemo(
@@ -190,11 +193,17 @@ export default function FeedScreen() {
       result = result.filter((it) => {
         const analysis = it.item_analysis?.[0] ?? null;
         if (normalizeText(it.title).includes(q)) return true;
+        if (normalizeText(it.body).includes(q)) return true;
         if (normalizeText(it.channel_name).includes(q)) return true;
         if (analysis?.short_summary && normalizeText(analysis.short_summary).includes(q)) return true;
         if (analysis?.tags?.some((t) => normalizeText(t).includes(q))) return true;
         return false;
       });
+    }
+
+    // Platform filter
+    if (platformFilter !== "all") {
+      result = result.filter((it) => platformOf(it.platform) === platformFilter);
     }
 
     // Agent filter
@@ -225,7 +234,17 @@ export default function FeedScreen() {
     // "recent" uses server order (by published_at desc)
 
     return result;
-  }, [allItems, search, agentFilter, channelFilter, statusFilter, sortMode]);
+  }, [allItems, search, agentFilter, channelFilter, statusFilter, sortMode, platformFilter]);
+
+  // Items per platform; the chips only show when there is more than one platform.
+  const platformCounts = useMemo(() => {
+    const counts = new Map<Platform, number>();
+    for (const it of allItems) {
+      const p = platformOf(it.platform);
+      counts.set(p, (counts.get(p) ?? 0) + 1);
+    }
+    return counts;
+  }, [allItems]);
 
   // Actions
   const setStatus = useCallback(
@@ -273,6 +292,11 @@ export default function FeedScreen() {
 
   const openVideo = useCallback(
     (item: ItemWithAnalysis) => {
+      // X posts and Reddit threads open in the in-app reader
+      if (isPostVideoId(item.video_id)) {
+        router.push(`/post-reader?itemId=${encodeURIComponent(item.id)}`);
+        return;
+      }
       const vid = item.video_id?.trim() || extractYoutubeId(item.url);
       router.push(`/video-player?videoId=${encodeURIComponent(vid ?? "")}&itemId=${encodeURIComponent(item.id)}`);
     },
@@ -426,6 +450,29 @@ export default function FeedScreen() {
           </View>
         </View>
       </View>
+
+      {/* ── Platform chips ─────────────────────────────────────── */}
+      {platformCounts.size > 1 ? (
+        <View style={postPreviewStyles.chipRow}>
+          {(["all", ...PLATFORMS.filter((p) => platformCounts.has(p))] as const).map((p) => {
+            const active = platformFilter === p;
+            return (
+              <Pressable
+                key={p}
+                onPress={() => setPlatformFilter(p as Platform | "all")}
+                style={[postPreviewStyles.chip, active && postPreviewStyles.chipActive]}
+                accessibilityRole="button"
+                accessibilityState={{ selected: active }}
+              >
+                {p !== "all" ? <PlatformBadge platform={p as Platform} /> : null}
+                <Text style={[postPreviewStyles.chipText, active && postPreviewStyles.chipTextActive]}>
+                  {p === "all" ? `All · ${allItems.length}` : `${PLATFORM_META[p as Platform].label} · ${platformCounts.get(p as Platform)}`}
+                </Text>
+              </Pressable>
+            );
+          })}
+        </View>
+      ) : null}
 
       {/* ── List ───────────────────────────────────────────────── */}
       {items.isLoading ? (
@@ -698,6 +745,8 @@ const FeedCard = React.memo(function FeedCard({
   const StatusIcon = statusCfg.icon;
 
   const channelInitial = (item.channel_name ?? "?")[0].toUpperCase();
+  const platform = platformOf(item.platform);
+  const isPost = platform !== "youtube";
 
   return (
     <Pressable
@@ -721,10 +770,18 @@ const FeedCard = React.memo(function FeedCard({
             onError={() => setThumbIndex((i) => i + 1)}
           />
         ) : (
+          isPost ? (
+          <View style={[styles.thumb, styles.thumbFallback, postPreviewStyles.box]}>
+            <Text style={postPreviewStyles.text} numberOfLines={6}>
+              {(platform === "reddit" ? (analysis.short_summary || item.body) : item.body) || item.title}
+            </Text>
+          </View>
+        ) : (
           <View style={[styles.thumb, styles.thumbFallback]} />
+        )
         )}
         <View style={styles.playOverlay}>
-          <Play size={22} color={Colors.white} fill={Colors.white} />
+          {isPost ? <PlatformBadge platform={platform} size="md" /> : <Play size={22} color={Colors.white} fill={Colors.white} />}
         </View>
         {selectionMode ? (
           <View style={[styles.selectionCheck, selected && styles.selectionCheckSelected]}>
@@ -765,7 +822,7 @@ const FeedCard = React.memo(function FeedCard({
             </Text>
           </View>
           <Text style={styles.durationInline}>
-            {formatDuration(analysis.duration_seconds)}
+            {isPost ? PLATFORM_META[platform].label : formatDuration(analysis.duration_seconds)}
           </Text>
         </View>
 
@@ -1452,4 +1509,49 @@ const styles = StyleSheet.create({
 
   // Shared
   pressed: { opacity: 0.7, transform: [{ scale: 0.98 }] },
+});
+
+// Text preview for X posts / Reddit threads, and the platform chips above the list.
+const postPreviewStyles = StyleSheet.create({
+  box: {
+    padding: 14,
+    justifyContent: "center",
+    backgroundColor: Colors.input,
+  },
+  text: {
+    color: Colors.textPrimary,
+    fontSize: 14,
+    lineHeight: 20,
+  },
+  chipRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+    paddingHorizontal: 16,
+    paddingBottom: 10,
+  },
+  chip: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    height: 36,
+    paddingHorizontal: 12,
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    backgroundColor: Colors.card,
+  },
+  chipActive: {
+    backgroundColor: Colors.accent,
+    borderColor: Colors.accent,
+  },
+  chipText: {
+    color: Colors.textPrimary,
+    fontSize: 13,
+    fontWeight: "600",
+  },
+  chipTextActive: {
+    color: "#06121F",
+    fontWeight: "700",
+  },
 });
