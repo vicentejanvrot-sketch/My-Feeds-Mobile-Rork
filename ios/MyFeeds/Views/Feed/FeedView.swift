@@ -14,6 +14,7 @@ struct FeedView: View {
     @State private var agentFilter: String? = nil
     @State private var channelFilter: String? = nil
     @State private var statusFilter: ItemStatus? = .notWatched
+    @State private var platformFilter: SourcePlatform? = nil
     @State private var sortMode: SortMode = .recent
 
     // Selection
@@ -44,6 +45,7 @@ struct FeedView: View {
             result = result.filter { item in
                 (item.title?.lowercased().contains(query) ?? false)
                 || (item.channelName?.lowercased().contains(query) ?? false)
+                || (item.body?.lowercased().contains(query) ?? false)
                 || (item.analysis?.shortSummary?.lowercased().contains(query) ?? false)
                 || (item.analysis?.tags?.contains { $0.lowercased().contains(query) } ?? false)
             }
@@ -57,6 +59,9 @@ struct FeedView: View {
         if let statusFilter {
             result = result.filter { $0.status == statusFilter }
         }
+        if let platformFilter {
+            result = result.filter { $0.sourcePlatform == platformFilter }
+        }
         switch sortMode {
         case .recent:
             break
@@ -66,6 +71,11 @@ struct FeedView: View {
             result = result.sorted { ($0.analysis?.rankingScore ?? 0) > ($1.analysis?.rankingScore ?? 0) }
         }
         return result
+    }
+
+    /// Platforms that have at least one item. The chips only show when there is more than one.
+    private var presentPlatforms: [SourcePlatform] {
+        SourcePlatform.allCases.filter { platform in items.contains { $0.sourcePlatform == platform } }
     }
 
     /// Channels for the selected agent (deduped by channel_id).
@@ -89,6 +99,7 @@ struct FeedView: View {
                 header
                 if !selectedIds.isEmpty { bulkBar }
                 searchBar
+                if presentPlatforms.count > 1 { platformChips }
                 filterStack
                 list
             }
@@ -125,6 +136,11 @@ struct FeedView: View {
                 items[index].userStatus = change.status
             }
         }
+        .onChange(of: router.postRequest == nil) { wasClosed, isClosed in
+            if !wasClosed && isClosed {
+                Task { await load() }
+            }
+        }
         .onChange(of: router.playerRequest == nil) { wasClosed, isClosed in
             if !wasClosed && isClosed {
                 Task { await load() }
@@ -141,7 +157,7 @@ struct FeedView: View {
                 .foregroundStyle(Theme.textPrimary)
             Spacer()
             if !isLoading {
-                Text("\(filteredItems.count) videos")
+                Text("\(filteredItems.count) \(presentPlatforms.count > 1 ? "items" : "videos")")
                     .font(.system(size: 13, weight: .semibold))
                     .foregroundStyle(Theme.textSecondary)
             }
@@ -149,6 +165,43 @@ struct FeedView: View {
         .padding(.horizontal, 16)
         .padding(.top, 12)
         .padding(.bottom, 10)
+    }
+
+    /// All / YouTube / X / Reddit, same chips as the web and Expo feeds.
+    private var platformChips: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 8) {
+                platformChip(platform: nil, label: "All · \(items.count)")
+                ForEach(presentPlatforms, id: \.self) { platform in
+                    let count = items.filter { $0.sourcePlatform == platform }.count
+                    platformChip(platform: platform, label: "\(platform.label) · \(count)")
+                }
+            }
+            .padding(.horizontal, 16)
+        }
+        .padding(.bottom, 10)
+    }
+
+    private func platformChip(platform: SourcePlatform?, label: String) -> some View {
+        let active = platformFilter == platform
+        return Button {
+            UISelectionFeedbackGenerator().selectionChanged()
+            platformFilter = platform
+        } label: {
+            HStack(spacing: 6) {
+                if let platform { PlatformBadge(platform: platform) }
+                Text(label)
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundStyle(active ? .white : Theme.textSecondary)
+            }
+            .padding(.horizontal, 12)
+            .frame(height: 36)
+            .background(active ? Theme.accent : Theme.card)
+            .clipShape(Capsule())
+            .overlay(Capsule().stroke(active ? Theme.accent : Theme.border, lineWidth: 1))
+        }
+        .buttonStyle(.plain)
+        .accessibilityAddTraits(active ? .isSelected : [])
     }
 
     private var bulkBar: some View {
@@ -535,7 +588,7 @@ private struct FeedItemCard: View {
         ZStack(alignment: .bottomTrailing) {
             Button(action: onTap) {
                 VStack(alignment: .leading, spacing: 0) {
-                    thumbnail
+                    if item.isPost { postPreview } else { thumbnail }
                     body12
                 }
                 .background(Theme.card)
@@ -585,6 +638,35 @@ private struct FeedItemCard: View {
                         .foregroundStyle(.white)
                 }
                 .allowsHitTesting(false)
+            }
+            .clipped()
+    }
+
+    /// X posts and Reddit threads have no video frame: show their text instead.
+    private var postPreview: some View {
+        let text: String = {
+            if item.sourcePlatform == .reddit,
+               let summary = item.analysis?.shortSummary, !summary.isEmpty { return summary }
+            if let body = item.body, !body.isEmpty { return body }
+            return item.title ?? ""
+        }()
+        return Color(Theme.input)
+            .aspectRatio(16 / 9, contentMode: .fit)
+            .overlay(alignment: .leading) {
+                Text(text)
+                    .font(.system(size: 14))
+                    .foregroundStyle(Theme.textPrimary)
+                    .lineSpacing(3)
+                    .lineLimit(6)
+                    .padding(.horizontal, 14)
+                    .padding(.top, 30)
+                    .padding(.bottom, 12)
+                    .allowsHitTesting(false)
+            }
+            .overlay(alignment: .topLeading) {
+                PlatformBadge(platform: item.sourcePlatform, size: 24)
+                    .padding(10)
+                    .allowsHitTesting(false)
             }
             .clipped()
     }
@@ -640,12 +722,16 @@ private struct FeedItemCard: View {
 
             HStack {
                 HStack(spacing: 6) {
-                    ZStack {
-                        Circle().fill(Theme.input).frame(width: 24, height: 24)
-                        Circle().stroke(Theme.border, lineWidth: 0.5).frame(width: 24, height: 24)
-                        Text(String((item.channelName ?? "?").prefix(1)).uppercased())
-                            .font(.system(size: 11, weight: .bold))
-                            .foregroundStyle(Theme.textSecondary)
+                    if item.isPost {
+                        PlatformBadge(platform: item.sourcePlatform, size: 24)
+                    } else {
+                        ZStack {
+                            Circle().fill(Theme.input).frame(width: 24, height: 24)
+                            Circle().stroke(Theme.border, lineWidth: 0.5).frame(width: 24, height: 24)
+                            Text(String((item.channelName ?? "?").prefix(1)).uppercased())
+                                .font(.system(size: 11, weight: .bold))
+                                .foregroundStyle(Theme.textSecondary)
+                        }
                     }
                     Text("\(item.channelName ?? "Unknown channel") · \(Format.timeAgo(item.publishedAt))")
                         .font(.system(size: 12))
@@ -653,7 +739,7 @@ private struct FeedItemCard: View {
                         .lineLimit(1)
                 }
                 Spacer()
-                Text(Format.duration(item.displayDurationSeconds))
+                Text(item.isPost ? item.sourcePlatform.label : Format.duration(item.displayDurationSeconds))
                     .font(.system(size: 12, weight: .semibold))
                     .foregroundStyle(Theme.textMuted)
                     .monospacedDigit()
@@ -686,9 +772,18 @@ private struct FeedItemCard: View {
             }
 
             HStack(spacing: 16) {
-                statChip(icon: "eye", value: item.displayViews)
-                statChip(icon: "hand.thumbsup", value: item.displayLikes)
-                statChip(icon: "bubble.left", value: item.displayComments)
+                if item.sourcePlatform == .x {
+                    statChip(icon: "bubble.left", value: item.metrics?.replies ?? 0)
+                    statChip(icon: "arrow.2.squarepath", value: item.metrics?.reposts ?? 0)
+                    statChip(icon: "hand.thumbsup", value: item.metrics?.likes ?? 0)
+                } else if item.sourcePlatform == .reddit {
+                    statChip(icon: "arrow.up", value: item.metrics?.score ?? 0)
+                    statChip(icon: "bubble.left", value: item.metrics?.comments ?? 0)
+                } else {
+                    statChip(icon: "eye", value: item.displayViews)
+                    statChip(icon: "hand.thumbsup", value: item.displayLikes)
+                    statChip(icon: "bubble.left", value: item.displayComments)
+                }
                 Spacer()
             }
             .padding(.top, 10)
