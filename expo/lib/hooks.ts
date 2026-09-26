@@ -1082,3 +1082,26 @@ export function useDeleteApiKey() {
 
 /** Re-fetch a query whenever its screen regains focus. */
 export { useFocusEffect } from "expo-router";
+
+/** Add an X account or subreddit through the add-source edge function (same flow as the web app). */
+export function useAddSource(agentId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (payload: { platform: "x" | "reddit"; value: string; priority?: number }) => {
+      const { data, error } = await supabase.functions.invoke("add-source", {
+        body: {
+          agentId,
+          platform: payload.platform,
+          value: payload.value,
+          priority: payload.priority ?? 3,
+        },
+      });
+      if (error) throw new Error(await extractEdgeFunctionErrorMessage(error));
+      if (!data?.channel) throw new Error(data?.error ?? "Couldn't add that source.");
+      return data.channel as Channel;
+    },
+    onSettled: () => {
+      void queryClient.invalidateQueries({ queryKey: ["channels"] });
+    },
+  });
+}
