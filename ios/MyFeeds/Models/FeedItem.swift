@@ -14,6 +14,17 @@ nonisolated struct ItemAnalysis: Codable, Identifiable, Hashable, Sendable {
     var keyPoints: [String]?
     var tags: [String]?
     var rankingScore: Double?
+    /// Timestamped moments from the video transcript (YouTube only).
+    var keyMoments: [KeyMoment]?
+    /// "transcript" | "metadata" | "post" | "thread"
+    var summarySource: String?
+
+    /// Key moments with text, in time order.
+    var moments: [KeyMoment] {
+        (keyMoments ?? []).filter { !$0.text.isEmpty }.sorted { $0.seconds < $1.seconds }
+    }
+
+    var isFromTranscript: Bool { summarySource == "transcript" }
 }
 
 /// Row in `items` with the embedded `item_analysis` join used in the feed.
@@ -30,6 +41,13 @@ nonisolated struct FeedItem: Codable, Identifiable, Hashable, Sendable {
     var publishedAt: String?
     var userStatus: ItemStatus?
     var itemAnalysis: [ItemAnalysis]?
+    /// "youtube" | "x" | "reddit". Missing on rows created before multi-platform sources.
+    var platform: String?
+    /// Post text (X) or self-text (Reddit).
+    var body: String?
+    var authorHandle: String?
+    var metrics: ItemMetrics?
+    var media: [ItemMedia]?
     /// Real duration loaded separately when the embedded analysis join cannot
     /// be decoded. This is runtime-only and is absent from normal API rows.
     var resolvedDurationSeconds: Int?
@@ -37,11 +55,31 @@ nonisolated struct FeedItem: Codable, Identifiable, Hashable, Sendable {
     var analysis: ItemAnalysis? { itemAnalysis?.first }
     var status: ItemStatus { userStatus ?? .notWatched }
 
+    var sourcePlatform: SourcePlatform {
+        if let platform { return SourcePlatform(raw: platform) }
+        if videoId?.hasPrefix("x:") == true { return .x }
+        if videoId?.hasPrefix("reddit:") == true { return .reddit }
+        return .youtube
+    }
+
+    /// X posts and Reddit threads open in the reader, not the video player.
+    var isPost: Bool { sourcePlatform != .youtube || SourcePlatform.isPostVideoId(videoId) }
+
+    /// First image attached to a post, or its stored thumbnail.
+    var postImageURL: URL? {
+        let raw = media?.first(where: { $0.type != "video" && ($0.url?.isEmpty == false) })?.url ?? thumbnailUrl
+        guard var raw, !raw.isEmpty else { return nil }
+        if raw.hasPrefix("http://") { raw = "https://" + raw.dropFirst("http://".count) }
+        return URL(string: raw)
+    }
+
     /// Resolve the YouTube video ID from video_id or the URL.
     var resolvedVideoId: String? {
         if let videoId, videoId.range(of: "^[\\w-]{11}$", options: .regularExpression) != nil {
             return videoId
         }
+        // "x:<id>" / "reddit:<id>" are kept as-is so the router can open the reader.
+        if SourcePlatform.isPostVideoId(videoId) { return videoId }
         guard let url, let comps = URLComponents(string: url) else { return videoId }
         if comps.host?.contains("youtu.be") == true {
             let id = comps.path.trimmingCharacters(in: CharacterSet(charactersIn: "/"))
