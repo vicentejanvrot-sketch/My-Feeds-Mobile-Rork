@@ -65,9 +65,16 @@ nonisolated struct FeedItem: Codable, Identifiable, Hashable, Sendable {
     /// X posts and Reddit threads open in the reader, not the video player.
     var isPost: Bool { sourcePlatform != .youtube || SourcePlatform.isPostVideoId(videoId) }
 
+    /// Quoted post or X article shown as a card inside the post.
+    var quoteEmbed: ItemMedia? { media?.first(where: { $0.isEmbed }) }
+
+    /// Video attached to the post itself (not to a quoted post).
+    var postVideo: ItemMedia? { media?.first(where: { !$0.isEmbed && $0.playableURL != nil }) }
+
     /// First image attached to a post, or its stored thumbnail.
     var postImageURL: URL? {
-        let raw = media?.first(where: { $0.type != "video" && ($0.url?.isEmpty == false) })?.url ?? thumbnailUrl
+        let attached = media?.first(where: { $0.type != "video" && !$0.isEmbed && ($0.url?.isEmpty == false) })?.url
+        let raw = attached ?? (quoteEmbed == nil ? thumbnailUrl : nil)
         guard var raw, !raw.isEmpty else { return nil }
         if raw.hasPrefix("http://") { raw = "https://" + raw.dropFirst("http://".count) }
         return URL(string: raw)
