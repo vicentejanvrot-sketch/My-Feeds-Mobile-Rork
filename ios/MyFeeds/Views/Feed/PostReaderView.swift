@@ -1,3 +1,4 @@
+import AVKit
 import SwiftUI
 
 /// In-app reader for X posts and Reddit threads. The native twin of the web
@@ -15,18 +16,12 @@ struct PostReaderView: View {
     @State private var loadFailed = false
     @State private var status: ItemStatus = .notWatched
 
-    /// Posts are read, not watched: same four statuses, reading-friendly labels.
-    private struct StatusOption: Hashable {
-        let status: ItemStatus
-        let label: String
-    }
-
-    private static let statuses: [StatusOption] = [
-        StatusOption(status: .notWatched, label: "Unread"),
-        StatusOption(status: .watched, label: "Read"),
-        StatusOption(status: .liked, label: "Saved"),
-        StatusOption(status: .watchLater, label: "Read Later"),
-    ]
+    // The action bar copies each platform's own row under a post. In My Feeds:
+    // Like / Upvote = Saved, Bookmark / Save = Read Later, the check = Read.
+    // Reply and Repost open the post on X, since those happen on the platform.
+    private static let xPink = Color(red: 249 / 255, green: 24 / 255, blue: 128 / 255)
+    private static let xBlue = Color(red: 29 / 255, green: 155 / 255, blue: 240 / 255)
+    private static let redditOrange = Color(red: 1, green: 69 / 255, blue: 0)
 
     var body: some View {
         ZStack {
@@ -85,7 +80,9 @@ struct PostReaderView: View {
                             .textSelection(.enabled)
                     }
 
-                    if let imageURL = item.postImageURL {
+                    if let video = item.postVideo, let url = video.playableURL {
+                        PostVideoPlayer(url: url)
+                    } else if let imageURL = item.postImageURL {
                         AsyncImage(url: imageURL) { phase in
                             if let image = phase.image {
                                 image.resizable().aspectRatio(contentMode: .fit)
@@ -97,7 +94,9 @@ struct PostReaderView: View {
                         .clipShape(.rect(cornerRadius: 12))
                     }
 
-                    metricsRow(item, platform: platform)
+                    if let quote = item.quoteEmbed {
+                        quoteCard(quote)
+                    }
 
                     summaryBox(item, platform: platform)
 
@@ -156,33 +155,111 @@ struct PostReaderView: View {
         return "\(name) · \(Format.timeAgo(item.publishedAt))"
     }
 
-    private func metricsRow(_ item: FeedItem, platform: SourcePlatform) -> some View {
-        let metrics = item.metrics
-        return HStack(spacing: 18) {
-            if platform == .x {
-                metric(icon: "bubble.left", value: Format.compactNumber(metrics?.replies ?? 0))
-                metric(icon: "arrow.2.squarepath", value: Format.compactNumber(metrics?.reposts ?? 0))
-                metric(icon: "hand.thumbsup", value: Format.compactNumber(metrics?.likes ?? 0))
-                if let views = metrics?.views, views > 0 {
-                    metric(icon: "eye", value: Format.compactNumber(views))
+    /// Quoted post or X article, shown as a card inside the post like on X.
+    private func quoteCard(_ quote: ItemMedia) -> some View {
+        // Not a Button, so a video inside the card still gets its own taps.
+        VStack(alignment: .leading, spacing: 8) {
+            HStack(spacing: 6) {
+                if let avatar = quote.authorAvatar, let url = URL(string: avatar) {
+                    AsyncImage(url: url) { phase in
+                        if let image = phase.image {
+                            image.resizable().aspectRatio(contentMode: .fill)
+                        } else {
+                            Theme.input
+                        }
+                    }
+                    .frame(width: 20, height: 20)
+                    .clipShape(Circle())
                 }
-            } else {
-                metric(icon: "arrow.up", value: Format.compactNumber(metrics?.score ?? 0))
-                metric(icon: "bubble.left", value: "\(Format.compactNumber(metrics?.comments ?? 0)) comments")
+                Text(quote.authorName ?? "")
+                    .font(.system(size: 14, weight: .bold))
+                    .foregroundStyle(Theme.textPrimary)
+                    .lineLimit(1)
+                if quote.verified == true {
+                    Image(systemName: "checkmark.seal.fill")
+                        .font(.system(size: 13))
+                        .foregroundStyle(Self.xBlue)
+                }
+                Text(quoteHandleText(quote))
+                    .font(.system(size: 14))
+                    .foregroundStyle(Theme.textSecondary)
+                    .lineLimit(1)
+                Spacer(minLength: 0)
             }
-            Spacer(minLength: 0)
+            if !quote.isArticle, let text = quote.text, !text.isEmpty {
+                Text(text)
+                    .font(.system(size: 14))
+                    .foregroundStyle(Theme.textPrimary)
+                    .lineSpacing(3)
+                    .multilineTextAlignment(.leading)
+            }
+            if let url = quote.playableURL {
+                PostVideoPlayer(url: url)
+            } else if let raw = quote.image, let url = URL(string: raw) {
+                AsyncImage(url: url) { phase in
+                    if let image = phase.image {
+                        image.resizable().aspectRatio(contentMode: .fill)
+                    } else {
+                        Theme.card
+                    }
+                }
+                .frame(maxWidth: .infinity)
+                .aspectRatio(16 / 9, contentMode: .fit)
+                .clipShape(.rect(cornerRadius: 12))
+            }
+            if quote.isArticle {
+                if let title = quote.title, !title.isEmpty {
+                    Text(title)
+                        .font(.system(size: 15, weight: .heavy))
+                        .foregroundStyle(Theme.textPrimary)
+                        .multilineTextAlignment(.leading)
+                }
+                if let preview = quote.preview, !preview.isEmpty {
+                    Text(preview)
+                        .font(.system(size: 14))
+                        .foregroundStyle(Theme.textPrimary.opacity(0.85))
+                        .lineLimit(3)
+                        .multilineTextAlignment(.leading)
+                }
+            }
         }
+        .padding(12)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .overlay(
+            RoundedRectangle(cornerRadius: 16)
+                .stroke(Theme.border, lineWidth: 1)
+        )
+        .contentShape(Rectangle())
+        .onTapGesture {
+            if let raw = quote.url, let url = URL(string: raw) { openURL(url) }
+        }
+        .accessibilityAddTraits(.isLink)
     }
 
-    private func metric(icon: String, value: String) -> some View {
-        HStack(spacing: 5) {
-            Image(systemName: icon)
-                .font(.system(size: 13))
-            Text(value)
-                .font(.system(size: 13, weight: .semibold))
-                .monospacedDigit()
+    private func quoteHandleText(_ quote: ItemMedia) -> String {
+        let handle = quote.authorHandle ?? ""
+        guard quote.createdAt != nil else { return handle }
+        return "\(handle) · \(Format.timeAgo(quote.createdAt))"
+    }
+
+    /// "12:01 PM · Sep 26, 2026 · 166.5K Views", as under a post on X.
+    private func xDateLine(_ item: FeedItem) -> Text? {
+        guard let raw = item.publishedAt else { return nil }
+        let parser = ISO8601DateFormatter()
+        parser.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        let date = parser.date(from: raw) ?? ISO8601DateFormatter().date(from: raw)
+        guard let date else { return nil }
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "en_US")
+        formatter.dateFormat = "h:mm a · MMM d, yyyy"
+        var line = Text(formatter.string(from: date)).foregroundColor(Theme.textSecondary)
+        if let views = item.metrics?.views, views > 0 {
+            line = line
+                + Text(" · ").foregroundColor(Theme.textSecondary)
+                + Text(Format.compactNumber(views)).bold().foregroundColor(Theme.textPrimary)
+                + Text(" Views").foregroundColor(Theme.textSecondary)
         }
-        .foregroundStyle(Theme.textSecondary)
+        return line
     }
 
     @ViewBuilder
@@ -221,52 +298,58 @@ struct PostReaderView: View {
 
     private func footer(_ item: FeedItem, platform: SourcePlatform) -> some View {
         VStack(spacing: 10) {
-            HStack(spacing: 6) {
-                ForEach(Self.statuses, id: \.status) { entry in
-                    let active = status == entry.status
-                    Button {
-                        changeStatus(entry.status, item: item)
-                    } label: {
-                        VStack(spacing: 4) {
-                            Image(systemName: entry.status.icon)
-                                .font(.system(size: 15))
-                                .foregroundStyle(entry.status.color)
-                            Text(entry.label)
-                                .font(.system(size: 11, weight: .semibold))
-                                .foregroundStyle(Theme.textPrimary)
-                                .lineLimit(1)
-                        }
-                        .frame(maxWidth: .infinity, minHeight: 48)
-                        .background(active ? Theme.accent.opacity(0.10) : Color.clear)
-                        .clipShape(.rect(cornerRadius: 10))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 10)
-                                .stroke(active ? Theme.accent : Theme.border, lineWidth: 1)
-                        )
-                    }
-                    .buttonStyle(.plain)
-                    .accessibilityAddTraits(active ? .isSelected : [])
+            if platform == .x {
+                if let line = xDateLine(item) {
+                    line
+                        .font(.system(size: 13))
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.horizontal, 4)
                 }
+                xActionBar(item)
+            } else {
+                redditActionBar(item)
             }
 
-            Button {
-                if let raw = item.url, let url = URL(string: raw) { openURL(url) }
-            } label: {
-                HStack(spacing: 8) {
-                    Image(systemName: "arrow.up.right.square")
-                        .font(.system(size: 15))
-                    Text(platform.openLabel)
-                        .font(.system(size: 14, weight: .bold))
+            HStack(spacing: 8) {
+                let read = status == .watched
+                Button {
+                    changeStatus(read ? .notWatched : .watched, item: item)
+                } label: {
+                    HStack(spacing: 8) {
+                        Image(systemName: "checkmark")
+                            .font(.system(size: 14, weight: .semibold))
+                        Text(read ? "Read" : "Mark as read")
+                            .font(.system(size: 14, weight: .bold))
+                    }
+                    .foregroundStyle(read ? Theme.success : Theme.textPrimary)
+                    .frame(maxWidth: .infinity, minHeight: 44)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 10)
+                            .stroke(read ? Theme.success : Theme.border, lineWidth: 1)
+                    )
                 }
-                .foregroundStyle(Theme.textPrimary)
-                .frame(maxWidth: .infinity, minHeight: 44)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 10)
-                        .stroke(Theme.border, lineWidth: 1)
-                )
+                .buttonStyle(.plain)
+                .accessibilityAddTraits(read ? .isSelected : [])
+
+                Button {
+                    if let raw = item.url, let url = URL(string: raw) { openURL(url) }
+                } label: {
+                    HStack(spacing: 8) {
+                        Image(systemName: "arrow.up.right.square")
+                            .font(.system(size: 15))
+                        Text(platform.openLabel)
+                            .font(.system(size: 14, weight: .bold))
+                    }
+                    .foregroundStyle(Theme.textPrimary)
+                    .frame(maxWidth: .infinity, minHeight: 44)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 10)
+                            .stroke(Theme.border, lineWidth: 1)
+                    )
+                }
+                .buttonStyle(.plain)
+                .disabled(item.url == nil)
             }
-            .buttonStyle(.plain)
-            .disabled(item.url == nil)
         }
         .padding(.horizontal, 12)
         .padding(.top, 10)
@@ -275,6 +358,169 @@ struct PostReaderView: View {
         .overlay(alignment: .top) {
             Rectangle().fill(Theme.border).frame(height: 0.5)
         }
+    }
+
+    // MARK: - Action bars
+
+    private func xActionBar(_ item: FeedItem) -> some View {
+        let metrics = item.metrics
+        let liked = status == .liked
+        let bookmarked = status == .watchLater
+        let postId = item.videoId.flatMap { $0.hasPrefix("x:") ? String($0.dropFirst(2)) : nil }
+        return HStack {
+            barButton(
+                icon: "bubble.left",
+                value: metrics?.replies ?? 0,
+                color: Theme.textSecondary,
+                label: "Reply on X"
+            ) {
+                if let postId { openExternal("https://x.com/intent/post?in_reply_to=\(postId)") }
+            }
+            Spacer(minLength: 0)
+            barButton(
+                icon: "arrow.2.squarepath",
+                value: metrics?.reposts ?? 0,
+                color: Theme.textSecondary,
+                label: "Repost on X"
+            ) {
+                if let postId { openExternal("https://x.com/intent/retweet?tweet_id=\(postId)") }
+            }
+            Spacer(minLength: 0)
+            barButton(
+                icon: liked ? "heart.fill" : "heart",
+                value: (metrics?.likes ?? 0) + (liked ? 1 : 0),
+                color: liked ? Self.xPink : Theme.textSecondary,
+                label: liked ? "Remove from Saved" : "Like (save in My Feeds)"
+            ) {
+                changeStatus(liked ? .watched : .liked, item: item)
+            }
+            Spacer(minLength: 0)
+            barButton(
+                icon: bookmarked ? "bookmark.fill" : "bookmark",
+                value: (metrics?.bookmarks ?? 0) + (bookmarked ? 1 : 0),
+                color: bookmarked ? Self.xBlue : Theme.textSecondary,
+                label: bookmarked ? "Remove from Read Later" : "Bookmark (Read Later)"
+            ) {
+                changeStatus(bookmarked ? .notWatched : .watchLater, item: item)
+            }
+            Spacer(minLength: 0)
+            shareButton(item, color: Theme.textSecondary)
+        }
+        .padding(.horizontal, 4)
+    }
+
+    private func redditActionBar(_ item: FeedItem) -> some View {
+        let metrics = item.metrics
+        let upvoted = status == .liked
+        let bookmarked = status == .watchLater
+        return HStack(spacing: 8) {
+            HStack(spacing: 0) {
+                Button {
+                    changeStatus(upvoted ? .watched : .liked, item: item)
+                } label: {
+                    Image(systemName: upvoted ? "arrowshape.up.fill" : "arrowshape.up")
+                        .font(.system(size: 16, weight: .semibold))
+                        .frame(width: 40, height: 40)
+                }
+                .accessibilityLabel(upvoted ? "Remove upvote (Saved)" : "Upvote (save in My Feeds)")
+                Text(Format.compactNumber((metrics?.score ?? 0) + (upvoted ? 1 : 0)))
+                    .font(.system(size: 13, weight: .bold))
+                    .monospacedDigit()
+                Button {
+                    changeStatus(.watched, item: item)
+                } label: {
+                    Image(systemName: "arrowshape.down")
+                        .font(.system(size: 16, weight: .semibold))
+                        .frame(width: 40, height: 40)
+                }
+                .accessibilityLabel("Downvote (mark as read)")
+            }
+            .buttonStyle(.plain)
+            .foregroundStyle(upvoted ? Color.white : Theme.textPrimary)
+            .background(upvoted ? Self.redditOrange : Theme.input)
+            .clipShape(Capsule())
+
+            redditPill(icon: "bubble.left", text: Format.compactNumber(metrics?.comments ?? 0), color: Theme.textPrimary) {
+                if let raw = item.url { openExternal(raw) }
+            }
+            .accessibilityLabel("Open comments on Reddit")
+
+            redditPill(
+                icon: bookmarked ? "bookmark.fill" : "bookmark",
+                text: bookmarked ? "Saved" : "Save",
+                color: bookmarked ? Self.xBlue : Theme.textPrimary
+            ) {
+                changeStatus(bookmarked ? .notWatched : .watchLater, item: item)
+            }
+
+            if let raw = item.url, let url = URL(string: raw) {
+                ShareLink(item: url) {
+                    HStack(spacing: 6) {
+                        Image(systemName: "square.and.arrow.up")
+                            .font(.system(size: 14, weight: .semibold))
+                        Text("Share")
+                            .font(.system(size: 13, weight: .bold))
+                    }
+                    .foregroundStyle(Theme.textPrimary)
+                    .padding(.horizontal, 14)
+                    .frame(height: 40)
+                    .background(Theme.input)
+                    .clipShape(Capsule())
+                }
+            }
+            Spacer(minLength: 0)
+        }
+    }
+
+    private func barButton(icon: String, value: Int, color: Color, label: String, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            HStack(spacing: 5) {
+                Image(systemName: icon)
+                    .font(.system(size: 16))
+                Text(Format.compactNumber(value))
+                    .font(.system(size: 13))
+                    .monospacedDigit()
+            }
+            .foregroundStyle(color)
+            .frame(minWidth: 44, minHeight: 44)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(label)
+    }
+
+    private func redditPill(icon: String, text: String, color: Color, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            HStack(spacing: 6) {
+                Image(systemName: icon)
+                    .font(.system(size: 14, weight: .semibold))
+                Text(text)
+                    .font(.system(size: 13, weight: .bold))
+            }
+            .foregroundStyle(color)
+            .padding(.horizontal, 14)
+            .frame(height: 40)
+            .background(Theme.input)
+            .clipShape(Capsule())
+        }
+        .buttonStyle(.plain)
+    }
+
+    @ViewBuilder
+    private func shareButton(_ item: FeedItem, color: Color) -> some View {
+        if let raw = item.url, let url = URL(string: raw) {
+            ShareLink(item: url) {
+                Image(systemName: "square.and.arrow.up")
+                    .font(.system(size: 16))
+                    .foregroundStyle(color)
+                    .frame(minWidth: 44, minHeight: 44)
+            }
+            .accessibilityLabel("Share")
+        }
+    }
+
+    private func openExternal(_ raw: String) {
+        if let url = URL(string: raw) { openURL(url) }
     }
 
     // MARK: - Behavior
@@ -306,5 +552,28 @@ struct PostReaderView: View {
             }
             router.settleStatusChange(itemId: item.id)
         }
+    }
+}
+
+/// Plays a post's video in place, like on X and Reddit. The player is created
+/// when the view appears and paused when it goes away.
+private struct PostVideoPlayer: View {
+    let url: URL
+    @State private var player: AVPlayer?
+
+    var body: some View {
+        ZStack {
+            Color.black
+            if let player {
+                VideoPlayer(player: player)
+            }
+        }
+        .aspectRatio(16 / 9, contentMode: .fit)
+        .frame(maxWidth: .infinity)
+        .clipShape(.rect(cornerRadius: 12))
+        .onAppear {
+            if player == nil { player = AVPlayer(url: url) }
+        }
+        .onDisappear { player?.pause() }
     }
 }
