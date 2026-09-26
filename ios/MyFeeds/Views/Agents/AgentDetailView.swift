@@ -25,6 +25,7 @@ struct AgentDetailView: View {
     @State private var newRecipientEmail = ""
     @State private var newChannelUrl = ""
     @State private var newChannelPriority = 3
+    @State private var newSourcePlatform: SourcePlatform = .youtube
     @State private var isSubmittingModal = false
     @State private var recipientToRemove: AgentRecipient?
     @State private var channelToRemove: Channel?
@@ -321,7 +322,7 @@ struct AgentDetailView: View {
     private var channelsSection: some View {
         VStack(alignment: .leading, spacing: 0) {
             HStack {
-                Text("CHANNELS (\(channels.count))")
+                Text("SOURCES (\(channels.count))")
                     .font(.system(size: 13, weight: .bold))
                     .kerning(0.6)
                     .foregroundStyle(Theme.textSecondary)
@@ -338,9 +339,10 @@ struct AgentDetailView: View {
                 Button {
                     newChannelUrl = ""
                     newChannelPriority = 3
+                    newSourcePlatform = .youtube
                     showAddChannel = true
                 } label: {
-                    Text("+ Add Channel")
+                    Text("+ Add Source")
                         .font(.system(size: 13, weight: .semibold))
                         .foregroundStyle(Theme.accent)
                 }
@@ -411,10 +413,19 @@ struct AgentDetailView: View {
                             }
                         }
                         .allowsHitTesting(false)
+                    } else if channel.sourcePlatform != .youtube {
+                        PlatformBadge(platform: channel.sourcePlatform, size: 32)
                     } else {
                         Image(systemName: "photo")
                             .font(.system(size: 16))
                             .foregroundStyle(Theme.textMuted)
+                    }
+                }
+                .overlay(alignment: .bottomTrailing) {
+                    // X accounts and subreddits with a picture still show where they come from.
+                    if channel.sourcePlatform != .youtube, channel.channelThumbnail != nil {
+                        PlatformBadge(platform: channel.sourcePlatform, size: 18)
+                            .padding(4)
                     }
                 }
                 .clipped()
@@ -790,7 +801,7 @@ struct AgentDetailView: View {
             Color.black.opacity(0.7).ignoresSafeArea().onTapGesture { showAddChannel = false }
             VStack(alignment: .leading, spacing: 14) {
                 HStack {
-                    Text("Add Channel")
+                    Text("Add Source")
                         .font(.system(size: 18, weight: .bold))
                         .foregroundStyle(Theme.textPrimary)
                     Spacer()
@@ -800,10 +811,38 @@ struct AgentDetailView: View {
                             .foregroundStyle(Theme.textSecondary)
                     }
                 }
-                Text("Channel URL")
+                Text("Platform")
                     .font(.system(size: 12, weight: .semibold))
                     .foregroundStyle(Theme.textSecondary)
-                TextField("https://www.youtube.com/@ChannelName", text: $newChannelUrl)
+                HStack(spacing: 8) {
+                    ForEach(SourcePlatform.allCases, id: \.self) { platform in
+                        let active = newSourcePlatform == platform
+                        Button {
+                            newSourcePlatform = platform
+                        } label: {
+                            HStack(spacing: 6) {
+                                PlatformBadge(platform: platform)
+                                Text(platform.label)
+                                    .font(.system(size: 13, weight: .semibold))
+                                    .foregroundStyle(active ? .white : Theme.textSecondary)
+                            }
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 40)
+                            .background(active ? Theme.accent.opacity(0.13) : Theme.input)
+                            .clipShape(.rect(cornerRadius: 8))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 8)
+                                    .stroke(active ? Theme.accent : Theme.border, lineWidth: 1)
+                            )
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityAddTraits(active ? .isSelected : [])
+                    }
+                }
+                Text(newSourcePlatform == .youtube ? "Channel URL" : newSourcePlatform.sourceNoun)
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundStyle(Theme.textSecondary)
+                TextField(newSourcePlatform.addPlaceholder, text: $newChannelUrl)
                     .font(.system(size: 14))
                     .foregroundStyle(Theme.textPrimary)
                     .keyboardType(.URL)
@@ -817,6 +856,9 @@ struct AgentDetailView: View {
                         RoundedRectangle(cornerRadius: 8)
                             .stroke(Theme.border, lineWidth: 1)
                     )
+                Text(newSourcePlatform.addHelp)
+                    .font(.system(size: 12))
+                    .foregroundStyle(Theme.textMuted)
                 Text("Priority")
                     .font(.system(size: 12, weight: .semibold))
                     .foregroundStyle(Theme.textSecondary)
@@ -847,7 +889,7 @@ struct AgentDetailView: View {
                         if isSubmittingModal {
                             ProgressView().tint(.white)
                         } else {
-                            Text("Add Channel")
+                            Text("Add \(newSourcePlatform.sourceNoun)")
                                 .font(.system(size: 15, weight: .bold))
                         }
                     }
@@ -948,12 +990,24 @@ struct AgentDetailView: View {
         isSubmittingModal = true
         Task {
             do {
-                try await SupabaseService.shared.addChannel(agentId: agentId, url: url, priority: newChannelPriority)
-                toasts.show("Channel added")
+                if newSourcePlatform == .youtube {
+                    try await SupabaseService.shared.addChannel(agentId: agentId, url: url, priority: newChannelPriority)
+                    toasts.show("Channel added")
+                } else {
+                    // X accounts and subreddits are checked and named by the add-source function.
+                    let channel = try await SupabaseService.shared.addSource(
+                        agentId: agentId,
+                        platform: newSourcePlatform,
+                        value: url,
+                        priority: newChannelPriority
+                    )
+                    toasts.show("Added \(channel.displayName)")
+                }
                 showAddChannel = false
                 await load()
             } catch {
-                toasts.show("Couldn't add channel", type: .error)
+                let fallback = "Couldn't add \(newSourcePlatform.sourceNoun.lowercased())"
+                toasts.show((error as? SourceError)?.message ?? fallback, type: .error)
             }
             isSubmittingModal = false
         }
