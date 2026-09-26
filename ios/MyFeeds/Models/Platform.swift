@@ -87,19 +87,17 @@ extension SourcePlatform {
     }
 }
 
-/// Small square badge (YT / X / r/), same colours as the web and Expo apps.
+/// Platform logo used on cards, lists and filters, same look as the web and Expo apps.
 struct PlatformBadge: View {
     let platform: SourcePlatform
     var size: CGFloat = 20
 
     var body: some View {
-        Text(platform.short)
-            .font(.system(size: size * 0.45, weight: .heavy))
-            .foregroundStyle(platform.foreground)
+        PlatformLogo(platform: platform)
             .frame(width: size, height: size)
-            .background(platform.background)
-            .clipShape(.rect(cornerRadius: size * 0.3))
+            .accessibilityElement()
             .accessibilityLabel(platform.label)
+            .accessibilityAddTraits(.isImage)
     }
 }
 
