@@ -43,6 +43,11 @@ export interface Channel {
   channel_name: string | null;
   channel_thumbnail: string | null;
   priority: number | null;
+  // Multi-platform sources (web app migration 20260926210000)
+  platform: "youtube" | "x" | "reddit" | null;
+  source_type: "channel" | "account" | "subreddit" | "keyword" | null;
+  handle: string | null;
+  min_engagement: number | null;
   is_enabled: boolean | null;
   user_status: ChannelStatus | null;
   last_scanned_at: string | null;
@@ -77,6 +82,19 @@ export interface Item {
   channel_id: string | null;
   published_at: string | null;
   user_status: ItemStatus | null;
+  // X posts / Reddit threads (video_id holds "x:<id>" or "reddit:<id>")
+  platform: "youtube" | "x" | "reddit" | null;
+  body: string | null;
+  author_handle: string | null;
+  metrics: {
+    likes?: number;
+    reposts?: number;
+    replies?: number;
+    views?: number;
+    score?: number;
+    comments?: number;
+  } | null;
+  media: { type: string; url: string }[] | null;
 }
 
 export interface ItemAnalysis {
@@ -92,6 +110,9 @@ export interface ItemAnalysis {
   key_points: string[] | null;
   tags: string[] | null;
   ranking_score: number | null;
+  // Timestamped points from the transcript
+  key_moments: { seconds: number; text: string }[] | null;
+  summary_source: "transcript" | "metadata" | "post" | null;
 }
 
 export interface RunAsset {
