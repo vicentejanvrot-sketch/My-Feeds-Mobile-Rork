@@ -34,6 +34,8 @@ struct VideoPlayerScreen: View {
     @State private var isPocketLocked = false
     @State private var unlockProgress: CGFloat = 0
     @State private var brightnessBeforeLock: CGFloat?
+    // Summary and transcript key moments shown under the controls
+    @State private var analysis: ItemAnalysis?
 
     private var watchURL: String { "https://www.youtube.com/watch?v=\(request.videoId)" }
 
@@ -68,6 +70,7 @@ struct VideoPlayerScreen: View {
         .sheet(isPresented: $showGearSheet) { gearSheet }
         .sheet(isPresented: $showShareSheet) { shareSheet }
         .onAppear { startPlayerLifecycle() }
+        .task { await loadAnalysis() }
         .onDisappear {
             if isPocketLocked {
                 restoreAfterPocketLock()
@@ -154,6 +157,7 @@ struct VideoPlayerScreen: View {
 
                 if !isFullscreen {
                     controlsStrip
+                    summaryPanel
                 }
 
                 Spacer(minLength: 0)
@@ -444,6 +448,80 @@ struct VideoPlayerScreen: View {
             }
             .foregroundStyle(Theme.accent)
         }
+    }
+
+    // MARK: - Summary & key moments
+
+    /// "From the transcript" panel: the summary plus tappable timestamps that
+    /// jump the video to that moment. Same panel as the web and Expo players.
+    @ViewBuilder
+    private var summaryPanel: some View {
+        let summary = analysis?.shortSummary ?? ""
+        let moments = analysis?.moments ?? []
+        if !summary.isEmpty || !moments.isEmpty {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 10) {
+                    Text(analysis?.isFromTranscript == true ? "FROM THE TRANSCRIPT" : "SUMMARY")
+                        .font(.system(size: 11, weight: .heavy))
+                        .kerning(0.8)
+                        .foregroundStyle(Theme.accent)
+
+                    if !summary.isEmpty {
+                        Text(summary)
+                            .font(.system(size: 14))
+                            .foregroundStyle(Theme.textPrimary)
+                            .lineSpacing(4)
+                    }
+
+                    ForEach(Array(moments.enumerated()), id: \.offset) { _, moment in
+                        Button {
+                            seekToMoment(moment)
+                        } label: {
+                            HStack(alignment: .firstTextBaseline, spacing: 10) {
+                                Text(moment.clock)
+                                    .font(.system(size: 12, weight: .bold))
+                                    .monospacedDigit()
+                                    .foregroundStyle(Theme.accent)
+                                    .padding(.horizontal, 8)
+                                    .padding(.vertical, 4)
+                                    .background(Theme.accent.opacity(0.12))
+                                    .clipShape(.rect(cornerRadius: 6))
+                                Text(moment.text)
+                                    .font(.system(size: 14))
+                                    .foregroundStyle(Theme.textPrimary)
+                                    .multilineTextAlignment(.leading)
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                            }
+                            .frame(minHeight: 44)
+                            .contentShape(Rectangle())
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityLabel("Jump to \(moment.clock): \(moment.text)")
+                    }
+                }
+                .padding(14)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(Theme.card)
+                .clipShape(.rect(cornerRadius: 12))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke(Theme.border, lineWidth: 0.5)
+                )
+                .padding(.horizontal, 12)
+                .padding(.top, 12)
+                .padding(.bottom, 24)
+            }
+        }
+    }
+
+    private func loadAnalysis() async {
+        guard let itemId = request.itemId else { return }
+        analysis = try? await SupabaseService.shared.fetchItemAnalysis(itemId: itemId)
+    }
+
+    private func seekToMoment(_ moment: KeyMoment) {
+        UISelectionFeedbackGenerator().selectionChanged()
+        controller.seek(to: Double(moment.seconds))
     }
 
     // MARK: - Video & controls
