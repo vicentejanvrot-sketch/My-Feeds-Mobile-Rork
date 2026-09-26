@@ -53,6 +53,8 @@ import {
 import * as Haptics from "expo-haptics";
 import { Colors } from "@/constants/colors";
 import { useUpdateItemStatus } from "@/lib/hooks";
+import { useQuery } from "@tanstack/react-query";
+import { toKeyMoments, formatClock } from "@/lib/platforms";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/components/Toast";
 import { openExternalLink } from "@/lib/open-link";
@@ -268,6 +270,21 @@ export default function VideoPlayerScreen() {
   const updateStatus = useUpdateItemStatus();
   const showToast = useToast();
   const youtubeConn = useYouTubeConnection();
+
+  // Summary + key moments written from the transcript (same data the web player shows)
+  const analysisQ = useQuery({
+    queryKey: ["itemAnalysis", itemId ?? ""],
+    enabled: !!itemId,
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("item_analysis")
+        .select("*")
+        .eq("item_id", (itemId ?? "").trim())
+        .maybeSingle();
+      return (data ?? null) as { short_summary: string | null; key_moments: unknown; summary_source: string | null } | null;
+    },
+  });
+  const keyMoments = toKeyMoments(analysisQ.data?.key_moments);
 
   // Shared quality / speed prefs (synced with Settings screen)
   const { quality, setQuality, speed, setSpeed, ready: prefsReady } = useVideoQuality();
@@ -796,6 +813,14 @@ export default function VideoPlayerScreen() {
     setCurrentTime(target);
     await playerRef.current?.seekTo(target);
   }, [currentTime, duration, resetControlsTimer]);
+
+  // Jump to a key moment from the summary
+  const seekToMoment = useCallback(async (seconds: number) => {
+    void Haptics.selectionAsync();
+    resetControlsTimer();
+    setCurrentTime(seconds);
+    await playerRef.current?.seekTo(seconds);
+  }, [resetControlsTimer]);
 
   // ── YouTube sync actions ─────────────────────────────────────
 
@@ -1451,6 +1476,30 @@ export default function VideoPlayerScreen() {
           </View>
         </Animated.View>
       )}
+
+      {/* ── Summary + key moments (tap a time to jump there) ── */}
+      {!isFullscreen && (analysisQ.data?.short_summary || keyMoments.length > 0) ? (
+        <ScrollView style={keyMomentStyles.panel} contentContainerStyle={keyMomentStyles.panelContent}>
+          <Text style={keyMomentStyles.label}>
+            {analysisQ.data?.summary_source === "transcript" ? "FROM THE TRANSCRIPT" : "SUMMARY"}
+          </Text>
+          {analysisQ.data?.short_summary ? (
+            <Text style={keyMomentStyles.summary}>{analysisQ.data.short_summary}</Text>
+          ) : null}
+          {keyMoments.map((m) => (
+            <Pressable
+              key={`${m.seconds}-${m.text}`}
+              onPress={() => void seekToMoment(m.seconds)}
+              style={({ pressed }) => [keyMomentStyles.row, pressed && { opacity: 0.6 }]}
+              accessibilityRole="button"
+              accessibilityLabel={`Jump to ${formatClock(m.seconds)}: ${m.text}`}
+            >
+              <Text style={keyMomentStyles.time}>{formatClock(m.seconds)}</Text>
+              <Text style={keyMomentStyles.text}>{m.text}</Text>
+            </Pressable>
+          ))}
+        </ScrollView>
+      ) : null}
 
       {/* ── Fullscreen bottom bar (progress + transport + volume + speed + countdown) ── */}
       {isFullscreen && ready && !isAutoLandscapeFullscreen && (
@@ -2535,4 +2584,24 @@ const styles = StyleSheet.create({
     textAlign: "center",
     lineHeight: 20,
   },
+});
+
+const keyMomentStyles = StyleSheet.create({
+  panel: { flex: 1 },
+  panelContent: { paddingHorizontal: 16, paddingVertical: 12, gap: 8 },
+  label: { color: Colors.accent, fontSize: 11, fontWeight: "800", letterSpacing: 0.8 },
+  summary: { color: Colors.textPrimary, fontSize: 14, lineHeight: 21 },
+  row: { flexDirection: "row", alignItems: "flex-start", gap: 10, minHeight: 40, paddingVertical: 6 },
+  time: {
+    color: Colors.accent,
+    fontSize: 12,
+    fontWeight: "800",
+    fontVariant: ["tabular-nums"],
+    backgroundColor: "rgba(14, 165, 233, 0.12)",
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+    overflow: "hidden",
+  },
+  text: { flex: 1, color: Colors.textPrimary, fontSize: 14, lineHeight: 20 },
 });
