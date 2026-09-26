@@ -1,13 +1,26 @@
 // In-app reader for X posts and Reddit threads — the mobile twin of the web
 // PostReaderModal, so reading works the same everywhere.
 import { useEffect, useState } from "react";
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, Pressable, ScrollView, Share, StyleSheet, Text, View } from "react-native";
 import { useLocalSearchParams, router } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Image } from "expo-image";
 import * as Haptics from "expo-haptics";
 import { useQuery } from "@tanstack/react-query";
-import { X, ExternalLink, Circle, CheckCircle, Heart, Clock, ThumbsUp, Repeat2, MessageCircle, ArrowBigUp } from "lucide-react-native";
+import {
+  X,
+  ExternalLink,
+  Heart,
+  Repeat2,
+  MessageCircle,
+  MessageSquare,
+  BadgeCheck,
+  Bookmark,
+  Share as ShareIcon,
+  ArrowBigUp,
+  ArrowBigDown,
+  Check,
+} from "lucide-react-native";
 import { Colors } from "@/constants/colors";
 import { supabase } from "@/lib/supabase";
 import { useUpdateItemStatus } from "@/lib/hooks";
@@ -18,13 +31,45 @@ import { PlatformBadge } from "@/components/PlatformBadge";
 import { PLATFORM_META, platformOf, formatCount } from "@/lib/platforms";
 import type { ItemStatus, ItemWithAnalysis } from "@/lib/database";
 
-// Posts are read, not watched: same four statuses, reading-friendly labels.
-const POST_STATUSES: { key: ItemStatus; label: string; color: string; Icon: typeof Circle }[] = [
-  { key: "not_watched", label: "Unread", color: Colors.textSecondary, Icon: Circle },
-  { key: "watched", label: "Read", color: Colors.success, Icon: CheckCircle },
-  { key: "liked", label: "Saved", color: Colors.destructive, Icon: Heart },
-  { key: "watch_later", label: "Read Later", color: Colors.warning, Icon: Clock },
-];
+// The action bar copies each platform's own row under a post. In My Feeds:
+// Like / Upvote = Saved, Bookmark / Save = Read Later, the check = Read.
+// Reply and Repost open the post on X, since those happen on the platform.
+const X_PINK = "#F91880";
+const X_BLUE = "#1D9BF0";
+const REDDIT_ORANGE = "#FF4500";
+
+type PostMetrics = {
+  likes?: number;
+  reposts?: number;
+  replies?: number;
+  views?: number;
+  bookmarks?: number;
+  quotes?: number;
+  score?: number;
+  comments?: number;
+};
+
+// An image, or a quoted post / X article (type "quote" / "article").
+type PostEmbed = {
+  type: string;
+  url: string;
+  author_name?: string;
+  author_handle?: string;
+  author_avatar?: string | null;
+  verified?: boolean;
+  created_at?: string | null;
+  text?: string;
+  image?: string | null;
+  title?: string | null;
+  preview?: string | null;
+};
+
+function formatPostDate(iso: string): string {
+  const d = new Date(iso);
+  const time = d.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
+  const date = d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+  return `${time} · ${date}`;
+}
 
 export default function PostReaderScreen() {
   const { itemId } = useLocalSearchParams<{ itemId?: string }>();
@@ -81,10 +126,24 @@ export default function PostReaderScreen() {
   }
 
   const platform = platformOf(item.platform);
+  const xPostId = item.video_id?.startsWith("x:") ? item.video_id.slice(2) : null;
+  const liked = status === "liked";
+  const bookmarked = status === "watch_later";
+  const read = status === "watched";
+
+  const share = () => {
+    if (!item.url) return;
+    void Share.share({ message: item.url, url: item.url });
+  };
   const meta = PLATFORM_META[platform];
   const analysis = item.item_analysis?.[0] ?? null;
-  const metrics = item.metrics ?? {};
-  const image = item.media?.find((m) => m.type !== "video")?.url ?? item.thumbnail_url ?? null;
+  const metrics = (item.metrics ?? {}) as PostMetrics;
+  const embeds = (item.media ?? []) as PostEmbed[];
+  const quote = embeds.find((m) => m.type === "quote" || m.type === "article") ?? null;
+  const image =
+    embeds.find((m) => m.type !== "video" && m.type !== "quote" && m.type !== "article")?.url ??
+    (!quote ? item.thumbnail_url : null) ??
+    null;
   const keyPoints = analysis?.key_points ?? [];
 
   return (
@@ -114,20 +173,7 @@ export default function PostReaderScreen() {
 
         {image ? <Image source={{ uri: image }} style={styles.image} contentFit="cover" /> : null}
 
-        <View style={styles.metricsRow}>
-          {platform === "x" ? (
-            <>
-              <Metric icon={<MessageCircle size={14} color={Colors.textMuted} />} value={formatCount(metrics.replies)} />
-              <Metric icon={<Repeat2 size={14} color={Colors.textMuted} />} value={formatCount(metrics.reposts)} />
-              <Metric icon={<ThumbsUp size={14} color={Colors.textMuted} />} value={formatCount(metrics.likes)} />
-            </>
-          ) : (
-            <>
-              <Metric icon={<ArrowBigUp size={15} color={Colors.textMuted} />} value={formatCount(metrics.score)} />
-              <Metric icon={<MessageCircle size={14} color={Colors.textMuted} />} value={`${formatCount(metrics.comments)} comments`} />
-            </>
-          )}
-        </View>
+        {quote ? <QuoteCard quote={quote} /> : null}
 
         {analysis?.short_summary || keyPoints.length > 0 ? (
           <View style={styles.summaryBox}>
@@ -141,42 +187,181 @@ export default function PostReaderScreen() {
       </ScrollView>
 
       <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 12) }]}>
-        <View style={styles.statusRow}>
-          {POST_STATUSES.map(({ key, label, color, Icon }) => {
-            const active = status === key;
-            return (
+        {platform === "x" && item.published_at ? (
+          <Text style={styles.dateLine}>
+            {formatPostDate(item.published_at)}
+            {metrics.views ? (
+              <>
+                {" · "}
+                <Text style={styles.dateLineStrong}>{formatCount(metrics.views)}</Text> Views
+              </>
+            ) : null}
+          </Text>
+        ) : null}
+        {platform === "x" ? (
+          <View style={styles.xBar}>
+            <BarButton
+              label="Reply on X"
+              onPress={xPostId ? () => openExternalLink(`https://x.com/intent/post?in_reply_to=${xPostId}`) : undefined}
+              icon={<MessageCircle size={19} color={Colors.textSecondary} />}
+              value={formatCount(metrics.replies)}
+            />
+            <BarButton
+              label="Repost on X"
+              onPress={xPostId ? () => openExternalLink(`https://x.com/intent/retweet?tweet_id=${xPostId}`) : undefined}
+              icon={<Repeat2 size={19} color={Colors.textSecondary} />}
+              value={formatCount(metrics.reposts)}
+            />
+            <BarButton
+              label={liked ? "Remove from Saved" : "Like (save in My Feeds)"}
+              selected={liked}
+              onPress={() => changeStatus(liked ? "watched" : "liked")}
+              icon={<Heart size={19} color={liked ? X_PINK : Colors.textSecondary} fill={liked ? X_PINK : "transparent"} />}
+              value={formatCount((metrics.likes ?? 0) + (liked ? 1 : 0))}
+              valueColor={liked ? X_PINK : undefined}
+            />
+            <BarButton
+              label={bookmarked ? "Remove from Read Later" : "Bookmark (Read Later)"}
+              selected={bookmarked}
+              onPress={() => changeStatus(bookmarked ? "not_watched" : "watch_later")}
+              icon={<Bookmark size={19} color={bookmarked ? X_BLUE : Colors.textSecondary} fill={bookmarked ? X_BLUE : "transparent"} />}
+              value={formatCount((metrics.bookmarks ?? 0) + (bookmarked ? 1 : 0))}
+              valueColor={bookmarked ? X_BLUE : undefined}
+            />
+            <BarButton label="Share" onPress={share} icon={<ShareIcon size={19} color={Colors.textSecondary} />} />
+          </View>
+        ) : (
+          <View style={styles.redditBar}>
+            <View style={[styles.votePill, liked && { backgroundColor: REDDIT_ORANGE }]}>
               <Pressable
-                key={key}
-                onPress={() => changeStatus(key)}
-                style={({ pressed }) => [styles.statusBtn, active && styles.statusBtnActive, pressed && { opacity: 0.7 }]}
+                onPress={() => changeStatus(liked ? "watched" : "liked")}
+                style={styles.voteBtn}
+                hitSlop={4}
                 accessibilityRole="button"
-                accessibilityState={{ selected: active }}
+                accessibilityLabel={liked ? "Remove upvote (Saved)" : "Upvote (save in My Feeds)"}
+                accessibilityState={{ selected: liked }}
               >
-                <Icon size={16} color={color} fill={key === "liked" && active ? color : "transparent"} />
-                <Text style={styles.statusText}>{label}</Text>
+                <ArrowBigUp size={22} color={liked ? "#FFFFFF" : Colors.textSecondary} fill={liked ? "#FFFFFF" : "transparent"} />
               </Pressable>
-            );
-          })}
+              <Text style={[styles.voteText, liked && { color: "#FFFFFF" }]}>
+                {formatCount((metrics.score ?? 0) + (liked ? 1 : 0))}
+              </Text>
+              <Pressable
+                onPress={() => changeStatus("watched")}
+                style={styles.voteBtn}
+                hitSlop={4}
+                accessibilityRole="button"
+                accessibilityLabel="Downvote (mark as read)"
+              >
+                <ArrowBigDown size={22} color={liked ? "#FFFFFF" : Colors.textSecondary} />
+              </Pressable>
+            </View>
+            <Pressable
+              onPress={() => openExternalLink(item.url)}
+              style={styles.redditPill}
+              accessibilityRole="button"
+              accessibilityLabel="Open comments on Reddit"
+            >
+              <MessageSquare size={18} color={Colors.textPrimary} />
+              <Text style={styles.redditPillText}>{formatCount(metrics.comments)}</Text>
+            </Pressable>
+            <Pressable
+              onPress={() => changeStatus(bookmarked ? "not_watched" : "watch_later")}
+              style={styles.redditPill}
+              accessibilityRole="button"
+              accessibilityLabel={bookmarked ? "Unsave (Read Later)" : "Save (Read Later)"}
+              accessibilityState={{ selected: bookmarked }}
+            >
+              <Bookmark size={18} color={bookmarked ? X_BLUE : Colors.textPrimary} fill={bookmarked ? X_BLUE : "transparent"} />
+              <Text style={[styles.redditPillText, bookmarked && { color: X_BLUE }]}>{bookmarked ? "Saved" : "Save"}</Text>
+            </Pressable>
+            <Pressable onPress={share} style={styles.redditPill} accessibilityRole="button" accessibilityLabel="Share">
+              <ShareIcon size={18} color={Colors.textPrimary} />
+              <Text style={styles.redditPillText}>Share</Text>
+            </Pressable>
+          </View>
+        )}
+
+        <View style={styles.bottomRow}>
+          <Pressable
+            onPress={() => changeStatus(read ? "not_watched" : "watched")}
+            style={({ pressed }) => [styles.openBtn, styles.bottomBtn, read && { borderColor: Colors.success }, pressed && { opacity: 0.7 }]}
+            accessibilityRole="button"
+            accessibilityState={{ selected: read }}
+          >
+            <Check size={16} color={read ? Colors.success : Colors.textPrimary} />
+            <Text style={[styles.openText, read && { color: Colors.success }]}>{read ? "Read" : "Mark as read"}</Text>
+          </Pressable>
+          <Pressable
+            onPress={() => openExternalLink(item.url)}
+            style={({ pressed }) => [styles.openBtn, styles.bottomBtn, pressed && { opacity: 0.7 }]}
+            accessibilityRole="link"
+          >
+            <ExternalLink size={16} color={Colors.textPrimary} />
+            <Text style={styles.openText}>{meta.openLabel}</Text>
+          </Pressable>
         </View>
-        <Pressable
-          onPress={() => openExternalLink(item.url)}
-          style={({ pressed }) => [styles.openBtn, pressed && { opacity: 0.7 }]}
-          accessibilityRole="link"
-        >
-          <ExternalLink size={16} color={Colors.textPrimary} />
-          <Text style={styles.openText}>{meta.openLabel}</Text>
-        </Pressable>
       </View>
     </View>
   );
 }
 
-function Metric({ icon, value }: { icon: React.ReactNode; value: string }) {
+// Quoted post or X article, shown as a card inside the post like on X.
+function QuoteCard({ quote }: { quote: PostEmbed }) {
+  const isArticle = quote.type === "article";
   return (
-    <View style={styles.metric}>
+    <Pressable
+      onPress={() => openExternalLink(quote.url)}
+      style={({ pressed }) => [styles.quoteCard, pressed && { opacity: 0.8 }]}
+      accessibilityRole="link"
+    >
+      <View style={styles.quoteHeader}>
+        {quote.author_avatar ? <Image source={{ uri: quote.author_avatar }} style={styles.quoteAvatar} /> : null}
+        <Text style={styles.quoteName} numberOfLines={1}>{quote.author_name}</Text>
+        {quote.verified ? <BadgeCheck size={15} color={X_BLUE} /> : null}
+        <Text style={styles.quoteHandle} numberOfLines={1}>
+          {quote.author_handle}
+          {quote.created_at ? ` · ${timeAgo(quote.created_at)}` : ""}
+        </Text>
+      </View>
+      {!isArticle && quote.text ? <Text style={styles.quoteText}>{quote.text}</Text> : null}
+      {quote.image ? <Image source={{ uri: quote.image }} style={styles.quoteImage} contentFit="cover" /> : null}
+      {isArticle && quote.title ? <Text style={styles.quoteTitle}>{quote.title}</Text> : null}
+      {isArticle && quote.preview ? (
+        <Text style={styles.quoteText} numberOfLines={3}>{quote.preview}</Text>
+      ) : null}
+    </Pressable>
+  );
+}
+
+function BarButton({
+  label,
+  icon,
+  value,
+  valueColor,
+  selected,
+  onPress,
+}: {
+  label: string;
+  icon: React.ReactNode;
+  value?: string;
+  valueColor?: string;
+  selected?: boolean;
+  onPress?: () => void;
+}) {
+  return (
+    <Pressable
+      onPress={onPress}
+      disabled={!onPress}
+      style={({ pressed }) => [styles.barBtn, pressed && { opacity: 0.6 }]}
+      hitSlop={4}
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      accessibilityState={{ selected: !!selected }}
+    >
       {icon}
-      <Text style={styles.metricText}>{value}</Text>
-    </View>
+      {value !== undefined ? <Text style={[styles.barText, valueColor ? { color: valueColor } : null]}>{value}</Text> : null}
+    </Pressable>
   );
 }
 
@@ -201,9 +386,6 @@ const styles = StyleSheet.create({
   bodyLarge: { color: Colors.textPrimary, fontSize: 17, lineHeight: 26 },
   muted: { color: Colors.textSecondary, fontSize: 13 },
   image: { width: "100%", aspectRatio: 16 / 9, borderRadius: 12, backgroundColor: Colors.card },
-  metricsRow: { flexDirection: "row", gap: 18 },
-  metric: { flexDirection: "row", alignItems: "center", gap: 5 },
-  metricText: { color: Colors.textSecondary, fontSize: 13, fontWeight: "600" },
   summaryBox: {
     backgroundColor: "rgba(14, 165, 233, 0.10)",
     borderColor: "rgba(14, 165, 233, 0.25)",
@@ -223,19 +405,35 @@ const styles = StyleSheet.create({
     gap: 10,
     backgroundColor: Colors.card,
   },
-  statusRow: { flexDirection: "row", gap: 6 },
-  statusBtn: {
-    flex: 1,
-    minHeight: 48,
+  xBar: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
+  dateLine: { color: Colors.textSecondary, fontSize: 13, paddingHorizontal: 4 },
+  dateLineStrong: { color: Colors.textPrimary, fontWeight: "700" },
+  quoteCard: { borderWidth: 1, borderColor: Colors.border, borderRadius: 16, padding: 12, gap: 8 },
+  quoteHeader: { flexDirection: "row", alignItems: "center", gap: 6 },
+  quoteAvatar: { width: 20, height: 20, borderRadius: 10 },
+  quoteName: { color: Colors.textPrimary, fontSize: 14, fontWeight: "700", flexShrink: 1 },
+  quoteHandle: { color: Colors.textSecondary, fontSize: 14, flexShrink: 1 },
+  quoteText: { color: Colors.textPrimary, fontSize: 14, lineHeight: 20 },
+  quoteTitle: { color: Colors.textPrimary, fontSize: 15, fontWeight: "800", lineHeight: 21 },
+  quoteImage: { width: "100%", aspectRatio: 16 / 9, borderRadius: 12, backgroundColor: Colors.card },
+  barBtn: { flexDirection: "row", alignItems: "center", gap: 5, minHeight: 44, minWidth: 36, paddingHorizontal: 4 },
+  barText: { color: Colors.textSecondary, fontSize: 13, fontVariant: ["tabular-nums"] },
+  redditBar: { flexDirection: "row", alignItems: "center", flexWrap: "wrap", gap: 8 },
+  votePill: { flexDirection: "row", alignItems: "center", height: 40, borderRadius: 20, backgroundColor: Colors.input },
+  voteBtn: { width: 40, height: 40, alignItems: "center", justifyContent: "center" },
+  voteText: { color: Colors.textPrimary, fontSize: 13, fontWeight: "700", fontVariant: ["tabular-nums"] },
+  redditPill: {
+    flexDirection: "row",
     alignItems: "center",
-    justifyContent: "center",
-    gap: 4,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: Colors.border,
+    gap: 6,
+    height: 40,
+    paddingHorizontal: 14,
+    borderRadius: 20,
+    backgroundColor: Colors.input,
   },
-  statusBtnActive: { borderColor: Colors.accent, backgroundColor: "rgba(14, 165, 233, 0.10)" },
-  statusText: { color: Colors.textPrimary, fontSize: 11, fontWeight: "600" },
+  redditPillText: { color: Colors.textPrimary, fontSize: 13, fontWeight: "700" },
+  bottomRow: { flexDirection: "row", gap: 8 },
+  bottomBtn: { flex: 1 },
   openBtn: {
     flexDirection: "row",
     alignItems: "center",
