@@ -203,18 +203,22 @@ final class VideoPrefs {
         }
     }
 
-    // MARK: - Resume positions (local-only, per-device)
+    // MARK: - Resume positions (this phone's copy)
+    // The shared copy lives in the video_progress table (see SupabaseService),
+    // so web, iOS and Android resume from the same spot. updatedAt decides which
+    // of the two copies is newer when a video is opened.
 
-    func savedPosition(videoId: String) -> (time: Double, duration: Double)? {
+    func savedPosition(videoId: String) -> (time: Double, duration: Double, updatedAt: Date)? {
         guard let dict = UserDefaults.standard.dictionary(forKey: "video_position.\(videoId)"),
               let time = dict["currentTime"] as? Double,
               let duration = dict["duration"] as? Double else { return nil }
-        return (time, duration)
+        let stamp = dict["updatedAt"] as? Double ?? 0
+        return (time, duration, Date(timeIntervalSince1970: stamp))
     }
 
-    func savePosition(videoId: String, time: Double, duration: Double) {
+    func savePosition(videoId: String, time: Double, duration: Double, updatedAt: Date = Date()) {
         UserDefaults.standard.set(
-            ["currentTime": time, "duration": duration, "updatedAt": Date().timeIntervalSince1970],
+            ["currentTime": time, "duration": duration, "updatedAt": updatedAt.timeIntervalSince1970],
             forKey: "video_position.\(videoId)"
         )
     }
