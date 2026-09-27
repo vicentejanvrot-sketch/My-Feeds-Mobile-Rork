@@ -41,6 +41,7 @@ import {
   initials,
   isPersonSource,
   personSummary,
+  platformFollowUrl,
   type FoundAccount,
   type Person,
 } from "@/lib/alsoOn";
@@ -123,11 +124,14 @@ function FollowButton({ account, agentId }: { account: FoundAccount; agentId: st
       disabled={!agentId || follow.isPending}
       onPress={() => {
         if (!agentId) return;
+        // Adds it to the agent, then opens it on its own platform so the user
+        // can follow there too (LinkedIn and Instagram don't let apps do that).
         follow.mutate(
           { platform: account.platform, url: account.url, agentId },
           {
-            onSuccess: () => showToast("Added to your agent", "success"),
+            onSuccess: () => showToast("Added. Follow on " + platformLabel(account.platform) + " to finish", "success"),
             onError: (e) => showToast(e instanceof Error ? e.message : "Couldn't add that account", "error"),
+            onSettled: () => void openExternalLink(platformFollowUrl(account.platform, account.url)),
           },
         );
       }}
