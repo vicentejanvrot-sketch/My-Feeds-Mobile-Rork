@@ -252,6 +252,26 @@ export function buildPeople(channels: Channel[], links: IdentityLink[], scans: I
   return people.sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: "base" }));
 }
 
+// Where to follow this account on the platform itself. X and YouTube open their
+// own follow / subscribe prompt; LinkedIn and Instagram open the profile, since
+// neither lets other apps follow accounts for the user.
+export function platformFollowUrl(platform: Platform, url: string): string {
+  const key = accountKeyFromUrl(url);
+  if (platform === "x" && key?.startsWith("x:")) {
+    return "https://x.com/intent/follow?screen_name=" + encodeURIComponent(key.slice(2));
+  }
+  if (platform === "youtube") {
+    try {
+      const u = new URL(url);
+      u.searchParams.set("sub_confirmation", "1");
+      return u.toString();
+    } catch {
+      return url;
+    }
+  }
+  return url;
+}
+
 export function initials(name: string): string {
   const parts = name.replace(/^r\//, "").split(/\s+/).filter(Boolean);
   const letters = parts.length > 1 ? parts[0][0] + parts[1][0] : (parts[0] ?? "?").slice(0, 2);
