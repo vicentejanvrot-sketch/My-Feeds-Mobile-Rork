@@ -779,6 +779,16 @@ private struct FeedItemCard: View {
                 } else if item.sourcePlatform == .reddit {
                     statChip(icon: "arrow.up", value: item.metrics?.score ?? 0)
                     statChip(icon: "bubble.left", value: item.metrics?.comments ?? 0)
+                } else if item.sourcePlatform == .instagram {
+                    statChip(icon: "heart", value: item.metrics?.likes ?? 0)
+                    statChip(icon: "bubble.right", value: item.metrics?.comments ?? 0)
+                    if let plays = item.metrics?.plays, plays > 0 {
+                        statChip(icon: "play", value: plays)
+                    }
+                } else if item.sourcePlatform == .linkedin {
+                    statChip(icon: "hand.thumbsup", value: item.metrics?.likes ?? 0)
+                    statChip(icon: "text.bubble", value: item.metrics?.comments ?? 0)
+                    statChip(icon: "arrow.2.squarepath", value: item.metrics?.reposts ?? 0)
                 } else {
                     statChip(icon: "eye", value: item.displayViews)
                     statChip(icon: "hand.thumbsup", value: item.displayLikes)
