@@ -1,7 +1,7 @@
 import AVKit
 import SwiftUI
 
-/// In-app reader for X posts and Reddit threads. The native twin of the web
+/// In-app reader for X posts, Reddit threads, Instagram posts and LinkedIn posts. The native twin of the web
 /// PostReaderModal and the Expo post-reader screen, so reading works the same
 /// everywhere and the user doesn't have to leave My Feeds.
 struct PostReaderView: View {
@@ -22,6 +22,8 @@ struct PostReaderView: View {
     private static let xPink = Color(red: 249 / 255, green: 24 / 255, blue: 128 / 255)
     private static let xBlue = Color(red: 29 / 255, green: 155 / 255, blue: 240 / 255)
     private static let redditOrange = Color(red: 1, green: 69 / 255, blue: 0)
+    private static let igRed = Color(red: 1, green: 48 / 255, blue: 64 / 255)
+    private static let linkedInBlue = Color(red: 55 / 255, green: 143 / 255, blue: 233 / 255)
 
     var body: some View {
         ZStack {
@@ -68,9 +70,9 @@ struct PostReaderView: View {
 
                     if let body = item.body, !body.isEmpty {
                         Text(body)
-                            .font(.system(size: platform == .x ? 17 : 15))
+                            .font(.system(size: platform == .reddit ? 15 : 17))
                             .foregroundStyle(Theme.textPrimary)
-                            .lineSpacing(platform == .x ? 6 : 5)
+                            .lineSpacing(platform == .reddit ? 5 : 6)
                             .textSelection(.enabled)
                     } else if platform == .x, let title = item.title {
                         Text(title)
@@ -80,8 +82,11 @@ struct PostReaderView: View {
                             .textSelection(.enabled)
                     }
 
+                    let photos = item.postPhotoURLs
                     if let video = item.postVideo, let url = video.playableURL {
                         PostVideoPlayer(url: url)
+                    } else if photos.count > 1 {
+                        PhotoCarousel(urls: photos)
                     } else if let imageURL = item.postImageURL {
                         AsyncImage(url: imageURL) { phase in
                             if let image = phase.image {
@@ -243,7 +248,8 @@ struct PostReaderView: View {
     }
 
     /// "12:01 PM · Sep 26, 2026 · 166.5K Views", as under a post on X.
-    private func xDateLine(_ item: FeedItem) -> Text? {
+    /// Instagram and LinkedIn show the date only, plus plays for reels.
+    private func dateLine(_ item: FeedItem, platform: SourcePlatform) -> Text? {
         guard let raw = item.publishedAt else { return nil }
         let parser = ISO8601DateFormatter()
         parser.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
@@ -251,9 +257,10 @@ struct PostReaderView: View {
         guard let date else { return nil }
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "en_US")
-        formatter.dateFormat = "h:mm a · MMM d, yyyy"
+        formatter.dateFormat = platform == .x ? "h:mm a · MMM d, yyyy" : "MMM d, yyyy"
         var line = Text(formatter.string(from: date)).foregroundColor(Theme.textSecondary)
-        if let views = item.metrics?.views, views > 0 {
+        let views = (item.metrics?.views ?? 0) > 0 ? item.metrics?.views : item.metrics?.plays
+        if let views, views > 0 {
             line = line
                 + Text(" · ").foregroundColor(Theme.textSecondary)
                 + Text(Format.compactNumber(views)).bold().foregroundColor(Theme.textPrimary)
@@ -298,16 +305,17 @@ struct PostReaderView: View {
 
     private func footer(_ item: FeedItem, platform: SourcePlatform) -> some View {
         VStack(spacing: 10) {
-            if platform == .x {
-                if let line = xDateLine(item) {
-                    line
-                        .font(.system(size: 13))
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(.horizontal, 4)
-                }
-                xActionBar(item)
-            } else {
-                redditActionBar(item)
+            if platform != .reddit, let line = dateLine(item, platform: platform) {
+                line
+                    .font(.system(size: 13))
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal, 4)
+            }
+            switch platform {
+            case .x: xActionBar(item)
+            case .instagram: instagramActionBar(item)
+            case .linkedin: linkedInActionBar(item)
+            default: redditActionBar(item)
             }
 
             HStack(spacing: 8) {
@@ -407,6 +415,150 @@ struct PostReaderView: View {
             shareButton(item, color: Theme.textSecondary)
         }
         .padding(.horizontal, 4)
+    }
+
+    /// Instagram: like, comment, share on the left, save on the right.
+    private func instagramActionBar(_ item: FeedItem) -> some View {
+        let metrics = item.metrics
+        let liked = status == .liked
+        let bookmarked = status == .watchLater
+        return HStack(spacing: 4) {
+            igButton(
+                icon: liked ? "heart.fill" : "heart",
+                value: (metrics?.likes ?? 0) + (liked ? 1 : 0),
+                color: liked ? Self.igRed : Theme.textPrimary,
+                label: liked ? "Remove from Saved" : "Like (save in My Feeds)"
+            ) {
+                changeStatus(liked ? .watched : .liked, item: item)
+            }
+            igButton(
+                icon: "bubble.right",
+                value: metrics?.comments,
+                color: Theme.textPrimary,
+                label: "Comment on Instagram"
+            ) {
+                if let raw = item.url { openExternal(raw) }
+            }
+            if let raw = item.url, let url = URL(string: raw) {
+                ShareLink(item: url) {
+                    Image(systemName: "paperplane")
+                        .font(.system(size: 20))
+                        .foregroundStyle(Theme.textPrimary)
+                        .frame(minWidth: 44, minHeight: 44)
+                }
+                .accessibilityLabel("Share")
+            }
+            Spacer(minLength: 0)
+            igButton(
+                icon: bookmarked ? "bookmark.fill" : "bookmark",
+                value: nil,
+                color: Theme.textPrimary,
+                label: bookmarked ? "Remove from Read Later" : "Save (Read Later)"
+            ) {
+                changeStatus(bookmarked ? .notWatched : .watchLater, item: item)
+            }
+        }
+    }
+
+    private func igButton(icon: String, value: Int?, color: Color, label: String, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            HStack(spacing: 6) {
+                Image(systemName: icon)
+                    .font(.system(size: 20))
+                    .foregroundStyle(color)
+                if let value {
+                    Text(Format.compactNumber(value))
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundStyle(Theme.textPrimary)
+                        .monospacedDigit()
+                }
+            }
+            .frame(minWidth: 44, minHeight: 44)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(label)
+    }
+
+    /// LinkedIn: reaction and comment counts, then Like, Comment, Repost, Send, Save.
+    private func linkedInActionBar(_ item: FeedItem) -> some View {
+        let metrics = item.metrics
+        let liked = status == .liked
+        let bookmarked = status == .watchLater
+        return VStack(spacing: 6) {
+            HStack(spacing: 6) {
+                Image(systemName: "hand.thumbsup.fill")
+                    .font(.system(size: 9))
+                    .foregroundStyle(Color.white)
+                    .frame(width: 16, height: 16)
+                    .background(Self.linkedInBlue)
+                    .clipShape(Circle())
+                Text(Format.compactNumber((metrics?.likes ?? 0) + (liked ? 1 : 0)))
+                Spacer(minLength: 0)
+                Text("\(Format.compactNumber(metrics?.comments ?? 0)) comments · \(Format.compactNumber(metrics?.reposts ?? 0)) reposts")
+            }
+            .font(.system(size: 13))
+            .foregroundStyle(Theme.textSecondary)
+            .padding(.horizontal, 4)
+
+            HStack(spacing: 0) {
+                linkedInAction(
+                    icon: liked ? "hand.thumbsup.fill" : "hand.thumbsup",
+                    title: "Like",
+                    active: liked
+                ) {
+                    changeStatus(liked ? .watched : .liked, item: item)
+                }
+                linkedInAction(icon: "text.bubble", title: "Comment", active: false) {
+                    if let raw = item.url { openExternal(raw) }
+                }
+                linkedInAction(icon: "arrow.2.squarepath", title: "Repost", active: false) {
+                    if let raw = item.url { openExternal(raw) }
+                }
+                if let raw = item.url, let url = URL(string: raw) {
+                    ShareLink(item: url) {
+                        linkedInLabel(icon: "paperplane.fill", title: "Send", active: false)
+                    }
+                    .buttonStyle(.plain)
+                    .frame(maxWidth: .infinity)
+                } else {
+                    linkedInLabel(icon: "paperplane.fill", title: "Send", active: false)
+                        .frame(maxWidth: .infinity)
+                        .opacity(0.4)
+                }
+                linkedInAction(
+                    icon: bookmarked ? "bookmark.fill" : "bookmark",
+                    title: "Save",
+                    active: bookmarked
+                ) {
+                    changeStatus(bookmarked ? .notWatched : .watchLater, item: item)
+                }
+            }
+            .overlay(alignment: .top) {
+                Rectangle().fill(Theme.border).frame(height: 0.5)
+            }
+        }
+    }
+
+    private func linkedInAction(icon: String, title: String, active: Bool, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            linkedInLabel(icon: icon, title: title, active: active)
+        }
+        .buttonStyle(.plain)
+        .frame(maxWidth: .infinity)
+        .accessibilityAddTraits(active ? .isSelected : [])
+    }
+
+    private func linkedInLabel(icon: String, title: String, active: Bool) -> some View {
+        VStack(spacing: 3) {
+            Image(systemName: icon)
+                .font(.system(size: 17))
+            Text(title)
+                .font(.system(size: 11, weight: .semibold))
+        }
+        .foregroundStyle(active ? Self.linkedInBlue : Theme.textSecondary)
+        .frame(maxWidth: .infinity, minHeight: 48)
+        .contentShape(Rectangle())
     }
 
     private func redditActionBar(_ item: FeedItem) -> some View {
@@ -552,6 +704,32 @@ struct PostReaderView: View {
             }
             router.settleStatusChange(itemId: item.id)
         }
+    }
+}
+
+/// Swipeable photos for Instagram and LinkedIn carousels, with page dots.
+private struct PhotoCarousel: View {
+    let urls: [URL]
+
+    var body: some View {
+        TabView {
+            ForEach(urls, id: \.self) { url in
+                AsyncImage(url: url) { phase in
+                    if let image = phase.image {
+                        image.resizable().aspectRatio(contentMode: .fit)
+                    } else {
+                        Theme.card
+                    }
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .background(Color.black)
+            }
+        }
+        .tabViewStyle(.page(indexDisplayMode: .always))
+        .indexViewStyle(.page(backgroundDisplayMode: .always))
+        .aspectRatio(4 / 5, contentMode: .fit)
+        .frame(maxWidth: .infinity)
+        .clipShape(.rect(cornerRadius: 12))
     }
 }
 
