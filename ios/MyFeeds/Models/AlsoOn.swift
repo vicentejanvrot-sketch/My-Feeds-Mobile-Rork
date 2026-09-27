@@ -79,21 +79,6 @@ nonisolated struct AlsoOnPerson: Identifiable, Hashable, Sendable {
     let scanErrors: [String]
 
     var platformCount: Int { following.count + also.count }
-
-    /// "Not checked yet" / "Only on X" / "On 3 platforms · 1 you don't follow · 1 to check"
-    var summary: String {
-        var parts: [String] = []
-        if lastScannedAt == nil {
-            parts.append("Not checked yet")
-        } else if platformCount == 1, let only = following.first {
-            parts.append("Only on " + only.platform.label)
-        } else {
-            parts.append("On \(platformCount) platforms")
-        }
-        if !also.isEmpty { parts.append("\(also.count) you don't follow") }
-        if !possible.isEmpty { parts.append("\(possible.count) to check") }
-        return parts.joined(separator: " · ")
-    }
 }
 
 nonisolated enum AlsoOn {
@@ -340,10 +325,7 @@ nonisolated enum AlsoOn {
                 also: also,
                 possible: possible,
                 lastScannedAt: groupScans.map { $0.scannedAt }.max(),
-                scanErrors: groupScans.compactMap { scan in
-                    guard let error = scan.error, !error.isEmpty else { return nil }
-                    return error
-                }
+                scanErrors: groupScans.compactMap { $0.error }.filter { !$0.isEmpty }
             ))
         }
 
