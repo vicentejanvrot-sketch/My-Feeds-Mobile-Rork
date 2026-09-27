@@ -2,9 +2,9 @@
 // sources the same way. Keep in sync with src/lib/platforms.ts (web) and
 // ios/MyFeeds/Models/Platform.swift in the mobile repo.
 
-export type Platform = "youtube" | "x" | "reddit";
+export type Platform = "youtube" | "x" | "reddit" | "instagram" | "linkedin";
 
-export const PLATFORMS: Platform[] = ["youtube", "x", "reddit"];
+export const PLATFORMS: Platform[] = ["youtube", "x", "reddit", "instagram", "linkedin"];
 
 export const PLATFORM_META: Record<Platform, {
   label: string;
@@ -16,6 +16,8 @@ export const PLATFORM_META: Record<Platform, {
   addPlaceholder: string;
   addHelp: string;
   openLabel: string;
+  // Newer sources whose data provider is still settling in.
+  beta?: boolean;
 }> = {
   youtube: {
     label: "YouTube",
@@ -47,15 +49,37 @@ export const PLATFORM_META: Record<Platform, {
     addHelp: "Top posts from the lookback window.",
     openLabel: "Open on Reddit",
   },
+  instagram: {
+    label: "Instagram",
+    short: "IG",
+    fg: "#FF7AB2",
+    bg: "#3A1830",
+    sourceNoun: "Account",
+    addPlaceholder: "@handle or https://www.instagram.com/handle",
+    addHelp: "Public accounts only. Posts and reels from the lookback window.",
+    openLabel: "Open on Instagram",
+    beta: true,
+  },
+  linkedin: {
+    label: "LinkedIn",
+    short: "in",
+    fg: "#7FB8F0",
+    bg: "#14283D",
+    sourceNoun: "Profile or company",
+    addPlaceholder: "https://www.linkedin.com/in/name or /company/name",
+    addHelp: "Paste a person's profile link or a company page link.",
+    openLabel: "Open on LinkedIn",
+    beta: true,
+  },
 };
 
 export function platformOf(value: string | null | undefined): Platform {
-  return value === "x" || value === "reddit" ? value : "youtube";
+  return value === "x" || value === "reddit" || value === "instagram" || value === "linkedin" ? value : "youtube";
 }
 
-// Non-YouTube items store "x:<id>" / "reddit:<id>" in items.video_id.
+// Non-YouTube items store "<platform>:<id>" in items.video_id (x, reddit, instagram, linkedin).
 export function isPostVideoId(videoId: string | null | undefined): boolean {
-  return !!videoId && /^(x|reddit):/.test(videoId);
+  return !!videoId && /^(x|reddit|instagram|linkedin):/.test(videoId);
 }
 
 export function formatCount(num: number | null | undefined): string {
