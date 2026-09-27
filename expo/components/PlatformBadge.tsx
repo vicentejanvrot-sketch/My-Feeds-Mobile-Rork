@@ -19,10 +19,28 @@ const REDDIT_PATH =
 // The logo as it appears on the platform: red YouTube button with a white play
 // arrow, white X on the dark theme, white Snoo on the orange Reddit bubble,
 // the Instagram camera in its gradient and LinkedIn's blue "in" tile.
+// Each logo's scale inside its box, so they all look the same size: the X
+// glyph fills its corners and the Instagram camera is a full square, while the
+// YouTube button is only 17 of 24 tall. Keep in sync with web and iOS.
+const LOGO_SCALE: Record<Platform, number> = {
+  youtube: 1,
+  x: 0.68,
+  instagram: 0.82,
+  linkedin: 0.84,
+  reddit: 0.92,
+};
+
+// Zooms the 24x24 artwork out around its centre.
+function viewBoxFor(platform: Platform): string {
+  const side = 24 / LOGO_SCALE[platform];
+  const origin = 12 - side / 2;
+  return `${origin} ${origin} ${side} ${side}`;
+}
+
 export function PlatformLogo({ platform, size }: { platform: Platform; size: number }) {
   if (platform === "youtube") {
     return (
-      <Svg width={size} height={size} viewBox="0 0 24 24">
+      <Svg width={size} height={size} viewBox={viewBoxFor(platform)}>
         <Path d={YOUTUBE_PLAY} fill="#FFFFFF" />
         <Path d={YOUTUBE_PATH} fill="#FF0000" />
       </Svg>
@@ -30,14 +48,14 @@ export function PlatformLogo({ platform, size }: { platform: Platform; size: num
   }
   if (platform === "x") {
     return (
-      <Svg width={size * 0.8} height={size * 0.8} viewBox="0 0 24 24">
+      <Svg width={size} height={size} viewBox={viewBoxFor(platform)}>
         <Path d={X_PATH} fill={Colors.textPrimary} />
       </Svg>
     );
   }
   if (platform === "instagram") {
     return (
-      <Svg width={size} height={size} viewBox="0 0 24 24">
+      <Svg width={size} height={size} viewBox={viewBoxFor(platform)}>
         <Defs>
           <LinearGradient id="mfIgGradient" x1="0" y1="1" x2="1" y2="0">
             <Stop offset="0" stopColor="#FEDA75" />
@@ -53,14 +71,14 @@ export function PlatformLogo({ platform, size }: { platform: Platform; size: num
   }
   if (platform === "linkedin") {
     return (
-      <Svg width={size} height={size} viewBox="0 0 24 24">
-        <Rect x={1} y={1} width={22} height={22} rx={4} fill="#0A66C2" />
-        <SvgText x={12} y={17.6} textAnchor="middle" fontWeight="700" fontSize={14.5} fill="#FFFFFF">in</SvgText>
+      <Svg width={size} height={size} viewBox={viewBoxFor(platform)}>
+        <Rect x={0} y={0} width={24} height={24} rx={4.5} fill="#0A66C2" />
+        <SvgText x={12} y={18.2} textAnchor="middle" fontWeight="700" fontSize={16} fill="#FFFFFF">in</SvgText>
       </Svg>
     );
   }
   return (
-    <Svg width={size} height={size} viewBox="0 0 24 24">
+    <Svg width={size} height={size} viewBox={viewBoxFor(platform)}>
       <Circle cx={12} cy={12} r={10.5} fill="#FFFFFF" />
       <Path d={REDDIT_PATH} fill="#FF4500" />
     </Svg>
