@@ -28,6 +28,8 @@ import {
   Clock4,
   MoreVertical,
   Sparkles,
+  Users,
+  ChevronRight,
 } from "lucide-react-native";
 import { Colors } from "@/constants/colors";
 
@@ -384,6 +386,23 @@ export default function DashboardScreen() {
               isWide={isWide}
             />
           </View>
+
+          {/* ── Following ──────────────────────────────────────── */}
+          <Pressable
+            style={({ pressed }) => [followingStyles.card, pressed && styles.pressed]}
+            onPress={() => router.push("/following")}
+            accessibilityRole="button"
+            accessibilityLabel="Following: everyone you follow, and where else they are"
+          >
+            <View style={followingStyles.iconBox}>
+              <Users size={18} color={statIconBlue} strokeWidth={1.75} />
+            </View>
+            <View style={followingStyles.body}>
+              <Text style={followingStyles.title}>Following</Text>
+              <Text style={followingStyles.sub} numberOfLines={1}>Everyone you follow, and where else they are</Text>
+            </View>
+            <ChevronRight size={18} color={Colors.textMuted} />
+          </Pressable>
 
           {/* ── My Feeds ─────────────────────────────────────────── */}
           <SectionHeader
@@ -934,4 +953,30 @@ const styles = StyleSheet.create({
     gap: 16,
   },
   sectionSpacer: { height: 4 },
+});
+
+// Dashboard link to the Following screen (app/following.tsx).
+const followingStyles = StyleSheet.create({
+  card: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    marginTop: 12,
+    padding: 14,
+    borderRadius: 10,
+    backgroundColor: Colors.card,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: Colors.border,
+  },
+  iconBox: {
+    width: 34,
+    height: 34,
+    borderRadius: 8,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: statIconBg,
+  },
+  body: { flex: 1 },
+  title: { fontSize: 15, fontWeight: "700" as const, color: Colors.textPrimary },
+  sub: { fontSize: 12, color: Colors.textSecondary, marginTop: 2 },
 });
