@@ -1243,6 +1243,7 @@ export default function AgentDetailScreen() {
                   >
                     <PlatformBadge platform={p} size="md" />
                     <Text style={sourceStyles.platformText}>{PLATFORM_META[p].label}</Text>
+                    {PLATFORM_META[p].beta ? <Text style={sourceStyles.beta}>Beta</Text> : null}
                   </Pressable>
                 );
               })}
@@ -1781,9 +1782,10 @@ const styles = StyleSheet.create({
 
 // Platform picker in the Add Source modal
 const sourceStyles = StyleSheet.create({
-  platformRow: { flexDirection: "row", gap: 8 },
+  platformRow: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
   platformBtn: {
-    flex: 1,
+    flexGrow: 1,
+    flexBasis: "30%",
     alignItems: "center",
     gap: 6,
     paddingVertical: 10,
@@ -1795,4 +1797,5 @@ const sourceStyles = StyleSheet.create({
   platformBtnActive: { borderColor: Colors.accent, backgroundColor: "rgba(14, 165, 233, 0.10)" },
   platformText: { color: Colors.textPrimary, fontSize: 12, fontWeight: "700" },
   help: { color: Colors.textMuted, fontSize: 12, marginTop: 6 },
+  beta: { color: Colors.textMuted, fontSize: 10, fontWeight: "600", marginTop: -3 },
 });
