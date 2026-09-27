@@ -41,9 +41,9 @@ nonisolated struct FeedItem: Codable, Identifiable, Hashable, Sendable {
     var publishedAt: String?
     var userStatus: ItemStatus?
     var itemAnalysis: [ItemAnalysis]?
-    /// "youtube" | "x" | "reddit". Missing on rows created before multi-platform sources.
+    /// "youtube" | "x" | "reddit" | "instagram" | "linkedin". Missing on rows created before multi-platform sources.
     var platform: String?
-    /// Post text (X) or self-text (Reddit).
+    /// Post text (X, Instagram caption, LinkedIn) or self-text (Reddit).
     var body: String?
     var authorHandle: String?
     var metrics: ItemMetrics?
@@ -57,12 +57,10 @@ nonisolated struct FeedItem: Codable, Identifiable, Hashable, Sendable {
 
     var sourcePlatform: SourcePlatform {
         if let platform { return SourcePlatform(raw: platform) }
-        if videoId?.hasPrefix("x:") == true { return .x }
-        if videoId?.hasPrefix("reddit:") == true { return .reddit }
-        return .youtube
+        return SourcePlatform.fromVideoId(videoId)
     }
 
-    /// X posts and Reddit threads open in the reader, not the video player.
+    /// Posts (X, Reddit, Instagram, LinkedIn) open in the reader, not the video player.
     var isPost: Bool { sourcePlatform != .youtube || SourcePlatform.isPostVideoId(videoId) }
 
     /// Quoted post or X article shown as a card inside the post.
@@ -70,6 +68,15 @@ nonisolated struct FeedItem: Codable, Identifiable, Hashable, Sendable {
 
     /// Video attached to the post itself (not to a quoted post).
     var postVideo: ItemMedia? { media?.first(where: { !$0.isEmbed && $0.playableURL != nil }) }
+
+    /// Every photo attached to the post, for Instagram and LinkedIn carousels.
+    var postPhotoURLs: [URL] {
+        (media ?? []).compactMap { m -> URL? in
+            guard m.type != "video", !m.isEmbed, var raw = m.url, !raw.isEmpty else { return nil }
+            if raw.hasPrefix("http://") { raw = "https://" + raw.dropFirst("http://".count) }
+            return URL(string: raw)
+        }
+    }
 
     /// First image attached to a post, or its stored thumbnail.
     var postImageURL: URL? {
@@ -85,7 +92,7 @@ nonisolated struct FeedItem: Codable, Identifiable, Hashable, Sendable {
         if let videoId, videoId.range(of: "^[\\w-]{11}$", options: .regularExpression) != nil {
             return videoId
         }
-        // "x:<id>" / "reddit:<id>" are kept as-is so the router can open the reader.
+        // "<platform>:<id>" post ids are kept as-is so the router can open the reader.
         if SourcePlatform.isPostVideoId(videoId) { return videoId }
         guard let url, let comps = URLComponents(string: url) else { return videoId }
         if comps.host?.contains("youtu.be") == true {
