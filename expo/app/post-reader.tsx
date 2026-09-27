@@ -73,13 +73,14 @@ function escapeAttr(value: string): string {
 }
 
 // Plays a post's video in place, like on X and Reddit. iOS plays the HLS
-// stream; Android gets the MP4.
+// stream; Android gets the MP4. No Referer is sent: X's video server
+// refuses requests that carry another site's address.
 function PostVideo({ media }: { media: PostEmbed }) {
   const src =
     (RNPlatform.OS === "ios" ? media.hls_url || media.video_url : media.video_url || media.hls_url) || "";
   if (!src) return null;
   const poster = media.url || media.image || "";
-  const html = `<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+  const html = `<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"><meta name="referrer" content="no-referrer">
 <style>html,body{margin:0;padding:0;background:#000;height:100%}video{width:100%;height:100%;object-fit:contain;background:#000}</style></head>
 <body><video src="${escapeAttr(src)}"${poster ? ` poster="${escapeAttr(poster)}"` : ""} controls playsinline webkit-playsinline preload="metadata"></video></body></html>`;
   return (
