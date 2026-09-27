@@ -206,6 +206,24 @@ nonisolated enum AlsoOn {
         return cleanName(ch.channelName, fallback: ch.channelUrl ?? "Source")
     }
 
+    /// Where to follow this account on the platform itself. X and YouTube open
+    /// their own follow / subscribe prompt; LinkedIn and Instagram open the
+    /// profile, since neither lets other apps follow accounts for the user.
+    static func platformFollowURL(platform: SourcePlatform, url: String) -> URL? {
+        if platform == .x, let key = accountKey(fromURL: url), key.hasPrefix("x:") {
+            var comps = URLComponents(string: "https://x.com/intent/follow")
+            comps?.queryItems = [URLQueryItem(name: "screen_name", value: String(key.dropFirst(2)))]
+            return comps?.url
+        }
+        if platform == .youtube, var comps = URLComponents(string: url) {
+            var items = (comps.queryItems ?? []).filter { $0.name != "sub_confirmation" }
+            items.append(URLQueryItem(name: "sub_confirmation", value: "1"))
+            comps.queryItems = items
+            return comps.url ?? URL(string: url)
+        }
+        return URL(string: url)
+    }
+
     static func initials(_ name: String) -> String {
         let trimmed = name.hasPrefix("r/") ? String(name.dropFirst(2)) : name
         let parts = trimmed.split(whereSeparator: { $0.isWhitespace })
