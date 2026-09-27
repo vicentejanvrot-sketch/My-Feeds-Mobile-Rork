@@ -814,7 +814,7 @@ struct AgentDetailView: View {
                 Text("Platform")
                     .font(.system(size: 12, weight: .semibold))
                     .foregroundStyle(Theme.textSecondary)
-                HStack(spacing: 8) {
+                LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: 3), spacing: 8) {
                     ForEach(SourcePlatform.allCases, id: \.self) { platform in
                         let active = newSourcePlatform == platform
                         Button {
@@ -825,6 +825,8 @@ struct AgentDetailView: View {
                                 Text(platform.label)
                                     .font(.system(size: 13, weight: .semibold))
                                     .foregroundStyle(active ? .white : Theme.textSecondary)
+                                    .lineLimit(1)
+                                    .minimumScaleFactor(0.8)
                             }
                             .frame(maxWidth: .infinity)
                             .frame(height: 40)
@@ -834,6 +836,20 @@ struct AgentDetailView: View {
                                 RoundedRectangle(cornerRadius: 8)
                                     .stroke(active ? Theme.accent : Theme.border, lineWidth: 1)
                             )
+                            .overlay(alignment: .topTrailing) {
+                                // Instagram and LinkedIn are still in beta.
+                                if platform.isBeta {
+                                    Text("BETA")
+                                        .font(.system(size: 8, weight: .heavy))
+                                        .kerning(0.4)
+                                        .foregroundStyle(.white)
+                                        .padding(.horizontal, 4)
+                                        .padding(.vertical, 1)
+                                        .background(Theme.accent)
+                                        .clipShape(Capsule())
+                                        .offset(x: -4, y: -6)
+                                }
+                            }
                         }
                         .buttonStyle(.plain)
                         .accessibilityAddTraits(active ? .isSelected : [])
