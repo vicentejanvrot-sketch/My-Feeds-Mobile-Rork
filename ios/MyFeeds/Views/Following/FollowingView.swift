@@ -5,6 +5,7 @@ import SwiftUI
 /// Same screen as /following on the web and expo/app/following.tsx.
 struct FollowingView: View {
     @Environment(ToastCenter.self) private var toasts
+    @Environment(\.openURL) private var openURL
 
     @State private var channels: [Channel] = []
     @State private var links: [IdentityLink] = []
@@ -482,13 +483,20 @@ struct FollowingView: View {
         }
     }
 
+    /// Adds the account to an agent, then opens it on its own platform so the
+    /// user can follow there too (LinkedIn and Instagram don't let apps do that).
     private func follow(_ account: AlsoOnFoundAccount, agentId: String) {
         guard !busyKeys.contains(account.key) else { return }
         busyKeys.insert(account.key)
         Task {
+            defer {
+                if let link = AlsoOn.platformFollowURL(platform: account.platform, url: account.url) {
+                    openURL(link)
+                }
+            }
             do {
                 try await SupabaseService.shared.followAccount(platform: account.platform, url: account.url, agentId: agentId)
-                toasts.show("Added to your agent")
+                toasts.show("Added. Follow on " + account.platform.label + " to finish")
                 if let loaded = try? await SupabaseService.shared.fetchAllChannels() {
                     channels = loaded
                     rebuild()
