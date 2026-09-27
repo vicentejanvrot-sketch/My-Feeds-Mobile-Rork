@@ -320,6 +320,52 @@ final class SupabaseService {
         try await db.from("agents").delete().eq("id", value: id).execute()
     }
 
+    // MARK: - Resume position (video_progress, shared with web and Android)
+
+    /// Signed-in user's id, lowercased like the web and Android apps store it.
+    private var currentUserId: String? {
+        client.auth.currentUser?.id.uuidString.lowercased()
+    }
+
+    /// Where this user last stopped this video on any device, or nil.
+    func fetchVideoProgress(videoId: String) async throws -> VideoProgress? {
+        guard let userId = currentUserId else { return nil }
+        let rows: [VideoProgressRow] = try await db.from("video_progress")
+            .select("position_seconds, duration_seconds, updated_at")
+            .eq("user_id", value: userId)
+            .eq("video_id", value: videoId)
+            .limit(1)
+            .execute().value
+        guard let row = rows.first else { return nil }
+        return VideoProgress(
+            position: row.positionSeconds,
+            duration: row.durationSeconds,
+            updatedAt: Format.parseDate(row.updatedAt) ?? .distantPast
+        )
+    }
+
+    func saveVideoProgress(videoId: String, position: Double, duration: Double, updatedAt: Date) async throws {
+        guard let userId = currentUserId else { return }
+        let row = VideoProgressUpsert(
+            userId: userId,
+            videoId: videoId,
+            positionSeconds: position,
+            durationSeconds: duration,
+            updatedAt: VideoProgress.isoString(updatedAt)
+        )
+        try await db.from("video_progress")
+            .upsert(row, onConflict: "user_id,video_id")
+            .execute()
+    }
+
+    func deleteVideoProgress(videoId: String) async throws {
+        guard let userId = currentUserId else { return }
+        try await db.from("video_progress").delete()
+            .eq("user_id", value: userId)
+            .eq("video_id", value: videoId)
+            .execute()
+    }
+
     // MARK: - Account
 
     /// Delete account via edge function; falls back to best-effort client deletes.
@@ -365,4 +411,47 @@ nonisolated struct AddSourceResponse: Codable, Sendable {
 nonisolated struct SourceError: LocalizedError, Sendable {
     let message: String
     var errorDescription: String? { message }
+}
+
+/// A resume position, in seconds. The same rules apply on web, iOS and Android:
+/// resume only from 5 s in, and a position in the last 10 s counts as finished.
+nonisolated struct VideoProgress: Sendable {
+    var position: Double
+    var duration: Double
+    var updatedAt: Date
+
+    static let minResumeSeconds: Double = 5
+    static let endThresholdSeconds: Double = 10
+
+    static func isNearEnd(position: Double, duration: Double) -> Bool {
+        duration > 0 && position >= duration - endThresholdSeconds
+    }
+
+    /// The time to seek to, or nil when it's too close to the start or the end.
+    static func resumeTime(position: Double, duration: Double) -> Double? {
+        guard position >= minResumeSeconds, !isNearEnd(position: position, duration: duration) else { return nil }
+        return position
+    }
+
+    static func isoString(_ date: Date) -> String {
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        return formatter.string(from: date)
+    }
+}
+
+/// Row read from video_progress.
+nonisolated struct VideoProgressRow: Codable, Sendable {
+    var positionSeconds: Double
+    var durationSeconds: Double
+    var updatedAt: String
+}
+
+/// Row written to video_progress (keys become snake_case via the client's encoder).
+nonisolated struct VideoProgressUpsert: Codable, Sendable {
+    var userId: String
+    var videoId: String
+    var positionSeconds: Double
+    var durationSeconds: Double
+    var updatedAt: String
 }
