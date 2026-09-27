@@ -12,6 +12,7 @@ struct VideoPlayerScreen: View {
     @Environment(AppRouter.self) private var router
     @Environment(\.openURL) private var openURL
     @Environment(\.verticalSizeClass) private var verticalSizeClass
+    @Environment(\.scenePhase) private var scenePhase
 
     @State private var controller = YouTubePlayerController()
     @State private var isFullscreen = false
@@ -30,6 +31,9 @@ struct VideoPlayerScreen: View {
     @State private var landscapeControlsHeight: CGFloat = 112
     @State private var landscapeControlsTask: Task<Void, Never>?
     @State private var savePositionTask: Task<Void, Never>?
+    /// Where playback was resumed, so a late position from the shared table
+    /// isn't applied after the user has already moved elsewhere.
+    @State private var resumedAt: Double = 0
     // Pocket Lock: blocks every touch and dims the screen while the video keeps playing
     @State private var isPocketLocked = false
     @State private var unlockProgress: CGFloat = 0
@@ -81,6 +85,14 @@ struct VideoPlayerScreen: View {
             if prefs.keepScreenOn {
                 UIApplication.shared.isIdleTimerDisabled = false
             }
+        }
+        // Paused: save where the user stopped.
+        .onChange(of: controller.isPlaying) { _, playing in
+            if !playing { persistPosition() }
+        }
+        // App going to the background, app switcher, lock screen: save right away.
+        .onChange(of: scenePhase) { _, phase in
+            if phase != .active { persistPosition() }
         }
     }
 
@@ -1056,17 +1068,11 @@ struct VideoPlayerScreen: View {
                 controller.setRate(prefs.speed.value)
             }
             controller.setQuality(prefs.quality.youtubeValue)
-            if let saved = prefs.savedPosition(videoId: request.videoId), saved.duration > 0 {
-                if saved.time / saved.duration < 0.95 {
-                    controller.seek(to: saved.time)
-                } else {
-                    prefs.clearPosition(videoId: request.videoId)
-                }
-            }
+            resumeFromSavedPosition()
         }
 
         controller.onEnded = {
-            prefs.clearPosition(videoId: request.videoId)
+            clearSavedPosition()
             markWatchedAndDismiss()
         }
 
@@ -1089,9 +1095,60 @@ struct VideoPlayerScreen: View {
         }
     }
 
+    /// Saves where playback is, on this phone and in the shared video_progress
+    /// table, so the web and Android apps pick up from the same spot (and this
+    /// phone picks up theirs). Runs every 5 s while playing, on pause, when the
+    /// player closes and when the app goes to the background.
     private func persistPosition() {
-        guard controller.duration > 0, controller.currentTime > 0 else { return }
-        prefs.savePosition(videoId: request.videoId, time: controller.currentTime, duration: controller.duration)
+        let time = controller.currentTime
+        let duration = controller.duration
+        guard duration > 0, time > 0 else { return }
+        // The last 10 s count as finished: don't bring back a position the end cleared.
+        guard !VideoProgress.isNearEnd(position: time, duration: duration) else { return }
+        let videoId = request.videoId
+        let now = Date()
+        prefs.savePosition(videoId: videoId, time: time, duration: duration, updatedAt: now)
+        Task {
+            try? await SupabaseService.shared.saveVideoProgress(
+                videoId: videoId,
+                position: time,
+                duration: duration,
+                updatedAt: now
+            )
+        }
+    }
+
+    /// Seeks to where the user stopped: this phone's copy straight away, then
+    /// the shared copy (saved on the web or Android) if it's newer.
+    private func resumeFromSavedPosition() {
+        let videoId = request.videoId
+        let local = prefs.savedPosition(videoId: videoId)
+        if let local {
+            if let resumeAt = VideoProgress.resumeTime(position: local.time, duration: local.duration) {
+                controller.seek(to: resumeAt)
+                resumedAt = resumeAt
+            } else if VideoProgress.isNearEnd(position: local.time, duration: local.duration) {
+                prefs.clearPosition(videoId: videoId)
+            }
+        }
+        Task {
+            guard let remote = try? await SupabaseService.shared.fetchVideoProgress(videoId: videoId) else { return }
+            guard remote.updatedAt > (local?.updatedAt ?? .distantPast) else { return }
+            prefs.savePosition(videoId: videoId, time: remote.position, duration: remote.duration, updatedAt: remote.updatedAt)
+            guard let resumeAt = VideoProgress.resumeTime(position: remote.position, duration: remote.duration) else { return }
+            // Only jump if the user hasn't already moved away from where playback started.
+            guard abs(controller.currentTime - resumedAt) < 20, abs(resumeAt - controller.currentTime) > 3 else { return }
+            controller.seek(to: resumeAt)
+            resumedAt = resumeAt
+        }
+    }
+
+    /// Video finished: forget the position here and in the shared table, so
+    /// it starts from the beginning next time on any device.
+    private func clearSavedPosition() {
+        let videoId = request.videoId
+        prefs.clearPosition(videoId: videoId)
+        Task { try? await SupabaseService.shared.deleteVideoProgress(videoId: videoId) }
     }
 
     private func setStatus(_ status: ItemStatus) {
