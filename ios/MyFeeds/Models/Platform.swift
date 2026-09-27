@@ -6,16 +6,27 @@ nonisolated enum SourcePlatform: String, Codable, CaseIterable, Hashable, Sendab
     case youtube
     case x
     case reddit
+    case instagram
+    case linkedin
 
     /// Unknown or missing values (rows written before the migration) are YouTube.
     init(raw: String?) {
         self = SourcePlatform(rawValue: raw ?? "") ?? .youtube
     }
 
-    /// Non-YouTube items store "x:<id>" / "reddit:<id>" in items.video_id.
+    /// Non-YouTube items store "<platform>:<id>" in items.video_id
+    /// (x, reddit, instagram, linkedin).
     static func isPostVideoId(_ videoId: String?) -> Bool {
         guard let videoId else { return false }
-        return videoId.hasPrefix("x:") || videoId.hasPrefix("reddit:")
+        return ["x:", "reddit:", "instagram:", "linkedin:"].contains { videoId.hasPrefix($0) }
+    }
+
+    /// Platform of a post item from its "<platform>:<id>" video_id; YouTube otherwise.
+    static func fromVideoId(_ videoId: String?) -> SourcePlatform {
+        guard let videoId, let prefix = videoId.split(separator: ":", maxSplits: 1).first,
+              videoId.contains(":"),
+              let platform = SourcePlatform(rawValue: String(prefix)) else { return .youtube }
+        return platform
     }
 }
 
@@ -25,6 +36,8 @@ extension SourcePlatform {
         case .youtube: return "YouTube"
         case .x: return "X"
         case .reddit: return "Reddit"
+        case .instagram: return "Instagram"
+        case .linkedin: return "LinkedIn"
         }
     }
 
@@ -33,6 +46,8 @@ extension SourcePlatform {
         case .youtube: return "YT"
         case .x: return "X"
         case .reddit: return "r/"
+        case .instagram: return "IG"
+        case .linkedin: return "in"
         }
     }
 
@@ -42,6 +57,8 @@ extension SourcePlatform {
         case .youtube: return Color(red: 1, green: 138 / 255, blue: 132 / 255)
         case .x: return Color(red: 241 / 255, green: 243 / 255, blue: 245 / 255)
         case .reddit: return Color(red: 1, green: 154 / 255, blue: 92 / 255)
+        case .instagram: return Color(red: 1, green: 122 / 255, blue: 178 / 255)
+        case .linkedin: return Color(red: 127 / 255, green: 184 / 255, blue: 240 / 255)
         }
     }
 
@@ -51,6 +68,8 @@ extension SourcePlatform {
         case .youtube: return Color(red: 58 / 255, green: 29 / 255, blue: 36 / 255)
         case .x: return Color(red: 38 / 255, green: 45 / 255, blue: 59 / 255)
         case .reddit: return Color(red: 58 / 255, green: 36 / 255, blue: 24 / 255)
+        case .instagram: return Color(red: 58 / 255, green: 24 / 255, blue: 48 / 255)
+        case .linkedin: return Color(red: 20 / 255, green: 40 / 255, blue: 61 / 255)
         }
     }
 
@@ -59,6 +78,8 @@ extension SourcePlatform {
         case .youtube: return "Channel"
         case .x: return "Account"
         case .reddit: return "Subreddit"
+        case .instagram: return "Account"
+        case .linkedin: return "Profile or company"
         }
     }
 
@@ -67,6 +88,8 @@ extension SourcePlatform {
         case .youtube: return "https://www.youtube.com/@ChannelName"
         case .x: return "@handle or https://x.com/handle"
         case .reddit: return "r/subreddit or a reddit.com link"
+        case .instagram: return "@handle or https://www.instagram.com/handle"
+        case .linkedin: return "https://www.linkedin.com/in/name or /company/name"
         }
     }
 
@@ -75,6 +98,8 @@ extension SourcePlatform {
         case .youtube: return "Paste the channel link."
         case .x: return "Original posts only. Reposts and replies are skipped."
         case .reddit: return "Top posts from the lookback window."
+        case .instagram: return "Public accounts only. Posts and reels from the lookback window."
+        case .linkedin: return "Paste a person's profile link or a company page link."
         }
     }
 
@@ -83,8 +108,13 @@ extension SourcePlatform {
         case .youtube: return "Open on YouTube"
         case .x: return "Open on X"
         case .reddit: return "Open on Reddit"
+        case .instagram: return "Open on Instagram"
+        case .linkedin: return "Open on LinkedIn"
         }
     }
+
+    /// Newer sources whose data provider is still settling in.
+    var isBeta: Bool { self == .instagram || self == .linkedin }
 }
 
 /// Platform logo used on cards, lists and filters, same look as the web and Expo apps.
@@ -145,7 +175,7 @@ nonisolated struct KeyMoment: Codable, Hashable, Sendable {
     }
 }
 
-/// Engagement numbers for X posts and Reddit threads (items.metrics).
+/// Engagement numbers for X, Reddit, Instagram and LinkedIn posts (items.metrics).
 nonisolated struct ItemMetrics: Codable, Hashable, Sendable {
     var likes: Int?
     var reposts: Int?
@@ -155,8 +185,10 @@ nonisolated struct ItemMetrics: Codable, Hashable, Sendable {
     var quotes: Int?
     var score: Int?
     var comments: Int?
+    /// Instagram reel plays.
+    var plays: Int?
 
-    enum CodingKeys: String, CodingKey { case likes, reposts, replies, views, bookmarks, quotes, score, comments }
+    enum CodingKeys: String, CodingKey { case likes, reposts, replies, views, bookmarks, quotes, score, comments, plays }
 
     init(from decoder: Decoder) throws {
         guard let c = try? decoder.container(keyedBy: CodingKeys.self) else { return }
@@ -168,6 +200,7 @@ nonisolated struct ItemMetrics: Codable, Hashable, Sendable {
         quotes = decodeLenientInt(c, .quotes)
         score = decodeLenientInt(c, .score)
         comments = decodeLenientInt(c, .comments)
+        plays = decodeLenientInt(c, .plays)
     }
 }
 
