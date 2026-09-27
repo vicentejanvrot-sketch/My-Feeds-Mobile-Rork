@@ -129,7 +129,14 @@ function formatTime(seconds: number): string {
 // ── Resume-playback position persistence ────────────────────────────
 
 const POSITION_SAVE_INTERVAL_MS = 5000;
-const NEAR_END_THRESHOLD = 0.95;
+// Same rules as the web and iOS apps: resume only from 5 s in, and a position
+// in the last 10 s counts as finished (cleared, never saved).
+const MIN_RESUME_SECONDS = 5;
+const END_THRESHOLD_SECONDS = 10;
+
+function isNearEnd(position: number, duration: number): boolean {
+  return duration > 0 && position >= duration - END_THRESHOLD_SECONDS;
+}
 
 interface SavedPosition {
   currentTime: number;
@@ -200,7 +207,9 @@ async function saveResumePosition(
   currentTime: number,
   duration: number,
 ): Promise<void> {
-  if (!videoId || duration <= 0) return;
+  if (!videoId || duration <= 0 || currentTime <= 0) return;
+  // Don't bring back a finished video's position (the end clears it).
+  if (isNearEnd(currentTime, duration)) return;
   const data: SavedPosition = {
     currentTime,
     duration,
@@ -626,9 +635,7 @@ export default function VideoPlayerScreen() {
       if (state === "active" || !videoIdStr) return;
       const t = currentTimeRef.current;
       const d = durationRef.current;
-      if (d > 0 && t > 0 && t / d < NEAR_END_THRESHOLD) {
-        saveResumePosition(videoIdStr, t, d);
-      }
+      saveResumePosition(videoIdStr, t, d);
     });
     return () => sub.remove();
   }, [videoIdStr]);
@@ -1299,11 +1306,11 @@ export default function VideoPlayerScreen() {
                 try {
                   const saved = await loadResumePosition(videoIdStr);
                   if (saved && saved.duration > 0) {
-                    if (saved.currentTime / saved.duration < NEAR_END_THRESHOLD) {
-                      playerRef.current?.seekTo(saved.currentTime);
-                    } else {
+                    if (isNearEnd(saved.currentTime, saved.duration)) {
                       // Near the end — clear so next open starts from beginning
                       await clearResumePosition(videoIdStr);
+                    } else if (saved.currentTime >= MIN_RESUME_SECONDS) {
+                      playerRef.current?.seekTo(saved.currentTime);
                     }
                   }
                 } catch {
