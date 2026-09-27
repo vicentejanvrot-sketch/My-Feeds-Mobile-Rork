@@ -78,14 +78,11 @@ struct FollowingView: View {
                     .foregroundStyle(Theme.textSecondary)
                     .padding(.bottom, 14)
 
-                Picker("View", selection: $tab) {
-                    Text("Everyone").tag(FollowingTab.everyone)
-                    Text("Gaps · \(gapCount)").tag(FollowingTab.gaps)
+                HStack(spacing: 8) {
+                    tabSwitcher
+                    searchField
                 }
-                .pickerStyle(.segmented)
-                .padding(.bottom, 12)
-
-                searchField
+                .padding(.bottom, 14)
 
                 if let progress { progressBox(progress) }
 
@@ -128,7 +125,9 @@ struct FollowingView: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbarBackground(Theme.background, for: .navigationBar)
         .toolbar {
-            ToolbarItem(placement: .topBarTrailing) { scanButton }
+            if showScanButton {
+                ToolbarItem(placement: .topBarTrailing) { scanButton }
+            }
         }
         .refreshable { await load() }
         .task { await load() }
@@ -157,38 +156,71 @@ struct FollowingView: View {
 
     // MARK: - Header pieces
 
+    /// Shown only while checking or when some sources still need a check.
+    private var showScanButton: Bool {
+        isScanning || (!isLoading && !toScan.isEmpty)
+    }
+
+    /// Plain toolbar button so the nav bar draws it like its other buttons.
     private var scanButton: some View {
-        let disabled = isScanning || toScan.isEmpty || isLoading
-        return Button {
+        Button {
             Task { await runScan(toScan) }
         } label: {
-            HStack(spacing: 5) {
+            HStack(spacing: 6) {
                 if isScanning {
-                    ProgressView().controlSize(.small).tint(.white)
+                    ProgressView().controlSize(.small)
                 } else {
                     Image(systemName: "magnifyingglass")
-                        .font(.system(size: 12, weight: .bold))
+                        .font(.system(size: 13, weight: .semibold))
                 }
-                Text(isScanning ? "Checking" : toScan.isEmpty ? "All checked" : "Check \(toScan.count)")
-                    .font(.system(size: 13, weight: .bold))
+                Text(isScanning ? "Checking" : "Check \(toScan.count)")
+                    .font(.system(size: 14, weight: .semibold))
             }
-            .foregroundStyle(disabled && !isScanning ? Theme.textSecondary : .white)
-            .padding(.horizontal, 12)
-            .frame(height: 32)
-            .background(disabled && !isScanning ? Theme.input : Theme.accent)
-            .clipShape(.rect(cornerRadius: 9))
+            .foregroundStyle(Theme.accent)
+        }
+        .disabled(isScanning)
+        .accessibilityLabel(isScanning ? "Checking sources" : "Check \(toScan.count) sources")
+    }
+
+    /// Everyone / Gaps switch, styled like the web tabs: a muted track with
+    /// the active tab set in the page background colour.
+    private var tabSwitcher: some View {
+        HStack(spacing: 0) {
+            tabButton("Everyone", value: .everyone)
+            tabButton("Gaps · \(gapCount)", value: .gaps)
+        }
+        .padding(3)
+        .background(Theme.input)
+        .clipShape(.rect(cornerRadius: 9))
+        .fixedSize()
+    }
+
+    private func tabButton(_ title: String, value: FollowingTab) -> some View {
+        let active = tab == value
+        return Button {
+            tab = value
+        } label: {
+            Text(title)
+                .font(.system(size: 13, weight: .semibold))
+                .foregroundStyle(active ? Theme.textPrimary : Theme.textSecondary)
+                .lineLimit(1)
+                .padding(.horizontal, 12)
+                .frame(height: 30)
+                .background(active ? Theme.background : Color.clear)
+                .clipShape(.rect(cornerRadius: 7))
+                .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .disabled(disabled)
+        .accessibilityAddTraits(active ? .isSelected : [])
     }
 
     private var searchField: some View {
         HStack(spacing: 8) {
             Image(systemName: "magnifyingglass")
-                .font(.system(size: 14))
+                .font(.system(size: 13))
                 .foregroundStyle(Theme.textMuted)
             TextField("", text: $query, prompt: Text("Search people").foregroundStyle(Theme.textMuted))
-                .font(.system(size: 15))
+                .font(.system(size: 14))
                 .foregroundStyle(Theme.textPrimary)
                 .textInputAutocapitalization(.never)
                 .autocorrectionDisabled()
@@ -204,12 +236,12 @@ struct FollowingView: View {
                 .accessibilityLabel("Clear search")
             }
         }
-        .padding(.horizontal, 12)
-        .frame(height: 42)
+        .padding(.horizontal, 10)
+        .frame(maxWidth: .infinity)
+        .frame(height: 36)
         .background(Theme.input)
-        .clipShape(.rect(cornerRadius: 10))
-        .overlay(RoundedRectangle(cornerRadius: 10).stroke(Theme.border, lineWidth: 0.5))
-        .padding(.bottom, 12)
+        .clipShape(.rect(cornerRadius: 9))
+        .overlay(RoundedRectangle(cornerRadius: 9).stroke(Theme.border, lineWidth: 0.5))
     }
 
     private func progressBox(_ progress: ScanProgress) -> some View {
@@ -589,12 +621,12 @@ private struct PersonRow: View {
 
     var body: some View {
         Button(action: onTap) {
-            HStack(alignment: .center, spacing: 12) {
+            HStack(alignment: .top, spacing: 12) {
                 PersonAvatar(name: person.name, url: person.thumbnail)
                 VStack(alignment: .leading, spacing: 6) {
-                    HStack(spacing: 8) {
+                    HStack(alignment: .firstTextBaseline, spacing: 8) {
                         Text(person.name)
-                            .font(.system(size: 15, weight: .bold))
+                            .font(.system(size: 15, weight: .semibold))
                             .foregroundStyle(Theme.textPrimary)
                             .lineLimit(1)
                         if !agentNames.isEmpty {
@@ -623,8 +655,10 @@ private struct PersonRow: View {
                 Image(systemName: "chevron.right")
                     .font(.system(size: 13, weight: .semibold))
                     .foregroundStyle(Theme.textMuted)
+                    .padding(.top, 4)
             }
-            .padding(12)
+            .padding(.horizontal, 16)
+            .padding(.vertical, 12)
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
@@ -642,7 +676,8 @@ private struct PlatformChip: View {
                 .font(.system(size: 12, weight: .semibold))
                 .foregroundStyle(variant == .possible ? Theme.textSecondary : Theme.textPrimary)
         }
-        .padding(.horizontal, 8)
+        .padding(.leading, 6)
+        .padding(.trailing, 10)
         .padding(.vertical, 4)
         .background(variant == .following ? Theme.input : Color.clear)
         .clipShape(Capsule())
