@@ -1,7 +1,7 @@
-// In-app reader for X posts and Reddit threads — the mobile twin of the web
+// In-app reader for X, Reddit, Instagram and LinkedIn posts — the mobile twin of the web
 // PostReaderModal, so reading works the same everywhere.
 import { useEffect, useState } from "react";
-import { ActivityIndicator, Platform as RNPlatform, Pressable, ScrollView, Share, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, Platform as RNPlatform, Pressable, ScrollView, Share, StyleSheet, Text, View, useWindowDimensions } from "react-native";
 import { WebView } from "react-native-webview";
 import { useLocalSearchParams, router } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -21,6 +21,8 @@ import {
   ArrowBigUp,
   ArrowBigDown,
   Check,
+  Send,
+  ThumbsUp,
 } from "lucide-react-native";
 import { Colors } from "@/constants/colors";
 import { supabase } from "@/lib/supabase";
@@ -38,12 +40,15 @@ import type { ItemStatus, ItemWithAnalysis } from "@/lib/database";
 const X_PINK = "#F91880";
 const X_BLUE = "#1D9BF0";
 const REDDIT_ORANGE = "#FF4500";
+const IG_RED = "#FF3040";
+const LINKEDIN_BLUE = "#378FE9";
 
 type PostMetrics = {
   likes?: number;
   reposts?: number;
   replies?: number;
   views?: number;
+  plays?: number;
   bookmarks?: number;
   quotes?: number;
   score?: number;
@@ -175,8 +180,10 @@ export default function PostReaderScreen() {
   const embeds = (item.media ?? []) as PostEmbed[];
   const quote = embeds.find((m) => m.type === "quote" || m.type === "article") ?? null;
   const video = embeds.find((m) => m.type !== "quote" && m.type !== "article" && (m.video_url || m.hls_url)) ?? null;
+  // Carousels (Instagram, LinkedIn) swipe through every photo.
+  const photos = embeds.filter((m) => m.type !== "video" && m.type !== "quote" && m.type !== "article" && !!m.url);
   const image =
-    embeds.find((m) => m.type !== "video" && m.type !== "quote" && m.type !== "article")?.url ??
+    photos[0]?.url ??
     (!quote ? item.thumbnail_url : null) ??
     null;
   const keyPoints = analysis?.key_points ?? [];
@@ -203,11 +210,13 @@ export default function PostReaderScreen() {
         ) : null}
 
         {item.body ? (
-          <Text style={platform === "x" ? styles.bodyLarge : styles.body}>{item.body}</Text>
+          <Text style={platform === "reddit" ? styles.body : styles.bodyLarge}>{item.body}</Text>
         ) : null}
 
         {video ? (
           <PostVideo media={video} />
+        ) : photos.length > 1 ? (
+          <PhotoCarousel urls={photos.map((p) => p.url)} />
         ) : image ? (
           <Image source={{ uri: image }} style={styles.image} contentFit="cover" />
         ) : null}
@@ -226,18 +235,74 @@ export default function PostReaderScreen() {
       </ScrollView>
 
       <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 12) }]}>
-        {platform === "x" && item.published_at ? (
+        {platform !== "reddit" && item.published_at ? (
           <Text style={styles.dateLine}>
-            {formatPostDate(item.published_at)}
-            {metrics.views ? (
+            {platform === "x" ? formatPostDate(item.published_at) : formatPostDate(item.published_at).split(" · ")[1]}
+            {metrics.views || metrics.plays ? (
               <>
                 {" · "}
-                <Text style={styles.dateLineStrong}>{formatCount(metrics.views)}</Text> Views
+                <Text style={styles.dateLineStrong}>{formatCount(metrics.views || metrics.plays)}</Text> Views
               </>
             ) : null}
           </Text>
         ) : null}
-        {platform === "x" ? (
+        {platform === "instagram" ? (
+          // Instagram: like, comment, share on the left; save on the right.
+          <View style={styles.xBar}>
+            <View style={styles.xBarEnd}>
+              <BarButton
+                label={liked ? "Remove from Saved" : "Like (save in My Feeds)"}
+                selected={liked}
+                onPress={() => changeStatus(liked ? "watched" : "liked")}
+                icon={<Heart size={22} color={liked ? IG_RED : Colors.textPrimary} fill={liked ? IG_RED : "transparent"} />}
+                value={formatCount((metrics.likes ?? 0) + (liked ? 1 : 0))}
+              />
+              <BarButton
+                label="Comment on Instagram"
+                onPress={() => openExternalLink(item.url)}
+                icon={<MessageCircle size={22} color={Colors.textPrimary} style={{ transform: [{ scaleX: -1 }] }} />}
+                value={formatCount(metrics.comments)}
+              />
+              <BarButton label="Share" onPress={share} icon={<Send size={21} color={Colors.textPrimary} />} />
+            </View>
+            <BarButton
+              label={bookmarked ? "Remove from Read Later" : "Save (Read Later)"}
+              selected={bookmarked}
+              onPress={() => changeStatus(bookmarked ? "not_watched" : "watch_later")}
+              icon={<Bookmark size={22} color={Colors.textPrimary} fill={bookmarked ? Colors.textPrimary : "transparent"} />}
+            />
+          </View>
+        ) : platform === "linkedin" ? (
+          // LinkedIn: Like, Comment, Repost, Send, plus Save.
+          <View style={{ gap: 6 }}>
+            <View style={styles.liCounts}>
+              <View style={styles.liLikeDot}>
+                <ThumbsUp size={9} color="#FFFFFF" fill="#FFFFFF" />
+              </View>
+              <Text style={styles.barText}>{formatCount((metrics.likes ?? 0) + (liked ? 1 : 0))}</Text>
+              <Text style={[styles.barText, { marginLeft: "auto" }]}>
+                {formatCount(metrics.comments)} comments · {formatCount(metrics.reposts)} reposts
+              </Text>
+            </View>
+            <View style={styles.liBar}>
+              <LinkedInAction
+                label="Like"
+                active={liked}
+                onPress={() => changeStatus(liked ? "watched" : "liked")}
+                icon={<ThumbsUp size={19} color={liked ? LINKEDIN_BLUE : Colors.textSecondary} fill={liked ? LINKEDIN_BLUE : "transparent"} />}
+              />
+              <LinkedInAction label="Comment" onPress={() => openExternalLink(item.url)} icon={<MessageSquare size={19} color={Colors.textSecondary} />} />
+              <LinkedInAction label="Repost" onPress={() => openExternalLink(item.url)} icon={<Repeat2 size={19} color={Colors.textSecondary} />} />
+              <LinkedInAction label="Send" onPress={share} icon={<Send size={19} color={Colors.textSecondary} />} />
+              <LinkedInAction
+                label="Save"
+                active={bookmarked}
+                onPress={() => changeStatus(bookmarked ? "not_watched" : "watch_later")}
+                icon={<Bookmark size={19} color={bookmarked ? LINKEDIN_BLUE : Colors.textSecondary} fill={bookmarked ? LINKEDIN_BLUE : "transparent"} />}
+              />
+            </View>
+          </View>
+        ) : platform === "x" ? (
           <View style={styles.xBar}>
             <BarButton
               label="Reply on X"
@@ -377,6 +442,48 @@ function QuoteCard({ quote }: { quote: PostEmbed }) {
   );
 }
 
+// Swipeable row of photos for Instagram and LinkedIn carousels.
+function PhotoCarousel({ urls }: { urls: string[] }) {
+  const { width } = useWindowDimensions();
+  const pageWidth = Math.min(width, 720) - 32;
+  const [page, setPage] = useState(0);
+  return (
+    <View style={{ gap: 6 }}>
+      <ScrollView
+        horizontal
+        pagingEnabled
+        showsHorizontalScrollIndicator={false}
+        onMomentumScrollEnd={(e) => setPage(Math.round(e.nativeEvent.contentOffset.x / pageWidth))}
+        style={{ width: pageWidth, borderRadius: 12 }}
+      >
+        {urls.map((u) => (
+          <Image key={u} source={{ uri: u }} style={{ width: pageWidth, aspectRatio: 1, backgroundColor: Colors.card }} contentFit="cover" />
+        ))}
+      </ScrollView>
+      <View style={styles.dots}>
+        {urls.map((u, i) => (
+          <View key={u} style={[styles.dot, i === page && styles.dotActive]} />
+        ))}
+      </View>
+    </View>
+  );
+}
+
+function LinkedInAction({ label, icon, active, onPress }: { label: string; icon: React.ReactNode; active?: boolean; onPress: () => void }) {
+  return (
+    <Pressable
+      onPress={onPress}
+      style={({ pressed }) => [styles.liAction, pressed && { opacity: 0.6 }]}
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      accessibilityState={{ selected: !!active }}
+    >
+      {icon}
+      <Text style={[styles.liActionText, active && { color: LINKEDIN_BLUE }]}>{label}</Text>
+    </Pressable>
+  );
+}
+
 function BarButton({
   label,
   icon,
@@ -450,6 +557,19 @@ const styles = StyleSheet.create({
   },
   xBar: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
   dateLine: { color: Colors.textSecondary, fontSize: 13, paddingHorizontal: 4 },
+  liCounts: { flexDirection: "row", alignItems: "center", gap: 5, paddingHorizontal: 4 },
+  liLikeDot: { width: 16, height: 16, borderRadius: 8, backgroundColor: LINKEDIN_BLUE, alignItems: "center", justifyContent: "center" },
+  liBar: {
+    flexDirection: "row",
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: Colors.border,
+    paddingTop: 4,
+  },
+  liAction: { flex: 1, alignItems: "center", justifyContent: "center", gap: 2, minHeight: 48 },
+  liActionText: { color: Colors.textSecondary, fontSize: 11, fontWeight: "600" },
+  dots: { flexDirection: "row", justifyContent: "center", gap: 5 },
+  dot: { width: 6, height: 6, borderRadius: 3, backgroundColor: Colors.border },
+  dotActive: { backgroundColor: Colors.accent },
   dateLineStrong: { color: Colors.textPrimary, fontWeight: "700" },
   video: { width: "100%", aspectRatio: 16 / 9, borderRadius: 12, overflow: "hidden", backgroundColor: "#000" },
   videoWeb: { flex: 1, backgroundColor: "#000" },
