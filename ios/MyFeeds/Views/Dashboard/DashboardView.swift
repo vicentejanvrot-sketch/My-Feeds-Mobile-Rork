@@ -37,6 +37,7 @@ struct DashboardView: View {
                 } else {
                     if isOffline { offlineBanner }
                     statGrid
+                    followingCard
 
                     SectionHeader(title: "My Feeds", actionLabel: agents.isEmpty ? nil : "View All") {
                         router.openFeed(agentId: nil, status: nil)
@@ -164,6 +165,46 @@ struct DashboardView: View {
             StatCard(icon: "waveform.path.ecg", label: "Recent Runs", value: "\(runs.count)")
             StatCard(icon: "chart.line.uptrend.xyaxis", label: "Success Rate", value: "\(successRate)%")
         }
+    }
+
+    /// Opens the Following screen: everyone the user follows and where else they are.
+    private var followingCard: some View {
+        NavigationLink(value: AppRoute.following) {
+            HStack(spacing: 12) {
+                ZStack {
+                    RoundedRectangle(cornerRadius: 8)
+                        .fill(Color(hsl: 199, 89, 55, alpha: 0.16))
+                        .frame(width: 34, height: 34)
+                    Image(systemName: "person.2")
+                        .font(.system(size: 15))
+                        .foregroundStyle(Color(hsl: 199, 89, 55))
+                }
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Following")
+                        .font(.system(size: 15, weight: .bold))
+                        .foregroundStyle(Theme.textPrimary)
+                    Text("Everyone you follow, and where else they are")
+                        .font(.system(size: 12))
+                        .foregroundStyle(Theme.textSecondary)
+                        .lineLimit(1)
+                }
+                Spacer(minLength: 0)
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundStyle(Theme.textMuted)
+            }
+            .padding(14)
+            .background(Theme.card)
+            .clipShape(.rect(cornerRadius: 8))
+            .overlay(
+                RoundedRectangle(cornerRadius: 8)
+                    .stroke(Theme.cardBorder, lineWidth: 1)
+            )
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .padding(.top, 12)
+        .accessibilityLabel("Following: everyone you follow, and where else they are")
     }
 
     private func emptyCard(text: String) -> some View {
