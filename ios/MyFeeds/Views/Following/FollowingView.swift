@@ -517,6 +517,24 @@ struct FollowingView: View {
     }
 }
 
+/// "Not checked yet" / "Only on X" / "On 3 platforms · 1 you don't follow · 1 to check"
+/// Lives here (main actor) because SourcePlatform.label does.
+private extension AlsoOnPerson {
+    var summary: String {
+        var parts: [String] = []
+        if lastScannedAt == nil {
+            parts.append("Not checked yet")
+        } else if platformCount == 1, let only = following.first {
+            parts.append("Only on " + only.platform.label)
+        } else {
+            parts.append("On \(platformCount) platforms")
+        }
+        if !also.isEmpty { parts.append("\(also.count) you don't follow") }
+        if !possible.isEmpty { parts.append("\(possible.count) to check") }
+        return parts.joined(separator: " · ")
+    }
+}
+
 private enum FollowingTab: Hashable {
     case everyone
     case gaps
