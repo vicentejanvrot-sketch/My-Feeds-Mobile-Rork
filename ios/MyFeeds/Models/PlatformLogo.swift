@@ -134,10 +134,99 @@ nonisolated enum PlatformLogoPaths {
         path.closeSubpath()
         return path
     }
+
+    static func instagram(in rect: CGRect) -> Path {
+        let p = scaler(rect)
+        var path = Path()
+        path.move(to: p(7.03, 0.084))
+        path.addCurve(to: p(4.119, 0.647), control1: p(5.753, 0.144), control2: p(4.881, 0.348))
+        path.addCurve(to: p(1.996, 2.035), control1: p(3.33, 0.955), control2: p(2.662, 1.367))
+        path.addCurve(to: p(0.616, 4.162), control1: p(1.331, 2.703), control2: p(0.921, 3.372))
+        path.addCurve(to: p(0.064, 7.076), control1: p(0.321, 4.926), control2: p(0.12, 5.799))
+        path.addCurve(to: p(0.001, 12.023), control1: p(0.008, 8.354), control2: p(-0.005, 8.764))
+        path.addCurve(to: p(0.084, 16.97), control1: p(0.008, 15.282), control2: p(0.022, 15.69))
+        path.addCurve(to: p(0.647, 19.881), control1: p(0.145, 18.247), control2: p(0.348, 19.119))
+        path.addCurve(to: p(2.035, 22.004), control1: p(0.955, 20.67), control2: p(1.367, 21.338))
+        path.addCurve(to: p(4.164, 23.384), control1: p(2.703, 22.669), control2: p(3.372, 23.078))
+        path.addCurve(to: p(7.077, 23.936), control1: p(4.927, 23.679), control2: p(5.8, 23.88))
+        path.addCurve(to: p(12.024, 23.999), control1: p(8.355, 23.992), control2: p(8.766, 24.005))
+        path.addCurve(to: p(16.971, 23.917), control1: p(15.281, 23.992), control2: p(15.692, 23.978))
+        path.addCurve(to: p(19.881, 23.354), control1: p(18.251, 23.856), control2: p(19.118, 23.652))
+        path.addCurve(to: p(22.004, 21.966), control1: p(20.67, 23.045), control2: p(21.339, 22.634))
+        path.addCurve(to: p(23.383, 19.837), control1: p(22.669, 21.298), control2: p(23.078, 20.628))
+        path.addCurve(to: p(23.935, 16.925), control1: p(23.679, 19.074), control2: p(23.88, 18.201))
+        path.addCurve(to: p(23.998, 11.977), control1: p(23.991, 15.644), control2: p(24.005, 15.235))
+        path.addCurve(to: p(23.917, 7.03), control1: p(23.992, 8.719), control2: p(23.977, 8.31))
+        path.addCurve(to: p(23.353, 4.119), control1: p(23.856, 5.751), control2: p(23.653, 4.882))
+        path.addCurve(to: p(21.966, 1.996), control1: p(23.045, 3.33), control2: p(22.633, 2.662))
+        path.addCurve(to: p(19.838, 0.617), control1: p(21.298, 1.33), control2: p(20.628, 0.921))
+        path.addCurve(to: p(16.924, 0.065), control1: p(19.074, 0.321), control2: p(18.202, 0.12))
+        path.addCurve(to: p(11.977, 0.001), control1: p(15.647, 0.009), control2: p(15.236, -0.005))
+        path.addCurve(to: p(7.03, 0.084), control1: p(8.718, 0.008), control2: p(8.31, 0.021))
+        path.move(to: p(7.17, 21.777))
+        path.addCurve(to: p(4.942, 21.369), control1: p(6.0, 21.726), control2: p(5.365, 21.532))
+        path.addCurve(to: p(3.56, 20.474), control1: p(4.381, 21.153), control2: p(3.982, 20.892))
+        path.addCurve(to: p(2.66, 19.096), control1: p(3.138, 20.056), control2: p(2.879, 19.655))
+        path.addCurve(to: p(2.243, 16.868), control1: p(2.495, 18.673), control2: p(2.297, 18.038))
+        path.addCurve(to: p(2.164, 12.02), control1: p(2.183, 15.604), control2: p(2.171, 15.224))
+        path.addCurve(to: p(2.224, 7.172), control1: p(2.157, 8.816), control2: p(2.169, 8.437))
+        path.addCurve(to: p(2.632, 4.944), control1: p(2.274, 6.003), control2: p(2.47, 5.367))
+        path.addCurve(to: p(3.527, 3.562), control1: p(2.848, 4.383), control2: p(3.109, 3.984))
+        path.addCurve(to: p(4.906, 2.662), control1: p(3.946, 3.141), control2: p(4.346, 2.881))
+        path.addCurve(to: p(7.133, 2.245), control1: p(5.329, 2.497), control2: p(5.963, 2.301))
+        path.addCurve(to: p(11.981, 2.166), control1: p(8.398, 2.185), control2: p(8.777, 2.173))
+        path.addCurve(to: p(16.83, 2.227), control1: p(15.184, 2.159), control2: p(15.564, 2.171))
+        path.addCurve(to: p(19.058, 2.635), control1: p(17.999, 2.277), control2: p(18.635, 2.471))
+        path.addCurve(to: p(20.44, 3.53), control1: p(19.619, 2.851), control2: p(20.018, 3.11))
+        path.addCurve(to: p(21.34, 4.908), control1: p(20.861, 3.949), control2: p(21.121, 4.347))
+        path.addCurve(to: p(21.757, 7.135), control1: p(21.505, 5.33), control2: p(21.702, 5.964))
+        path.addCurve(to: p(21.837, 11.983), control1: p(21.817, 8.4), control2: p(21.831, 8.78))
+        path.addCurve(to: p(21.776, 16.831), control1: p(21.842, 15.186), control2: p(21.831, 15.566))
+        path.addCurve(to: p(21.368, 19.06), control1: p(21.725, 18.001), control2: p(21.531, 18.636))
+        path.addCurve(to: p(20.472, 20.441), control1: p(21.152, 19.62), control2: p(20.891, 20.02))
+        path.addCurve(to: p(19.094, 21.341), control1: p(20.053, 20.863), control2: p(19.654, 21.123))
+        path.addCurve(to: p(16.868, 21.759), control1: p(18.672, 21.506), control2: p(18.036, 21.703))
+        path.addCurve(to: p(12.018, 21.838), control1: p(15.602, 21.818), control2: p(15.223, 21.831))
+        path.addCurve(to: p(7.17, 21.777), control1: p(8.814, 21.845), control2: p(8.436, 21.832))
+        path.move(to: p(16.953, 5.586))
+        path.addCurve(to: p(17.111, 6.24), control1: p(16.953, 5.814), control2: p(17.008, 6.038))
+        path.addCurve(to: p(17.549, 6.75), control1: p(17.215, 6.442), control2: p(17.365, 6.617))
+        path.addCurve(to: p(18.17, 7.007), control1: p(17.733, 6.884), control2: p(17.946, 6.972))
+        path.addCurve(to: p(18.84, 6.953), control1: p(18.395, 7.042), control2: p(18.624, 7.023))
+        path.addCurve(to: p(19.413, 6.6), control1: p(19.056, 6.882), control2: p(19.253, 6.761))
+        path.addCurve(to: p(19.763, 6.026), control1: p(19.574, 6.439), control2: p(19.694, 6.243))
+        path.addCurve(to: p(19.815, 5.356), control1: p(19.833, 5.81), control2: p(19.851, 5.58))
+        path.addCurve(to: p(19.556, 4.735), control1: p(19.779, 5.132), control2: p(19.69, 4.919))
+        path.addCurve(to: p(19.044, 4.3), control1: p(19.422, 4.552), control2: p(19.247, 4.402))
+        path.addCurve(to: p(18.39, 4.144), control1: p(18.841, 4.197), control2: p(18.617, 4.144))
+        path.addCurve(to: p(17.671, 4.338), control1: p(18.137, 4.145), control2: p(17.889, 4.212))
+        path.addCurve(to: p(17.145, 4.866), control1: p(17.452, 4.465), control2: p(17.271, 4.647))
+        path.addCurve(to: p(16.953, 5.586), control1: p(17.019, 5.085), control2: p(16.953, 5.334))
+        path.move(to: p(5.838, 12.012))
+        path.addCurve(to: p(12.011, 18.161), control1: p(5.845, 15.415), control2: p(8.609, 18.168))
+        path.addCurve(to: p(18.162, 11.988), control1: p(15.414, 18.155), control2: p(18.169, 15.391))
+        path.addCurve(to: p(11.988, 5.838), control1: p(18.156, 8.585), control2: p(15.391, 5.831))
+        path.addCurve(to: p(5.838, 12.012), control1: p(8.585, 5.845), control2: p(5.832, 8.609))
+        path.move(to: p(8.0, 12.008))
+        path.addCurve(to: p(8.532, 10.007), control1: p(7.999, 11.306), control2: p(8.182, 10.615))
+        path.addCurve(to: p(9.993, 8.54), control1: p(8.882, 9.398), control2: p(9.386, 8.892))
+        path.addCurve(to: p(11.992, 8.0), control1: p(10.6, 8.187), control2: p(11.29, 8.001))
+        path.addCurve(to: p(13.993, 8.532), control1: p(12.694, 7.998), control2: p(13.384, 8.182))
+        path.addCurve(to: p(15.46, 9.993), control1: p(14.602, 8.882), control2: p(15.108, 9.386))
+        path.addCurve(to: p(16.0, 11.992), control1: p(15.812, 10.6), control2: p(15.999, 11.29))
+        path.addCurve(to: p(15.468, 13.993), control1: p(16.001, 12.694), control2: p(15.818, 13.384))
+        path.addCurve(to: p(14.007, 15.46), control1: p(15.118, 14.602), control2: p(14.614, 15.108))
+        path.addCurve(to: p(12.008, 16.0), control1: p(13.4, 15.812), control2: p(12.71, 15.998))
+        path.addCurve(to: p(10.477, 15.698), control1: p(11.483, 16.001), control2: p(10.962, 15.899))
+        path.addCurve(to: p(9.177, 14.834), control1: p(9.991, 15.498), control2: p(9.549, 15.205))
+        path.addCurve(to: p(8.307, 13.538), control1: p(8.805, 14.463), control2: p(8.509, 14.023))
+        path.addCurve(to: p(8.0, 12.008), control1: p(8.105, 13.053), control2: p(8.001, 12.533))
+        return path
+    }
 }
 
 private struct LogoShape: Shape {
-    enum Kind { case youtube, youtubePlay, x, reddit }
+    enum Kind { case youtube, youtubePlay, x, reddit, instagram }
     let kind: Kind
 
     func path(in rect: CGRect) -> Path {
@@ -146,12 +235,14 @@ private struct LogoShape: Shape {
         case .youtubePlay: return PlatformLogoPaths.youtubePlay(in: rect)
         case .x: return PlatformLogoPaths.x(in: rect)
         case .reddit: return PlatformLogoPaths.reddit(in: rect)
+        case .instagram: return PlatformLogoPaths.instagram(in: rect)
         }
     }
 }
 
 /// The logo as it appears on the platform: red YouTube button with a white play
-/// arrow, white X on the dark theme, white Snoo on the orange Reddit bubble.
+/// arrow, white X on the dark theme, white Snoo on the orange Reddit bubble,
+/// the Instagram camera in its gradient and LinkedIn's blue "in" tile.
 struct PlatformLogo: View {
     let platform: SourcePlatform
 
@@ -170,6 +261,33 @@ struct PlatformLogo: View {
             ZStack {
                 Circle().fill(Color.white).scaleEffect(21.0 / 24.0)
                 LogoShape(kind: .reddit).fill(Color(red: 1, green: 69 / 255, blue: 0))
+            }
+        case .instagram:
+            LogoShape(kind: .instagram)
+                .fill(LinearGradient(
+                    stops: [
+                        .init(color: Color(red: 254 / 255, green: 218 / 255, blue: 117 / 255), location: 0),
+                        .init(color: Color(red: 250 / 255, green: 126 / 255, blue: 30 / 255), location: 0.3),
+                        .init(color: Color(red: 214 / 255, green: 41 / 255, blue: 118 / 255), location: 0.55),
+                        .init(color: Color(red: 150 / 255, green: 47 / 255, blue: 191 / 255), location: 0.8),
+                        .init(color: Color(red: 79 / 255, green: 91 / 255, blue: 213 / 255), location: 1),
+                    ],
+                    startPoint: .bottomLeading,
+                    endPoint: .topTrailing
+                ))
+        case .linkedin:
+            GeometryReader { geo in
+                let s = min(geo.size.width, geo.size.height) / 24
+                ZStack {
+                    RoundedRectangle(cornerRadius: 4 * s)
+                        .fill(Color(red: 10 / 255, green: 102 / 255, blue: 194 / 255))
+                        .frame(width: 22 * s, height: 22 * s)
+                    Text("in")
+                        .font(.system(size: 14.5 * s, weight: .bold))
+                        .foregroundStyle(Color.white)
+                        .offset(y: 0.4 * s)
+                }
+                .frame(width: geo.size.width, height: geo.size.height)
             }
         }
     }
