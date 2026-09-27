@@ -7,6 +7,7 @@ enum AppRoute: Hashable {
     case faq
     case privacy
     case terms
+    case following
 }
 
 struct MainTabView: View {
@@ -69,6 +70,8 @@ private struct AppRoutesModifier: ViewModifier {
                     PrivacyPolicyView()
                 case .terms:
                     TermsView()
+                case .following:
+                    FollowingView()
                 }
             }
     }
