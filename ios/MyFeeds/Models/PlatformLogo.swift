@@ -246,7 +246,25 @@ private struct LogoShape: Shape {
 struct PlatformLogo: View {
     let platform: SourcePlatform
 
+    /// Each logo's scale inside its box, so they all look the same size: the X
+    /// glyph fills its corners and the Instagram camera is a full square, while
+    /// the YouTube button is only 17 of 24 tall. Same values as web and Expo.
+    private var scale: CGFloat {
+        switch platform {
+        case .youtube: return 1
+        case .x: return 0.68
+        case .instagram: return 0.82
+        case .linkedin: return 0.84
+        case .reddit: return 0.92
+        }
+    }
+
     var body: some View {
+        artwork.scaleEffect(scale)
+    }
+
+    @ViewBuilder
+    private var artwork: some View {
         switch platform {
         case .youtube:
             ZStack {
@@ -256,7 +274,6 @@ struct PlatformLogo: View {
         case .x:
             LogoShape(kind: .x)
                 .fill(Theme.textPrimary)
-                .scaleEffect(0.8)
         case .reddit:
             ZStack {
                 Circle().fill(Color.white).scaleEffect(21.0 / 24.0)
@@ -279,13 +296,13 @@ struct PlatformLogo: View {
             GeometryReader { geo in
                 let s = min(geo.size.width, geo.size.height) / 24
                 ZStack {
-                    RoundedRectangle(cornerRadius: 4 * s)
+                    RoundedRectangle(cornerRadius: 4.5 * s)
                         .fill(Color(red: 10 / 255, green: 102 / 255, blue: 194 / 255))
-                        .frame(width: 22 * s, height: 22 * s)
+                        .frame(width: 24 * s, height: 24 * s)
                     Text("in")
-                        .font(.system(size: 14.5 * s, weight: .bold))
+                        .font(.system(size: 16 * s, weight: .bold))
                         .foregroundStyle(Color.white)
-                        .offset(y: 0.4 * s)
+                        .offset(y: 0.5 * s)
                 }
                 .frame(width: geo.size.width, height: geo.size.height)
             }
