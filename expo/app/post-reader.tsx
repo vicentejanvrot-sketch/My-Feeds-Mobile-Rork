@@ -77,17 +77,38 @@ function escapeAttr(value: string): string {
   return value.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;");
 }
 
+// Instagram videos are stored behind our media-proxy, but the CDN plays them
+// fine straight from Instagram as long as no Referer is sent. Going direct
+// avoids the extra hop on every chunk, which made playback pause after the
+// first second. The proxied link stays as a fallback.
+function directVideoUrl(url: string | null | undefined): string | null {
+  if (!url) return null;
+  try {
+    const parsed = new URL(url);
+    if (!parsed.pathname.endsWith("/functions/v1/media-proxy")) return null;
+    const inner = new URL(parsed.searchParams.get("u") ?? "");
+    const host = inner.hostname.toLowerCase();
+    return host.endsWith(".cdninstagram.com") || host.endsWith(".fbcdn.net") ? inner.toString() : null;
+  } catch {
+    return null;
+  }
+}
+
 // Plays a post's video in place, like on X and Reddit. iOS plays the HLS
 // stream; Android gets the MP4. No Referer is sent: X's video server
 // refuses requests that carry another site's address.
 function PostVideo({ media }: { media: PostEmbed }) {
-  const src =
+  const main =
     (RNPlatform.OS === "ios" ? media.hls_url || media.video_url : media.video_url || media.hls_url) || "";
-  if (!src) return null;
+  if (!main) return null;
+  const direct = directVideoUrl(media.video_url);
+  const sources = (direct ? [direct, main] : [main])
+    .map((src) => `<source src="${escapeAttr(src)}">`)
+    .join("");
   const poster = media.url || media.image || "";
   const html = `<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"><meta name="referrer" content="no-referrer">
 <style>html,body{margin:0;padding:0;background:#000;height:100%}video{width:100%;height:100%;object-fit:contain;background:#000}</style></head>
-<body><video src="${escapeAttr(src)}"${poster ? ` poster="${escapeAttr(poster)}"` : ""} controls playsinline webkit-playsinline preload="metadata"></video></body></html>`;
+<body><video${poster ? ` poster="${escapeAttr(poster)}"` : ""} controls playsinline webkit-playsinline preload="auto">${sources}</video></body></html>`;
   return (
     <View style={styles.video}>
       <WebView
