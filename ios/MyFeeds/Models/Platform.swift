@@ -247,9 +247,22 @@ nonisolated struct ItemMedia: Codable, Hashable, Sendable {
     /// HLS first (it has sound for Reddit videos), MP4 otherwise.
     var playableURL: URL? {
         for raw in [hlsUrl, videoUrl] {
-            if let raw, !raw.isEmpty, let url = URL(string: raw) { return url }
+            if let raw, !raw.isEmpty, let url = URL(string: raw) { return Self.directVideoURL(url) ?? url }
         }
         return nil
+    }
+
+    /// Instagram videos are stored behind our media-proxy, but AVPlayer sends
+    /// no Referer, so Instagram's CDN serves them directly. Going direct avoids
+    /// the extra hop on every chunk, which made playback pause after a second.
+    private static func directVideoURL(_ url: URL) -> URL? {
+        guard url.path.hasSuffix("/functions/v1/media-proxy"),
+              let inner = URLComponents(url: url, resolvingAgainstBaseURL: false)?
+                .queryItems?.first(where: { $0.name == "u" })?.value,
+              let direct = URL(string: inner),
+              let host = direct.host?.lowercased(),
+              host.hasSuffix(".cdninstagram.com") || host.hasSuffix(".fbcdn.net") else { return nil }
+        return direct
     }
 
     var isEmbed: Bool { type == "quote" || type == "article" }
