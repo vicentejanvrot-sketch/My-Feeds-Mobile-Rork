@@ -341,7 +341,7 @@ function PersonRow({ person, agentNames, onPress }: { person: Person; agentNames
         </View>
         <Text style={styles.muted}>{personSummary(person, platformLabel)}</Text>
       </View>
-      <ChevronRight size={18} color={Colors.textMuted} />
+      <ChevronRight size={18} color={Colors.textMuted} style={styles.rowChevron} />
     </Pressable>
   );
 }
@@ -501,42 +501,48 @@ export default function FollowingScreen() {
             <ArrowLeft size={20} color={Colors.textSecondary} />
           </Pressable>
           <Text style={styles.heading}>Following</Text>
-          <Pressable
-            disabled={isScanning || toScan.length === 0}
-            onPress={() => void runScan(toScan)}
-            style={({ pressed }) => [
-              styles.scanBtn,
-              (isScanning || toScan.length === 0) && styles.scanBtnDisabled,
-              pressed && styles.pressed,
-            ]}
-          >
-            {isScanning ? <ActivityIndicator size="small" color={Colors.white} /> : <ScanSearch size={15} color={Colors.white} />}
-            <Text style={styles.scanText}>{isScanning ? "Checking" : toScan.length ? "Check " + toScan.length : "All checked"}</Text>
-          </Pressable>
+          {isScanning || (!loading && toScan.length > 0) ? (
+            <Pressable
+              disabled={isScanning}
+              onPress={() => void runScan(toScan)}
+              style={({ pressed }) => [styles.scanBtn, (pressed || isScanning) && styles.pressed]}
+              accessibilityLabel={isScanning ? "Checking sources" : "Check " + toScan.length + " sources"}
+            >
+              {isScanning ? <ActivityIndicator size="small" color={Colors.white} /> : <ScanSearch size={15} color={Colors.white} />}
+              <Text style={styles.scanText}>{isScanning ? "Checking" : "Check " + toScan.length}</Text>
+            </Pressable>
+          ) : null}
         </View>
         <Text style={[styles.muted, styles.subtitle]}>Everyone you follow across your agents, and where else they are.</Text>
 
-        <View style={styles.segment}>
-          <Pressable onPress={() => setTab("all")} style={[styles.segmentBtn, tab === "all" && styles.segmentBtnActive]}>
-            <Text style={[styles.segmentText, tab === "all" && styles.segmentTextActive]}>Everyone</Text>
-          </Pressable>
-          <Pressable onPress={() => setTab("gaps")} style={[styles.segmentBtn, tab === "gaps" && styles.segmentBtnActive]}>
-            <Text style={[styles.segmentText, tab === "gaps" && styles.segmentTextActive]}>{"Gaps · " + gapCount}</Text>
-          </Pressable>
-        </View>
+        <View style={styles.controlsRow}>
+          <View style={styles.segment}>
+            <Pressable onPress={() => setTab("all")} style={[styles.segmentBtn, tab === "all" && styles.segmentBtnActive]}>
+              <Text style={[styles.segmentText, tab === "all" && styles.segmentTextActive]} numberOfLines={1}>Everyone</Text>
+            </Pressable>
+            <Pressable onPress={() => setTab("gaps")} style={[styles.segmentBtn, tab === "gaps" && styles.segmentBtnActive]}>
+              <Text style={[styles.segmentText, tab === "gaps" && styles.segmentTextActive]} numberOfLines={1}>{"Gaps · " + gapCount}</Text>
+            </Pressable>
+          </View>
 
-        <View style={styles.searchBox}>
-          <Search size={16} color={Colors.textMuted} />
-          <TextInput
-            value={query}
-            onChangeText={setQuery}
-            placeholder="Search people"
-            placeholderTextColor={Colors.textMuted}
-            style={styles.searchInput}
-            autoCapitalize="none"
-            autoCorrect={false}
-            accessibilityLabel="Search people"
-          />
+          <View style={styles.searchBox}>
+            <Search size={15} color={Colors.textMuted} />
+            <TextInput
+              value={query}
+              onChangeText={setQuery}
+              placeholder="Search people"
+              placeholderTextColor={Colors.textMuted}
+              style={styles.searchInput}
+              autoCapitalize="none"
+              autoCorrect={false}
+              accessibilityLabel="Search people"
+            />
+            {query ? (
+              <Pressable onPress={() => setQuery("")} hitSlop={8} accessibilityLabel="Clear search">
+                <X size={15} color={Colors.textMuted} />
+              </Pressable>
+            ) : null}
+          </View>
         </View>
 
         {progress ? (
@@ -666,7 +672,6 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     backgroundColor: Colors.accent,
   },
-  scanBtnDisabled: { backgroundColor: Colors.input },
   scanText: { color: Colors.white, fontSize: 13, fontWeight: "700" as const },
   pressed: { opacity: 0.8 },
   flex1: { flex: 1 },
@@ -674,28 +679,31 @@ const styles = StyleSheet.create({
   gap6: { gap: 6 },
   gap12: { gap: 12 },
   muted: { fontSize: 12, color: Colors.textSecondary, lineHeight: 17 },
+  // Tabs and search share one row, like the web.
+  controlsRow: { flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 14 },
+  // Web tabs: muted track, active tab in the page background colour.
   segment: {
     flexDirection: "row",
     backgroundColor: Colors.input,
-    borderRadius: 10,
+    borderRadius: 9,
     padding: 3,
-    marginBottom: 12,
   },
-  segmentBtn: { flex: 1, height: 34, borderRadius: 8, alignItems: "center", justifyContent: "center" },
-  segmentBtnActive: { backgroundColor: Colors.card, borderWidth: StyleSheet.hairlineWidth, borderColor: Colors.border },
+  segmentBtn: { height: 30, paddingHorizontal: 12, borderRadius: 7, alignItems: "center", justifyContent: "center" },
+  segmentBtnActive: { backgroundColor: Colors.background },
   segmentText: { fontSize: 13, fontWeight: "600" as const, color: Colors.textSecondary },
   segmentTextActive: { color: Colors.textPrimary },
   searchBox: {
+    flex: 1,
+    minWidth: 0,
     flexDirection: "row",
     alignItems: "center",
-    gap: 8,
-    height: 40,
-    paddingHorizontal: 12,
-    borderRadius: 10,
+    gap: 6,
+    height: 36,
+    paddingHorizontal: 10,
+    borderRadius: 9,
     backgroundColor: Colors.input,
-    borderWidth: 1,
+    borderWidth: StyleSheet.hairlineWidth,
     borderColor: Colors.border,
-    marginBottom: 14,
   },
   searchInput: { flex: 1, fontSize: 14, color: Colors.textPrimary, paddingVertical: 0 },
   progressBox: { gap: 6, marginBottom: 14 },
@@ -744,26 +752,27 @@ const styles = StyleSheet.create({
   skippedNote: { marginTop: 10 },
   row: {
     flexDirection: "row",
-    alignItems: "center",
+    alignItems: "flex-start",
     gap: 12,
-    paddingHorizontal: 14,
+    paddingHorizontal: 16,
     paddingVertical: 12,
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: Colors.border,
   },
   rowPressed: { backgroundColor: Colors.input },
+  rowChevron: { marginTop: 2 },
   rowTitle: { flexDirection: "row", alignItems: "baseline", gap: 8 },
-  rowName: { flexShrink: 1, fontSize: 15, fontWeight: "700" as const, color: Colors.textPrimary },
+  rowName: { flexShrink: 1, fontSize: 15, fontWeight: "600" as const, color: Colors.textPrimary },
   rowAgents: { flexShrink: 1, fontSize: 11, color: Colors.textMuted },
   chipWrap: { flexDirection: "row", flexWrap: "wrap", gap: 6 },
   chip: {
     flexDirection: "row",
     alignItems: "center",
     gap: 5,
-    height: 28,
-    paddingLeft: 4,
+    height: 26,
+    paddingLeft: 6,
     paddingRight: 10,
-    borderRadius: 14,
+    borderRadius: 13,
     borderWidth: 1,
   },
   chipFollowing: { backgroundColor: Colors.input, borderColor: Colors.input },
