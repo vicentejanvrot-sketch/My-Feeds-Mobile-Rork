@@ -91,15 +91,7 @@ struct PostReaderView: View {
                     } else if photos.count > 1 {
                         PhotoCarousel(urls: photos)
                     } else if let imageURL = item.postImageURL {
-                        AsyncImage(url: imageURL) { phase in
-                            if let image = phase.image {
-                                image.resizable().aspectRatio(contentMode: .fit)
-                            } else {
-                                Theme.card.aspectRatio(16 / 9, contentMode: .fit)
-                            }
-                        }
-                        .frame(maxWidth: .infinity)
-                        .clipShape(.rect(cornerRadius: 12))
+                        ExpandablePhoto(url: imageURL)
                     }
 
                     if let quote = item.quoteEmbed {
@@ -718,8 +710,20 @@ private struct MediaCarousel: View {
     let slides: [ItemMedia]
     let progressId: String?
     @State private var index = 0
+    @State private var viewer: PhotoViewerRequest?
 
     private var firstVideoIndex: Int? { slides.firstIndex { $0.playableURL != nil } }
+
+    /// The carousel's photos (videos have their own full screen button).
+    private var photoURLs: [URL] {
+        slides.compactMap { $0.playableURL == nil ? Self.photoURL($0.url) : nil }
+    }
+
+    /// Opens the full screen viewer on the photo at this carousel page.
+    private func openPhoto(at offset: Int) {
+        let photoIndex = slides[..<offset].filter { $0.playableURL == nil && Self.photoURL($0.url) != nil }.count
+        viewer = PhotoViewerRequest(urls: photoURLs, index: photoIndex)
+    }
 
     var body: some View {
         VStack(spacing: 8) {
@@ -758,6 +762,9 @@ private struct MediaCarousel: View {
             .animation(.easeOut(duration: 0.2), value: index)
             .accessibilityHidden(true)
         }
+        .fullScreenCover(item: $viewer) { request in
+            PhotoViewer(urls: request.urls, index: request.index)
+        }
     }
 
     @ViewBuilder
@@ -774,6 +781,11 @@ private struct MediaCarousel: View {
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .contentShape(Rectangle())
+            .onTapGesture { openPhoto(at: offset) }
+            .overlay(alignment: .topLeading) {
+                ExpandButton { openPhoto(at: offset) }
+            }
         } else {
             Color.black
         }
@@ -783,6 +795,157 @@ private struct MediaCarousel: View {
         guard var raw, !raw.isEmpty else { return nil }
         if raw.hasPrefix("http://") { raw = "https://" + raw.dropFirst("http://".count) }
         return URL(string: raw)
+    }
+}
+
+// MARK: - Full screen photos
+
+private struct PhotoViewerRequest: Identifiable {
+    let id = UUID()
+    let urls: [URL]
+    let index: Int
+}
+
+/// Top-left expand button on post photos, like the full screen button AVKit
+/// shows on post videos.
+private struct ExpandButton: View {
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            Image(systemName: "arrow.up.left.and.arrow.down.right")
+                .font(.system(size: 13, weight: .bold))
+                .foregroundStyle(.white)
+                .frame(width: 32, height: 32)
+                .background(.black.opacity(0.6))
+                .clipShape(Circle())
+        }
+        .buttonStyle(.plain)
+        .padding(10)
+        .accessibilityLabel("Full screen")
+    }
+}
+
+/// A post's single photo. Tapping it or the expand button opens it full screen.
+private struct ExpandablePhoto: View {
+    let url: URL
+    @State private var showViewer = false
+
+    var body: some View {
+        AsyncImage(url: url) { phase in
+            if let image = phase.image {
+                image.resizable().aspectRatio(contentMode: .fit)
+            } else {
+                Theme.card.aspectRatio(16 / 9, contentMode: .fit)
+            }
+        }
+        .frame(maxWidth: .infinity)
+        .clipShape(.rect(cornerRadius: 12))
+        .contentShape(Rectangle())
+        .onTapGesture { showViewer = true }
+        .overlay(alignment: .topLeading) {
+            ExpandButton { showViewer = true }
+        }
+        .fullScreenCover(isPresented: $showViewer) {
+            PhotoViewer(urls: [url], index: 0)
+        }
+    }
+}
+
+/// Full screen photo viewer: swipe between the post's photos, pinch or
+/// double-tap to zoom, × to close.
+private struct PhotoViewer: View {
+    let urls: [URL]
+    @State var index: Int
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        ZStack(alignment: .topTrailing) {
+            Color.black.ignoresSafeArea()
+            TabView(selection: $index) {
+                ForEach(Array(urls.enumerated()), id: \.offset) { offset, url in
+                    ZoomablePhoto(url: url)
+                        .tag(offset)
+                }
+            }
+            .tabViewStyle(.page(indexDisplayMode: urls.count > 1 ? .always : .never))
+            .ignoresSafeArea()
+
+            HStack(spacing: 10) {
+                if urls.count > 1 {
+                    Text("\(index + 1) / \(urls.count)")
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundStyle(.white)
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 6)
+                        .background(.black.opacity(0.6))
+                        .clipShape(Capsule())
+                }
+                Button {
+                    dismiss()
+                } label: {
+                    Image(systemName: "xmark")
+                        .font(.system(size: 15, weight: .bold))
+                        .foregroundStyle(.white)
+                        .frame(width: 36, height: 36)
+                        .background(.black.opacity(0.6))
+                        .clipShape(Circle())
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("Close")
+            }
+            .padding(16)
+        }
+        .statusBarHidden()
+    }
+}
+
+private struct ZoomablePhoto: View {
+    let url: URL
+    @State private var scale: CGFloat = 1
+    @State private var lastScale: CGFloat = 1
+
+    var body: some View {
+        AsyncImage(url: url) { phase in
+            if let image = phase.image {
+                image.resizable().aspectRatio(contentMode: .fit)
+            } else {
+                ProgressView().tint(.white)
+            }
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .scaleEffect(scale)
+        .gesture(
+            MagnifyGesture()
+                .onChanged { value in scale = min(max(lastScale * value.magnification, 1), 4) }
+                .onEnded { _ in lastScale = scale }
+        )
+        .onTapGesture(count: 2) {
+            withAnimation(.easeOut(duration: 0.2)) {
+                scale = scale > 1 ? 1 : 2
+                lastScale = scale
+            }
+        }
+    }
+}
+
+/// AVKit's own player view, inline. Unlike SwiftUI's VideoPlayer it has the
+/// full screen button (and turns to landscape there), like the YouTube player.
+private struct InlinePlayerView: UIViewControllerRepresentable {
+    let player: AVPlayer
+
+    func makeUIViewController(context: Context) -> AVPlayerViewController {
+        let controller = AVPlayerViewController()
+        controller.player = player
+        controller.showsPlaybackControls = true
+        controller.entersFullScreenWhenPlaybackBegins = false
+        controller.exitsFullScreenWhenPlaybackEnds = false
+        controller.videoGravity = .resizeAspect
+        return controller
+    }
+
+    func updateUIViewController(_ controller: AVPlayerViewController, context: Context) {
+        if controller.player !== player { controller.player = player }
     }
 }
 
@@ -831,7 +994,7 @@ private struct PostVideoPlayer: View {
         ZStack {
             Color.black
             if let player {
-                VideoPlayer(player: player)
+                InlinePlayerView(player: player)
             }
         }
         .aspectRatio(16 / 9, contentMode: .fit)
@@ -927,7 +1090,7 @@ private struct PostVideoPlayer: View {
                 try? await Task.sleep(for: .milliseconds(200))
             }
             // Only jump if the user hasn't already moved.
-            guard player.currentTime().seconds < VideoProgress.minResumeSeconds else { return }
+            guard player.currentTime().seconds < 1 else { return }
             _ = await player.seek(to: CMTime(seconds: resumeAt, preferredTimescale: 600))
         }
     }
