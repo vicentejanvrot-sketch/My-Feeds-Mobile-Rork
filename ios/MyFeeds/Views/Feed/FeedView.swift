@@ -38,7 +38,11 @@ struct FeedView: View {
         agents.sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
     }
 
-    private var filteredItems: [FeedItem] {
+    // Counts work like the web feed: each number matches what the feed shows
+    // after picking that option, under the other filters currently applied.
+
+    /// Search, agent and status filters. The channel counts come from this list.
+    private var statusSearchItems: [FeedItem] {
         var result = items
         let query = search.trimmingCharacters(in: .whitespaces).lowercased()
         if !query.isEmpty {
@@ -53,12 +57,20 @@ struct FeedView: View {
         if let agentFilter {
             result = result.filter { $0.agentId == agentFilter }
         }
-        if let channelFilter {
-            result = result.filter { $0.channelId == channelFilter }
-        }
         if let statusFilter {
             result = result.filter { $0.status == statusFilter }
         }
+        return result
+    }
+
+    /// Every filter except the platform chips. The chip counts come from this list.
+    private var baseFilteredItems: [FeedItem] {
+        guard let channelFilter else { return statusSearchItems }
+        return statusSearchItems.filter { $0.channelId == channelFilter }
+    }
+
+    private var filteredItems: [FeedItem] {
+        var result = baseFilteredItems
         if let platformFilter {
             result = result.filter { $0.sourcePlatform == platformFilter }
         }
@@ -73,9 +85,17 @@ struct FeedView: View {
         return result
     }
 
-    /// Platforms that have at least one item. The chips only show when there is more than one.
+    /// Items per platform under the current filters (a platform at 0 has no chip).
+    private var platformCounts: [SourcePlatform: Int] {
+        var counts: [SourcePlatform: Int] = [:]
+        for item in baseFilteredItems { counts[item.sourcePlatform, default: 0] += 1 }
+        return counts
+    }
+
+    /// Platforms with at least one item under the current filters. The chips only show when there is more than one.
     private var presentPlatforms: [SourcePlatform] {
-        SourcePlatform.allCases.filter { platform in items.contains { $0.sourcePlatform == platform } }
+        let counts = platformCounts
+        return SourcePlatform.allCases.filter { (counts[$0] ?? 0) > 0 }
     }
 
     /// Channels for the selected agent (deduped by channel_id), limited to the
@@ -91,9 +111,9 @@ struct FeedView: View {
         }
     }
 
-    /// Posts for one channel.
+    /// Posts for one channel under the current search, agent and status filters.
     private func channelItemCount(_ channelId: String) -> Int {
-        items.filter { $0.channelId == channelId }.count
+        statusSearchItems.filter { $0.channelId == channelId }.count
     }
 
     /// Badge on the Channel filter: how many channels are listed when it's on
@@ -124,6 +144,12 @@ struct FeedView: View {
         .task { await load() }
         // A chip whose platform doesn't include the selected channel: back to
         // All Channels, since that channel is no longer in the dropdown.
+        // The selected platform ran out of items, so its chip is gone: back to All.
+        .onChange(of: presentPlatforms) { _, platforms in
+            if let platformFilter, !platforms.contains(platformFilter) {
+                self.platformFilter = nil
+            }
+        }
         .onChange(of: platformFilter) { _, _ in
             if let channelFilter, !agentChannels.contains(where: { $0.channelId == channelFilter }) {
                 self.channelFilter = nil
@@ -186,12 +212,13 @@ struct FeedView: View {
 
     /// All / YouTube / X / Reddit, same chips as the web and Expo feeds.
     private var platformChips: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
+        let counts = platformCounts
+        let total = counts.values.reduce(0, +)
+        return ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 8) {
-                platformChip(platform: nil, label: "All · \(items.count)")
-                ForEach(presentPlatforms, id: \.self) { platform in
-                    let count = items.filter { $0.sourcePlatform == platform }.count
-                    platformChip(platform: platform, label: "\(platform.label) · \(count)")
+                platformChip(platform: nil, label: "All · \(total)")
+                ForEach(SourcePlatform.allCases.filter { (counts[$0] ?? 0) > 0 }, id: \.self) { platform in
+                    platformChip(platform: platform, label: "\(platform.label) · \(counts[platform] ?? 0)")
                 }
             }
             .padding(.horizontal, 16)
@@ -517,7 +544,7 @@ struct FeedView: View {
         // independently so a failure in optional agent/channel metadata never
         // leaves the iOS feed blank.
         do {
-            var fetched = try await service.fetchFeedItems(limit: 500)
+            var fetched = try await service.fetchFeedItems()
             // Keep statuses that are still being saved, so the reload can't
             // bring a just-watched video back for a moment.
             if !router.pendingStatuses.isEmpty {
