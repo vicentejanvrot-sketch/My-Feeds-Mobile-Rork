@@ -729,6 +729,26 @@ private struct FeedItemCard: View {
                     .padding(10)
                     .allowsHitTesting(false)
             }
+            .overlay(alignment: .topTrailing) {
+                // Carousel: the card shows the first photo/video; the count says how many are inside.
+                let count = item.carouselMedia.count
+                if count > 1 {
+                    HStack(spacing: 4) {
+                        Image(systemName: "square.on.square")
+                            .font(.system(size: 11, weight: .semibold))
+                        Text("\(count)")
+                            .font(.system(size: 12, weight: .semibold))
+                    }
+                    .foregroundStyle(.white)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(.black.opacity(0.6))
+                    .clipShape(Capsule())
+                    .padding(10)
+                    .allowsHitTesting(false)
+                    .accessibilityLabel("Carousel: \(count) photos and videos")
+                }
+            }
             .clipped()
     }
 
