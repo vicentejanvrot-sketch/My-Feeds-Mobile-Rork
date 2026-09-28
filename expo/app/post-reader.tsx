@@ -24,6 +24,7 @@ import {
   Check,
   Send,
   ThumbsUp,
+  Play,
 } from "lucide-react-native";
 import { Colors } from "@/constants/colors";
 import { supabase } from "@/lib/supabase";
@@ -286,6 +287,8 @@ export default function PostReaderScreen() {
   const video = embeds.find((m) => m.type !== "quote" && m.type !== "article" && (m.video_url || m.hls_url)) ?? null;
   // Carousels (Instagram, LinkedIn) swipe through every photo.
   const photos = embeds.filter((m) => m.type !== "video" && m.type !== "quote" && m.type !== "article" && !!m.url);
+  // Every photo and video in the post itself. More than one is a carousel.
+  const slides = embeds.filter((m) => m.type !== "quote" && m.type !== "article" && (!!m.url || !!m.video_url || !!m.hls_url));
   const image =
     photos[0]?.url ??
     (!quote ? item.thumbnail_url : null) ??
@@ -317,7 +320,9 @@ export default function PostReaderScreen() {
           <Text style={platform === "reddit" ? styles.body : styles.bodyLarge}>{item.body}</Text>
         ) : null}
 
-        {video ? (
+        {slides.length > 1 ? (
+          <MediaCarousel slides={slides} progressId={item.video_id} />
+        ) : video ? (
           <PostVideo media={video} progressId={item.video_id} />
         ) : photos.length > 1 ? (
           <PhotoCarousel urls={photos.map((p) => p.url)} />
@@ -547,6 +552,61 @@ function QuoteCard({ quote }: { quote: PostEmbed }) {
 }
 
 // Swipeable row of photos for Instagram and LinkedIn carousels.
+// Carousel posts (Instagram, LinkedIn, X with several photos): every photo and
+// video in the post, swiped one page at a time, with a "2 / 5" counter and dots.
+// Only the page on screen loads its video; the others show the poster with a
+// play icon. The first video keeps the resume position (same id as web and iOS).
+function MediaCarousel({ slides, progressId }: { slides: PostEmbed[]; progressId?: string | null }) {
+  const { width } = useWindowDimensions();
+  const pageWidth = Math.min(width, 720) - 32;
+  const [page, setPage] = useState(0);
+  const firstVideo = slides.findIndex((m) => !!(m.video_url || m.hls_url));
+  return (
+    <View style={{ gap: 6 }}>
+      <View>
+        <ScrollView
+          horizontal
+          pagingEnabled
+          showsHorizontalScrollIndicator={false}
+          onMomentumScrollEnd={(e) => setPage(Math.round(e.nativeEvent.contentOffset.x / pageWidth))}
+          style={{ width: pageWidth, borderRadius: 12 }}
+        >
+          {slides.map((m, i) => {
+            const isVideo = !!(m.video_url || m.hls_url);
+            const poster = m.url || m.image || "";
+            return (
+              <View key={i} style={[styles.carouselPage, { width: pageWidth }]}>
+                {isVideo && i === page ? (
+                  <PostVideo media={m} progressId={i === firstVideo ? progressId : null} />
+                ) : (
+                  <>
+                    {poster ? (
+                      <Image source={{ uri: poster }} style={styles.carouselImage} contentFit={isVideo ? "cover" : "contain"} />
+                    ) : null}
+                    {isVideo ? (
+                      <View style={styles.carouselPlay} pointerEvents="none">
+                        <Play size={30} color="#fff" fill="#fff" />
+                      </View>
+                    ) : null}
+                  </>
+                )}
+              </View>
+            );
+          })}
+        </ScrollView>
+        <View style={styles.carouselCounter} pointerEvents="none">
+          <Text style={styles.carouselCounterText}>{page + 1} / {slides.length}</Text>
+        </View>
+      </View>
+      <View style={styles.dots} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
+        {slides.map((_, i) => (
+          <View key={i} style={[styles.dot, i === page && styles.dotActive]} />
+        ))}
+      </View>
+    </View>
+  );
+}
+
 function PhotoCarousel({ urls }: { urls: string[] }) {
   const { width } = useWindowDimensions();
   const pageWidth = Math.min(width, 720) - 32;
@@ -674,6 +734,24 @@ const styles = StyleSheet.create({
   dots: { flexDirection: "row", justifyContent: "center", gap: 5 },
   dot: { width: 6, height: 6, borderRadius: 3, backgroundColor: Colors.border },
   dotActive: { backgroundColor: Colors.accent },
+  carouselPage: { aspectRatio: 1, backgroundColor: "#000", justifyContent: "center", alignItems: "center" },
+  carouselImage: { width: "100%", height: "100%" },
+  carouselPlay: {
+    ...StyleSheet.absoluteFillObject,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(0,0,0,0.25)",
+  },
+  carouselCounter: {
+    position: "absolute",
+    top: 10,
+    right: 10,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+    backgroundColor: "rgba(0,0,0,0.6)",
+  },
+  carouselCounterText: { color: "#fff", fontSize: 12, fontWeight: "600" },
   dateLineStrong: { color: Colors.textPrimary, fontWeight: "700" },
   video: { width: "100%", aspectRatio: 16 / 9, borderRadius: 12, overflow: "hidden", backgroundColor: "#000" },
   videoWeb: { flex: 1, backgroundColor: "#000" },
