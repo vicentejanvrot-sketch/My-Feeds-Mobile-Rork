@@ -199,9 +199,16 @@ final class SupabaseService {
 
     // MARK: - Mutations
 
+    /// Sets the status on this item and on every other copy of the same video or
+    /// post (it can be saved under more than one agent), so marking it once takes
+    /// it off every feed on every device. RLS keeps this to the user's own agents.
     func updateItemStatus(id: String, status: ItemStatus) async throws {
         try await db.from("items").update(["user_status": status.rawValue])
             .eq("id", value: id).execute()
+        if let videoId = try? await videoIds(forItemIds: [id]).first {
+            _ = try? await db.from("items").update(["user_status": status.rawValue])
+                .eq("video_id", value: videoId).execute()
+        }
     }
 
     /// Replace an analyzed duration with the authoritative value reported by
@@ -218,6 +225,28 @@ final class SupabaseService {
         guard !ids.isEmpty else { return }
         try await db.from("items").update(["user_status": status.rawValue])
             .in("id", values: ids).execute()
+        // Same for every other copy of those videos/posts.
+        guard let videoIds = try? await videoIds(forItemIds: ids), !videoIds.isEmpty else { return }
+        for chunk in stride(from: 0, to: videoIds.count, by: 200).map({ Array(videoIds[$0..<min($0 + 200, videoIds.count)]) }) {
+            _ = try? await db.from("items").update(["user_status": status.rawValue])
+                .in("video_id", values: chunk).execute()
+        }
+    }
+
+    /// Distinct video_ids of the given items, read in chunks to keep URLs short.
+    private func videoIds(forItemIds ids: [String]) async throws -> [String] {
+        var result: [String] = []
+        var seen = Set<String>()
+        for chunk in stride(from: 0, to: ids.count, by: 200).map({ Array(ids[$0..<min($0 + 200, ids.count)]) }) {
+            let rows: [ItemVideoIdRow] = try await db.from("items").select("video_id")
+                .in("id", values: chunk).execute().value
+            for row in rows {
+                if let videoId = row.videoId, !videoId.isEmpty, seen.insert(videoId).inserted {
+                    result.append(videoId)
+                }
+            }
+        }
+        return result
     }
 
     func upsertDefaultEmail(userId: String, email: String) async throws {
@@ -474,4 +503,9 @@ nonisolated struct VideoProgressUpsert: Codable, Sendable {
     var positionSeconds: Double
     var durationSeconds: Double
     var updatedAt: String
+}
+
+/// items.video_id, for giving every copy of a video/post the same status.
+nonisolated struct ItemVideoIdRow: Codable, Sendable {
+    var videoId: String?
 }
