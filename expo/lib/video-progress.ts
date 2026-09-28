@@ -6,13 +6,19 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { supabase } from "@/lib/supabase";
 
 export const POSITION_SAVE_INTERVAL_MS = 5000;
-// Same rules as the web and iOS apps: resume only from 5 s in, and a position
-// in the last 10 s counts as finished (cleared, never saved).
+// Same rules as the web and iOS apps: resume only from a few seconds in, and a
+// position in the last few seconds counts as finished (cleared, never saved).
+// Long videos use 5 s and 10 s; short clips (X, Instagram) get proportional
+// limits (10% / 5% of the length) so a 20-second clip still resumes.
 export const MIN_RESUME_SECONDS = 5;
 export const END_THRESHOLD_SECONDS = 10;
 
+export function minResumeSeconds(duration: number): number {
+  return duration > 0 ? Math.min(MIN_RESUME_SECONDS, duration * 0.1) : MIN_RESUME_SECONDS;
+}
+
 export function isNearEnd(position: number, duration: number): boolean {
-  return duration > 0 && position >= duration - END_THRESHOLD_SECONDS;
+  return duration > 0 && position >= duration - Math.min(END_THRESHOLD_SECONDS, duration * 0.05);
 }
 
 export interface SavedPosition {
