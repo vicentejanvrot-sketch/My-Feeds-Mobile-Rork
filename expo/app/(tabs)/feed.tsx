@@ -125,7 +125,7 @@ export default function FeedScreen() {
   );
 
   // Data
-  const items = useFeedItems(500);
+  const items = useFeedItems();
   const agents = useAgents();
   const channels = useChannelsAll();
   const updateStatus = useUpdateItemStatus();
@@ -133,7 +133,7 @@ export default function FeedScreen() {
   const [selectionMode, setSelectionMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(() => new Set());
 
-  useRealtimeInvalidation("items", ["feedItems", 500]);
+  useRealtimeInvalidation("items", ["feedItems", "all"]);
 
   // Filter state
   const [search, setSearch] = useState("");
@@ -185,19 +185,11 @@ export default function FeedScreen() {
   // Items
   const allItems = items.data ?? [];
 
-  // Channel → video count (from ALL items, not just displayed)
-  const channelCounts = useMemo(() => {
-    const map: Record<string, number> = {};
-    for (const it of allItems) {
-      if (it.channel_id) {
-        map[it.channel_id] = (map[it.channel_id] ?? 0) + 1;
-      }
-    }
-    return map;
-  }, [allItems]);
+  // Counts work like the web feed: each number matches what the feed shows
+  // after picking that option, under the other filters currently applied.
 
-  // Filter + sort
-  const filtered = useMemo(() => {
+  // Search, agent and status filters. The channel counts come from this list.
+  const statusSearchItems = useMemo(() => {
     let result = allItems;
 
     // Search: title, channel_name, short_summary, tags
@@ -214,24 +206,43 @@ export default function FeedScreen() {
       });
     }
 
-    // Platform filter
-    if (platformFilter !== "all") {
-      result = result.filter((it) => platformOf(it.platform) === platformFilter);
-    }
-
     // Agent filter
     if (agentFilter !== "all") {
       result = result.filter((it) => it.agent_id === agentFilter);
     }
 
-    // Channel filter
-    if (channelFilter !== "all") {
-      result = result.filter((it) => it.channel_id === channelFilter);
-    }
-
     // Status filter
     if (statusFilter !== "all") {
       result = result.filter((it) => (it.user_status ?? "not_watched") === statusFilter);
+    }
+
+    return result;
+  }, [allItems, search, agentFilter, statusFilter]);
+
+  // Every filter except the platform chips. The chip counts come from this list.
+  const baseFilteredItems = useMemo(() => {
+    if (channelFilter === "all") return statusSearchItems;
+    return statusSearchItems.filter((it) => it.channel_id === channelFilter);
+  }, [statusSearchItems, channelFilter]);
+
+  // Channel → item count under the search, agent and status filters
+  const channelCounts = useMemo(() => {
+    const map: Record<string, number> = {};
+    for (const it of statusSearchItems) {
+      if (it.channel_id) {
+        map[it.channel_id] = (map[it.channel_id] ?? 0) + 1;
+      }
+    }
+    return map;
+  }, [statusSearchItems]);
+
+  // Platform chip, then sort
+  const filtered = useMemo(() => {
+    let result = baseFilteredItems;
+
+    // Platform filter
+    if (platformFilter !== "all") {
+      result = result.filter((it) => platformOf(it.platform) === platformFilter);
     }
 
     // Sort
@@ -247,17 +258,25 @@ export default function FeedScreen() {
     // "recent" uses server order (by published_at desc)
 
     return result;
-  }, [allItems, search, agentFilter, channelFilter, statusFilter, sortMode, platformFilter]);
+  }, [baseFilteredItems, sortMode, platformFilter]);
 
-  // Items per platform; the chips only show when there is more than one platform.
+  // Items per platform under the current filters; the chips only show when
+  // there is more than one platform, and a platform at 0 has no chip.
   const platformCounts = useMemo(() => {
     const counts = new Map<Platform, number>();
-    for (const it of allItems) {
+    for (const it of baseFilteredItems) {
       const p = platformOf(it.platform);
       counts.set(p, (counts.get(p) ?? 0) + 1);
     }
     return counts;
-  }, [allItems]);
+  }, [baseFilteredItems]);
+
+  // The selected platform ran out of items, so its chip is gone: back to All.
+  useEffect(() => {
+    if (platformFilter !== "all" && !platformCounts.has(platformFilter)) {
+      setPlatformFilter("all");
+    }
+  }, [platformCounts, platformFilter]);
 
   // Actions
   const setStatus = useCallback(
@@ -480,7 +499,7 @@ export default function FeedScreen() {
               >
                 {p !== "all" ? <PlatformBadge platform={p as Platform} /> : null}
                 <Text style={[postPreviewStyles.chipText, active && postPreviewStyles.chipTextActive]}>
-                  {p === "all" ? `All · ${allItems.length}` : `${PLATFORM_META[p as Platform].label} · ${platformCounts.get(p as Platform)}`}
+                  {p === "all" ? `All · ${baseFilteredItems.length}` : `${PLATFORM_META[p as Platform].label} · ${platformCounts.get(p as Platform)}`}
                 </Text>
               </Pressable>
             );
