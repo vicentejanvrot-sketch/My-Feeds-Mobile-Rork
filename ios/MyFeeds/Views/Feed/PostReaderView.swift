@@ -84,7 +84,7 @@ struct PostReaderView: View {
 
                     let photos = item.postPhotoURLs
                     if let video = item.postVideo, let url = video.playableURL {
-                        PostVideoPlayer(url: url)
+                        PostVideoPlayer(url: url, progressId: item.videoId)
                     } else if photos.count > 1 {
                         PhotoCarousel(urls: photos)
                     } else if let imageURL = item.postImageURL {
@@ -735,9 +735,19 @@ private struct PhotoCarousel: View {
 
 /// Plays a post's video in place, like on X and Reddit. The player is created
 /// when the view appears and paused when it goes away.
+/// With a progressId (the item's video_id, e.g. "x:123") it resumes like YouTube
+/// videos: the position is saved every 5 s while playing, on pause, when the post
+/// closes and when the app goes to the background, on this phone and in the shared
+/// video_progress table, so web and Android pick up from the same spot.
 private struct PostVideoPlayer: View {
     let url: URL
+    var progressId: String? = nil
+
+    @Environment(VideoPrefs.self) private var prefs
+    @Environment(\.scenePhase) private var scenePhase
     @State private var player: AVPlayer?
+    @State private var trackTask: Task<Void, Never>?
+    @State private var clearedAtEnd = false
 
     var body: some View {
         ZStack {
@@ -750,8 +760,97 @@ private struct PostVideoPlayer: View {
         .frame(maxWidth: .infinity)
         .clipShape(.rect(cornerRadius: 12))
         .onAppear {
-            if player == nil { player = AVPlayer(url: url) }
+            if player == nil {
+                let newPlayer = AVPlayer(url: url)
+                player = newPlayer
+                resume(newPlayer)
+            }
+            if trackTask == nil, let player { trackTask = track(player) }
         }
-        .onDisappear { player?.pause() }
+        .onDisappear {
+            player?.pause()
+            trackTask?.cancel()
+            trackTask = nil
+            persistPosition()
+        }
+        .onChange(of: scenePhase) { _, phase in
+            if phase != .active { persistPosition() }
+        }
+    }
+
+    /// Checks once a second: saves every 5 s while playing, and right after a pause.
+    private func track(_ player: AVPlayer) -> Task<Void, Never> {
+        Task {
+            var wasPlaying = false
+            var secondsSinceSave = 0
+            while !Task.isCancelled {
+                try? await Task.sleep(for: .seconds(1))
+                let playing = player.timeControlStatus == .playing
+                if playing {
+                    secondsSinceSave += 1
+                    if secondsSinceSave >= 5 {
+                        secondsSinceSave = 0
+                        persistPosition()
+                    }
+                } else if wasPlaying {
+                    persistPosition()
+                }
+                wasPlaying = playing
+            }
+        }
+    }
+
+    private func persistPosition() {
+        guard let progressId, let player, let item = player.currentItem else { return }
+        let time = player.currentTime().seconds
+        let duration = item.duration.seconds
+        guard time.isFinite, duration.isFinite, duration > 0, time > 0 else { return }
+        if VideoProgress.isNearEnd(position: time, duration: duration) {
+            // Finished: forget it here and everywhere, so it starts over next time.
+            if !clearedAtEnd {
+                clearedAtEnd = true
+                prefs.clearPosition(videoId: progressId)
+                Task { try? await SupabaseService.shared.deleteVideoProgress(videoId: progressId) }
+            }
+            return
+        }
+        clearedAtEnd = false
+        let now = Date()
+        prefs.savePosition(videoId: progressId, time: time, duration: duration, updatedAt: now)
+        Task {
+            try? await SupabaseService.shared.saveVideoProgress(
+                videoId: progressId,
+                position: time,
+                duration: duration,
+                updatedAt: now
+            )
+        }
+    }
+
+    /// Seeks to where the user stopped, using whichever copy is newer: this
+    /// phone's or the shared one (saved on the web or Android).
+    private func resume(_ player: AVPlayer) {
+        guard let progressId else { return }
+        let local = prefs.savedPosition(videoId: progressId)
+        Task {
+            var position = local?.time
+            var duration = local?.duration
+            if let remote = try? await SupabaseService.shared.fetchVideoProgress(videoId: progressId),
+               remote.updatedAt > (local?.updatedAt ?? .distantPast) {
+                position = remote.position
+                duration = remote.duration
+                prefs.savePosition(videoId: progressId, time: remote.position, duration: remote.duration, updatedAt: remote.updatedAt)
+            }
+            guard let position, let duration,
+                  let resumeAt = VideoProgress.resumeTime(position: position, duration: duration) else { return }
+            // Wait for the video to load (up to 10 s) before seeking.
+            for _ in 0..<50 {
+                if player.currentItem?.status == .readyToPlay { break }
+                try? await Task.sleep(for: .milliseconds(200))
+            }
+            // Only jump if the user hasn't already moved.
+            guard player.currentTime().seconds < VideoProgress.minResumeSeconds else { return }
+            player.seek(to: CMTime(seconds: resumeAt, preferredTimescale: 600))
+        }
     }
 }
