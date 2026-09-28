@@ -212,6 +212,9 @@ export default function FeedScreen() {
       result = result.filter((it) => it.agent_id === agentFilter);
     }
 
+    // One row per video/post, even when it's saved under more than one agent
+    result = dedupeByVideo(result);
+
     // Status filter
     if (statusFilter !== "all") {
       result = result.filter((it) => (it.user_status ?? "not_watched") === statusFilter);
@@ -1556,6 +1559,31 @@ const styles = StyleSheet.create({
 });
 
 // Text preview for X posts / Reddit threads, and the platform chips above the list.
+// The same video or post can be saved under more than one agent: show it once.
+// Keeps the first (newest) copy, or the copy already marked (liked, watch later,
+// watched), so a leftover not-watched copy can't bring it back. Same rule as
+// the web and iOS apps.
+function dedupeByVideo<T extends { video_id: string | null; user_status: string | null }>(items: T[]): T[] {
+  const rank = (s: string | null) => (s === "liked" ? 3 : s === "watch_later" ? 2 : s === "watched" ? 1 : 0);
+  const position = new Map<string, number>();
+  const result: T[] = [];
+  for (const item of items) {
+    const key = item.video_id;
+    if (!key) {
+      result.push(item);
+      continue;
+    }
+    const at = position.get(key);
+    if (at === undefined) {
+      position.set(key, result.length);
+      result.push(item);
+    } else if (rank(item.user_status) > rank(result[at].user_status)) {
+      result[at] = item;
+    }
+  }
+  return result;
+}
+
 const postPreviewStyles = StyleSheet.create({
   carouselBadge: {
     position: "absolute",
