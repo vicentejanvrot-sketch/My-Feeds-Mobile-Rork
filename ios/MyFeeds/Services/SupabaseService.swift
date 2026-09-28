@@ -63,24 +63,44 @@ final class SupabaseService {
         try await db.from("runs").select().eq("id", value: id).single().execute().value
     }
 
-    func fetchFeedItems(limit: Int = 500) async throws -> [FeedItem] {
+    /// Every feed item, newest first. The web app loads all of them (not just
+    /// the newest few hundred), so the feed, its counts and its filters match
+    /// only if this does too. Pass a limit to cap the total.
+    func fetchFeedItems(limit: Int? = nil) async throws -> [FeedItem] {
         do {
-            return try await db.from("items").select("*, item_analysis(*)")
-                .order("published_at", ascending: false, nullsFirst: false)
-                .limit(limit).execute().value
+            return try await fetchItemPages(columns: "*, item_analysis(*)", limit: limit)
         } catch {
             // A single malformed/legacy analysis row must not prevent the
             // native app from showing its videos. Retry with the base item
             // fields; FeedItem's optional analysis then falls back gracefully.
-            var items: [FeedItem] = try await db.from("items").select()
-                .order("published_at", ascending: false, nullsFirst: false)
-                .limit(limit).execute().value
+            var items = try await fetchItemPages(columns: "*", limit: limit)
             let durations = (try? await fetchDurations(itemIds: items.map(\.id))) ?? [:]
             for index in items.indices {
                 items[index].resolvedDurationSeconds = durations[items[index].id]
             }
             return items
         }
+    }
+
+    /// The API returns at most 1,000 rows per request, so read page by page
+    /// (in a stable order) until a short page comes back.
+    private func fetchItemPages(columns: String, limit: Int?) async throws -> [FeedItem] {
+        let pageSize = 1000
+        var all: [FeedItem] = []
+        while true {
+            let from = all.count
+            var to = from + pageSize - 1
+            if let limit { to = min(to, limit - 1) }
+            if to < from { break }
+            let page: [FeedItem] = try await db.from("items").select(columns)
+                .order("published_at", ascending: false, nullsFirst: false)
+                .order("id", ascending: true)
+                .range(from: from, to: to)
+                .execute().value
+            all.append(contentsOf: page)
+            if page.count < to - from + 1 { break }
+        }
+        return all
     }
 
     /// One item with its analysis, for the post reader.
