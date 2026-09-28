@@ -91,13 +91,16 @@ struct FeedView: View {
         }
     }
 
-    /// Items for one channel, or for "All Channels" (nil) under the selected platform chip.
-    private func channelItemCount(_ channelId: String?) -> Int {
-        guard let channelId else {
-            guard let platformFilter else { return items.count }
-            return items.filter { $0.sourcePlatform == platformFilter }.count
-        }
-        return items.filter { $0.channelId == channelId }.count
+    /// Posts for one channel.
+    private func channelItemCount(_ channelId: String) -> Int {
+        items.filter { $0.channelId == channelId }.count
+    }
+
+    /// Badge on the Channel filter: how many channels are listed when it's on
+    /// All Channels, or the selected channel's post count.
+    private var channelTriggerBadge: String {
+        guard let channelFilter else { return "\(agentChannels.count)" }
+        return "\(channelItemCount(channelFilter))"
     }
 
     var body: some View {
@@ -297,7 +300,7 @@ struct FeedView: View {
                 filterTrigger(
                     icon: "dot.radiowaves.left.and.right",
                     label: channelFilter.flatMap { id in agentChannels.first { $0.channelId == id }?.displayName } ?? "All Channels",
-                    badge: "\(channelItemCount(channelFilter))"
+                    badge: channelTriggerBadge
                 ) { activeFilterModal = .channel }
             }
 
@@ -429,7 +432,8 @@ struct FeedView: View {
                 }
             case .channel:
                 PickerModal(title: "Channel", onDismiss: { activeFilterModal = nil }) {
-                    PickerRow(label: "All Channels", isActive: channelFilter == nil, badge: "\(channelItemCount(nil))") {
+                    // How many channels are listed below (each row shows its post count)
+                    PickerRow(label: "All Channels", isActive: channelFilter == nil, badge: "\(agentChannels.count)") {
                         channelFilter = nil
                         activeFilterModal = nil
                     }
@@ -437,7 +441,7 @@ struct FeedView: View {
                         PickerRow(
                             label: channel.displayName,
                             isActive: channelFilter == channel.channelId,
-                            badge: "\(channelItemCount(channel.channelId))"
+                            badge: "\(channelItemCount(channel.channelId ?? ""))"
                         ) {
                             channelFilter = channel.channelId
                             activeFilterModal = nil
