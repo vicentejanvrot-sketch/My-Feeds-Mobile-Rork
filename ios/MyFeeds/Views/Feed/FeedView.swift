@@ -57,8 +57,40 @@ struct FeedView: View {
         if let agentFilter {
             result = result.filter { $0.agentId == agentFilter }
         }
+        result = Self.dedupedByVideo(result)
         if let statusFilter {
             result = result.filter { $0.status == statusFilter }
+        }
+        return result
+    }
+
+    /// The same video or post can be saved under more than one agent: show it
+    /// once. Keeps the first (newest) copy, or the copy already marked (liked,
+    /// watch later, watched), so a leftover not-watched copy can't bring it back.
+    /// Same rule as the web and Android apps.
+    private static func dedupedByVideo(_ items: [FeedItem]) -> [FeedItem] {
+        func rank(_ status: ItemStatus) -> Int {
+            switch status {
+            case .liked: return 3
+            case .watchLater: return 2
+            case .watched: return 1
+            case .notWatched: return 0
+            }
+        }
+        var position: [String: Int] = [:]
+        var result: [FeedItem] = []
+        result.reserveCapacity(items.count)
+        for item in items {
+            guard let key = item.videoId, !key.isEmpty else {
+                result.append(item)
+                continue
+            }
+            if let at = position[key] {
+                if rank(item.status) > rank(result[at].status) { result[at] = item }
+            } else {
+                position[key] = result.count
+                result.append(item)
+            }
         }
         return result
     }
