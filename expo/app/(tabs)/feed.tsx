@@ -351,8 +351,8 @@ export default function FeedScreen() {
       {
         key: "all" as const,
         label: "All Channels",
-        // Count for the selected chip
-        badge: platformFilter === "all" ? allItems.length : platformCounts.get(platformFilter) ?? 0,
+        // How many channels are listed below (each row shows its post count)
+        badge: deduped.length,
       },
       ...deduped.map((ch) => ({
         key: (ch.channel_id ?? ch.id) as string,
@@ -362,7 +362,7 @@ export default function FeedScreen() {
         thumbnailText: (ch.channel_name ?? "?")[0].toUpperCase(),
       })),
     ];
-  }, [visibleChannels, channelCounts, allItems.length, platformFilter, platformCounts]);
+  }, [visibleChannels, channelCounts]);
 
   // ── Render ──────────────────────────────────────────────────────
 
