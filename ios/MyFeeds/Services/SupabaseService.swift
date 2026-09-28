@@ -463,7 +463,9 @@ nonisolated struct SourceError: LocalizedError, Sendable {
 }
 
 /// A resume position, in seconds. The same rules apply on web, iOS and Android:
-/// resume only from 5 s in, and a position in the last 10 s counts as finished.
+/// resume only from a few seconds in, and the last few seconds count as finished.
+/// Long videos use 5 s and 10 s; short clips (X, Instagram) get proportional
+/// limits (10% / 5% of the length) so a 20-second clip still resumes.
 nonisolated struct VideoProgress: Sendable {
     var position: Double
     var duration: Double
@@ -472,13 +474,17 @@ nonisolated struct VideoProgress: Sendable {
     static let minResumeSeconds: Double = 5
     static let endThresholdSeconds: Double = 10
 
+    static func minResume(duration: Double) -> Double {
+        duration > 0 ? min(minResumeSeconds, duration * 0.1) : minResumeSeconds
+    }
+
     static func isNearEnd(position: Double, duration: Double) -> Bool {
-        duration > 0 && position >= duration - endThresholdSeconds
+        duration > 0 && position >= duration - min(endThresholdSeconds, duration * 0.05)
     }
 
     /// The time to seek to, or nil when it's too close to the start or the end.
     static func resumeTime(position: Double, duration: Double) -> Double? {
-        guard position >= minResumeSeconds, !isNearEnd(position: position, duration: duration) else { return nil }
+        guard position >= minResume(duration: duration), !isNearEnd(position: position, duration: duration) else { return nil }
         return position
     }
 
