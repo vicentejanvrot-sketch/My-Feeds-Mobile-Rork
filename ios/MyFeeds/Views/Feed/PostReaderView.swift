@@ -850,7 +850,7 @@ private struct PostVideoPlayer: View {
             }
             // Only jump if the user hasn't already moved.
             guard player.currentTime().seconds < VideoProgress.minResumeSeconds else { return }
-            player.seek(to: CMTime(seconds: resumeAt, preferredTimescale: 600))
+            _ = await player.seek(to: CMTime(seconds: resumeAt, preferredTimescale: 600))
         }
     }
 }
