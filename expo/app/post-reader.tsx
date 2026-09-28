@@ -1,7 +1,7 @@
 // In-app reader for X, Reddit, Instagram and LinkedIn posts — the mobile twin of the web
 // PostReaderModal, so reading works the same everywhere.
 import { useEffect, useRef, useState } from "react";
-import { ActivityIndicator, AppState, Platform as RNPlatform, Pressable, ScrollView, Share, StyleSheet, Text, View, useWindowDimensions } from "react-native";
+import { ActivityIndicator, AppState, Modal, Platform as RNPlatform, Pressable, ScrollView, Share, StyleSheet, Text, View, useWindowDimensions } from "react-native";
 import type { WebViewMessageEvent } from "react-native-webview";
 import { WebView } from "react-native-webview";
 import { useLocalSearchParams, router } from "expo-router";
@@ -25,6 +25,7 @@ import {
   Send,
   ThumbsUp,
   Play,
+  Maximize2,
 } from "lucide-react-native";
 import { Colors } from "@/constants/colors";
 import { supabase } from "@/lib/supabase";
@@ -36,7 +37,7 @@ import { PlatformBadge } from "@/components/PlatformBadge";
 import { PLATFORM_META, platformOf, formatCount } from "@/lib/platforms";
 import {
   POSITION_SAVE_INTERVAL_MS,
-  MIN_RESUME_SECONDS,
+  minResumeSeconds,
   isNearEnd,
   saveResumePosition,
   loadResumePosition,
@@ -115,7 +116,8 @@ const VIDEO_PROGRESS_JS =
   "v.addEventListener('timeupdate',function(){var now=Date.now();if(now-last>=1000){last=now;send('time');}});" +
   "v.addEventListener('pause',function(){if(!v.ended)send('pause');});" +
   "v.addEventListener('ended',function(){send('ended');});" +
-  "window.__seekTo=function(s){try{if(v.currentTime<" + MIN_RESUME_SECONDS + ")v.currentTime=s;}catch(e){}};" +
+  // Only jump if the user hasn't already moved past the first second.
+  "window.__seekTo=function(s){try{if(v.currentTime<1)v.currentTime=s;}catch(e){}};" +
   "if(v.readyState>=1)send('ready');" +
   "})();true;";
 
@@ -126,7 +128,9 @@ const VIDEO_PROGRESS_JS =
 // YouTube videos: saved every 5 s while playing, on pause, on close and when the
 // app goes to the background, on the phone and in the shared video_progress
 // table, so the web and iOS apps pick up from the same spot.
-function PostVideo({ media, progressId }: { media: PostEmbed; progressId?: string | null }) {
+// fill: take the whole parent (full screen viewer) instead of a 16:9 box.
+// autoPlay: start playing on its own (full screen, opened with a tap).
+function PostVideo({ media, progressId, fill, autoPlay }: { media: PostEmbed; progressId?: string | null; fill?: boolean; autoPlay?: boolean }) {
   const webRef = useRef<WebView>(null);
   const latest = useRef({ t: 0, d: 0 });
   const lastSave = useRef(0);
@@ -163,7 +167,7 @@ function PostVideo({ media, progressId }: { media: PostEmbed; progressId?: strin
         if (!saved || saved.duration <= 0) return;
         if (isNearEnd(saved.currentTime, saved.duration)) {
           void clearResumePosition(progressId);
-        } else if (saved.currentTime >= MIN_RESUME_SECONDS) {
+        } else if (saved.currentTime >= minResumeSeconds(saved.duration)) {
           webRef.current?.injectJavaScript("window.__seekTo&&window.__seekTo(" + saved.currentTime + ");true;");
         }
       });
@@ -189,9 +193,9 @@ function PostVideo({ media, progressId }: { media: PostEmbed; progressId?: strin
   const poster = media.url || media.image || "";
   const html = `<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"><meta name="referrer" content="no-referrer">
 <style>html,body{margin:0;padding:0;background:#000;height:100%}video{width:100%;height:100%;object-fit:contain;background:#000}</style></head>
-<body><video${poster ? ` poster="${escapeAttr(poster)}"` : ""} controls playsinline webkit-playsinline preload="auto">${sources}</video></body></html>`;
+<body><video${poster ? ` poster="${escapeAttr(poster)}"` : ""} controls playsinline webkit-playsinline preload="auto"${autoPlay ? " autoplay" : ""}>${sources}</video></body></html>`;
   return (
-    <View style={styles.video}>
+    <View style={fill ? styles.videoFill : styles.video}>
       <WebView
         ref={webRef}
         source={{ html }}
@@ -199,7 +203,7 @@ function PostVideo({ media, progressId }: { media: PostEmbed; progressId?: strin
         injectedJavaScript={progressId ? VIDEO_PROGRESS_JS : undefined}
         onMessage={progressId ? onMessage : undefined}
         allowsInlineMediaPlayback
-        mediaPlaybackRequiresUserAction
+        mediaPlaybackRequiresUserAction={!autoPlay}
         allowsFullscreenVideo
         scrollEnabled={false}
         style={styles.videoWeb}
@@ -323,11 +327,11 @@ export default function PostReaderScreen() {
         {slides.length > 1 ? (
           <MediaCarousel slides={slides} progressId={item.video_id} />
         ) : video ? (
-          <PostVideo media={video} progressId={item.video_id} />
+          <ExpandableMedia media={video} progressId={item.video_id} />
         ) : photos.length > 1 ? (
           <PhotoCarousel urls={photos.map((p) => p.url)} />
         ) : image ? (
-          <Image source={{ uri: image }} style={styles.image} contentFit="cover" />
+          <ExpandableMedia media={{ type: "photo", url: image } as PostEmbed} />
         ) : null}
 
         {quote ? <QuoteCard quote={quote} /> : null}
@@ -561,6 +565,8 @@ function MediaCarousel({ slides, progressId }: { slides: PostEmbed[]; progressId
   const pageWidth = Math.min(width, 720) - 32;
   const [page, setPage] = useState(0);
   const firstVideo = slides.findIndex((m) => !!(m.video_url || m.hls_url));
+  // Page open in the full screen viewer (the inline video is paused meanwhile)
+  const [viewerAt, setViewerAt] = useState<number | null>(null);
   return (
     <View style={{ gap: 6 }}>
       <View>
@@ -576,12 +582,14 @@ function MediaCarousel({ slides, progressId }: { slides: PostEmbed[]; progressId
             const poster = m.url || m.image || "";
             return (
               <View key={i} style={[styles.carouselPage, { width: pageWidth }]}>
-                {isVideo && i === page ? (
+                {isVideo && i === page && viewerAt === null ? (
                   <PostVideo media={m} progressId={i === firstVideo ? progressId : null} />
                 ) : (
                   <>
                     {poster ? (
-                      <Image source={{ uri: poster }} style={styles.carouselImage} contentFit={isVideo ? "cover" : "contain"} />
+                      <Pressable style={styles.carouselImage} onPress={() => setViewerAt(i)} accessibilityLabel="Open full screen">
+                        <Image source={{ uri: poster }} style={styles.carouselImage} contentFit={isVideo ? "cover" : "contain"} />
+                      </Pressable>
                     ) : null}
                     {isVideo ? (
                       <View style={styles.carouselPlay} pointerEvents="none">
@@ -597,13 +605,97 @@ function MediaCarousel({ slides, progressId }: { slides: PostEmbed[]; progressId
         <View style={styles.carouselCounter} pointerEvents="none">
           <Text style={styles.carouselCounterText}>{page + 1} / {slides.length}</Text>
         </View>
+        <Pressable style={styles.expandBtn} onPress={() => setViewerAt(page)} hitSlop={8} accessibilityLabel="Full screen">
+          <Maximize2 size={16} color="#fff" />
+        </Pressable>
       </View>
       <View style={styles.dots} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
         {slides.map((_, i) => (
           <View key={i} style={[styles.dot, i === page && styles.dotActive]} />
         ))}
       </View>
+      {viewerAt !== null ? (
+        <FullscreenViewer slides={slides} startIndex={viewerAt} progressId={progressId} onClose={() => setViewerAt(null)} />
+      ) : null}
     </View>
+  );
+}
+
+// A post's single video or photo, with the expand button (top left) that opens
+// it full screen, like the YouTube player. Tapping a photo opens it too.
+function ExpandableMedia({ media, progressId }: { media: PostEmbed; progressId?: string | null }) {
+  const [open, setOpen] = useState(false);
+  const isVideo = !!(media.video_url || media.hls_url);
+  return (
+    <View>
+      {isVideo ? (
+        // Paused (unmounted, position saved) while the full screen player is open
+        open ? <View style={styles.video} /> : <PostVideo media={media} progressId={progressId} />
+      ) : (
+        <Pressable onPress={() => setOpen(true)} accessibilityLabel="Open photo full screen">
+          <Image source={{ uri: media.url || media.image || "" }} style={styles.image} contentFit="cover" />
+        </Pressable>
+      )}
+      <Pressable style={styles.expandBtn} onPress={() => setOpen(true)} hitSlop={8} accessibilityLabel="Full screen">
+        <Maximize2 size={16} color="#fff" />
+      </Pressable>
+      {open ? (
+        <FullscreenViewer slides={[media]} startIndex={0} progressId={progressId} onClose={() => setOpen(false)} />
+      ) : null}
+    </View>
+  );
+}
+
+// Full screen viewer for a post's photos and videos: swipe between them, turn the
+// phone for landscape, × to close. The video picks up where the inline one was
+// (its position is saved when it pauses) and starts playing on its own.
+function FullscreenViewer({ slides, startIndex, progressId, onClose }: { slides: PostEmbed[]; startIndex: number; progressId?: string | null; onClose: () => void }) {
+  const { width, height } = useWindowDimensions();
+  const insets = useSafeAreaInsets();
+  const [page, setPage] = useState(startIndex);
+  const firstVideoIndex = slides.findIndex((m) => !!(m.video_url || m.hls_url));
+  return (
+    <Modal
+      visible
+      animationType="fade"
+      onRequestClose={onClose}
+      supportedOrientations={["portrait", "landscape", "landscape-left", "landscape-right"]}
+      statusBarTranslucent
+    >
+      <View style={styles.fullscreen}>
+        <ScrollView
+          horizontal
+          pagingEnabled
+          showsHorizontalScrollIndicator={false}
+          contentOffset={{ x: startIndex * width, y: 0 }}
+          onMomentumScrollEnd={(e) => setPage(Math.round(e.nativeEvent.contentOffset.x / width))}
+        >
+          {slides.map((m, i) => {
+            const isVideo = !!(m.video_url || m.hls_url);
+            const poster = m.url || m.image || "";
+            return (
+              <View key={i} style={{ width, height, alignItems: "center", justifyContent: "center" }}>
+                {isVideo && i === page ? (
+                  <PostVideo media={m} progressId={i === firstVideoIndex ? progressId : null} fill autoPlay />
+                ) : poster ? (
+                  <Image source={{ uri: poster }} style={{ width, height }} contentFit="contain" />
+                ) : null}
+              </View>
+            );
+          })}
+        </ScrollView>
+        <View style={[styles.fullscreenBar, { top: insets.top + 8, right: insets.right + 12 }]}>
+          {slides.length > 1 ? (
+            <View style={styles.fullscreenCounter}>
+              <Text style={styles.carouselCounterText}>{page + 1} / {slides.length}</Text>
+            </View>
+          ) : null}
+          <Pressable onPress={onClose} style={styles.fullscreenClose} hitSlop={10} accessibilityLabel="Close full screen">
+            <X size={20} color="#fff" />
+          </Pressable>
+        </View>
+      </View>
+    </Modal>
   );
 }
 
@@ -754,6 +846,29 @@ const styles = StyleSheet.create({
   carouselCounterText: { color: "#fff", fontSize: 12, fontWeight: "600" },
   dateLineStrong: { color: Colors.textPrimary, fontWeight: "700" },
   video: { width: "100%", aspectRatio: 16 / 9, borderRadius: 12, overflow: "hidden", backgroundColor: "#000" },
+  videoFill: { width: "100%", height: "100%", backgroundColor: "#000" },
+  expandBtn: {
+    position: "absolute",
+    top: 10,
+    left: 10,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(0,0,0,0.6)",
+  },
+  fullscreen: { flex: 1, backgroundColor: "#000" },
+  fullscreenBar: { position: "absolute", flexDirection: "row", alignItems: "center", gap: 10 },
+  fullscreenCounter: { paddingHorizontal: 10, paddingVertical: 6, borderRadius: 14, backgroundColor: "rgba(0,0,0,0.6)" },
+  fullscreenClose: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(0,0,0,0.6)",
+  },
   videoWeb: { flex: 1, backgroundColor: "#000" },
   quoteCard: { borderWidth: 1, borderColor: Colors.border, borderRadius: 16, padding: 12, gap: 8 },
   quoteHeader: { flexDirection: "row", alignItems: "center", gap: 6 },
