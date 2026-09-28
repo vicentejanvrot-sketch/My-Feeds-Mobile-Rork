@@ -83,7 +83,10 @@ struct PostReaderView: View {
                     }
 
                     let photos = item.postPhotoURLs
-                    if let video = item.postVideo, let url = video.playableURL {
+                    let slides = item.carouselMedia
+                    if slides.count > 1 {
+                        MediaCarousel(slides: slides, progressId: item.videoId)
+                    } else if let video = item.postVideo, let url = video.playableURL {
                         PostVideoPlayer(url: url, progressId: item.videoId)
                     } else if photos.count > 1 {
                         PhotoCarousel(urls: photos)
@@ -708,6 +711,81 @@ struct PostReaderView: View {
 }
 
 /// Swipeable photos for Instagram and LinkedIn carousels, with page dots.
+/// Carousel posts (Instagram, LinkedIn, X with several photos): every photo and
+/// video in the post, swiped one at a time, with a "2 / 5" counter and dots.
+/// The first video keeps the resume position (the same id web and Android use).
+private struct MediaCarousel: View {
+    let slides: [ItemMedia]
+    let progressId: String?
+    @State private var index = 0
+
+    private var firstVideoIndex: Int? { slides.firstIndex { $0.playableURL != nil } }
+
+    var body: some View {
+        VStack(spacing: 8) {
+            TabView(selection: $index) {
+                ForEach(Array(slides.enumerated()), id: \.offset) { offset, slide in
+                    page(slide, at: offset)
+                        .tag(offset)
+                }
+            }
+            .tabViewStyle(.page(indexDisplayMode: .never))
+            .aspectRatio(4 / 5, contentMode: .fit)
+            .frame(maxWidth: .infinity)
+            .background(Color.black)
+            .clipShape(.rect(cornerRadius: 12))
+            .overlay(alignment: .topTrailing) {
+                Text("\(index + 1) / \(slides.count)")
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundStyle(.white)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(.black.opacity(0.6))
+                    .clipShape(Capsule())
+                    .padding(10)
+                    .allowsHitTesting(false)
+            }
+            .accessibilityElement(children: .contain)
+            .accessibilityLabel("\(slides.count) photos and videos, showing \(index + 1)")
+
+            HStack(spacing: 6) {
+                ForEach(slides.indices, id: \.self) { i in
+                    Capsule()
+                        .fill(i == index ? Theme.accent : Theme.textMuted.opacity(0.5))
+                        .frame(width: i == index ? 16 : 6, height: 6)
+                }
+            }
+            .animation(.easeOut(duration: 0.2), value: index)
+            .accessibilityHidden(true)
+        }
+    }
+
+    @ViewBuilder
+    private func page(_ slide: ItemMedia, at offset: Int) -> some View {
+        if let url = slide.playableURL {
+            PostVideoPlayer(url: url, progressId: offset == firstVideoIndex ? progressId : nil)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+        } else if let url = Self.photoURL(slide.url) {
+            AsyncImage(url: url) { phase in
+                if let image = phase.image {
+                    image.resizable().aspectRatio(contentMode: .fit)
+                } else {
+                    Theme.card
+                }
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+        } else {
+            Color.black
+        }
+    }
+
+    private static func photoURL(_ raw: String?) -> URL? {
+        guard var raw, !raw.isEmpty else { return nil }
+        if raw.hasPrefix("http://") { raw = "https://" + raw.dropFirst("http://".count) }
+        return URL(string: raw)
+    }
+}
+
 private struct PhotoCarousel: View {
     let urls: [URL]
 
