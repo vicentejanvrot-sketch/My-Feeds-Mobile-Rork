@@ -1,7 +1,8 @@
 // In-app reader for X, Reddit, Instagram and LinkedIn posts — the mobile twin of the web
 // PostReaderModal, so reading works the same everywhere.
-import { useEffect, useState } from "react";
-import { ActivityIndicator, Platform as RNPlatform, Pressable, ScrollView, Share, StyleSheet, Text, View, useWindowDimensions } from "react-native";
+import { useEffect, useRef, useState } from "react";
+import { ActivityIndicator, AppState, Platform as RNPlatform, Pressable, ScrollView, Share, StyleSheet, Text, View, useWindowDimensions } from "react-native";
+import type { WebViewMessageEvent } from "react-native-webview";
 import { WebView } from "react-native-webview";
 import { useLocalSearchParams, router } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -32,6 +33,14 @@ import { openExternalLink } from "@/lib/open-link";
 import { timeAgo } from "@/lib/format";
 import { PlatformBadge } from "@/components/PlatformBadge";
 import { PLATFORM_META, platformOf, formatCount } from "@/lib/platforms";
+import {
+  POSITION_SAVE_INTERVAL_MS,
+  MIN_RESUME_SECONDS,
+  isNearEnd,
+  saveResumePosition,
+  loadResumePosition,
+  clearResumePosition,
+} from "@/lib/video-progress";
 import type { ItemStatus, ItemWithAnalysis } from "@/lib/database";
 
 // The action bar copies each platform's own row under a post. In My Feeds:
@@ -94,10 +103,81 @@ function directVideoUrl(url: string | null | undefined): string | null {
   }
 }
 
+// Reports the video's position to the app once a second, plus pause, end and
+// "ready" (length known), and lets the app seek with window.__seekTo(seconds).
+const VIDEO_PROGRESS_JS =
+  "(function(){" +
+  "var v=document.querySelector('video');if(!v)return;" +
+  "function send(type){try{window.ReactNativeWebView.postMessage(JSON.stringify({type:type,t:v.currentTime||0,d:isFinite(v.duration)?v.duration:0}));}catch(e){}}" +
+  "var last=0;" +
+  "v.addEventListener('loadedmetadata',function(){send('ready');});" +
+  "v.addEventListener('timeupdate',function(){var now=Date.now();if(now-last>=1000){last=now;send('time');}});" +
+  "v.addEventListener('pause',function(){if(!v.ended)send('pause');});" +
+  "v.addEventListener('ended',function(){send('ended');});" +
+  "window.__seekTo=function(s){try{if(v.currentTime<" + MIN_RESUME_SECONDS + ")v.currentTime=s;}catch(e){}};" +
+  "if(v.readyState>=1)send('ready');" +
+  "})();true;";
+
 // Plays a post's video in place, like on X and Reddit. iOS plays the HLS
 // stream; Android gets the MP4. No Referer is sent: X's video server
 // refuses requests that carry another site's address.
-function PostVideo({ media }: { media: PostEmbed }) {
+// progressId (the item's video_id, e.g. "x:123") turns on resume, the same as
+// YouTube videos: saved every 5 s while playing, on pause, on close and when the
+// app goes to the background, on the phone and in the shared video_progress
+// table, so the web and iOS apps pick up from the same spot.
+function PostVideo({ media, progressId }: { media: PostEmbed; progressId?: string | null }) {
+  const webRef = useRef<WebView>(null);
+  const latest = useRef({ t: 0, d: 0 });
+  const lastSave = useRef(0);
+  const resumed = useRef(false);
+
+  // Closing the post or leaving the app: save where the video was.
+  useEffect(() => {
+    if (!progressId) return;
+    resumed.current = false;
+    const sub = AppState.addEventListener("change", (state) => {
+      if (state !== "active") void saveResumePosition(progressId, latest.current.t, latest.current.d);
+    });
+    return () => {
+      sub.remove();
+      void saveResumePosition(progressId, latest.current.t, latest.current.d);
+    };
+  }, [progressId]);
+
+  const onMessage = (event: WebViewMessageEvent) => {
+    if (!progressId) return;
+    let msg: { type?: string; t?: number; d?: number };
+    try {
+      msg = JSON.parse(event.nativeEvent.data);
+    } catch {
+      return;
+    }
+    const t = Number(msg.t) || 0;
+    const d = Number(msg.d) || 0;
+    latest.current = { t, d };
+    if (msg.type === "ready") {
+      if (resumed.current) return;
+      resumed.current = true;
+      void loadResumePosition(progressId).then((saved) => {
+        if (!saved || saved.duration <= 0) return;
+        if (isNearEnd(saved.currentTime, saved.duration)) {
+          void clearResumePosition(progressId);
+        } else if (saved.currentTime >= MIN_RESUME_SECONDS) {
+          webRef.current?.injectJavaScript("window.__seekTo&&window.__seekTo(" + saved.currentTime + ");true;");
+        }
+      });
+    } else if (msg.type === "ended") {
+      latest.current = { t: 0, d };
+      void clearResumePosition(progressId);
+    } else if (msg.type === "pause") {
+      lastSave.current = Date.now();
+      void saveResumePosition(progressId, t, d);
+    } else if (msg.type === "time" && Date.now() - lastSave.current >= POSITION_SAVE_INTERVAL_MS) {
+      lastSave.current = Date.now();
+      void saveResumePosition(progressId, t, d);
+    }
+  };
+
   const main =
     (RNPlatform.OS === "ios" ? media.hls_url || media.video_url : media.video_url || media.hls_url) || "";
   if (!main) return null;
@@ -112,8 +192,11 @@ function PostVideo({ media }: { media: PostEmbed }) {
   return (
     <View style={styles.video}>
       <WebView
+        ref={webRef}
         source={{ html }}
         originWhitelist={["*"]}
+        injectedJavaScript={progressId ? VIDEO_PROGRESS_JS : undefined}
+        onMessage={progressId ? onMessage : undefined}
         allowsInlineMediaPlayback
         mediaPlaybackRequiresUserAction
         allowsFullscreenVideo
@@ -235,7 +318,7 @@ export default function PostReaderScreen() {
         ) : null}
 
         {video ? (
-          <PostVideo media={video} />
+          <PostVideo media={video} progressId={item.video_id} />
         ) : photos.length > 1 ? (
           <PhotoCarousel urls={photos.map((p) => p.url)} />
         ) : image ? (
