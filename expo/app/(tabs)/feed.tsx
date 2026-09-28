@@ -32,6 +32,7 @@ import {
   Play,
   ThumbsUp,
   MessageCircle,
+  Copy,
 } from "lucide-react-native";
 import { Colors } from "@/constants/colors";
 import type { ItemStatus, ItemWithAnalysis, Channel, Agent } from "@/lib/database";
@@ -780,6 +781,9 @@ const FeedCard = React.memo(function FeedCard({
   const channelInitial = (item.channel_name ?? "?")[0].toUpperCase();
   const platform = platformOf(item.platform);
   const isPost = platform !== "youtube";
+  // Photos and videos in the post itself (quoted posts don't count): more than one is a carousel.
+  const carouselCount = ((item.media ?? []) as { type: string; url?: string | null; video_url?: string | null; hls_url?: string | null }[])
+    .filter((m) => m.type !== "quote" && m.type !== "article" && (!!m.url || !!m.video_url || !!m.hls_url)).length;
 
   return (
     <Pressable
@@ -816,6 +820,13 @@ const FeedCard = React.memo(function FeedCard({
         <View style={styles.playOverlay}>
           {isPost ? <PlatformBadge platform={platform} size="md" /> : <Play size={22} color={Colors.white} fill={Colors.white} />}
         </View>
+        {/* Carousel: the card shows the first photo/video; the count says how many are inside */}
+        {isPost && carouselCount > 1 && !selectionMode ? (
+          <View style={postPreviewStyles.carouselBadge} accessibilityLabel={`Carousel: ${carouselCount} photos and videos`}>
+            <Copy size={12} color={Colors.white} />
+            <Text style={postPreviewStyles.carouselBadgeText}>{carouselCount}</Text>
+          </View>
+        ) : null}
         {selectionMode ? (
           <View style={[styles.selectionCheck, selected && styles.selectionCheckSelected]}>
             {selected ? <Check size={17} color={Colors.white} strokeWidth={3} /> : null}
@@ -1546,6 +1557,19 @@ const styles = StyleSheet.create({
 
 // Text preview for X posts / Reddit threads, and the platform chips above the list.
 const postPreviewStyles = StyleSheet.create({
+  carouselBadge: {
+    position: "absolute",
+    top: 10,
+    right: 10,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+    backgroundColor: "rgba(0,0,0,0.6)",
+  },
+  carouselBadgeText: { color: Colors.white, fontSize: 12, fontWeight: "600" },
   box: {
     padding: 14,
     justifyContent: "center",
