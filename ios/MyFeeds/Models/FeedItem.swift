@@ -69,6 +69,15 @@ nonisolated struct FeedItem: Codable, Identifiable, Hashable, Sendable {
     /// Video attached to the post itself (not to a quoted post).
     var postVideo: ItemMedia? { media?.first(where: { !$0.isEmbed && $0.playableURL != nil }) }
 
+    /// Every photo and video in the post itself (not a quoted post), in order.
+    /// More than one means a carousel (Instagram, LinkedIn, X with several photos).
+    var carouselMedia: [ItemMedia] {
+        (media ?? []).filter { m in
+            guard !m.isEmbed else { return false }
+            return m.playableURL != nil || (m.url?.isEmpty == false)
+        }
+    }
+
     /// Every photo attached to the post, for Instagram and LinkedIn carousels.
     var postPhotoURLs: [URL] {
         (media ?? []).compactMap { m -> URL? in
