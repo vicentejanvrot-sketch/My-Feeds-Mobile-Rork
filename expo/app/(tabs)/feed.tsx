@@ -163,11 +163,24 @@ export default function FeedScreen() {
   );
   const channelList = channels.data ?? [];
 
-  // Channels filtered by selected agent
+  // Channels filtered by selected agent and by the selected platform chip, so the
+  // Channel dropdown only lists channels under that chip.
   const visibleChannels = useMemo(() => {
-    if (agentFilter === "all") return channelList;
-    return channelList.filter((ch) => ch.agent_id === agentFilter);
-  }, [channelList, agentFilter]);
+    return channelList.filter(
+      (ch) =>
+        (agentFilter === "all" || ch.agent_id === agentFilter) &&
+        (platformFilter === "all" || platformOf(ch.platform) === platformFilter),
+    );
+  }, [channelList, agentFilter, platformFilter]);
+
+  // A chip whose platform doesn't include the selected channel: back to All
+  // Channels, since that channel is no longer in the dropdown.
+  useEffect(() => {
+    if (channelFilter === "all" || channels.isLoading) return;
+    if (!visibleChannels.some((ch) => (ch.channel_id ?? ch.id) === channelFilter)) {
+      setChannelFilter("all");
+    }
+  }, [visibleChannels, channelFilter, channels.isLoading]);
 
   // Items
   const allItems = items.data ?? [];
@@ -338,7 +351,8 @@ export default function FeedScreen() {
       {
         key: "all" as const,
         label: "All Channels",
-        badge: allItems.length,
+        // Count for the selected chip
+        badge: platformFilter === "all" ? allItems.length : platformCounts.get(platformFilter) ?? 0,
       },
       ...deduped.map((ch) => ({
         key: (ch.channel_id ?? ch.id) as string,
@@ -348,7 +362,7 @@ export default function FeedScreen() {
         thumbnailText: (ch.channel_name ?? "?")[0].toUpperCase(),
       })),
     ];
-  }, [visibleChannels, channelCounts, allItems.length]);
+  }, [visibleChannels, channelCounts, allItems.length, platformFilter, platformCounts]);
 
   // ── Render ──────────────────────────────────────────────────────
 
