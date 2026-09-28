@@ -78,18 +78,25 @@ struct FeedView: View {
         SourcePlatform.allCases.filter { platform in items.contains { $0.sourcePlatform == platform } }
     }
 
-    /// Channels for the selected agent (deduped by channel_id).
+    /// Channels for the selected agent (deduped by channel_id), limited to the
+    /// selected platform chip so the dropdown only lists channels under that chip.
     private var agentChannels: [Channel] {
         guard let agentFilter else { return [] }
         var seen = Set<String>()
-        return channels.filter { $0.agentId == agentFilter }.filter { channel in
+        return channels.filter { $0.agentId == agentFilter }
+            .filter { platformFilter == nil || $0.sourcePlatform == platformFilter }
+            .filter { channel in
             guard let cid = channel.channelId else { return false }
             return seen.insert(cid).inserted
         }
     }
 
+    /// Items for one channel, or for "All Channels" (nil) under the selected platform chip.
     private func channelItemCount(_ channelId: String?) -> Int {
-        guard let channelId else { return items.count }
+        guard let channelId else {
+            guard let platformFilter else { return items.count }
+            return items.filter { $0.sourcePlatform == platformFilter }.count
+        }
         return items.filter { $0.channelId == channelId }.count
     }
 
@@ -112,6 +119,13 @@ struct FeedView: View {
         .background(Theme.background)
         .toolbar(.hidden, for: .navigationBar)
         .task { await load() }
+        // A chip whose platform doesn't include the selected channel: back to
+        // All Channels, since that channel is no longer in the dropdown.
+        .onChange(of: platformFilter) { _, _ in
+            if let channelFilter, !agentChannels.contains(where: { $0.channelId == channelFilter }) {
+                self.channelFilter = nil
+            }
+        }
         .onChange(of: router.feedRequest) { _, request in
             guard let request else { return }
             agentFilter = request.agentId
@@ -415,7 +429,7 @@ struct FeedView: View {
                 }
             case .channel:
                 PickerModal(title: "Channel", onDismiss: { activeFilterModal = nil }) {
-                    PickerRow(label: "All Channels", isActive: channelFilter == nil, badge: "\(items.count)") {
+                    PickerRow(label: "All Channels", isActive: channelFilter == nil, badge: "\(channelItemCount(nil))") {
                         channelFilter = nil
                         activeFilterModal = nil
                     }
