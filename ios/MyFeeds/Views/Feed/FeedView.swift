@@ -660,7 +660,9 @@ private struct FeedItemCard: View {
             .clipped()
     }
 
-    /// X posts and Reddit threads have no video frame: show their text instead.
+    /// Posts with a stored thumbnail (Instagram, X posts with a photo or video)
+    /// show it, like the web card. Text-only posts (most X posts, Reddit
+    /// threads) have no picture: show their text instead.
     private var postPreview: some View {
         let text: String = {
             if item.sourcePlatform == .reddit,
@@ -668,18 +670,32 @@ private struct FeedItemCard: View {
             if let body = item.body, !body.isEmpty { return body }
             return item.title ?? ""
         }()
+        let imageURL = postThumbnailURL
         return Color(Theme.input)
             .aspectRatio(16 / 9, contentMode: .fit)
+            .overlay {
+                if let imageURL {
+                    FeedThumbnailImage(candidates: [imageURL])
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .clipShape(.rect(cornerRadius: 8))
+                        .padding(.horizontal, 10)
+                        .padding(.top, 44)
+                        .padding(.bottom, 10)
+                        .allowsHitTesting(false)
+                }
+            }
             .overlay(alignment: .leading) {
-                Text(text)
-                    .font(.system(size: 14))
-                    .foregroundStyle(Theme.textPrimary)
-                    .lineSpacing(3)
-                    .lineLimit(6)
-                    .padding(.horizontal, 14)
-                    .padding(.top, 30)
-                    .padding(.bottom, 12)
-                    .allowsHitTesting(false)
+                if imageURL == nil {
+                    Text(text)
+                        .font(.system(size: 14))
+                        .foregroundStyle(Theme.textPrimary)
+                        .lineSpacing(3)
+                        .lineLimit(6)
+                        .padding(.horizontal, 14)
+                        .padding(.top, 30)
+                        .padding(.bottom, 12)
+                        .allowsHitTesting(false)
+                }
             }
             .overlay(alignment: .topLeading) {
                 PlatformBadge(platform: item.sourcePlatform, size: 24)
@@ -687,6 +703,14 @@ private struct FeedItemCard: View {
                     .allowsHitTesting(false)
             }
             .clipped()
+    }
+
+    /// A post's stored thumbnail (forced to https). Instagram's go through our
+    /// media-proxy, which anyone can load, the same URL the web card uses.
+    private var postThumbnailURL: URL? {
+        guard var raw = item.thumbnailUrl, !raw.isEmpty else { return nil }
+        if raw.hasPrefix("http://") { raw = "https://" + raw.dropFirst("http://".count) }
+        return URL(string: raw)
     }
 
     /// Stored thumbnail first (forced to https), then YouTube's standard
