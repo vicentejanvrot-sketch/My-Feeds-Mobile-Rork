@@ -246,20 +246,42 @@ export function useItems(filter: "all" | ItemStatus) {
  * Feed items for the Research Feed screen — higher limit, no server-side
  * status filtering, so all client-side filtering/sorting works predictably.
  */
-export function useFeedItems(limit = 500) {
+/**
+ * Feed items, newest first. With no limit it loads every item, like the web app
+ * (which doesn't stop at the newest few hundred), so the feed, its counts and
+ * its filters match. The API returns at most 1,000 rows per request, so count
+ * first and read the pages in parallel, in a stable order.
+ */
+export function useFeedItems(limit?: number) {
   const { user } = useAuth();
   return useQuery({
-    queryKey: ["feedItems", limit],
+    queryKey: ["feedItems", limit ?? "all"],
     enabled: !!user,
     staleTime: 30_000,
     queryFn: async (): Promise<ItemWithAnalysis[]> => {
-      const { data, error } = await supabase
+      const PAGE_SIZE = 1000;
+      const { count, error: countError } = await supabase
         .from("items")
-        .select("*, item_analysis(*)")
-        .order("published_at", { ascending: false, nullsFirst: false })
-        .limit(limit);
-      if (error) throw error;
-      return (data ?? []) as ItemWithAnalysis[];
+        .select("id", { count: "exact", head: true });
+      if (countError) throw countError;
+      const total = limit ? Math.min(limit, count ?? 0) : count ?? 0;
+      const pageCount = Math.max(1, Math.ceil(total / PAGE_SIZE));
+      const pages = await Promise.all(
+        Array.from({ length: pageCount }, (_, page) => {
+          const from = page * PAGE_SIZE;
+          const to = Math.min((page + 1) * PAGE_SIZE, Math.max(total, 1)) - 1;
+          return supabase
+            .from("items")
+            .select("*, item_analysis(*)")
+            .order("published_at", { ascending: false, nullsFirst: false })
+            .order("id", { ascending: true })
+            .range(from, to);
+        }),
+      );
+      return pages.flatMap(({ data, error }) => {
+        if (error) throw error;
+        return (data ?? []) as ItemWithAnalysis[];
+      });
     },
   });
 }
