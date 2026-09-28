@@ -286,7 +286,42 @@ export function useFeedItems(limit?: number) {
   });
 }
 
-/** Update the watch status of a feed item, optimistically. */
+/** Distinct video_ids of these items, read in chunks to keep URLs short. */
+async function videoIdsOf(ids: string[]): Promise<string[]> {
+  const result = new Set<string>();
+  for (let i = 0; i < ids.length; i += 200) {
+    const { data } = await supabase.from("items").select("video_id").in("id", ids.slice(i, i + 200));
+    for (const row of (data ?? []) as { video_id: string | null }[]) {
+      if (row.video_id) result.add(row.video_id);
+    }
+  }
+  return [...result];
+}
+
+/**
+ * The same video or post can be saved under more than one agent. Give every
+ * copy the same status, so marking it once (watched, read, liked...) takes it
+ * off every feed on every device. RLS keeps this to the user's own agents.
+ */
+async function syncCopies(ids: string[], status: ItemStatus): Promise<void> {
+  const videoIds = await videoIdsOf(ids);
+  for (let i = 0; i < videoIds.length; i += 200) {
+    await supabase.from("items").update({ user_status: status }).in("video_id", videoIds.slice(i, i + 200));
+  }
+}
+
+/** video_ids of these items as they are in the feed cache, for the optimistic update. */
+function cachedVideoIds(feeds: [unknown, ItemWithAnalysis[] | undefined][], ids: Set<string>): Set<string> {
+  const result = new Set<string>();
+  for (const [, data] of feeds) {
+    for (const item of data ?? []) {
+      if (ids.has(item.id) && item.video_id) result.add(item.video_id);
+    }
+  }
+  return result;
+}
+
+/** Update the watch status of a feed item (and its copies), optimistically. */
 export function useUpdateItemStatus() {
   const queryClient = useQueryClient();
   return useMutation({
@@ -296,6 +331,7 @@ export function useUpdateItemStatus() {
         .update({ user_status: status })
         .eq("id", id);
       if (error) throw error;
+      await syncCopies([id], status).catch(() => {});
       return { id, status };
     },
     onMutate: async ({ id, status }) => {
@@ -307,12 +343,13 @@ export function useUpdateItemStatus() {
         queryKey: ["feedItems"],
       });
 
-      // Optimistically update each feed query cache in-place.
+      // Optimistically update each feed query cache in-place (every copy).
+      const videoIds = cachedVideoIds(previousFeed, new Set([id]));
       for (const [queryKey, data] of previousFeed) {
         if (!data) continue;
         queryClient.setQueryData<ItemWithAnalysis[]>(queryKey, (old) =>
           old?.map((item) =>
-            item.id === id ? { ...item, user_status: status } : item,
+            item.id === id || (item.video_id && videoIds.has(item.video_id)) ? { ...item, user_status: status } : item,
           ) ?? old,
         );
       }
@@ -346,6 +383,7 @@ export function useBulkUpdateItemStatus() {
         .update({ user_status: status })
         .in("id", ids);
       if (error) throw error;
+      await syncCopies(ids, status).catch(() => {});
       return { ids, status };
     },
     onMutate: async ({ ids, status }) => {
@@ -354,12 +392,13 @@ export function useBulkUpdateItemStatus() {
         queryKey: ["feedItems"],
       });
       const selectedIds = new Set(ids);
+      const videoIds = cachedVideoIds(previousFeed, selectedIds);
 
       for (const [queryKey, data] of previousFeed) {
         if (!data) continue;
         queryClient.setQueryData<ItemWithAnalysis[]>(queryKey, (old) =>
           old?.map((item) =>
-            selectedIds.has(item.id) ? { ...item, user_status: status } : item,
+            selectedIds.has(item.id) || (item.video_id && videoIds.has(item.video_id)) ? { ...item, user_status: status } : item,
           ) ?? old,
         );
       }
