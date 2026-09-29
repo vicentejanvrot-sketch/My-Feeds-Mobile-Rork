@@ -16,7 +16,7 @@ struct FeedView: View {
     @State private var channelFilter: String? = nil
     @State private var statusFilter: ItemStatus? = .notWatched
     @State private var platformFilter: SourcePlatform? = nil
-    @State private var sortMode: SortMode = .recent
+    @State private var sortMode: SortMode = .priority
 
     // Selection
     @State private var selectedIds: Set<String> = []
@@ -28,9 +28,9 @@ struct FeedView: View {
     @State private var showBulkStatusModal = false
 
     enum SortMode: String, CaseIterable {
+        case priority = "Priority"
         case recent = "Recent"
         case views = "Views"
-        case ranked = "Ranking"
     }
 
     enum FilterModal { case agent, channel, status, sort }
@@ -102,6 +102,17 @@ struct FeedView: View {
         return statusSearchItems.filter { $0.channelId == channelFilter }
     }
 
+    /// Each enabled source's Priority (1-5) keyed by agent and channel. An item
+    /// whose source is disabled or gone isn't here and sorts to the bottom.
+    private var sourcePriority: [String: Int] {
+        var map: [String: Int] = [:]
+        for ch in channels where ch.isEnabled != false {
+            guard let channelId = ch.channelId, !channelId.isEmpty else { continue }
+            map[ch.agentId + ":" + channelId] = ch.priority ?? 3
+        }
+        return map
+    }
+
     private var filteredItems: [FeedItem] {
         var result = baseFilteredItems
         if let platformFilter {
@@ -112,8 +123,19 @@ struct FeedView: View {
             break
         case .views:
             result = result.sorted { ($0.analysis?.viewsAtAnalysis ?? 0) > ($1.analysis?.viewsAtAnalysis ?? 0) }
-        case .ranked:
-            result = result.sorted { ($0.analysis?.rankingScore ?? 0) > ($1.analysis?.rankingScore ?? 0) }
+        case .priority:
+            // Priority 5 sources on top, 1 at the bottom; newest first within each.
+            let priorities = sourcePriority
+            func prio(_ item: FeedItem) -> Int {
+                guard let agentId = item.agentId, let channelId = item.channelId else { return 0 }
+                return priorities[agentId + ":" + channelId] ?? 0
+            }
+            result = result.sorted { a, b in
+                let pa = prio(a)
+                let pb = prio(b)
+                if pa != pb { return pa > pb }
+                return (a.publishedAt ?? "") > (b.publishedAt ?? "")
+            }
         }
         return result
     }
