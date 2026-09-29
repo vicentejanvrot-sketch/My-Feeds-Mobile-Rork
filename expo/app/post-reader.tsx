@@ -1,4 +1,4 @@
-// In-app reader for X, Reddit, Instagram and LinkedIn posts — the mobile twin of the web
+// In-app reader for X, Reddit, Instagram, LinkedIn and GitHub posts — the mobile twin of the web
 // PostReaderModal, so reading works the same everywhere.
 import { useEffect, useRef, useState } from "react";
 import { ActivityIndicator, AppState, Modal, Platform as RNPlatform, Pressable, ScrollView, Share, StyleSheet, Text, View, useWindowDimensions } from "react-native";
@@ -26,6 +26,8 @@ import {
   ThumbsUp,
   Play,
   Maximize2,
+  Star,
+  GitFork,
 } from "lucide-react-native";
 import { Colors } from "@/constants/colors";
 import { supabase } from "@/lib/supabase";
@@ -53,6 +55,7 @@ const X_BLUE = "#1D9BF0";
 const REDDIT_ORANGE = "#FF4500";
 const IG_RED = "#FF3040";
 const LINKEDIN_BLUE = "#378FE9";
+const GITHUB_STAR = "#E3B341";
 
 type PostMetrics = {
   likes?: number;
@@ -64,6 +67,8 @@ type PostMetrics = {
   quotes?: number;
   score?: number;
   comments?: number;
+  stars?: number;
+  forks?: number;
 };
 
 // An image, or a quoted post / X article (type "quote" / "article").
@@ -315,7 +320,7 @@ export default function PostReaderScreen() {
       </View>
 
       <ScrollView contentContainerStyle={styles.content}>
-        {platform === "reddit" ? <Text style={styles.title}>{item.title}</Text> : null}
+        {platform === "reddit" || platform === "github" ? <Text style={styles.title}>{item.title}</Text> : null}
         {platform === "reddit" && item.author_handle ? (
           <Text style={styles.muted}>{item.author_handle}</Text>
         ) : null}
@@ -444,6 +449,31 @@ export default function PostReaderScreen() {
               icon={<Bookmark size={19} color={bookmarked ? X_BLUE : Colors.textSecondary} fill={bookmarked ? X_BLUE : "transparent"} />}
               value={formatCount((metrics.bookmarks ?? 0) + (bookmarked ? 1 : 0))}
               valueColor={bookmarked ? X_BLUE : undefined}
+            />
+            <BarButton label="Share" onPress={share} icon={<ShareIcon size={19} color={Colors.textSecondary} />} />
+          </View>
+        ) : platform === "github" ? (
+          // GitHub: Star (= Saved), Fork, plus Save and Share.
+          <View style={styles.xBar}>
+            <BarButton
+              label={liked ? "Remove from Saved" : "Star (save in My Feeds)"}
+              selected={liked}
+              onPress={() => changeStatus(liked ? "watched" : "liked")}
+              icon={<Star size={19} color={liked ? GITHUB_STAR : Colors.textSecondary} fill={liked ? GITHUB_STAR : "transparent"} />}
+              value={formatCount((metrics.stars ?? 0) + (liked ? 1 : 0))}
+              valueColor={liked ? GITHUB_STAR : undefined}
+            />
+            <BarButton
+              label="Fork on GitHub"
+              onPress={() => openExternalLink(item.url)}
+              icon={<GitFork size={19} color={Colors.textSecondary} />}
+              value={formatCount(metrics.forks)}
+            />
+            <BarButton
+              label={bookmarked ? "Remove from Read Later" : "Save (Read Later)"}
+              selected={bookmarked}
+              onPress={() => changeStatus(bookmarked ? "not_watched" : "watch_later")}
+              icon={<Bookmark size={19} color={bookmarked ? X_BLUE : Colors.textSecondary} fill={bookmarked ? X_BLUE : "transparent"} />}
             />
             <BarButton label="Share" onPress={share} icon={<ShareIcon size={19} color={Colors.textSecondary} />} />
           </View>
