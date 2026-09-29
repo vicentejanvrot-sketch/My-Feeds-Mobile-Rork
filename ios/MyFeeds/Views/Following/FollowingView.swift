@@ -590,7 +590,11 @@ struct FollowingView: View {
         busyKeys.insert(busyKey)
         Task {
             do {
-                try await SupabaseService.shared.decideIdentityLink(id: account.link.id, same: same)
+                // Every source of this person, so the answer lands on each copy of the match.
+                let channelIds = people.first { person in
+                    person.sources.contains { $0.id == account.link.channelId }
+                }?.sources.map(\.id) ?? [account.link.channelId]
+                try await SupabaseService.shared.decideIdentityLink(account.link, channelIds: channelIds, same: same)
                 toasts.show(same ? "Marked as the same person" : "Removed that match")
                 await reloadIdentity()
             } catch {
