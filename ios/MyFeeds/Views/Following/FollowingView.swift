@@ -260,7 +260,7 @@ struct FollowingView: View {
             Text("Find where the people you follow also post")
                 .font(.system(size: 15, weight: .bold))
                 .foregroundStyle(Theme.textPrimary)
-            Text("Checks each of your \(people.count) people and companies once: the links on their profile, their link-in-bio page and website, and the same handle on other platforms. It uses at most \(AlsoOn.maxLookupsPerSource) AIsa lookups per source, so up to about $" + maxCost + " for this first check.")
+            Text("Checks each of your \(people.count) people and companies once: the links on their profile, their link-in-bio page and website, and handles like theirs on other platforms. It uses at most \(AlsoOn.maxLookupsPerSource) AIsa lookups per source, so up to about $" + maxCost + " for this first check.")
                 .font(.system(size: 13))
                 .foregroundStyle(Theme.textSecondary)
                 .fixedSize(horizontal: false, vertical: true)
@@ -918,7 +918,7 @@ private struct PersonSheet: View {
                 }
 
                 if person.lastScannedAt != nil && person.also.isEmpty && person.possible.isEmpty {
-                    Text("No other accounts found. Their profile doesn't link anywhere we can follow, and the same handle isn't on X, Instagram or YouTube.")
+                    Text("No other accounts found. Their profile doesn't link anywhere we can follow, and no handle like theirs turned up on X, Instagram, YouTube or Reddit.")
                         .font(.system(size: 13))
                         .foregroundStyle(Theme.textSecondary)
                         .fixedSize(horizontal: false, vertical: true)
@@ -1063,7 +1063,7 @@ private struct PersonSheet: View {
                     .foregroundStyle(Theme.warning)
                     .fixedSize(horizontal: false, vertical: true)
             }
-            Text("Matches come from links on their own profiles, their link-in-bio page and website, and the same handle on other platforms. A handle alone is only ever a possible match.")
+            Text("Matches come from links on their own profiles, their link-in-bio page and website, and handles like theirs on other platforms. A handle alone is only ever a possible match.")
                 .font(.system(size: 11))
                 .foregroundStyle(Theme.textMuted)
                 .fixedSize(horizontal: false, vertical: true)
