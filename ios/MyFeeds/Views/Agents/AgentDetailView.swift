@@ -30,6 +30,8 @@ struct AgentDetailView: View {
     @State private var recipientToRemove: AgentRecipient?
     @State private var channelToRemove: Channel?
     @State private var runToCancel: Run?
+    @State private var showDeleteAgent = false
+    @State private var isDeletingAgent = false
 
     private let accent = Theme.agentAccent(0)
 
@@ -116,6 +118,29 @@ struct AgentDetailView: View {
         } message: {
             Text("Stop this run in progress?")
         }
+        .alert("Delete \(agent?.name ?? "agent")?", isPresented: $showDeleteAgent) {
+            Button("Cancel", role: .cancel) {}
+            Button("Delete agent", role: .destructive) { deleteThisAgent() }
+        } message: {
+            Text("This deletes the agent, its \(channels.count) \(channels.count == 1 ? "source" : "sources"), its email recipients, its run history and every video and post it found, including ones you saved. It can't be undone. Your accounts on YouTube, X and the other platforms aren't touched.")
+        }
+    }
+
+    /// The database deletes the agent's sources, recipients, runs and found
+    /// items along with it.
+    private func deleteThisAgent() {
+        guard let agent, !isDeletingAgent else { return }
+        isDeletingAgent = true
+        Task {
+            do {
+                try await SupabaseService.shared.deleteAgent(id: agent.id)
+                toasts.show("Agent deleted")
+                dismiss()
+            } catch {
+                toasts.show(error.localizedDescription, type: .error)
+            }
+            isDeletingAgent = false
+        }
     }
 
     private var offlineBanner: some View {
@@ -191,6 +216,22 @@ struct AgentDetailView: View {
                                 .stroke(Theme.border, lineWidth: 1.5)
                         )
                     }
+
+                    Button {
+                        showDeleteAgent = true
+                    } label: {
+                        Image(systemName: "trash")
+                            .font(.system(size: 14))
+                            .foregroundStyle(Theme.destructive)
+                            .padding(.horizontal, 14)
+                            .frame(height: 44)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 10)
+                                    .stroke(Theme.destructive, lineWidth: 1.5)
+                            )
+                    }
+                    .disabled(isDeletingAgent)
+                    .accessibilityLabel("Delete agent")
                 }
                 .padding(.top, 18)
             }
