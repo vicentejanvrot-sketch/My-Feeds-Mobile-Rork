@@ -431,9 +431,17 @@ struct AgentFormView: View {
             }
         } else {
             runTime = date(fromTimeString: "07:00")
+            // Start with the user's own email: the Default Email from Settings
+            // if set, otherwise the sign-in email. They can remove it or add more.
+            var defaultEmail: String?
             if let userId = auth.userId,
-               let settings = try? await service.fetchUserSettings(userId: userId),
-               let email = settings.defaultEmail, isValidEmail(email) {
+               let settings = try? await service.fetchUserSettings(userId: userId) {
+                defaultEmail = settings.defaultEmail?.trimmingCharacters(in: .whitespaces)
+            }
+            if defaultEmail?.isEmpty ?? true {
+                defaultEmail = auth.userEmail?.trimmingCharacters(in: .whitespaces)
+            }
+            if let email = defaultEmail, isValidEmail(email), recipientEmails.isEmpty {
                 recipientEmails = [email]
             }
         }
