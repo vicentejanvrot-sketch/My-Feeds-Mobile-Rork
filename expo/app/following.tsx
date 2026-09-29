@@ -35,6 +35,7 @@ import { PlatformBadge } from "@/components/PlatformBadge";
 import { useToast } from "@/components/Toast";
 import { useAgents, useChannelsAll } from "@/lib/hooks";
 import { openExternalLink } from "@/lib/open-link";
+import { useYouTubeConnection } from "@/lib/useYouTubeConnection";
 import { PLATFORM_META, type Platform } from "@/lib/platforms";
 import {
   buildPeople,
@@ -119,13 +120,36 @@ function AccountLine({ platform, label, url }: { platform: Platform; label: stri
 function FollowButton({ account, agentId }: { account: FoundAccount; agentId: string | undefined }) {
   const follow = useFollowAccount();
   const showToast = useToast();
+  const youtube = useYouTubeConnection();
+  // With YouTube connected, a YouTube channel is subscribed to directly.
+  const subscribesDirectly = account.platform === "youtube" && youtube.status === "connected";
   return (
     <Pressable
       disabled={!agentId || follow.isPending}
       onPress={() => {
         if (!agentId) return;
+        if (subscribesDirectly) {
+          follow.mutate(
+            { platform: account.platform, url: account.url, agentId },
+            {
+              onSuccess: () => {
+                youtube
+                  .subscribe(account.url)
+                  .then((result) =>
+                    showToast(result === "already" ? "Added. You were already subscribed on YouTube" : "Added and subscribed on YouTube", "success"),
+                  )
+                  .catch(() => {
+                    showToast("Added, but couldn't subscribe on YouTube. Opening the channel", "error");
+                    void openExternalLink(platformFollowUrl(account.platform, account.url));
+                  });
+              },
+              onError: (e) => showToast(e instanceof Error ? e.message : "Couldn't add that account", "error"),
+            },
+          );
+          return;
+        }
         // Adds it to the agent, then opens it on its own platform so the user
-        // can follow there too (LinkedIn and Instagram don't let apps do that).
+        // can follow there too (Instagram, LinkedIn and X don't let apps do that).
         follow.mutate(
           { platform: account.platform, url: account.url, agentId },
           {
