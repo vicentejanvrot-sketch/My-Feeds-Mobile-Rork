@@ -837,10 +837,9 @@ export function useCreateAgent() {
   const { user } = useAuth();
   return useMutation({
     mutationFn: async (
-      payload: Omit<
-        Agent,
-        "id" | "user_id" | "created_at" | "updated_at"
-      >,
+      // Columns left out (the retired ranking weights, minimum duration) take
+      // their database defaults.
+      payload: Partial<Omit<Agent, "id" | "user_id" | "created_at" | "updated_at">> & { name: string },
     ) => {
       const { data, error } = await supabase
         .from("agents")
