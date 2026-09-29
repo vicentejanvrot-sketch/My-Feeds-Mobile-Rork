@@ -453,6 +453,7 @@ export default function FollowingScreen() {
 
   const [tab, setTab] = useState<"all" | "gaps">("all");
   const [query, setQuery] = useState("");
+  const [agentFilter, setAgentFilter] = useState<string>("all");
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
   const agents = useMemo(
@@ -469,12 +470,14 @@ export default function FollowingScreen() {
   );
   const skipped = (sources.data ?? []).filter((c) => !isPersonSource(c)).length;
 
+  // People followed in the chosen agent (a person can be in several), then the name search.
+  const inAgent = agentFilter === "all" ? people : people.filter((p) => p.agentIds.includes(agentFilter));
   const q = query.trim().toLowerCase();
   const filtered = q
-    ? people.filter((p) => p.name.toLowerCase().includes(q) || p.following.some((f) => f.label.toLowerCase().includes(q)))
-    : people;
+    ? inAgent.filter((p) => p.name.toLowerCase().includes(q) || p.following.some((f) => f.label.toLowerCase().includes(q)))
+    : inAgent;
 
-  const gapCount = people.reduce((n, p) => n + p.also.length + p.possible.length, 0);
+  const gapCount = inAgent.reduce((n, p) => n + p.also.length + p.possible.length, 0);
   const scanList = scans.data ?? [];
   const staleBefore = Date.now() - RESCAN_AFTER_DAYS * 24 * 60 * 60 * 1000;
   const scanTimes = new Map(scanList.map((s) => [s.channel_id, new Date(s.scanned_at).getTime()]));
@@ -568,6 +571,31 @@ export default function FollowingScreen() {
             ) : null}
           </View>
         </View>
+
+        {/* Filter by agent */}
+        {agents.length > 1 ? (
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            style={styles.agentFilter}
+            contentContainerStyle={styles.agentChips}
+          >
+            {[{ id: "all", name: "All agents" }, ...agents].map((a) => {
+              const active = a.id === agentFilter;
+              return (
+                <Pressable
+                  key={a.id}
+                  onPress={() => setAgentFilter(a.id)}
+                  style={[styles.agentChip, active && styles.agentChipActive]}
+                  accessibilityRole="button"
+                  accessibilityState={{ selected: active }}
+                >
+                  <Text style={[styles.agentChipText, active && styles.agentChipTextActive]}>{a.name}</Text>
+                </Pressable>
+              );
+            })}
+          </ScrollView>
+        ) : null}
 
         {progress ? (
           <View style={styles.progressBox}>
@@ -894,6 +922,7 @@ const styles = StyleSheet.create({
   },
   notThemText: { color: Colors.textPrimary, fontSize: 14, fontWeight: "700" as const },
   agentPicker: { gap: 6, marginBottom: 10 },
+  agentFilter: { flexGrow: 0, marginTop: -4, marginBottom: 14 },
   agentChips: { gap: 8 },
   agentChip: {
     height: 32,
