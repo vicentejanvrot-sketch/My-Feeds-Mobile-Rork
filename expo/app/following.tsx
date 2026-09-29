@@ -56,7 +56,7 @@ import {
 
 const RESCAN_AFTER_DAYS = 30;
 // Upper bound per source, and AIsa's listed median price per call.
-const MAX_LOOKUPS_PER_SOURCE = 8;
+const MAX_LOOKUPS_PER_SOURCE = 16;
 const AISA_PRICE_PER_CALL = 0.012;
 const IPAD_BREAKPOINT = 768;
 
@@ -312,7 +312,7 @@ function PersonPanel({ person, agents, scanning, onRescan }: {
 
       {person.lastScannedAt && person.also.length === 0 && person.possible.length === 0 ? (
         <Text style={[styles.muted, styles.noneFound]}>
-          No other accounts found. Their profile doesn't link anywhere we can follow, and the same handle isn't on X, Instagram or YouTube.
+          No other accounts found. Their profile doesn't link anywhere we can follow, and no handle like theirs turned up on X, Instagram, YouTube or Reddit.
         </Text>
       ) : null}
 
@@ -336,7 +336,7 @@ function PersonPanel({ person, agents, scanning, onRescan }: {
           <Text style={styles.warningText}>Last check had a problem: {person.scanErrors[0]}</Text>
         ) : null}
         <Text style={styles.footNote}>
-          Matches come from links on their own profiles, their link-in-bio page and website, and the same handle on other platforms. A handle alone is only ever a possible match.
+          Matches come from links on their own profiles, their link-in-bio page and website, and handles like theirs on other platforms. A handle alone is only ever a possible match.
         </Text>
       </View>
     </View>
@@ -590,7 +590,7 @@ export default function FollowingScreen() {
           <View style={styles.introCard}>
             <Text style={styles.introTitle}>Find where the people you follow also post</Text>
             <Text style={styles.muted}>
-              {"Checks each of your " + people.length + " people and companies once: the links on their profile, their link-in-bio page and website, and the same handle on other platforms. It uses at most " +
+              {"Checks each of your " + people.length + " people and companies once: the links on their profile, their link-in-bio page and website, and handles like theirs on other platforms. It uses at most " +
                 MAX_LOOKUPS_PER_SOURCE + " AIsa lookups per source, so up to about $" + maxCost + " for this first check."}
             </Text>
             <Pressable onPress={() => void runScan(toScan)} style={({ pressed }) => [styles.introBtn, pressed && styles.pressed]}>
