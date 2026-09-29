@@ -44,9 +44,9 @@ export const PLATFORM_META: Record<Platform, {
     short: "r/",
     fg: "#FF9A5C",
     bg: "#3A2418",
-    sourceNoun: "Subreddit",
-    addPlaceholder: "r/subreddit or a reddit.com link",
-    addHelp: "Top posts from the lookback window.",
+    sourceNoun: "Subreddit or user",
+    addPlaceholder: "r/subreddit, u/username or a reddit.com link",
+    addHelp: "Top posts from a subreddit, or a user's own posts, from the lookback window.",
     openLabel: "Open on Reddit",
   },
   instagram: {
