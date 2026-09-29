@@ -13,7 +13,7 @@ import { useRouter, useFocusEffect } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Haptics from "expo-haptics";
 import { LinearGradient } from "expo-linear-gradient";
-import { Play, Clock, Tags, Mail } from "lucide-react-native";
+import { Play, Clock, Mail } from "lucide-react-native";
 import { useQueryClient } from "@tanstack/react-query";
 import { Colors } from "@/constants/colors";
 import { agentAccent } from "@/lib/database";
@@ -221,9 +221,6 @@ export default function AgentsScreen() {
                   <Meta icon={<Clock size={13} color={Colors.textSecondary} />} text={agent.schedule_frequency ?? "manual"} />
                   {agent.run_time_local ? (
                     <Meta icon={<Mail size={13} color={Colors.textSecondary} />} text={agent.run_time_local} />
-                  ) : null}
-                  {agent.keywords && agent.keywords.length > 0 ? (
-                    <Meta icon={<Tags size={13} color={Colors.textSecondary} />} text={`${agent.keywords.length} keywords`} />
                   ) : null}
                 </View>
 
