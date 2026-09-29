@@ -8,6 +8,7 @@ nonisolated enum SourcePlatform: String, Codable, CaseIterable, Hashable, Sendab
     case reddit
     case instagram
     case linkedin
+    case github
 
     /// Unknown or missing values (rows written before the migration) are YouTube.
     init(raw: String?) {
@@ -15,10 +16,10 @@ nonisolated enum SourcePlatform: String, Codable, CaseIterable, Hashable, Sendab
     }
 
     /// Non-YouTube items store "<platform>:<id>" in items.video_id
-    /// (x, reddit, instagram, linkedin).
+    /// (x, reddit, instagram, linkedin, github).
     static func isPostVideoId(_ videoId: String?) -> Bool {
         guard let videoId else { return false }
-        return ["x:", "reddit:", "instagram:", "linkedin:"].contains { videoId.hasPrefix($0) }
+        return ["x:", "reddit:", "instagram:", "linkedin:", "github:"].contains { videoId.hasPrefix($0) }
     }
 
     /// Platform of a post item from its "<platform>:<id>" video_id; YouTube otherwise.
@@ -38,6 +39,7 @@ extension SourcePlatform {
         case .reddit: return "Reddit"
         case .instagram: return "Instagram"
         case .linkedin: return "LinkedIn"
+        case .github: return "GitHub"
         }
     }
 
@@ -48,6 +50,7 @@ extension SourcePlatform {
         case .reddit: return "r/"
         case .instagram: return "IG"
         case .linkedin: return "in"
+        case .github: return "GH"
         }
     }
 
@@ -59,6 +62,7 @@ extension SourcePlatform {
         case .reddit: return Color(red: 1, green: 154 / 255, blue: 92 / 255)
         case .instagram: return Color(red: 1, green: 122 / 255, blue: 178 / 255)
         case .linkedin: return Color(red: 127 / 255, green: 184 / 255, blue: 240 / 255)
+        case .github: return Color(red: 230 / 255, green: 237 / 255, blue: 243 / 255)
         }
     }
 
@@ -70,6 +74,7 @@ extension SourcePlatform {
         case .reddit: return Color(red: 58 / 255, green: 36 / 255, blue: 24 / 255)
         case .instagram: return Color(red: 58 / 255, green: 24 / 255, blue: 48 / 255)
         case .linkedin: return Color(red: 20 / 255, green: 40 / 255, blue: 61 / 255)
+        case .github: return Color(red: 33 / 255, green: 38 / 255, blue: 45 / 255)
         }
     }
 
@@ -80,6 +85,7 @@ extension SourcePlatform {
         case .reddit: return "Subreddit or user"
         case .instagram: return "Account"
         case .linkedin: return "Profile or company"
+        case .github: return "User or organization"
         }
     }
 
@@ -90,6 +96,7 @@ extension SourcePlatform {
         case .reddit: return "r/subreddit, u/username or a reddit.com link"
         case .instagram: return "@handle or https://www.instagram.com/handle"
         case .linkedin: return "https://www.linkedin.com/in/name or /company/name"
+        case .github: return "@username or https://github.com/username"
         }
     }
 
@@ -100,6 +107,7 @@ extension SourcePlatform {
         case .reddit: return "Top posts from a subreddit, or a user's own posts, from the lookback window."
         case .instagram: return "Public accounts only. Posts and reels from the lookback window."
         case .linkedin: return "Paste a person's profile link or a company page link."
+        case .github: return "New repositories and releases from the lookback window."
         }
     }
 
@@ -110,6 +118,7 @@ extension SourcePlatform {
         case .reddit: return "Open on Reddit"
         case .instagram: return "Open on Instagram"
         case .linkedin: return "Open on LinkedIn"
+        case .github: return "Open on GitHub"
         }
     }
 
@@ -175,7 +184,7 @@ nonisolated struct KeyMoment: Codable, Hashable, Sendable {
     }
 }
 
-/// Engagement numbers for X, Reddit, Instagram and LinkedIn posts (items.metrics).
+/// Engagement numbers for X, Reddit, Instagram, LinkedIn and GitHub posts (items.metrics).
 nonisolated struct ItemMetrics: Codable, Hashable, Sendable {
     var likes: Int?
     var reposts: Int?
@@ -187,8 +196,11 @@ nonisolated struct ItemMetrics: Codable, Hashable, Sendable {
     var comments: Int?
     /// Instagram reel plays.
     var plays: Int?
+    /// GitHub repo stars and forks.
+    var stars: Int?
+    var forks: Int?
 
-    enum CodingKeys: String, CodingKey { case likes, reposts, replies, views, bookmarks, quotes, score, comments, plays }
+    enum CodingKeys: String, CodingKey { case likes, reposts, replies, views, bookmarks, quotes, score, comments, plays, stars, forks }
 
     init(from decoder: Decoder) throws {
         guard let c = try? decoder.container(keyedBy: CodingKeys.self) else { return }
@@ -201,6 +213,8 @@ nonisolated struct ItemMetrics: Codable, Hashable, Sendable {
         score = decodeLenientInt(c, .score)
         comments = decodeLenientInt(c, .comments)
         plays = decodeLenientInt(c, .plays)
+        stars = decodeLenientInt(c, .stars)
+        forks = decodeLenientInt(c, .forks)
     }
 }
 
