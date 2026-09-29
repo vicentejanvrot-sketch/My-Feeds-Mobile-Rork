@@ -2,9 +2,9 @@
 // sources the same way. Keep in sync with src/lib/platforms.ts (web) and
 // ios/MyFeeds/Models/Platform.swift in the mobile repo.
 
-export type Platform = "youtube" | "x" | "reddit" | "instagram" | "linkedin";
+export type Platform = "youtube" | "x" | "reddit" | "instagram" | "linkedin" | "github";
 
-export const PLATFORMS: Platform[] = ["youtube", "x", "reddit", "instagram", "linkedin"];
+export const PLATFORMS: Platform[] = ["youtube", "x", "reddit", "instagram", "linkedin", "github"];
 
 export const PLATFORM_META: Record<Platform, {
   label: string;
@@ -71,15 +71,25 @@ export const PLATFORM_META: Record<Platform, {
     openLabel: "Open on LinkedIn",
     beta: true,
   },
+  github: {
+    label: "GitHub",
+    short: "GH",
+    fg: "#E6EDF3",
+    bg: "#21262D",
+    sourceNoun: "User or organization",
+    addPlaceholder: "@username or https://github.com/username",
+    addHelp: "New repositories and releases from the lookback window.",
+    openLabel: "Open on GitHub",
+  },
 };
 
 export function platformOf(value: string | null | undefined): Platform {
-  return value === "x" || value === "reddit" || value === "instagram" || value === "linkedin" ? value : "youtube";
+  return value === "x" || value === "reddit" || value === "instagram" || value === "linkedin" || value === "github" ? value : "youtube";
 }
 
-// Non-YouTube items store "<platform>:<id>" in items.video_id (x, reddit, instagram, linkedin).
+// Non-YouTube items store "<platform>:<id>" in items.video_id (x, reddit, instagram, linkedin, github).
 export function isPostVideoId(videoId: string | null | undefined): boolean {
-  return !!videoId && /^(x|reddit|instagram|linkedin):/.test(videoId);
+  return !!videoId && /^(x|reddit|instagram|linkedin|github):/.test(videoId);
 }
 
 export function formatCount(num: number | null | undefined): string {
