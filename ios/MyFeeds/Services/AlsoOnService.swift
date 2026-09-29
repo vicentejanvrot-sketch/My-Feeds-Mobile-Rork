@@ -31,13 +31,18 @@ extension SupabaseService {
 
     /// "Same person" confirms a possible match; "Not them" rejects it. Either way
     /// the function never overwrites the user's decision on a later check.
-    func decideIdentityLink(id: String, same: Bool) async throws {
+    /// channelIds are all the sources of this person (the same account followed
+    /// in several agents): the answer is saved on every copy of the match.
+    func decideIdentityLink(_ link: IdentityLink, channelIds: [String], same: Bool) async throws {
         let decision = same
             ? IdentityDecision(status: "confirmed", method: "user", evidence: "You confirmed this match.", decidedByUser: true)
             : IdentityDecision(status: "rejected", method: nil, evidence: nil, decidedByUser: true)
+        var ids = channelIds
+        if !ids.contains(link.channelId) { ids.append(link.channelId) }
         try await client.schema("public").from("identity_links")
             .update(decision)
-            .eq("id", value: id)
+            .eq("match_key", value: link.matchKey)
+            .in("channel_id", values: ids)
             .execute()
     }
 
