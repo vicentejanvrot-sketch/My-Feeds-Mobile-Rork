@@ -66,7 +66,6 @@ struct AgentFormView: View {
                         basicInfoSection
                         scheduleSection
                         videoFiltersSection
-                        rankingSection
                         recipientsSection
                         actions
                     }
@@ -193,22 +192,6 @@ struct AgentFormView: View {
             toggleRow(title: "Include Shorts", subtitle: "Include YouTube Shorts in results", isOn: $includeShorts)
             toggleRow(title: "Include Live/Upcoming", subtitle: "Include live streams and premieres", isOn: $includeLive)
                 .padding(.top, 12)
-
-            fieldLabel("Minimum Duration: \(Int(minDurationMinutes)) minutes")
-            Slider(value: $minDurationMinutes, in: 0...30, step: 1)
-                .tint(Theme.accent)
-        }
-    }
-
-    private var rankingSection: some View {
-        formSection(title: "Ranking Preferences — \"Adjust how videos are ranked in the digest\"") {
-            sliderField(label: "Freshness Weight", value: $freshnessWeight)
-            sliderField(label: "Channel Priority Weight", value: $priorityWeight)
-            sliderField(label: "Duration Preference", value: $durationWeight)
-            Text("Boosts videos 8–25 minutes")
-                .font(.system(size: 11))
-                .italic()
-                .foregroundStyle(Theme.textMuted)
         }
     }
 
@@ -473,7 +456,8 @@ struct AgentFormView: View {
             aiProvider: "lovable",
             includeShorts: includeShorts,
             includeLive: includeLive,
-            minDurationMinutes: Int(minDurationMinutes),
+            // Minimum Duration was removed: agents keep every video length.
+            minDurationMinutes: 0,
             freshnessWeight: freshnessWeight,
             priorityWeight: priorityWeight,
             durationWeight: durationWeight,
