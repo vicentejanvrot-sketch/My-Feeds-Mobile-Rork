@@ -68,7 +68,7 @@ function extractYoutubeId(url: string | null): string | null {
 // ── Filter types ──────────────────────────────────────────────────
 
 type StatusFilter = "all" | ItemStatus;
-type SortMode = "recent" | "views" | "ranked";
+type SortMode = "priority" | "recent" | "views";
 
 const STATUS_OPTIONS: { key: StatusFilter; label: string; icon?: React.ReactNode }[] = [
   { key: "all", label: "All Statuses" },
@@ -79,9 +79,9 @@ const STATUS_OPTIONS: { key: StatusFilter; label: string; icon?: React.ReactNode
 ];
 
 const SORT_OPTIONS: { key: SortMode; label: string }[] = [
+  { key: "priority", label: "Priority" },
   { key: "recent", label: "Recent" },
   { key: "views", label: "Views" },
-  { key: "ranked", label: "Ranking" },
 ];
 
 const ITEM_STATUS_ICONS: Record<
@@ -155,7 +155,7 @@ export default function FeedScreen() {
   const [statusFilter, setStatusFilter] = useState<StatusFilter>(
     (params.status as StatusFilter) || "not_watched",
   );
-  const [sortMode, setSortMode] = useState<SortMode>("recent");
+  const [sortMode, setSortMode] = useState<SortMode>("priority");
   const [platformFilter, setPlatformFilter] = useState<Platform | "all">("all");
 
   const listUnsorted = agents.data ?? [];
@@ -244,6 +244,17 @@ export default function FeedScreen() {
     return map;
   }, [statusSearchItems]);
 
+  // Each enabled source's Priority (1-5) from the agent's Sources list. An item
+  // whose source is disabled or gone isn't in this map and sorts to the bottom.
+  const sourcePriority = useMemo(() => {
+    const map = new Map<string, number>();
+    for (const ch of channelList) {
+      if (ch.is_enabled === false || !ch.channel_id) continue;
+      map.set(ch.agent_id + ":" + ch.channel_id, ch.priority ?? 3);
+    }
+    return map;
+  }, [channelList]);
+
   // Platform chip, then sort
   const filtered = useMemo(() => {
     let result = baseFilteredItems;
@@ -258,15 +269,20 @@ export default function FeedScreen() {
       result = [...result].sort(
         (a, b) => (b.item_analysis?.[0]?.views_at_analysis ?? 0) - (a.item_analysis?.[0]?.views_at_analysis ?? 0),
       );
-    } else if (sortMode === "ranked") {
-      result = [...result].sort(
-        (a, b) => (b.item_analysis?.[0]?.ranking_score ?? 0) - (a.item_analysis?.[0]?.ranking_score ?? 0),
-      );
+    } else if (sortMode === "priority") {
+      // Priority 5 sources on top, 1 at the bottom; newest first within each.
+      const prio = (it: (typeof result)[number]) =>
+        (it.channel_id && sourcePriority.get(it.agent_id + ":" + it.channel_id)) || 0;
+      result = [...result].sort((a, b) => {
+        const diff = prio(b) - prio(a);
+        if (diff !== 0) return diff;
+        return new Date(b.published_at ?? 0).getTime() - new Date(a.published_at ?? 0).getTime();
+      });
     }
     // "recent" uses server order (by published_at desc)
 
     return result;
-  }, [baseFilteredItems, sortMode, platformFilter]);
+  }, [baseFilteredItems, sortMode, platformFilter, sourcePriority]);
 
   // Items per platform under the current filters; the chips only show when
   // there is more than one platform, and a platform at 0 has no chip.
