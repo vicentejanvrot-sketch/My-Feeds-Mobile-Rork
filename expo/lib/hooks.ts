@@ -827,8 +827,8 @@ export function useDeleteAgent() {
  * so the same agent always gets the same color as in the web app.
  */
 export function getAgentColor(index: number): string {
-  const { AGENT_ACCENTS } = require("@/lib/database");
-  return AGENT_ACCENTS[index % AGENT_ACCENTS.length];
+  const { agentAccent } = require("@/lib/database");
+  return agentAccent(index);
 }
 
 /** Create a new agent row. Returns the inserted agent. */
