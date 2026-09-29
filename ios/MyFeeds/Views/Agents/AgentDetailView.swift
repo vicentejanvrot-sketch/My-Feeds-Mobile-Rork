@@ -33,7 +33,10 @@ struct AgentDetailView: View {
     @State private var showDeleteAgent = false
     @State private var isDeletingAgent = false
 
-    private let accent = Theme.agentAccent(0)
+    /// The agent's own colour: its place in the alphabetical agent list, same as
+    /// the dashboard and agents list.
+    @State private var accentIndex = 0
+    private var accent: Color { Theme.agentAccent(accentIndex) }
 
     private var filteredChannels: [Channel] {
         guard !filterAll, let filter = channelStatusFilter else { return channels }
@@ -979,6 +982,11 @@ struct AgentDetailView: View {
             runs = loadedRuns
             isLoading = false
             isOffline = false
+
+            if let allAgents = try? await service.fetchAgents() {
+                let sorted = allAgents.sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
+                accentIndex = sorted.firstIndex { $0.id == agentId } ?? 0
+            }
 
             let statuses = try await service.fetchRunItemStatuses(runIds: loadedRuns.map(\.id))
             var grouped: [String: [ItemStatus: Int]] = [:]
