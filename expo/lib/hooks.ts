@@ -1144,11 +1144,11 @@ export function useDeleteApiKey() {
 /** Re-fetch a query whenever its screen regains focus. */
 export { useFocusEffect } from "expo-router";
 
-/** Add an X account, subreddit, Instagram account or LinkedIn profile through the add-source edge function (same flow as the web app). */
+/** Add an X account, subreddit, Instagram account, LinkedIn profile or GitHub user through the add-source edge function (same flow as the web app). */
 export function useAddSource(agentId: string) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (payload: { platform: "x" | "reddit" | "instagram" | "linkedin"; value: string; priority?: number }) => {
+    mutationFn: async (payload: { platform: "x" | "reddit" | "instagram" | "linkedin" | "github"; value: string; priority?: number }) => {
       const { data, error } = await supabase.functions.invoke("add-source", {
         body: {
           agentId,
