@@ -916,6 +916,9 @@ private struct FeedItemCard: View {
                     if let plays = item.metrics?.plays, plays > 0 {
                         statChip(icon: "play", value: plays)
                     }
+                } else if item.sourcePlatform == .github {
+                    statChip(icon: "star", value: item.metrics?.stars ?? 0)
+                    statChip(icon: "arrow.triangle.branch", value: item.metrics?.forks ?? 0)
                 } else if item.sourcePlatform == .linkedin {
                     statChip(icon: "hand.thumbsup", value: item.metrics?.likes ?? 0)
                     statChip(icon: "text.bubble", value: item.metrics?.comments ?? 0)
