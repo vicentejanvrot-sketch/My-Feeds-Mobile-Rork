@@ -896,11 +896,6 @@ export default function AgentDetailScreen() {
             <Text style={icStyles.title}>Filters</Text>
             <FilterBoolRow label="Shorts" active={agent.include_shorts === true} />
             <FilterBoolRow label="Live/Upcoming" active={agent.include_live === true} />
-            {agent.min_duration_minutes != null ? (
-              <Text style={styles.filterMinLine}>
-                Min {agent.min_duration_minutes} min
-              </Text>
-            ) : null}
           </View>
         </View>
 
