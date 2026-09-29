@@ -57,6 +57,7 @@ import {
   useRunItemCounts,
   useRealtimeInvalidation,
   useDeleteAgent,
+  useAgents,
   qk,
   extractEdgeFunctionErrorMessage,
 } from "@/lib/hooks";
@@ -575,10 +576,17 @@ export default function AgentDetailScreen() {
     return allChannels.filter((c) => (c.user_status ?? "not_watched") === channelFilter);
   }, [allChannels, channelFilter]);
 
+  // The agent's own colour: its place in the alphabetical agent list, same as
+  // the dashboard and agents list.
+  const allAgentsQ = useAgents();
   const accent = useMemo(() => {
     if (!agent) return Colors.agentBlue;
-    return agentAccent(0);
-  }, [agent]);
+    const sorted = [...(allAgentsQ.data ?? [])].sort((a, b) =>
+      a.name.localeCompare(b.name, undefined, { sensitivity: "base" }),
+    );
+    const index = sorted.findIndex((a) => a.id === agent.id);
+    return agentAccent(index >= 0 ? index : 0);
+  }, [agent, allAgentsQ.data]);
 
   const goBack = useCallback(() => {
     if (router.canGoBack()) {
