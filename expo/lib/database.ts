@@ -163,20 +163,34 @@ export interface ItemWithAnalysis extends Item {
   item_analysis: ItemAnalysis[] | null;
 }
 
-// Per-agent accent color, cycled by index. Must match web app palette exactly.
+// One colour per agent, taken in the agents' alphabetical order. Same list as
+// the web app (src/lib/agentColors.ts) and iOS (Theme.agentAccents), so an
+// agent has the same colour everywhere. 16 hues far enough apart that no two
+// agents share a colour until there are more than 16.
 export const AGENT_ACCENTS = [
-  "hsl(199, 89%, 48%)", // blue
-  "hsl(152, 69%, 50%)", // green
-  "hsl(32, 95%, 55%)",  // orange
-  "hsl(0, 72%, 55%)",   // red
-  "hsl(199, 89%, 70%)", // light blue
-  "hsl(280, 70%, 60%)", // purple
-  "hsl(168, 70%, 50%)", // teal
-  "hsl(30, 90%, 55%)",  // amber
+  "#0DA2E7", // sky blue
+  "#21C45D", // green
+  "#F98C1F", // orange
+  "#B55AE2", // purple
+  "#E44444", // red
+  "#19B39E", // teal
+  "#F9D210", // yellow
+  "#EA53AB", // pink
+  "#637AEE", // indigo
+  "#80CA2B", // lime
+  "#AC8BF9", // lavender
+  "#A0ADBA", // slate
+  "#6EE5F7", // light cyan
+  "#F89177", // coral
+  "#D7B375", // tan
+  "#8DE2B8", // mint
 ] as const;
 
 export function agentAccent(index: number): string {
-  return AGENT_ACCENTS[index % AGENT_ACCENTS.length];
+  const i = Math.abs(Math.trunc(index || 0));
+  if (i < AGENT_ACCENTS.length) return AGENT_ACCENTS[i];
+  // 17th agent on: golden-angle hues, so each still differs from its neighbours.
+  return `hsl(${Math.round((i * 137.508) % 360)}, 70%, 60%)`;
 }
 
 /** AI provider options matching the web app. */
