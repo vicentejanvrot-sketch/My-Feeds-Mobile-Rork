@@ -3,6 +3,7 @@ import {
   ActivityIndicator,
   FlatList,
   Modal,
+  Platform,
   Pressable,
   RefreshControl,
   ScrollView,
@@ -11,10 +12,13 @@ import {
   TextInput,
   useWindowDimensions,
   View,
+  type StyleProp,
+  type ViewStyle,
 } from "react-native";
 import { useLocalSearchParams, router, useFocusEffect } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Image } from "expo-image";
+import { WebView } from "react-native-webview";
 import * as Haptics from "expo-haptics";
 import {
   Search,
@@ -760,6 +764,11 @@ const FeedCard = React.memo(function FeedCard({
     if (item.thumbnail_url) {
       urls.push(item.thumbnail_url.replace(/^http:\/\//, "https://"));
     }
+    // Then the post's own photos and video posters, then a quoted post's or article's image
+    for (const raw of postImageUrls(item.media)) {
+      const uri = raw.replace(/^http:\/\//, "https://");
+      if (!urls.includes(uri)) urls.push(uri);
+    }
     const fromUrl = item.url?.match(/(?:v=|youtu\.be\/|embed\/|shorts\/)([\w-]{11})/)?.[1];
     const videoId = item.video_id && /^[\w-]{11}$/.test(item.video_id) ? item.video_id : fromUrl;
     if (videoId) {
@@ -769,12 +778,14 @@ const FeedCard = React.memo(function FeedCard({
       }
     }
     return urls;
-  }, [item.thumbnail_url, item.video_id, item.url]);
+  }, [item.thumbnail_url, item.media, item.video_id, item.url]);
   const [thumbIndex, setThumbIndex] = useState(0);
   useEffect(() => {
     setThumbIndex(0);
   }, [thumbCandidates]);
   const thumbUri = thumbCandidates[thumbIndex];
+  // A video with no poster (LinkedIn often sends none) shows its first frame instead.
+  const frameVideoUri = useMemo(() => postFrameVideoUrl(item.media), [item.media]);
   const status = (item.user_status ?? "not_watched") as ItemStatus;
   const [statusOpen, setStatusOpen] = useState(false);
 
@@ -810,7 +821,9 @@ const FeedCard = React.memo(function FeedCard({
             onError={() => setThumbIndex((i) => i + 1)}
           />
         ) : (
-          isPost ? (
+          isPost && frameVideoUri && Platform.OS !== "web" ? (
+            <VideoFrameThumb uri={frameVideoUri} style={styles.thumb} />
+          ) : isPost ? (
           <View style={[styles.thumb, styles.thumbFallback, postPreviewStyles.box]}>
             <Text style={postPreviewStyles.text} numberOfLines={6}>
               {(platform === "reddit" ? (analysis.short_summary || item.body) : item.body) || item.title}
@@ -931,10 +944,63 @@ function feedCardComparator(
   if ((paAnalysis?.duration_seconds ?? null) !== (naAnalysis?.duration_seconds ?? null)) return false;
   if (pa.title !== na.title) return false;
   if (pa.thumbnail_url !== na.thumbnail_url) return false;
+  if (pa.media !== na.media) return false;
   return true;
 }
 
 const FeedCardMemo = FeedCard;
+
+type CardMedia = {
+  type?: string | null;
+  url?: string | null;
+  image?: string | null;
+  video_url?: string | null;
+  hls_url?: string | null;
+};
+
+function postMediaList(media: unknown): CardMedia[] {
+  return Array.isArray(media) ? (media as CardMedia[]).filter(Boolean) : [];
+}
+const isEmbedPostMedia = (m: CardMedia) => m.type === "quote" || m.type === "article";
+const isHttpUrl = (u: unknown): u is string => typeof u === "string" && u.startsWith("http");
+
+/** Pictures a post card can show after its stored thumbnail: the post's own photos
+ *  and video posters, then a quoted post's or article's image. */
+function postImageUrls(media: unknown): string[] {
+  const list = postMediaList(media);
+  const own = list.filter((m) => !isEmbedPostMedia(m)).map((m) => m.url);
+  const embed = list.find(isEmbedPostMedia)?.image;
+  return [...own, embed].filter(isHttpUrl);
+}
+
+/** MP4 of the post's video (or the quoted post's), for a first-frame preview when there is no picture. */
+function postFrameVideoUrl(media: unknown): string | null {
+  const list = postMediaList(media);
+  const own = list.filter((m) => !isEmbedPostMedia(m)).map((m) => m.video_url);
+  return [...own, list.find(isEmbedPostMedia)?.video_url].find(isHttpUrl) ?? null;
+}
+
+/** First frame of a video with no poster, drawn by a muted <video> in a WebView. */
+function VideoFrameThumb({ uri, style }: { uri: string; style: StyleProp<ViewStyle> }) {
+  const html = useMemo(() => {
+    const src = uri.replace(/&/g, "&amp;").replace(/"/g, "&quot;");
+    return '<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1">' +
+      '<style>html,body{margin:0;height:100%;background:#000;overflow:hidden}video{width:100%;height:100%;object-fit:cover}</style></head>' +
+      '<body><video src="' + src + '#t=0.1" muted playsinline preload="metadata"></video></body></html>';
+  }, [uri]);
+  return (
+    <View style={[style, { overflow: "hidden", backgroundColor: "#000" }]} pointerEvents="none">
+      <WebView
+        source={{ html }}
+        style={{ flex: 1, backgroundColor: "#000" }}
+        originWhitelist={["*"]}
+        scrollEnabled={false}
+        allowsInlineMediaPlayback
+        mediaPlaybackRequiresUserAction
+      />
+    </View>
+  );
+}
 
 function BulkStatusBar({
   count,
