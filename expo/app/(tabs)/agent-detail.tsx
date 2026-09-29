@@ -56,6 +56,7 @@ import {
   useUpdateChannelPriority,
   useRunItemCounts,
   useRealtimeInvalidation,
+  useDeleteAgent,
   qk,
   extractEdgeFunctionErrorMessage,
 } from "@/lib/hooks";
@@ -661,6 +662,34 @@ export default function AgentDetailScreen() {
     router.push({ pathname: "/agent-form", params: { agentId } });
   }, [agentId, router]);
 
+  // Deleting the agent also deletes its sources, recipients, runs and every
+  // video and post it found (the database cascades them).
+  const deleteAgent = useDeleteAgent();
+  const sourceCount = channelsQ.data?.length ?? 0;
+  const triggerDelete = useCallback(() => {
+    if (!agentId || !agent) return;
+    Alert.alert(
+      `Delete ${agent.name}?`,
+      `This deletes the agent, its ${sourceCount} ${sourceCount === 1 ? "source" : "sources"}, its email recipients, its run history and every video and post it found, including ones you saved. It can't be undone. Your accounts on YouTube, X and the other platforms aren't touched.`,
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete agent",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              await deleteAgent.mutateAsync(agentId);
+              showToast("Agent deleted", "success");
+              router.replace("/(tabs)/agents");
+            } catch (e) {
+              showToast(e instanceof Error ? e.message : "Delete failed", "error");
+            }
+          },
+        },
+      ],
+    );
+  }, [agentId, agent, sourceCount, deleteAgent, showToast, router]);
+
   // ── Add channel ──────────────────────────────────────────────────
   const handleAddChannel = useCallback(async () => {
     const value = newChannelUrl.trim();
@@ -868,6 +897,19 @@ export default function AgentDetailScreen() {
               >
                 <Pencil size={15} color={Colors.textSecondary} />
                 <Text style={styles.editText}>Edit</Text>
+              </Pressable>
+              <Pressable
+                style={({ pressed }) => [
+                  styles.editBtn,
+                  { borderColor: Colors.destructive, paddingHorizontal: 14 },
+                  pressed && styles.pressed,
+                ]}
+                onPress={triggerDelete}
+                disabled={deleteAgent.isPending}
+                accessibilityRole="button"
+                accessibilityLabel="Delete agent"
+              >
+                <Trash2 size={15} color={Colors.destructive} />
               </Pressable>
             </View>
           </View>
