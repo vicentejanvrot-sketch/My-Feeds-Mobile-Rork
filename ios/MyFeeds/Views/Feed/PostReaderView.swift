@@ -24,6 +24,7 @@ struct PostReaderView: View {
     private static let redditOrange = Color(red: 1, green: 69 / 255, blue: 0)
     private static let igRed = Color(red: 1, green: 48 / 255, blue: 64 / 255)
     private static let linkedInBlue = Color(red: 55 / 255, green: 143 / 255, blue: 233 / 255)
+    private static let gitHubStar = Color(red: 227 / 255, green: 179 / 255, blue: 65 / 255)
 
     var body: some View {
         ZStack {
@@ -56,6 +57,12 @@ struct PostReaderView: View {
 
             ScrollView {
                 VStack(alignment: .leading, spacing: 14) {
+                    if platform == .github {
+                        Text(item.title ?? "Untitled")
+                            .font(.system(size: 19, weight: .heavy))
+                            .foregroundStyle(Theme.textPrimary)
+                            .lineSpacing(3)
+                    }
                     if platform == .reddit {
                         Text(item.title ?? "Untitled")
                             .font(.system(size: 19, weight: .heavy))
@@ -310,6 +317,7 @@ struct PostReaderView: View {
             case .x: xActionBar(item)
             case .instagram: instagramActionBar(item)
             case .linkedin: linkedInActionBar(item)
+            case .github: gitHubActionBar(item)
             default: redditActionBar(item)
             }
 
@@ -554,6 +562,47 @@ struct PostReaderView: View {
         .foregroundStyle(active ? Self.linkedInBlue : Theme.textSecondary)
         .frame(maxWidth: .infinity, minHeight: 48)
         .contentShape(Rectangle())
+    }
+
+    /// GitHub: Star (= Saved), Fork, plus Save and Share.
+    private func gitHubActionBar(_ item: FeedItem) -> some View {
+        let metrics = item.metrics
+        let liked = status == .liked
+        let bookmarked = status == .watchLater
+        return HStack {
+            barButton(
+                icon: liked ? "star.fill" : "star",
+                value: (metrics?.stars ?? 0) + (liked ? 1 : 0),
+                color: liked ? Self.gitHubStar : Theme.textSecondary,
+                label: liked ? "Remove from Saved" : "Star (save in My Feeds)"
+            ) {
+                changeStatus(liked ? .watched : .liked, item: item)
+            }
+            Spacer(minLength: 0)
+            barButton(
+                icon: "arrow.triangle.branch",
+                value: metrics?.forks ?? 0,
+                color: Theme.textSecondary,
+                label: "Fork on GitHub"
+            ) {
+                if let raw = item.url { openExternal(raw) }
+            }
+            Spacer(minLength: 0)
+            Button {
+                changeStatus(bookmarked ? .notWatched : .watchLater, item: item)
+            } label: {
+                Image(systemName: bookmarked ? "bookmark.fill" : "bookmark")
+                    .font(.system(size: 16))
+                    .foregroundStyle(bookmarked ? Self.xBlue : Theme.textSecondary)
+                    .frame(minWidth: 44, minHeight: 44)
+                    .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel(bookmarked ? "Remove from Read Later" : "Save (Read Later)")
+            Spacer(minLength: 0)
+            shareButton(item, color: Theme.textSecondary)
+        }
+        .padding(.horizontal, 4)
     }
 
     private func redditActionBar(_ item: FeedItem) -> some View {
