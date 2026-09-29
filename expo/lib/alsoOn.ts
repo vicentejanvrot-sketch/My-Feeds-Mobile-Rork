@@ -66,9 +66,11 @@ export interface Person {
   scanErrors: string[];
 }
 
-// Subreddits and keyword searches aren't people or companies.
+// Subreddits and keyword searches aren't people or companies. Reddit users
+// are, and are saved as "account" sources.
 export function isPersonSource(ch: Channel): boolean {
-  return platformOf(ch.platform) !== "reddit" && ch.source_type !== "subreddit" && ch.source_type !== "keyword";
+  if (platformOf(ch.platform) === "reddit") return ch.source_type === "account";
+  return ch.source_type !== "subreddit" && ch.source_type !== "keyword";
 }
 
 function accountKeyFromUrl(raw: string | null | undefined): string | null {
@@ -79,9 +81,13 @@ function accountKeyFromUrl(raw: string | null | undefined): string | null {
   } catch {
     return null;
   }
-  const host = u.hostname.replace(/^(www\.|m\.|mobile\.)/, "").toLowerCase();
+  const host = u.hostname.replace(/^(www\.|m\.|mobile\.|old\.|new\.)/, "").toLowerCase();
   const parts = u.pathname.split("/").filter(Boolean);
   const first = parts[0] ?? "";
+  if (host === "reddit.com") {
+    const kind = first.toLowerCase();
+    return (kind === "user" || kind === "u") && parts[1] ? "reddit:u:" + parts[1].toLowerCase() : null;
+  }
   if (host === "x.com" || host === "twitter.com") {
     return first ? "x:" + first.replace(/^@/, "").toLowerCase() : null;
   }
@@ -133,6 +139,7 @@ export function cleanName(name: string | null | undefined, fallback: string): st
 export function accountLabel(platform: Platform, handle: string | null, url: string): string {
   if (!handle) return url.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "");
   if (platform === "x" || platform === "instagram") return "@" + handle;
+  if (platform === "reddit") return "u/" + handle.replace(/^\/?u(ser)?\//i, "");
   if (platform === "youtube") return /^UC[A-Za-z0-9_-]{10,}$/.test(handle) ? "Channel" : "@" + handle;
   return handle;
 }
@@ -143,6 +150,7 @@ function sourceLabel(ch: Channel): string {
   const m = (ch.channel_url ?? "").match(/youtube\.com\/@([^/?#]+)/);
   if (m) return "@" + m[1];
   if (platform === "linkedin" && ch.handle) return ch.handle;
+  if (platform === "reddit" && ch.handle) return "u/" + ch.handle.replace(/^\/?u(ser)?\//i, "");
   return cleanName(ch.channel_name, ch.channel_url ?? "Source");
 }
 
