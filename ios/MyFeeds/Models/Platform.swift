@@ -77,7 +77,7 @@ extension SourcePlatform {
         switch self {
         case .youtube: return "Channel"
         case .x: return "Account"
-        case .reddit: return "Subreddit"
+        case .reddit: return "Subreddit or user"
         case .instagram: return "Account"
         case .linkedin: return "Profile or company"
         }
@@ -87,7 +87,7 @@ extension SourcePlatform {
         switch self {
         case .youtube: return "https://www.youtube.com/@ChannelName"
         case .x: return "@handle or https://x.com/handle"
-        case .reddit: return "r/subreddit or a reddit.com link"
+        case .reddit: return "r/subreddit, u/username or a reddit.com link"
         case .instagram: return "@handle or https://www.instagram.com/handle"
         case .linkedin: return "https://www.linkedin.com/in/name or /company/name"
         }
@@ -97,7 +97,7 @@ extension SourcePlatform {
         switch self {
         case .youtube: return "Paste the channel link."
         case .x: return "Original posts only. Reposts and replies are skipped."
-        case .reddit: return "Top posts from the lookback window."
+        case .reddit: return "Top posts from a subreddit, or a user's own posts, from the lookback window."
         case .instagram: return "Public accounts only. Posts and reels from the lookback window."
         case .linkedin: return "Paste a person's profile link or a company page link."
         }
