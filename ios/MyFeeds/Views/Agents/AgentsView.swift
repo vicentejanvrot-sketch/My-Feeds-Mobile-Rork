@@ -169,9 +169,6 @@ private struct AgentListCard: View {
                         if let time = agent.runTimeLocal, !time.isEmpty {
                             metaItem(icon: "envelope", text: time)
                         }
-                        if let keywords = agent.keywords, !keywords.isEmpty {
-                            metaItem(icon: "tag", text: "\(keywords.count) keywords")
-                        }
                         Spacer()
                     }
                     .padding(.top, 12)
