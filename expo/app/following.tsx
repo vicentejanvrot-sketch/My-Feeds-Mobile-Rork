@@ -173,12 +173,12 @@ function FollowButton({ account, agentId }: { account: FoundAccount; agentId: st
   );
 }
 
-function DecisionButtons({ account }: { account: FoundAccount }) {
+function DecisionButtons({ account, channelIds }: { account: FoundAccount; channelIds: string[] }) {
   const decide = useDecideLink();
   const showToast = useToast();
   const run = (same: boolean) =>
     decide.mutate(
-      { link: account.link, same },
+      { link: account.link, same, channelIds },
       {
         onSuccess: () => showToast(same ? "Marked as the same person" : "Removed that match", "success"),
         onError: (e) => showToast(e instanceof Error ? e.message : "Couldn't save that", "error"),
@@ -275,7 +275,7 @@ function PersonPanel({ person, agents, scanning, onRescan }: {
                   <Pressable
                     onPress={() =>
                       decide.mutate(
-                        { link: a.link, same: false },
+                        { link: a.link, same: false, channelIds: person.sources.map((c) => c.id) },
                         {
                           onSuccess: () => showToast("Removed that match", "success"),
                           onError: (e) => showToast(e instanceof Error ? e.message : "Couldn't save that", "error"),
@@ -304,7 +304,7 @@ function PersonPanel({ person, agents, scanning, onRescan }: {
                 <Text style={styles.muted}>Name on that profile: {a.link.display_name}</Text>
               ) : null}
               <Text style={styles.warningText}>{a.link.evidence}</Text>
-              <DecisionButtons account={a} />
+              <DecisionButtons account={a} channelIds={person.sources.map((c) => c.id)} />
             </View>
           ))}
         </>
@@ -429,7 +429,7 @@ function GapsView({ people, agents, onOpen }: {
                 <Text style={styles.muted}>Name on that profile: {account.link.display_name}</Text>
               ) : null}
               <Text style={styles.warningText}>{account.link.evidence}</Text>
-              <DecisionButtons account={account} />
+              <DecisionButtons account={account} channelIds={person.sources.map((c) => c.id)} />
             </View>
           ))}
         </>
