@@ -16,6 +16,8 @@ struct FollowingView: View {
     @State private var loadError: String?
     @State private var tab: FollowingTab = .everyone
     @State private var query = ""
+    /// nil = all agents
+    @State private var agentFilter: String?
     @State private var selectedId: String?
     @State private var progress: ScanProgress?
     @State private var busyKeys: Set<String> = []
@@ -30,16 +32,22 @@ struct FollowingView: View {
         Dictionary(agents.map { ($0.id, $0.name) }, uniquingKeysWith: { first, _ in first })
     }
 
+    /// People followed in the chosen agent (a person can be in several).
+    private var inAgent: [AlsoOnPerson] {
+        guard let agentFilter else { return people }
+        return people.filter { $0.agentIds.contains(agentFilter) }
+    }
+
     private var filtered: [AlsoOnPerson] {
         let q = query.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
-        guard !q.isEmpty else { return people }
-        return people.filter { person in
+        guard !q.isEmpty else { return inAgent }
+        return inAgent.filter { person in
             person.name.lowercased().contains(q) || person.following.contains { $0.label.lowercased().contains(q) }
         }
     }
 
     private var gapCount: Int {
-        people.reduce(0) { $0 + $1.also.count + $1.possible.count }
+        inAgent.reduce(0) { $0 + $1.also.count + $1.possible.count }
     }
 
     private var skippedCount: Int {
@@ -83,6 +91,8 @@ struct FollowingView: View {
                     searchField
                 }
                 .padding(.bottom, 14)
+
+                agentFilterChips
 
                 if let progress { progressBox(progress) }
 
@@ -209,6 +219,40 @@ struct FollowingView: View {
                 .background(active ? Theme.background : Color.clear)
                 .clipShape(.rect(cornerRadius: 7))
                 .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityAddTraits(active ? .isSelected : [])
+    }
+
+    /// Filter by agent: "All agents" plus each agent, as chips.
+    @ViewBuilder
+    private var agentFilterChips: some View {
+        if agents.count > 1 {
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 6) {
+                    agentChip("All agents", id: nil)
+                    ForEach(sortedAgents) { agent in
+                        agentChip(agent.name, id: agent.id)
+                    }
+                }
+            }
+            .padding(.bottom, 14)
+        }
+    }
+
+    private func agentChip(_ title: String, id: String?) -> some View {
+        let active = agentFilter == id
+        return Button {
+            agentFilter = id
+        } label: {
+            Text(title)
+                .font(.system(size: 13, weight: .semibold))
+                .foregroundStyle(active ? Theme.textPrimary : Theme.textSecondary)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 6)
+                .background(active ? Theme.accent.opacity(0.15) : Theme.input)
+                .clipShape(Capsule())
+                .overlay(Capsule().stroke(active ? Theme.accent : Theme.border, lineWidth: 1))
         }
         .buttonStyle(.plain)
         .accessibilityAddTraits(active ? .isSelected : [])
