@@ -91,11 +91,14 @@ export function useScanSources() {
   return { scan, progress, isScanning: progress !== null };
 }
 
-// "Same person" / "Not them".
+// "Same person" / "Not them". channelIds are all the sources of this person
+// (the same account followed in several agents): the answer is saved on every
+// copy of the match, so no copy keeps asking. Same as the web app.
 export function useDecideLink() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async ({ link, same }: { link: IdentityLink; same: boolean }) => {
+    mutationFn: async ({ link, same, channelIds }: { link: IdentityLink; same: boolean; channelIds?: string[] }) => {
+      const ids = [...new Set([link.channel_id, ...(channelIds ?? [])])];
       const { error } = await supabase
         .from("identity_links")
         .update(
@@ -103,7 +106,8 @@ export function useDecideLink() {
             ? { status: "confirmed", method: "user", evidence: "You confirmed this match.", decided_by_user: true }
             : { status: "rejected", decided_by_user: true },
         )
-        .eq("id", link.id);
+        .eq("match_key", link.match_key)
+        .in("channel_id", ids);
       if (error) throw error;
     },
     onSettled: () => {
