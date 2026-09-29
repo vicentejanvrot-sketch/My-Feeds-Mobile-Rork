@@ -37,6 +37,7 @@ import {
 } from "@/lib/hooks";
 import { TIMEZONES } from "@/lib/database";
 import { useToast } from "@/components/Toast";
+import { useAuth } from "@/lib/auth-provider";
 import type { Agent } from "@/lib/database";
 
 // ─── helpers ────────────────────────────────────────────────────────
@@ -94,6 +95,7 @@ export default function AgentFormScreen() {
   const agentQ = useAgent(agentId ?? null);
   const recipientsQ = useRecipients(agentId ?? null);
   const settingsQ = useUserSettings();
+  const { user } = useAuth();
 
   // mutations
   const createAgent = useCreateAgent();
@@ -153,12 +155,13 @@ export default function AgentFormScreen() {
   useEffect(() => {
     if (populatedRef.current) return;
     if (!isEdit) {
-      // create mode — pre-fill default email from settings if present
-      if (settingsQ.data?.default_email && recipients.length === 0) {
-        const email = settingsQ.data.default_email.trim();
-        if (email && validateEmail(email)) {
-          setRecipients([email]);
-        }
+      // Create mode: start with the user's own email — the Default Email from
+      // Settings if set, otherwise the sign-in email. Wait for settings to
+      // load first, or the sign-in email would win over the default.
+      if (settingsQ.isLoading || !user) return;
+      const email = (settingsQ.data?.default_email || user.email || "").trim();
+      if (email && validateEmail(email)) {
+        setRecipients((prev) => (prev.length > 0 ? prev : [email]));
       }
       populatedRef.current = true;
       return;
@@ -186,7 +189,7 @@ export default function AgentFormScreen() {
     }
     existingRecipientMapRef.current = map;
     populatedRef.current = true;
-  }, [agent, existingRecipients, recipientsQ.isLoading, isEdit, settingsQ.data]);
+  }, [agent, existingRecipients, recipientsQ.isLoading, isEdit, settingsQ.data, settingsQ.isLoading, user]);
 
   // ── save ──────────────────────────────────────────────────────────
 
