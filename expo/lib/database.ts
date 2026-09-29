@@ -44,7 +44,7 @@ export interface Channel {
   channel_thumbnail: string | null;
   priority: number | null;
   // Multi-platform sources (web app migration 20260926210000)
-  platform: "youtube" | "x" | "reddit" | "instagram" | "linkedin" | null;
+  platform: "youtube" | "x" | "reddit" | "instagram" | "linkedin" | "github" | null;
   source_type: "channel" | "account" | "subreddit" | "keyword" | null;
   handle: string | null;
   min_engagement: number | null;
@@ -82,8 +82,8 @@ export interface Item {
   channel_id: string | null;
   published_at: string | null;
   user_status: ItemStatus | null;
-  // Posts (video_id holds "<platform>:<id>" for x, reddit, instagram, linkedin)
-  platform: "youtube" | "x" | "reddit" | "instagram" | "linkedin" | null;
+  // Posts (video_id holds "<platform>:<id>" for x, reddit, instagram, linkedin, github)
+  platform: "youtube" | "x" | "reddit" | "instagram" | "linkedin" | "github" | null;
   body: string | null;
   author_handle: string | null;
   metrics: {
@@ -95,6 +95,9 @@ export interface Item {
     bookmarks?: number;
     score?: number;
     comments?: number;
+    // GitHub repos and releases
+    stars?: number;
+    forks?: number;
   } | null;
   media: { type: string; url: string }[] | null;
 }
