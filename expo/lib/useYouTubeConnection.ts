@@ -20,6 +20,8 @@ export interface YouTubeConnectionState {
   connect: () => Promise<void>;
   disconnect: () => Promise<void>;
   syncAction: (videoId: string, action: YouTubeAction) => Promise<void>;
+  // Subscribes to a channel; "already" if it was subscribed before. Throws on failure.
+  subscribe: (channelUrl: string) => Promise<"subscribed" | "already">;
 }
 
 export type YouTubeAction = "rate" | "watch_later" | "unwatch_later";
@@ -333,6 +335,19 @@ export const [YouTubeConnectionProvider, useYouTubeConnection] =
       [status, getAccessToken, getSavePlaylistId],
     );
 
+    // ── Subscribe to a channel (Follow on the Following screen) ──
+    // Throws on failure so the caller can show the right toast.
+
+    const subscribe = useCallback(
+      async (channelUrl: string): Promise<"subscribed" | "already"> => {
+        if (status !== "connected") throw new Error("YouTube is not connected");
+        const accessToken = await getAccessToken();
+        const data = await callYouTubeApi<{ alreadySubscribed?: boolean }>({ action: "subscribe", accessToken, channelUrl });
+        return data?.alreadySubscribed ? "already" : "subscribed";
+      },
+      [status, getAccessToken],
+    );
+
     return {
       status,
       channelName,
@@ -342,5 +357,6 @@ export const [YouTubeConnectionProvider, useYouTubeConnection] =
       connect,
       disconnect,
       syncAction,
+      subscribe,
     };
   });
