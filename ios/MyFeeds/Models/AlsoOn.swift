@@ -83,7 +83,7 @@ nonisolated struct AlsoOnPerson: Identifiable, Hashable, Sendable {
 
 nonisolated enum AlsoOn {
     /// Upper bound of AIsa lookups for one source, and AIsa's listed median price per call.
-    static let maxLookupsPerSource = 8
+    static let maxLookupsPerSource = 16
     static let aisaPricePerCall = 0.012
     /// Sources checked longer ago than this are offered for a new check.
     static let rescanAfterDays = 30
