@@ -1,3 +1,4 @@
+import AVFoundation
 import SwiftUI
 
 struct FeedView: View {
@@ -719,9 +720,9 @@ private struct FeedItemCard: View {
             .clipped()
     }
 
-    /// Posts with a stored thumbnail (Instagram, X posts with a photo or video)
-    /// show it, like the web card. Text-only posts (most X posts, Reddit
-    /// threads) have no picture: show their text instead.
+    /// Posts show their picture like the web card: the stored thumbnail, the
+    /// post's own photos or video posters, the quoted post's / article's image,
+    /// or a video's first frame. Only posts with nothing to show get their text.
     private var postPreview: some View {
         let text: String = {
             if item.sourcePlatform == .reddit,
@@ -729,32 +730,16 @@ private struct FeedItemCard: View {
             if let body = item.body, !body.isEmpty { return body }
             return item.title ?? ""
         }()
-        let imageURL = postThumbnailURL
         return Color(Theme.input)
             .aspectRatio(16 / 9, contentMode: .fit)
             .overlay {
-                if let imageURL {
-                    FeedThumbnailImage(candidates: [imageURL])
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                        .clipShape(.rect(cornerRadius: 8))
-                        .padding(.horizontal, 10)
-                        .padding(.top, 44)
-                        .padding(.bottom, 10)
-                        .allowsHitTesting(false)
-                }
-            }
-            .overlay(alignment: .leading) {
-                if imageURL == nil {
-                    Text(text)
-                        .font(.system(size: 14))
-                        .foregroundStyle(Theme.textPrimary)
-                        .lineSpacing(3)
-                        .lineLimit(6)
-                        .padding(.horizontal, 14)
-                        .padding(.top, 30)
-                        .padding(.bottom, 12)
-                        .allowsHitTesting(false)
-                }
+                PostCardVisual(
+                    candidates: postThumbnailCandidates,
+                    frameVideoURL: postFrameVideoURL,
+                    isVideo: postIsVideo,
+                    text: text
+                )
+                .allowsHitTesting(false)
             }
             .overlay(alignment: .topLeading) {
                 PlatformBadge(platform: item.sourcePlatform, size: 24)
@@ -784,12 +769,37 @@ private struct FeedItemCard: View {
             .clipped()
     }
 
-    /// A post's stored thumbnail (forced to https). Instagram's go through our
-    /// media-proxy, which anyone can load, the same URL the web card uses.
-    private var postThumbnailURL: URL? {
-        guard var raw = item.thumbnailUrl, !raw.isEmpty else { return nil }
-        if raw.hasPrefix("http://") { raw = "https://" + raw.dropFirst("http://".count) }
+    /// Pictures a post card can show, in order (forced to https): the stored
+    /// thumbnail, the post's own photos and video posters, then a quoted post's
+    /// or article's image. Instagram's go through our media-proxy, which anyone
+    /// can load, the same URLs the web card uses.
+    private var postThumbnailCandidates: [URL] {
+        var raws: [String?] = [item.thumbnailUrl]
+        raws += (item.media ?? []).filter { !$0.isEmbed }.map { $0.url }
+        raws.append(item.quoteEmbed?.image)
+        var urls: [URL] = []
+        for case var raw? in raws where raw.hasPrefix("http") {
+            if raw.hasPrefix("http://") { raw = "https://" + raw.dropFirst("http://".count) }
+            if let url = URL(string: raw), !urls.contains(url) { urls.append(url) }
+        }
+        return urls
+    }
+
+    /// MP4 of the post's video (or the quoted post's), for a first-frame
+    /// preview when there is no picture (LinkedIn often sends no poster).
+    private var postFrameVideoURL: URL? {
+        let own = (item.media ?? []).filter { !$0.isEmbed }.compactMap { $0.videoUrl }
+        let raw = own.first(where: { $0.hasPrefix("http") }) ?? item.quoteEmbed?.videoUrl
+        guard let raw, raw.hasPrefix("http") else { return nil }
         return URL(string: raw)
+    }
+
+    /// The card's first photo/video is a video: show a play button on it.
+    private var postIsVideo: Bool {
+        if let first = item.carouselMedia.first {
+            return first.type == "video" || first.type == "animated_gif" || first.playableURL != nil
+        }
+        return item.quoteEmbed?.playableURL != nil
     }
 
     /// Stored thumbnail first (forced to https), then YouTube's standard
@@ -966,6 +976,18 @@ private final class ThumbnailCache {
         memory.setObject(image, forKey: url as NSURL)
         return image
     }
+
+    /// First frame of a video with no poster (LinkedIn often sends none).
+    func videoFrame(_ url: URL) async -> UIImage? {
+        if let image = cached(url) { return image }
+        let generator = AVAssetImageGenerator(asset: AVURLAsset(url: url))
+        generator.appliesPreferredTrackTransform = true
+        generator.maximumSize = CGSize(width: 960, height: 960)
+        guard let frame = try? await generator.image(at: CMTime(seconds: 0.1, preferredTimescale: 600)) else { return nil }
+        let image = UIImage(cgImage: frame.image)
+        memory.setObject(image, forKey: url as NSURL)
+        return image
+    }
 }
 
 /// Loads a card thumbnail through ThumbnailCache, trying each candidate URL
@@ -1004,5 +1026,91 @@ private struct FeedThumbnailImage: View {
             }
             if attempt == 0 { try? await Task.sleep(for: .milliseconds(700)) }
         }
+    }
+}
+
+/// A post card's picture: the first of the candidates that loads, else a
+/// video's first frame. The post's text shows only when the source has
+/// nothing to show or nothing loads.
+private struct PostCardVisual: View {
+    let candidates: [URL]
+    let frameVideoURL: URL?
+    let isVideo: Bool
+    let text: String
+    @State private var image: UIImage?
+    @State private var failed = false
+
+    init(candidates: [URL], frameVideoURL: URL?, isVideo: Bool, text: String) {
+        self.candidates = candidates
+        self.frameVideoURL = frameVideoURL
+        self.isVideo = isVideo
+        self.text = text
+        let cached = candidates.lazy.compactMap { ThumbnailCache.shared.cached($0) }.first
+            ?? frameVideoURL.flatMap { ThumbnailCache.shared.cached($0) }
+        _image = State(initialValue: cached)
+    }
+
+    private var hasNothingToShow: Bool { candidates.isEmpty && frameVideoURL == nil }
+
+    var body: some View {
+        ZStack {
+            if let image {
+                ZStack {
+                    Image(uiImage: image)
+                        .resizable()
+                        .aspectRatio(contentMode: .fill)
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .clipShape(.rect(cornerRadius: 8))
+                .overlay {
+                    if isVideo {
+                        Image(systemName: "play.fill")
+                            .font(.system(size: 18))
+                            .foregroundStyle(.white)
+                            .padding(12)
+                            .background(.black.opacity(0.6))
+                            .clipShape(Circle())
+                    }
+                }
+                .padding(.horizontal, 10)
+                .padding(.top, 44)
+                .padding(.bottom, 10)
+                .transition(.opacity)
+            } else if failed || hasNothingToShow {
+                Text(text)
+                    .font(.system(size: 14))
+                    .foregroundStyle(Theme.textPrimary)
+                    .lineSpacing(3)
+                    .lineLimit(6)
+                    .padding(.horizontal, 14)
+                    .padding(.top, 30)
+                    .padding(.bottom, 12)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
+            }
+        }
+        .task(id: candidates) { await load() }
+    }
+
+    private func load() async {
+        if image != nil { return }
+        failed = false
+        if !candidates.isEmpty {
+            for attempt in 0..<2 {
+                for url in candidates {
+                    if Task.isCancelled { return }
+                    if let loaded = await ThumbnailCache.shared.load(url) {
+                        withAnimation(.easeIn(duration: 0.15)) { image = loaded }
+                        return
+                    }
+                }
+                if attempt == 0 { try? await Task.sleep(for: .milliseconds(700)) }
+            }
+        }
+        if let frameVideoURL, !Task.isCancelled,
+           let frame = await ThumbnailCache.shared.videoFrame(frameVideoURL) {
+            withAnimation(.easeIn(duration: 0.15)) { image = frame }
+            return
+        }
+        if !Task.isCancelled { failed = true }
     }
 }
