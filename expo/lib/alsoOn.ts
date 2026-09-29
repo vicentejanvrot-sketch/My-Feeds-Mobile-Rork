@@ -98,6 +98,10 @@ function accountKeyFromUrl(raw: string | null | undefined): string | null {
     if ((first === "c" || first === "user") && parts[1]) return "youtube:c:" + parts[1].toLowerCase();
     return null;
   }
+  if (host === "github.com") {
+    // A repo link (github.com/owner/repo) belongs to its owner.
+    return /^[A-Za-z0-9][A-Za-z0-9-]{0,38}$/.test(first) ? "github:" + first.toLowerCase() : null;
+  }
   if (host === "linkedin.com" || host.endsWith(".linkedin.com")) {
     const kind = first.toLowerCase();
     if (!parts[1]) return null;
@@ -149,7 +153,7 @@ function sourceLabel(ch: Channel): string {
   if (ch.handle && (platform === "x" || platform === "instagram")) return "@" + ch.handle.replace(/^@/, "");
   const m = (ch.channel_url ?? "").match(/youtube\.com\/@([^/?#]+)/);
   if (m) return "@" + m[1];
-  if (platform === "linkedin" && ch.handle) return ch.handle;
+  if ((platform === "linkedin" || platform === "github") && ch.handle) return ch.handle;
   if (platform === "reddit" && ch.handle) return "u/" + ch.handle.replace(/^\/?u(ser)?\//i, "");
   return cleanName(ch.channel_name, ch.channel_url ?? "Source");
 }
