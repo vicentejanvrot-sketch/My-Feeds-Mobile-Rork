@@ -114,12 +114,6 @@ export default function AgentFormScreen() {
   const [lookbackHours, setLookbackHours] = useState("36");
   const [includeShorts, setIncludeShorts] = useState(false);
   const [includeLive, setIncludeLive] = useState(false);
-  const [minDuration, setMinDuration] = useState(3);
-  const [freshnessWeight, setFreshnessWeight] = useState(1.0);
-  const [priorityWeight, setPriorityWeight] = useState(1.0);
-  const [durationWeight, setDurationWeight] = useState(1.0);
-  const [keywordWeight, setKeywordWeight] = useState(0.5);
-  const [keywords, setKeywords] = useState<string[]>([]);
   const [recipients, setRecipients] = useState<string[]>([]);
 
   const [recipientInput, setRecipientInput] = useState("");
@@ -174,12 +168,6 @@ export default function AgentFormScreen() {
     setLookbackHours(String(agent.lookback_hours ?? 36));
     setIncludeShorts(agent.include_shorts ?? false);
     setIncludeLive(agent.include_live ?? false);
-    setMinDuration(agent.min_duration_minutes ?? 3);
-    setFreshnessWeight(agent.freshness_weight ?? 1.0);
-    setPriorityWeight(agent.priority_weight ?? 1.0);
-    setDurationWeight(agent.duration_weight ?? 1.0);
-    setKeywordWeight(agent.keyword_weight ?? 0.5);
-    setKeywords(agent.keywords ?? []);
 
     const existingEmails = existingRecipients.map((r) => r.email);
     setRecipients(existingEmails);
@@ -224,12 +212,6 @@ export default function AgentFormScreen() {
         ai_provider: "lovable" as const,
         include_shorts: includeShorts,
         include_live: includeLive,
-        min_duration_minutes: minDuration,
-        freshness_weight: freshnessWeight,
-        priority_weight: priorityWeight,
-        duration_weight: durationWeight,
-        keyword_weight: keywordWeight,
-        keywords: keywords.length > 0 ? keywords : null,
       };
 
       let savedAgent: Agent;
@@ -291,8 +273,7 @@ export default function AgentFormScreen() {
     }
   }, [
     name, description, runTime, timezone, lookbackHours,
-    includeShorts, includeLive, minDuration, freshnessWeight, priorityWeight,
-    durationWeight, keywordWeight, keywords, recipients, isEdit, agentId,
+    includeShorts, includeLive, recipients, isEdit, agentId,
     createAgent, updateAgent, deleteRecipient, showToast, router,
   ]);
 
@@ -473,34 +454,6 @@ export default function AgentFormScreen() {
             subtitle="Include live streams and premieres"
             value={includeLive}
             onToggle={setIncludeLive}
-          />
-          <FormLabel>Minimum Duration: {minDuration} minutes</FormLabel>
-          <CustomSlider
-            min={0}
-            max={30}
-            step={1}
-            value={minDuration}
-            onValueChange={setMinDuration}
-          />
-        </FormSection>
-
-        {/* ── Ranking Preferences ──────────────────────────────────── */}
-        <FormSection title='Ranking Preferences — "Adjust how videos are ranked in the digest"'>
-          <SliderField
-            label="Freshness Weight"
-            value={freshnessWeight}
-            onValueChange={setFreshnessWeight}
-          />
-          <SliderField
-            label="Channel Priority Weight"
-            value={priorityWeight}
-            onValueChange={setPriorityWeight}
-          />
-          <SliderField
-            label="Duration Preference"
-            value={durationWeight}
-            onValueChange={setDurationWeight}
-            helper="Boosts videos 8–25 minutes"
           />
         </FormSection>
 
