@@ -13,7 +13,7 @@ nonisolated struct IdentityLink: Codable, Identifiable, Hashable, Sendable {
     var channelId: String
     var platform: String?
     /// "x:name", "instagram:name", "youtube:UC...", "youtube:@handle",
-    /// "linkedin:in:slug", "linkedin:company:slug"
+    /// "linkedin:in:slug", "linkedin:company:slug", "reddit:u:name"
     var matchKey: String
     var handle: String?
     var url: String
@@ -88,9 +88,11 @@ nonisolated enum AlsoOn {
     /// Sources checked longer ago than this are offered for a new check.
     static let rescanAfterDays = 30
 
-    /// Subreddits and keyword searches aren't people or companies.
+    /// Subreddits and keyword searches aren't people or companies. Reddit users
+    /// are, and are saved as "account" sources.
     static func isPersonSource(_ ch: Channel) -> Bool {
-        ch.sourcePlatform != .reddit && ch.sourceType != "subreddit" && ch.sourceType != "keyword"
+        if ch.sourcePlatform == .reddit { return ch.sourceType == "account" }
+        return ch.sourceType != "subreddit" && ch.sourceType != "keyword"
     }
 
     static func isYouTubeChannelId(_ value: String) -> Bool {
@@ -102,13 +104,21 @@ nonisolated enum AlsoOn {
         value.hasPrefix("@") ? String(value.dropFirst()) : value
     }
 
+    /// "u/name", "/user/name" -> "name"
+    private static func redditName(_ value: String) -> String {
+        for prefix in ["/user/", "user/", "/u/", "u/"] where value.lowercased().hasPrefix(prefix) {
+            return String(value.dropFirst(prefix.count))
+        }
+        return value
+    }
+
     /// The account key a profile URL points at (same format as match_key).
     static func accountKey(fromURL raw: String?) -> String? {
         guard let raw,
               let comps = URLComponents(string: raw.trimmingCharacters(in: .whitespacesAndNewlines)),
               let rawHost = comps.host else { return nil }
         var host = rawHost.lowercased()
-        for prefix in ["www.", "m.", "mobile."] where host.hasPrefix(prefix) {
+        for prefix in ["www.", "m.", "mobile.", "old.", "new."] where host.hasPrefix(prefix) {
             host = String(host.dropFirst(prefix.count))
             break
         }
@@ -127,6 +137,11 @@ nonisolated enum AlsoOn {
             if first == "channel", let second { return "youtube:" + second }
             if first == "c" || first == "user", let second { return "youtube:c:" + second.lowercased() }
             return nil
+        }
+        if host == "reddit.com" {
+            let kind = first.lowercased()
+            guard kind == "user" || kind == "u", let second else { return nil }
+            return "reddit:u:" + second.lowercased()
         }
         if host == "linkedin.com" || host.hasSuffix(".linkedin.com") {
             guard let second else { return nil }
@@ -189,6 +204,7 @@ nonisolated enum AlsoOn {
         switch platform {
         case .x, .instagram: return "@" + handle
         case .youtube: return isYouTubeChannelId(handle) ? "Channel" : "@" + handle
+        case .reddit: return "u/" + redditName(handle)
         default: return handle
         }
     }
@@ -203,6 +219,7 @@ nonisolated enum AlsoOn {
             if let at = match.firstIndex(of: "@") { return String(match[at...]) }
         }
         if platform == .linkedin, let handle = ch.handle, !handle.isEmpty { return handle }
+        if platform == .reddit, let handle = ch.handle, !handle.isEmpty { return "u/" + redditName(handle) }
         return cleanName(ch.channelName, fallback: ch.channelUrl ?? "Source")
     }
 
