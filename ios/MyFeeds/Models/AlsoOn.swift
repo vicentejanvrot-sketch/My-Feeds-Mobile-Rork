@@ -13,7 +13,7 @@ nonisolated struct IdentityLink: Codable, Identifiable, Hashable, Sendable {
     var channelId: String
     var platform: String?
     /// "x:name", "instagram:name", "youtube:UC...", "youtube:@handle",
-    /// "linkedin:in:slug", "linkedin:company:slug", "reddit:u:name"
+    /// "linkedin:in:slug", "linkedin:company:slug", "reddit:u:name", "github:login"
     var matchKey: String
     var handle: String?
     var url: String
@@ -143,6 +143,11 @@ nonisolated enum AlsoOn {
             guard kind == "user" || kind == "u", let second else { return nil }
             return "reddit:u:" + second.lowercased()
         }
+        if host == "github.com" {
+            // A repo link (github.com/owner/repo) belongs to its owner.
+            guard first.range(of: "^[A-Za-z0-9][A-Za-z0-9-]{0,38}$", options: .regularExpression) != nil else { return nil }
+            return "github:" + first.lowercased()
+        }
         if host == "linkedin.com" || host.hasSuffix(".linkedin.com") {
             guard let second else { return nil }
             let kind = first.lowercased()
@@ -218,7 +223,7 @@ nonisolated enum AlsoOn {
             let match = url[range]
             if let at = match.firstIndex(of: "@") { return String(match[at...]) }
         }
-        if platform == .linkedin, let handle = ch.handle, !handle.isEmpty { return handle }
+        if platform == .linkedin || platform == .github, let handle = ch.handle, !handle.isEmpty { return handle }
         if platform == .reddit, let handle = ch.handle, !handle.isEmpty { return "u/" + redditName(handle) }
         return cleanName(ch.channelName, fallback: ch.channelUrl ?? "Source")
     }
