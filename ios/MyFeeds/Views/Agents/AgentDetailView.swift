@@ -224,11 +224,6 @@ struct AgentDetailView: View {
             VStack(alignment: .leading, spacing: 6) {
                 booleanRow(label: "Shorts", isOn: agent.includeShorts == true)
                 booleanRow(label: "Live/Upcoming", isOn: agent.includeLive == true)
-                if let minDuration = agent.minDurationMinutes {
-                    Text("Min \(minDuration) min")
-                        .font(.system(size: 12))
-                        .foregroundStyle(Theme.textSecondary)
-                }
             }
             .padding(.top, 6)
         }
