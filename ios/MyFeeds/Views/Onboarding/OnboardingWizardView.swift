@@ -7,16 +7,26 @@ struct OnboardingResult {
     let runNow: Bool
 }
 
-/// First-run wizard, same flow as the web and Expo wizards: create the first
-/// agent (its name is its topic), add its sources, then a per-platform tour of
+/// Onboarding wizard, same flow as the web and Expo wizards: create an agent
+/// (its name is its topic), add its sources, then a per-platform tour of
 /// reading and watching in the app. Saves through SupabaseService, so the agent
-/// it creates is a normal agent. Shown full screen by DashboardOnboardingView.
+/// it creates is a normal agent. Shown full screen by DashboardView: by itself
+/// until the user ticks "Don't show this again", and from the floating help
+/// button any time. "See how it works" jumps straight to the tour.
 struct OnboardingWizardView: View {
     /// Called with a result when the user leaves from the last screen, nil otherwise.
     let onClose: (OnboardingResult?) -> Void
+    /// Called when the user ticks or clears "Don't show this again".
+    let onHiddenChange: (Bool) -> Void
 
-    init(onClose: @escaping (OnboardingResult?) -> Void) {
+    init(
+        hidden: Bool,
+        onHiddenChange: @escaping (Bool) -> Void,
+        onClose: @escaping (OnboardingResult?) -> Void
+    ) {
+        self.onHiddenChange = onHiddenChange
         self.onClose = onClose
+        _dontShow = State(initialValue: hidden)
     }
 
     @Environment(AuthStore.self) private var auth
@@ -40,6 +50,9 @@ struct OnboardingWizardView: View {
     @State private var finishing = false
     @State private var errorText: String?
     @State private var finishedAgent: Agent?
+    /// Opened only to see the reading tour: no agent is created.
+    @State private var tourOnly = false
+    @State private var dontShow: Bool
 
     @State private var platform: SourcePlatform = .youtube
     @State private var sourceValue = ""
@@ -93,7 +106,12 @@ struct OnboardingWizardView: View {
 
     private var header: some View {
         HStack(alignment: .top, spacing: 12) {
-            if showFooter {
+            if showFooter && tourOnly {
+                Text("HOW IT WORKS")
+                    .font(.system(size: 12, weight: .bold))
+                    .kerning(0.6)
+                    .foregroundStyle(Theme.textSecondary)
+            } else if showFooter {
                 VStack(alignment: .leading, spacing: 8) {
                     HStack(spacing: 6) {
                         ForEach(Array(stepLabels.enumerated()), id: \.offset) { index, _ in
@@ -161,12 +179,34 @@ struct OnboardingWizardView: View {
             VStack(spacing: 10) {
                 Button { go(to: 1) } label: { primaryLabel("Get started") }
                     .buttonStyle(.plain)
-                Button { close(runNow: false) } label: { outlineLabel("Skip for now") }
+                Button { startTour() } label: { outlineLabel("See how it works") }
                     .buttonStyle(.plain)
+                Button { close(runNow: false) } label: {
+                    Text("Skip for now")
+                        .font(.system(size: 15, weight: .bold))
+                        .foregroundStyle(Theme.textPrimary)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 44)
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
             }
-            Text("Three quick steps, about two minutes.")
+            Text("Get started builds a new agent in three quick steps. See how it works only shows how to read and watch.")
                 .font(.system(size: 13))
                 .foregroundStyle(Theme.textSecondary)
+                .fixedSize(horizontal: false, vertical: true)
+            VStack(alignment: .leading, spacing: 6) {
+                dontShowBox
+                Text("You can open this again any time with the ? button on the Dashboard.")
+                    .font(.system(size: 13))
+                    .foregroundStyle(Theme.textSecondary)
+                    .padding(.leading, 32)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .padding(.top, 16)
+            .overlay(alignment: .top) {
+                Rectangle().fill(Theme.border).frame(height: 0.5)
+            }
         }
         .padding(.top, 12)
     }
@@ -250,7 +290,7 @@ struct OnboardingWizardView: View {
                                     Text(p.label)
                                         .font(.system(size: 13, weight: .semibold))
                                         .foregroundStyle(Theme.textPrimary)
-                                    if p == .instagram || p == .linkedin {
+                                    if p.isBeta {
                                         Text("BETA")
                                             .font(.system(size: 9, weight: .bold))
                                             .foregroundStyle(Theme.textMuted)
@@ -394,6 +434,11 @@ struct OnboardingWizardView: View {
                 Button { close(runNow: false) } label: { outlineLabel("Go to my feed") }
                     .buttonStyle(.plain)
             }
+            dontShowBox
+                .padding(.top, 16)
+                .overlay(alignment: .top) {
+                    Rectangle().fill(Theme.border).frame(height: 0.5)
+                }
         }
         .padding(.top, 8)
     }
@@ -410,9 +455,12 @@ struct OnboardingWizardView: View {
                     .foregroundStyle(Theme.textSecondary)
                     .multilineTextAlignment(.center)
             }
+            if tourOnly {
+                dontShowBox
+            }
             HStack(spacing: 10) {
                 Button {
-                    go(to: max(0, step - 1))
+                    back()
                 } label: {
                     Image(systemName: "arrow.left")
                         .font(.system(size: 18, weight: .semibold))
@@ -435,7 +483,7 @@ struct OnboardingWizardView: View {
                 }
 
                 Button { next() } label: {
-                    primaryLabel(step == lastStep - 1 ? "Finish" : "Continue", busy: saving || finishing)
+                    primaryLabel(tourOnly ? "Done" : step == lastStep - 1 ? "Finish" : "Continue", busy: saving || finishing)
                 }
                 .buttonStyle(.plain)
                 .disabled(nextDisabled)
@@ -452,6 +500,37 @@ struct OnboardingWizardView: View {
     }
 
     // MARK: - Pieces
+
+    private var dontShowBox: some View {
+        Button {
+            dontShow.toggle()
+            onHiddenChange(dontShow)
+        } label: {
+            HStack(spacing: 10) {
+                ZStack {
+                    RoundedRectangle(cornerRadius: 6)
+                        .fill(dontShow ? Theme.accent : Color.clear)
+                    RoundedRectangle(cornerRadius: 6)
+                        .stroke(dontShow ? Theme.accent : Theme.textSecondary, lineWidth: 1.5)
+                    if dontShow {
+                        Image(systemName: "checkmark")
+                            .font(.system(size: 12, weight: .heavy))
+                            .foregroundStyle(.white)
+                    }
+                }
+                .frame(width: 22, height: 22)
+                Text("Don't show this again")
+                    .font(.system(size: 15))
+                    .foregroundStyle(Theme.textPrimary)
+                Spacer(minLength: 0)
+            }
+            .frame(minHeight: 44)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("Don't show this again")
+        .accessibilityAddTraits(dontShow ? .isSelected : [])
+    }
 
     private func stepHeading(_ title: String, _ lead: String) -> some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -526,7 +605,25 @@ struct OnboardingWizardView: View {
         step = newStep
     }
 
+    private func startTour() {
+        tourOnly = true
+        go(to: 3)
+    }
+
+    private func back() {
+        if tourOnly {
+            tourOnly = false
+            go(to: 0)
+        } else {
+            go(to: max(0, step - 1))
+        }
+    }
+
     private func next() {
+        if tourOnly {
+            close(runNow: false)
+            return
+        }
         switch step {
         case 1: saveAgent()
         case lastStep - 1: finish()

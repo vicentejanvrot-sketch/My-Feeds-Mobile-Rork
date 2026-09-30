@@ -8,7 +8,6 @@ enum AppRoute: Hashable {
     case privacy
     case terms
     case following
-    case onboardingTest
 }
 
 struct MainTabView: View {
@@ -73,8 +72,6 @@ private struct AppRoutesModifier: ViewModifier {
                     TermsView()
                 case .following:
                     FollowingView()
-                case .onboardingTest:
-                    DashboardOnboardingView()
                 }
             }
     }

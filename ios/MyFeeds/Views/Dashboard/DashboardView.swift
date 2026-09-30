@@ -12,6 +12,10 @@ struct DashboardView: View {
     @State private var isLoading = true
     @State private var isOffline = false
     @State private var agentToDelete: Agent?
+    // Onboarding wizard: opens by itself once per launch until the user ticks
+    // "Don't show this again".
+    @State private var wizardOpen = false
+    @State private var wizardKey = 0
 
     private var sortedAgents: [Agent] {
         agents.sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
@@ -93,6 +97,17 @@ struct DashboardView: View {
         .toolbar(.hidden, for: .navigationBar)
         .refreshable { await load() }
         .task { await load() }
+        .task {
+            if await OnboardingPrefs.shouldAutoOpen() { openWizard() }
+        }
+        .fullScreenCover(isPresented: $wizardOpen) {
+            OnboardingWizardView(
+                hidden: OnboardingPrefs.isHidden,
+                onHiddenChange: { hidden in saveOnboardingHidden(hidden) },
+                onClose: { result in handleWizardClose(result) }
+            )
+            .id(wizardKey)
+        }
         .onChange(of: overlay.runCompletionCounter) {
             Task { await load() }
         }
@@ -238,6 +253,36 @@ struct DashboardView: View {
             Rectangle().fill(Color(hsl: 38, 92, 50, alpha: 0.3)).frame(height: 0.5)
         }
         .padding(.bottom, 12)
+    }
+
+    // MARK: - Wizard
+
+    /// A new id gives the wizard fresh state each time it opens.
+    private func openWizard() {
+        OnboardingPrefs.markShown()
+        wizardKey += 1
+        wizardOpen = true
+    }
+
+    private func saveOnboardingHidden(_ hidden: Bool) {
+        Task {
+            if let message = await OnboardingPrefs.setHidden(hidden) {
+                toasts.show("Couldn't save that setting: \(message)", type: .error)
+            }
+        }
+    }
+
+    /// Closed from the last screen: say it worked and start the first run if asked.
+    private func handleWizardClose(_ result: OnboardingResult?) {
+        wizardOpen = false
+        guard let result else { return }
+        toasts.show("\(result.agent.name) is set up")
+        Task {
+            await load()
+            if result.runNow {
+                await overlay.run(agent: result.agent)
+            }
+        }
     }
 
     // MARK: - Data
