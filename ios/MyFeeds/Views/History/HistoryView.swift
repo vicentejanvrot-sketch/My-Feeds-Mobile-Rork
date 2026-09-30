@@ -168,7 +168,8 @@ struct HistoryView: View {
             channelsByAgent = Dictionary(grouping: loadedChannels, by: \.agentId)
             isOffline = false
         } catch {
-            isOffline = true
+            // A cancelled load (tab switch) isn't being offline.
+            if !error.isCancellation { isOffline = true }
         }
         isLoading = false
     }

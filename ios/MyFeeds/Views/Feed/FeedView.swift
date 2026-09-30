@@ -616,6 +616,8 @@ struct FeedView: View {
                 }
             }
             items = fetched
+        } catch let error where error.isCancellation {
+            // The screen went away mid-load (for example a tab switch); not a failure.
         } catch {
             toasts.show("Couldn't load videos: \(error.localizedDescription)", type: .error)
         }

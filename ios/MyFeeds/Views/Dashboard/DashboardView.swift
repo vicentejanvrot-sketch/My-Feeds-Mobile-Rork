@@ -345,7 +345,8 @@ struct DashboardView: View {
             isOffline = false
             counts = (try? await service.fetchAgentItemCounts(agentIds: loadedAgents.map(\.id))) ?? [:]
         } catch {
-            isOffline = true
+            // A cancelled load (tab switch) isn't being offline.
+            if !error.isCancellation { isOffline = true }
             isLoading = false
         }
     }

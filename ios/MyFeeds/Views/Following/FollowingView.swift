@@ -519,7 +519,8 @@ struct FollowingView: View {
             loadError = nil
             rebuild()
         } catch {
-            loadError = error.localizedDescription
+            // A cancelled load (leaving the screen) isn't an error to show.
+            if !error.isCancellation { loadError = error.localizedDescription }
         }
         isLoading = false
     }

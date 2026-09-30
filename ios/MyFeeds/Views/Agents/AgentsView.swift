@@ -131,7 +131,8 @@ struct AgentsView: View {
             agents = loaded
             isOffline = false
         } catch {
-            isOffline = true
+            // A cancelled load (tab switch) isn't being offline.
+            if !error.isCancellation { isOffline = true }
         }
         isLoading = false
     }

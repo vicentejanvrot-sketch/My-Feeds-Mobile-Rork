@@ -1081,7 +1081,8 @@ struct AgentDetailView: View {
             }
             runItemCounts = grouped
         } catch {
-            isOffline = true
+            // A cancelled load (leaving the screen) isn't being offline.
+            if !error.isCancellation { isOffline = true }
             isLoading = false
         }
     }
