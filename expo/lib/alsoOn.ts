@@ -142,7 +142,7 @@ export function cleanName(name: string | null | undefined, fallback: string): st
 
 export function accountLabel(platform: Platform, handle: string | null, url: string): string {
   if (!handle) return url.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "");
-  if (platform === "x" || platform === "instagram") return "@" + handle;
+  if (platform === "x" || platform === "instagram" || platform === "tiktok") return "@" + handle;
   if (platform === "reddit") return "u/" + handle.replace(/^\/?u(ser)?\//i, "");
   if (platform === "youtube") return /^UC[A-Za-z0-9_-]{10,}$/.test(handle) ? "Channel" : "@" + handle;
   return handle;
@@ -150,7 +150,7 @@ export function accountLabel(platform: Platform, handle: string | null, url: str
 
 function sourceLabel(ch: Channel): string {
   const platform = platformOf(ch.platform);
-  if (ch.handle && (platform === "x" || platform === "instagram")) return "@" + ch.handle.replace(/^@/, "");
+  if (ch.handle && (platform === "x" || platform === "instagram" || platform === "tiktok")) return "@" + ch.handle.replace(/^@/, "");
   const m = (ch.channel_url ?? "").match(/youtube\.com\/@([^/?#]+)/);
   if (m) return "@" + m[1];
   if ((platform === "linkedin" || platform === "github") && ch.handle) return ch.handle;

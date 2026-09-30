@@ -139,6 +139,21 @@ const TOURS: Record<Platform, Tour> = {
     outActions: [{ icon: MessageCircle, label: "Comment" }, { icon: Repeat2, label: "Repost" }],
     outNote: "Opens LinkedIn",
   },
+  tiktok: {
+    author: "Ember Kitchen",
+    handle: "@emberkitchen",
+    when: "4h",
+    media: "video",
+    body: "Crispy rice in 60 seconds.",
+    steps: [
+      { title: "Watch it here", body: "Tap the video to play it inside My Feeds with TikTok's own player." },
+      { title: "Like to save", body: "Like saves it in My Feeds. Save adds it to Read later." },
+      { title: "Comments open on TikTok", body: "Commenting opens TikTok, because it posts from your account." },
+    ],
+    saveActions: [{ icon: Heart, label: "Like" }, { icon: Bookmark, label: "Save" }],
+    outActions: [{ icon: MessageCircle, label: "Comment" }],
+    outNote: "Opens TikTok",
+  },
 };
 
 function Marker({ n, label, active, onPick }: { n: number; label: string; active: boolean; onPick: () => void }) {

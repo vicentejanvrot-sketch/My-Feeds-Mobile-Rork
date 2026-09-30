@@ -2,9 +2,9 @@
 // sources the same way. Keep in sync with src/lib/platforms.ts (web) and
 // ios/MyFeeds/Models/Platform.swift in the mobile repo.
 
-export type Platform = "youtube" | "x" | "reddit" | "instagram" | "linkedin" | "github";
+export type Platform = "youtube" | "x" | "reddit" | "instagram" | "linkedin" | "github" | "tiktok";
 
-export const PLATFORMS: Platform[] = ["youtube", "x", "reddit", "instagram", "linkedin", "github"];
+export const PLATFORMS: Platform[] = ["youtube", "x", "reddit", "instagram", "linkedin", "github", "tiktok"];
 
 export const PLATFORM_META: Record<Platform, {
   label: string;
@@ -81,15 +81,26 @@ export const PLATFORM_META: Record<Platform, {
     addHelp: "New repositories and releases from the lookback window.",
     openLabel: "Open on GitHub",
   },
+  tiktok: {
+    label: "TikTok",
+    short: "TT",
+    fg: "#F1F3F5",
+    bg: "#1F1F24",
+    sourceNoun: "Account",
+    addPlaceholder: "@username or https://www.tiktok.com/@username",
+    addHelp: "Public accounts only. Videos from the lookback window.",
+    openLabel: "Open on TikTok",
+    beta: true,
+  },
 };
 
 export function platformOf(value: string | null | undefined): Platform {
-  return value === "x" || value === "reddit" || value === "instagram" || value === "linkedin" || value === "github" ? value : "youtube";
+  return value === "x" || value === "reddit" || value === "instagram" || value === "linkedin" || value === "github" || value === "tiktok" ? value : "youtube";
 }
 
-// Non-YouTube items store "<platform>:<id>" in items.video_id (x, reddit, instagram, linkedin, github).
+// Non-YouTube items store "<platform>:<id>" in items.video_id (x, reddit, instagram, linkedin, github, tiktok).
 export function isPostVideoId(videoId: string | null | undefined): boolean {
-  return !!videoId && /^(x|reddit|instagram|linkedin|github):/.test(videoId);
+  return !!videoId && /^(x|reddit|instagram|linkedin|github|tiktok):/.test(videoId);
 }
 
 export function formatCount(num: number | null | undefined): string {
