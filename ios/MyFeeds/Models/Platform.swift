@@ -331,3 +331,51 @@ nonisolated struct ItemMedia: Codable, Hashable, Sendable {
     var isEmbed: Bool { type == "quote" || type == "article" }
     var isArticle: Bool { type == "article" }
 }
+
+// MARK: - Platform from a pasted link
+
+extension SourcePlatform {
+    /// Web addresses that tell us which platform a pasted link belongs to.
+    /// A subdomain counts too (m.youtube.com, old.reddit.com, vm.tiktok.com).
+    private static let hosts: [(String, SourcePlatform)] = [
+        ("youtube.com", .youtube), ("youtu.be", .youtube),
+        ("x.com", .x), ("twitter.com", .x),
+        ("reddit.com", .reddit), ("redd.it", .reddit),
+        ("instagram.com", .instagram), ("instagr.am", .instagram),
+        ("linkedin.com", .linkedin), ("lnkd.in", .linkedin),
+        ("github.com", .github),
+        ("tiktok.com", .tiktok),
+        ("facebook.com", .facebook), ("fb.com", .facebook), ("fb.watch", .facebook),
+        ("music.apple.com", .appleMusic),
+        ("podcasts.apple.com", .applePodcasts),
+    ]
+
+    /// Works out the platform from what the user pasted in Add Source, so an
+    /// Instagram link can't be added with YouTube selected. Returns nil when the
+    /// text doesn't say (a plain @handle or a name could be any platform).
+    static func detect(from value: String) -> SourcePlatform? {
+        let text = value.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !text.isEmpty else { return nil }
+        if text.range(of: #"^/?(r|u|user)/[A-Za-z0-9_-]+"#, options: [.regularExpression, .caseInsensitive]) != nil {
+            return .reddit
+        }
+
+        let hasScheme = text.range(of: #"^[a-z][a-z0-9+.-]*://"#, options: [.regularExpression, .caseInsensitive]) != nil
+        guard let components = URLComponents(string: hasScheme ? text : "https://\(text)"),
+              var host = components.host?.lowercased(),
+              host.contains(".") else { return nil }
+        if host.hasPrefix("www.") { host.removeFirst(4) }
+        let path = components.path.lowercased()
+
+        // Old iTunes links use one host for both music and podcasts.
+        if host == "itunes.apple.com" {
+            if path.contains("/podcast") { return .applePodcasts }
+            if path.contains("/artist") || path.contains("/album") { return .appleMusic }
+            return nil
+        }
+        for (domain, platform) in hosts where host == domain || host.hasSuffix(".\(domain)") {
+            return platform
+        }
+        return nil
+    }
+}

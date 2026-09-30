@@ -55,6 +55,8 @@ struct OnboardingWizardView: View {
     @State private var dontShow: Bool
 
     @State private var platform: SourcePlatform = .youtube
+    /// Set when a pasted link picked the platform for the user.
+    @State private var autoPlatform: SourcePlatform?
     @State private var sourceValue = ""
     @State private var adding = false
     @State private var removingId: String?
@@ -282,6 +284,7 @@ struct OnboardingWizardView: View {
                         let selected = platform == p
                         Button {
                             platform = p
+                            autoPlatform = nil
                             errorText = nil
                         } label: {
                             VStack(spacing: 6) {
@@ -320,6 +323,15 @@ struct OnboardingWizardView: View {
                         .submitLabel(.done)
                         .onSubmit { addSource() }
                         .accessibilityLabel(platform.sourceNoun)
+                        .onChange(of: sourceValue) { _, value in
+                            if let detected = SourcePlatform.detect(from: value), detected != platform {
+                                platform = detected
+                                autoPlatform = detected
+                                errorText = nil
+                            } else if value.trimmingCharacters(in: .whitespaces).isEmpty {
+                                autoPlatform = nil
+                            }
+                        }
                     Button {
                         addSource()
                     } label: {
@@ -340,9 +352,15 @@ struct OnboardingWizardView: View {
                     .opacity(sourceValue.trimmingCharacters(in: .whitespaces).isEmpty || adding ? 0.45 : 1)
                     .accessibilityLabel("Add source")
                 }
-                Text(platform.addHelp)
-                    .font(.system(size: 13))
-                    .foregroundStyle(Theme.textSecondary)
+                if autoPlatform == platform {
+                    Text("That's a \(platform.label) link, so \(platform.label) is now selected.")
+                        .font(.system(size: 13))
+                        .foregroundStyle(Theme.accent)
+                } else {
+                    Text(platform.addHelp)
+                        .font(.system(size: 13))
+                        .foregroundStyle(Theme.textSecondary)
+                }
             }
 
             VStack(alignment: .leading, spacing: 8) {
@@ -716,6 +734,10 @@ struct OnboardingWizardView: View {
         let value = sourceValue.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !value.isEmpty, let agentId, !adding else { return }
         errorText = nil
+        if let detected = SourcePlatform.detect(from: value), detected != platform {
+            errorText = "That's a \(detected.label) link. Select \(detected.label) or paste a \(platform.label) link."
+            return
+        }
         if platform == .youtube,
            value.range(of: #"youtube\.com|youtu\.be|^@"#, options: [.regularExpression, .caseInsensitive]) == nil {
             errorText = "Paste the channel link, like youtube.com/@ChannelName."
@@ -739,6 +761,7 @@ struct OnboardingWizardView: View {
                     sources.append(AddedSource(id: channel.id, platform: chosen, name: channel.displayName))
                 }
                 sourceValue = ""
+                autoPlatform = nil
             } catch {
                 errorText = error.localizedDescription
             }

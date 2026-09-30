@@ -26,6 +26,8 @@ struct AgentDetailView: View {
     @State private var newChannelUrl = ""
     @State private var newChannelPriority = 3
     @State private var newSourcePlatform: SourcePlatform = .youtube
+    /// Set when a pasted link picked the platform for the user.
+    @State private var autoPlatform: SourcePlatform?
     @State private var isSubmittingModal = false
     @State private var recipientToRemove: AgentRecipient?
     @State private var channelToRemove: Channel?
@@ -379,6 +381,7 @@ struct AgentDetailView: View {
                     newChannelUrl = ""
                     newChannelPriority = 3
                     newSourcePlatform = .youtube
+                    autoPlatform = nil
                     showAddChannel = true
                 } label: {
                     Text("+ Add Source")
@@ -858,6 +861,7 @@ struct AgentDetailView: View {
                         let active = newSourcePlatform == platform
                         Button {
                             newSourcePlatform = platform
+                            autoPlatform = nil
                         } label: {
                             HStack(spacing: 6) {
                                 PlatformBadge(platform: platform)
@@ -911,9 +915,23 @@ struct AgentDetailView: View {
                         RoundedRectangle(cornerRadius: 8)
                             .stroke(Theme.border, lineWidth: 1)
                     )
-                Text(newSourcePlatform.addHelp)
-                    .font(.system(size: 12))
-                    .foregroundStyle(Theme.textMuted)
+                    .onChange(of: newChannelUrl) { _, value in
+                        if let detected = SourcePlatform.detect(from: value), detected != newSourcePlatform {
+                            newSourcePlatform = detected
+                            autoPlatform = detected
+                        } else if value.trimmingCharacters(in: .whitespaces).isEmpty {
+                            autoPlatform = nil
+                        }
+                    }
+                if autoPlatform == newSourcePlatform {
+                    Text("That's a \(newSourcePlatform.label) link, so \(newSourcePlatform.label) is now selected.")
+                        .font(.system(size: 12))
+                        .foregroundStyle(Theme.accent)
+                } else {
+                    Text(newSourcePlatform.addHelp)
+                        .font(.system(size: 12))
+                        .foregroundStyle(Theme.textMuted)
+                }
                 Text("Priority")
                     .font(.system(size: 12, weight: .semibold))
                     .foregroundStyle(Theme.textSecondary)
@@ -1047,6 +1065,11 @@ struct AgentDetailView: View {
     private func addChannel() {
         let url = newChannelUrl.trimmingCharacters(in: .whitespaces)
         guard !url.isEmpty else { return }
+        // The link says one platform but another is selected (picked after pasting).
+        if let detected = SourcePlatform.detect(from: url), detected != newSourcePlatform {
+            toasts.show("That's a \(detected.label) link. Select \(detected.label) or paste a \(newSourcePlatform.label) link.", type: .error)
+            return
+        }
         isSubmittingModal = true
         Task {
             do {
