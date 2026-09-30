@@ -1164,7 +1164,7 @@ export function canAddAsPrivate(error: unknown): boolean {
 export function useAddSource(agentId: string) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (payload: { platform: "x" | "reddit" | "instagram" | "linkedin" | "github" | "tiktok" | "facebook" | "apple_music" | "apple_podcasts" | "apple_books" | "youtube_music"; value: string; priority?: number; privateAccount?: boolean }) => {
+    mutationFn: async (payload: { platform: "x" | "reddit" | "instagram" | "linkedin" | "github" | "tiktok" | "facebook" | "apple_music" | "apple_podcasts" | "apple_books" | "youtube_music" | "spotify"; value: string; priority?: number; privateAccount?: boolean }) => {
       const { data, error } = await supabase.functions.invoke("add-source", {
         body: {
           agentId,

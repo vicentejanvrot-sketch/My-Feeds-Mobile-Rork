@@ -819,6 +819,8 @@ export default function PostReaderScreen() {
   const quote = embeds.find((m) => m.type === "quote" || m.type === "article") ?? null;
   const video = embeds.find((m) => m.type !== "quote" && m.type !== "article" && (m.video_url || m.hls_url)) ?? null;
   const appleRelease = platform === "apple_music" ? embeds.find((m) => m.type === "album" && m.embed_url) ?? null : null;
+  // A Spotify artist's release: Spotify's own player (album or single).
+  const spotifyRelease = platform === "spotify" ? embeds.find((m) => m.type === "album" && m.embed_url) ?? null : null;
   const ytMusic = platform === "youtube_music" ? embeds.find((m) => (m.type === "album" || m.type === "video") && (m.video_ids?.length || m.youtube_id)) ?? null : null;
   const ytMusicIds = ytMusic ? (ytMusic.video_ids?.length ? ytMusic.video_ids : ytMusic.youtube_id ? [ytMusic.youtube_id] : []) : [];
   const audiobook = platform === "apple_books" ? embeds.find((m) => m.type === "audiobook") ?? null : null;
@@ -860,7 +862,31 @@ export default function PostReaderScreen() {
           <Text style={platform === "reddit" ? styles.body : styles.bodyLarge}>{item.body}</Text>
         ) : null}
 
-        {ytMusic && ytMusicIds.length > 0 ? (
+        {spotifyRelease?.embed_url ? (
+          <View style={{ gap: 12 }}>
+            <View style={[styles.appleEmbed, { height: spotifyRelease.embed_url.includes("/track/") ? 152 : 352 }]}>
+              <WebView
+                source={{ uri: spotifyRelease.embed_url }}
+                style={{ flex: 1, backgroundColor: "transparent" }}
+                allowsInlineMediaPlayback
+                mediaPlaybackRequiresUserAction={false}
+                javaScriptEnabled
+                scrollEnabled={!spotifyRelease.embed_url.includes("/track/")}
+                accessibilityLabel="Spotify player"
+              />
+            </View>
+            {item.url ? (
+              <Pressable
+                onPress={() => void openExternalLink(item.url!)}
+                style={({ pressed }) => [styles.openBtn, pressed && { opacity: 0.7 }]}
+                accessibilityRole="link"
+              >
+                <SpotifyLogo />
+                <Text style={styles.openText}>Open in Spotify</Text>
+              </Pressable>
+            ) : null}
+          </View>
+        ) : ytMusic && ytMusicIds.length > 0 ? (
           <View style={{ gap: 12 }}>
             <YouTubeMusicPlayer videoIds={ytMusicIds} />
             <AddToYouTubeMusic videoIds={ytMusicIds} kind={ytMusic.type === "video" ? "video" : ytMusic.kind ?? "album"} />
@@ -1002,7 +1028,7 @@ export default function PostReaderScreen() {
               <BarButton label="Share" onPress={share} icon={<Send size={21} color={Colors.textPrimary} />} value={formatCount(metrics.reposts)} />
             </View>
           </View>
-        ) : platform === "apple_music" || platform === "apple_podcasts" || platform === "apple_books" || platform === "youtube_music" ? (
+        ) : platform === "apple_music" || platform === "apple_podcasts" || platform === "apple_books" || platform === "youtube_music" || platform === "spotify" ? (
           // Apple Music and Apple Podcasts: heart to save, share, save for later.
           <View style={styles.xBar}>
             <View style={{ flexDirection: "row", alignItems: "center" }}>
@@ -1011,7 +1037,7 @@ export default function PostReaderScreen() {
                 selected={liked}
                 onPress={() => changeStatus(liked ? "watched" : "liked")}
                 icon={(() => {
-                  const tint = platform === "apple_music" ? APPLE_MUSIC_RED : platform === "apple_books" ? APPLE_BOOKS_ORANGE : platform === "youtube_music" ? YOUTUBE_MUSIC_RED : APPLE_PODCASTS_PURPLE;
+                  const tint = platform === "apple_music" ? APPLE_MUSIC_RED : platform === "apple_books" ? APPLE_BOOKS_ORANGE : platform === "youtube_music" ? YOUTUBE_MUSIC_RED : platform === "spotify" ? SPOTIFY_GREEN : APPLE_PODCASTS_PURPLE;
                   return <Heart size={22} color={liked ? tint : Colors.textPrimary} fill={liked ? tint : "transparent"} />;
                 })()}
               />

@@ -46,7 +46,7 @@ interface Tour {
   outNote?: string;
 }
 
-// One tour per platform a source can be added from (Spotify only opens).
+// One tour per platform (Spotify releases work like Apple Music's, so it has none).
 const TOURS: Record<Exclude<Platform, "spotify">, Tour> = {
   youtube: {
     author: "Two Minute Markets",
@@ -277,7 +277,7 @@ export function ReadWatchTour({ defaultPlatform = "youtube" }: { defaultPlatform
     <View style={styles.root}>
       {/* Platform picker */}
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chips}>
-        {PLATFORMS.map((p) => {
+        {PLATFORMS.filter((p) => p !== "spotify").map((p) => {
           const selected = platform === p;
           return (
             <Pressable

@@ -92,6 +92,11 @@ function accountKeyFromUrl(raw: string | null | undefined): string | null {
     return first ? "x:" + first.replace(/^@/, "").toLowerCase() : null;
   }
   if (host === "instagram.com") return first ? "instagram:" + first.toLowerCase() : null;
+  if (host === "open.spotify.com") {
+    // Same key as find-also-on: spotify:artist:<id> / spotify:show:<id> (ids are case-sensitive).
+    const rest = first.startsWith("intl-") ? parts.slice(1) : parts;
+    return (rest[0] === "artist" || rest[0] === "show") && rest[1] ? "spotify:" + rest[0] + ":" + rest[1] : null;
+  }
   if (host === "music.youtube.com") {
     const channel = u.pathname.match(/\/channel\/(UC[\w-]{20,})/);
     return channel ? "youtube_music:" + channel[1] : null;

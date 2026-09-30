@@ -729,8 +729,8 @@ export default function AgentDetailScreen() {
       } else {
         // X accounts and subreddits are checked and named by the add-source function
         const channel = await addSource.mutateAsync({
-          // The Add Source list never offers YouTube here or Spotify at all.
-          platform: newPlatform as Exclude<Platform, "youtube" | "spotify">,
+          // YouTube channels take the branch above.
+          platform: newPlatform as Exclude<Platform, "youtube">,
           value,
           priority: newChannelPriority,
           privateAccount: asPrivate,

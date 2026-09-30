@@ -6,11 +6,9 @@ export type Platform =
   | "youtube" | "x" | "reddit" | "instagram" | "linkedin" | "github" | "tiktok" | "facebook"
   | "apple_music" | "apple_podcasts" | "apple_books" | "youtube_music" | "spotify";
 
-// Platforms a source can be added from. Spotify is left out: its artist pages
-// and shows show on People to open in Spotify, but can't be followed as sources.
 
 export const PLATFORMS: Platform[] = [
-  "youtube", "x", "reddit", "instagram", "linkedin", "github", "tiktok", "facebook", "apple_music", "apple_podcasts", "apple_books", "youtube_music",
+  "youtube", "x", "reddit", "instagram", "linkedin", "github", "tiktok", "facebook", "apple_music", "apple_podcasts", "apple_books", "youtube_music", "spotify",
 ];
 
 export const PLATFORM_META: Record<Platform, {
@@ -149,9 +147,10 @@ export const PLATFORM_META: Record<Platform, {
     fg: "#1ED760",
     bg: "#12301D",
     sourceNoun: "Artist",
-    addPlaceholder: "",
-    addHelp: "",
+    addPlaceholder: "https://open.spotify.com/artist/...",
+    addHelp: "New singles and albums, played with Spotify's player. Paste the artist's Spotify link. Adding an artist also brings in their latest album.",
     openLabel: "Open in Spotify",
+    beta: true,
   },
   youtube_music: {
     label: "YouTube Music",
@@ -166,8 +165,12 @@ export const PLATFORM_META: Record<Platform, {
   },
 };
 
-/** True for platforms a source can be added from (Spotify only opens). */
-export function isFollowablePlatform(platform: Platform): boolean {
+/**
+ * True when an account found on People can be followed as a source. Spotify
+ * artists can; Spotify podcast shows only open in Spotify.
+ */
+export function isFollowableAccount(platform: Platform, url: string): boolean {
+  if (platform === "spotify") return !/open\.spotify\.com\/(?:intl-[a-z]{2}\/)?show\//i.test(url);
   return (PLATFORMS as string[]).includes(platform);
 }
 
@@ -191,6 +194,7 @@ const PLATFORM_HOSTS: [string, Platform][] = [
   ["music.apple.com", "apple_music"],
   ["podcasts.apple.com", "apple_podcasts"],
   ["books.apple.com", "apple_books"],
+  ["open.spotify.com", "spotify"],
 ];
 
 /**
@@ -225,7 +229,7 @@ export function detectPlatform(value: string): Platform | null {
 
 // Non-YouTube items store "<platform>:<id>" in items.video_id (x, reddit, instagram, linkedin, github, tiktok, facebook, apple_music, apple_podcasts, apple_books, youtube_music).
 export function isPostVideoId(videoId: string | null | undefined): boolean {
-  return !!videoId && /^(x|reddit|instagram|linkedin|github|tiktok|facebook|apple_music|apple_podcasts|apple_books|youtube_music):/.test(videoId);
+  return !!videoId && /^(x|reddit|instagram|linkedin|github|tiktok|facebook|apple_music|apple_podcasts|apple_books|youtube_music|spotify):/.test(videoId);
 }
 
 export function formatCount(num: number | null | undefined): string {
