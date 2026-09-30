@@ -406,6 +406,9 @@ export default function FeedScreen() {
     const deduped = visibleChannels.filter((ch) => {
       const cid = (ch.channel_id ?? ch.id) as string;
       if (seen.has(cid)) return false;
+      // With All Collections, only channels that have something to show under
+      // the current filters (no rows with 0). The selected one always stays.
+      if (agentFilter === "all" && cid !== channelFilter && !(channelCounts[ch.channel_id ?? ""] > 0)) return false;
       seen.add(cid);
       return true;
     });
@@ -424,7 +427,7 @@ export default function FeedScreen() {
         thumbnailText: (ch.channel_name ?? "?")[0].toUpperCase(),
       })),
     ];
-  }, [visibleChannels, channelCounts]);
+  }, [visibleChannels, channelCounts, agentFilter, channelFilter]);
 
   // ── Render ──────────────────────────────────────────────────────
 
