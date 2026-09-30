@@ -156,14 +156,26 @@ struct FeedView: View {
     /// Channels for the selected agent (deduped by channel_id), limited to the
     /// selected platform chip so the dropdown only lists channels under that chip.
     private var agentChannels: [Channel] {
-        guard let agentFilter else { return [] }
         var seen = Set<String>()
-        return channels.filter { $0.agentId == agentFilter }
+        // With All Collections, only channels that have something to show under
+        // the current filters (no rows with 0). The selected one always stays.
+        let counts = agentFilter == nil ? channelCounts : [:]
+        return channels.filter { agentFilter == nil || $0.agentId == agentFilter }
             .filter { platformFilter == nil || $0.sourcePlatform == platformFilter }
             .filter { channel in
-            guard let cid = channel.channelId else { return false }
-            return seen.insert(cid).inserted
+                guard let cid = channel.channelId else { return false }
+                if agentFilter == nil, cid != channelFilter, (counts[cid] ?? 0) == 0 { return false }
+                return seen.insert(cid).inserted
+            }
+    }
+
+    /// Posts per channel under the current search, agent and status filters.
+    private var channelCounts: [String: Int] {
+        var counts: [String: Int] = [:]
+        for item in statusSearchItems {
+            if let cid = item.channelId { counts[cid, default: 0] += 1 }
         }
+        return counts
     }
 
     /// Posts for one channel under the current search, agent and status filters.
