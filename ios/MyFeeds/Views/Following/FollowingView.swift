@@ -1023,7 +1023,7 @@ private struct PersonSheet: View {
                 }
 
                 if person.lastScannedAt != nil && person.also.isEmpty && person.possible.isEmpty {
-                    Text("No other accounts found. Their profile doesn't link anywhere we can follow, and no handle like theirs turned up on X, Instagram, YouTube or Reddit.")
+                    Text("No other accounts found. Their profile doesn't link anywhere we can follow, and no handle or name like theirs turned up on X, Instagram, YouTube, LinkedIn or Reddit.")
                         .font(.system(size: 13))
                         .foregroundStyle(Theme.textSecondary)
                         .fixedSize(horizontal: false, vertical: true)
