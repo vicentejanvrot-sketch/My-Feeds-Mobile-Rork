@@ -223,6 +223,7 @@ nonisolated enum AlsoOn {
         if platform == .applePodcasts { return "Show" }
         if platform == .appleBooks { return "Author" }
         if platform == .youtubeMusic { return "Artist" }
+        if platform == .spotify { return url.contains("/show/") ? "Show" : "Artist" }
         guard let handle, !handle.isEmpty, platform != .facebook else {
             var value = url
             for prefix in ["https://www.", "http://www.", "https://", "http://"] where value.hasPrefix(prefix) {

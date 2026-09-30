@@ -27,7 +27,7 @@ struct ReadWatchTourView: View {
     private var platformPicker: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 8) {
-                ForEach(SourcePlatform.allCases, id: \.self) { p in
+                ForEach(SourcePlatform.addable, id: \.self) { p in
                     let selected = platform == p
                     Button {
                         platform = p
@@ -318,6 +318,9 @@ private struct TourContent {
 
     static func content(for platform: SourcePlatform) -> TourContent {
         switch platform {
+        case .spotify:
+            // Not in the tour (Spotify can't be added as a source).
+            return content(for: .youtubeMusic)
         case .youtube:
             return TourContent(
                 author: "Two Minute Markets", handle: "YouTube", when: "2h", media: .video,

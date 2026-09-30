@@ -452,7 +452,10 @@ struct FollowingView: View {
                             Spacer(minLength: 0)
                             FollowButton(
                                 isBusy: busyKeys.contains(account.key),
-                                isEnabled: person.agentIds.first != nil
+                                isEnabled: person.agentIds.first != nil,
+                                openInstead: account.platform.isFollowable
+                                    ? nil
+                                    : URL(string: account.url).map { (label: account.platform.openLabel, url: $0) }
                             ) {
                                 if let agentId = person.agentIds.first { follow(account, agentId: agentId) }
                             }
@@ -828,9 +831,37 @@ private struct AccountLine: View {
 private struct FollowButton: View {
     let isBusy: Bool
     let isEnabled: Bool
+    /// Spotify artist pages and shows can't be followed as sources: the button
+    /// opens them instead (label and link).
+    var openInstead: (label: String, url: URL)? = nil
     let action: () -> Void
 
+    @Environment(\.openURL) private var openURL
+
     var body: some View {
+        if let openInstead {
+            Button {
+                openURL(openInstead.url)
+            } label: {
+                HStack(spacing: 6) {
+                    Image(systemName: "arrow.up.right.square")
+                        .font(.system(size: 13))
+                    Text(openInstead.label)
+                        .font(.system(size: 13, weight: .bold))
+                        .lineLimit(1)
+                }
+                .foregroundStyle(Theme.textPrimary)
+                .frame(minHeight: 36)
+                .padding(.horizontal, 12)
+                .overlay(RoundedRectangle(cornerRadius: 10).stroke(Theme.border, lineWidth: 1))
+            }
+            .buttonStyle(.plain)
+        } else {
+            followButton
+        }
+    }
+
+    private var followButton: some View {
         Button(action: action) {
             HStack(spacing: 6) {
                 if isBusy {
@@ -1182,7 +1213,10 @@ private struct PersonSheet: View {
                         Spacer(minLength: 0)
                         FollowButton(
                             isBusy: busyKeys.contains(account.key),
-                            isEnabled: agentId != nil
+                            isEnabled: agentId != nil,
+                            openInstead: account.platform.isFollowable
+                                ? nil
+                                : URL(string: account.url).map { (label: account.platform.openLabel, url: $0) }
                         ) {
                             if let agentId { onFollow(account, agentId) }
                         }

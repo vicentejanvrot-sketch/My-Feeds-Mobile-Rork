@@ -168,7 +168,7 @@ struct OnboardingWizardView: View {
                 .foregroundStyle(Theme.textSecondary)
                 .lineSpacing(4)
             LazyVGrid(columns: [GridItem(.adaptive(minimum: 110), spacing: 8, alignment: .leading)], alignment: .leading, spacing: 8) {
-                ForEach(SourcePlatform.allCases, id: \.self) { p in
+                ForEach(SourcePlatform.addable, id: \.self) { p in
                     HStack(spacing: 8) {
                         PlatformBadge(platform: p, size: 18)
                         Text(p.label)
@@ -283,7 +283,7 @@ struct OnboardingWizardView: View {
             VStack(alignment: .leading, spacing: 10) {
                 fieldLabel("Platform")
                 LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: 3), spacing: 8) {
-                    ForEach(SourcePlatform.allCases, id: \.self) { p in
+                    ForEach(SourcePlatform.addable, id: \.self) { p in
                         let selected = platform == p
                         Button {
                             platform = p

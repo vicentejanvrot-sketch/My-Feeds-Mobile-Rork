@@ -15,6 +15,15 @@ nonisolated enum SourcePlatform: String, Codable, CaseIterable, Hashable, Sendab
     case applePodcasts = "apple_podcasts"
     case appleBooks = "apple_books"
     case youtubeMusic = "youtube_music"
+    /// Spotify artist pages and shows, found on People. They open in Spotify;
+    /// they can't be added as sources (see addable).
+    case spotify
+
+    /// Platforms a source can be added from, in the Add Source grids.
+    static var addable: [SourcePlatform] { allCases.filter(\.isFollowable) }
+
+    /// False for Spotify, which only opens.
+    var isFollowable: Bool { self != .spotify }
 
     /// Unknown or missing values (rows written before the migration) are YouTube.
     init(raw: String?) {
@@ -52,6 +61,7 @@ extension SourcePlatform {
         case .applePodcasts: return "Apple Podcasts"
         case .appleBooks: return "Apple Books"
         case .youtubeMusic: return "YouTube Music"
+        case .spotify: return "Spotify"
         }
     }
 
@@ -69,6 +79,7 @@ extension SourcePlatform {
         case .applePodcasts: return "POD"
         case .appleBooks: return "BK"
         case .youtubeMusic: return "YTM"
+        case .spotify: return "SP"
         }
     }
 
@@ -87,6 +98,7 @@ extension SourcePlatform {
         case .applePodcasts: return Color(red: 217 / 255, green: 166 / 255, blue: 1)
         case .appleBooks: return Color(red: 1, green: 179 / 255, blue: 92 / 255)
         case .youtubeMusic: return Color(red: 1, green: 138 / 255, blue: 132 / 255)
+        case .spotify: return Color(red: 30 / 255, green: 215 / 255, blue: 96 / 255)
         }
     }
 
@@ -105,6 +117,7 @@ extension SourcePlatform {
         case .applePodcasts: return Color(red: 42 / 255, green: 23 / 255, blue: 64 / 255)
         case .appleBooks: return Color(red: 58 / 255, green: 38 / 255, blue: 16 / 255)
         case .youtubeMusic: return Color(red: 58 / 255, green: 29 / 255, blue: 36 / 255)
+        case .spotify: return Color(red: 18 / 255, green: 48 / 255, blue: 29 / 255)
         }
     }
 
@@ -122,6 +135,7 @@ extension SourcePlatform {
         case .applePodcasts: return "Show"
         case .appleBooks: return "Author"
         case .youtubeMusic: return "Artist"
+        case .spotify: return "Artist"
         }
     }
 
@@ -139,6 +153,7 @@ extension SourcePlatform {
         case .applePodcasts: return "Show name or https://podcasts.apple.com/us/podcast/name/id123"
         case .appleBooks: return "Author name or https://books.apple.com/us/author/name/id123"
         case .youtubeMusic: return "Artist name or https://music.youtube.com/channel/UC..."
+        case .spotify: return ""
         }
     }
 
@@ -156,6 +171,7 @@ extension SourcePlatform {
         case .applePodcasts: return "New episodes, played right here. Adding a show also brings in its latest episode."
         case .appleBooks: return "New audiobooks, with a sample to listen to. Adding an author also brings in their latest audiobook."
         case .youtubeMusic: return "New songs, albums and music videos. Adding an artist also brings in their latest album."
+        case .spotify: return ""
         }
     }
 
@@ -173,6 +189,7 @@ extension SourcePlatform {
         case .applePodcasts: return "Open in Apple Podcasts"
         case .appleBooks: return "Open in Apple Books"
         case .youtubeMusic: return "Open in YouTube Music"
+        case .spotify: return "Open in Spotify"
         }
     }
 

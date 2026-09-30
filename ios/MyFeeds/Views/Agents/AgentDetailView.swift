@@ -876,7 +876,7 @@ struct AgentDetailView: View {
                     .font(.system(size: 12, weight: .semibold))
                     .foregroundStyle(Theme.textSecondary)
                 LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: 3), spacing: 8) {
-                    ForEach(SourcePlatform.allCases, id: \.self) { platform in
+                    ForEach(SourcePlatform.addable, id: \.self) { platform in
                         let active = newSourcePlatform == platform
                         Button {
                             newSourcePlatform = platform
