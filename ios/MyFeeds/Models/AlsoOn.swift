@@ -138,6 +138,10 @@ nonisolated enum AlsoOn {
             if first == "c" || first == "user", let second { return "youtube:c:" + second.lowercased() }
             return nil
         }
+        if host == "music.youtube.com" {
+            guard let range = comps.path.range(of: #"/channel/UC[\w-]{20,}"#, options: .regularExpression) else { return nil }
+            return "youtube_music:" + comps.path[range].replacingOccurrences(of: "/channel/", with: "")
+        }
         if host == "books.apple.com" || (host == "itunes.apple.com" && comps.path.contains("/author/")) {
             guard let range = comps.path.range(of: #"/author/(?:[^/]+/)?(?:id)?\d+"#, options: .regularExpression) else { return nil }
             let digits = comps.path[range].split(separator: "/").last.map { String($0).replacingOccurrences(of: "id", with: "") } ?? ""
@@ -218,6 +222,7 @@ nonisolated enum AlsoOn {
         if platform == .appleMusic { return "Artist page" }
         if platform == .applePodcasts { return "Show" }
         if platform == .appleBooks { return "Author" }
+        if platform == .youtubeMusic { return "Artist" }
         guard let handle, !handle.isEmpty, platform != .facebook else {
             var value = url
             for prefix in ["https://www.", "http://www.", "https://", "http://"] where value.hasPrefix(prefix) {

@@ -33,6 +33,7 @@ struct PostReaderView: View {
     private static let appleMusicRed = Color(red: 250 / 255, green: 36 / 255, blue: 60 / 255)
     private static let applePodcastsPurple = Color(red: 179 / 255, green: 92 / 255, blue: 242 / 255)
     private static let appleBooksOrange = Color(red: 1, green: 149 / 255, blue: 0)
+    private static let youtubeMusicRed = Color(red: 1, green: 0, blue: 51 / 255)
 
     var body: some View {
         ZStack {
@@ -99,7 +100,13 @@ struct PostReaderView: View {
 
                     let photos = item.postPhotoURLs
                     let slides = item.carouselMedia
-                    if platform == .appleMusic,
+                    if platform == .youtubeMusic,
+                       let music = item.media?.first(where: { ($0.type == "album" || $0.type == "video") && $0.embedUrl != nil }),
+                       let raw = music.embedUrl, let embedURL = URL(string: raw) {
+                        // Songs, albums (all tracks in a row) and music videos in YouTube's player.
+                        YouTubeMusicEmbedPlayer(url: embedURL)
+                        youtubeMusicButton(item)
+                    } else if platform == .appleMusic,
                        let release = item.media?.first(where: { $0.type == "album" }),
                        let raw = release.embedUrl, let embedURL = URL(string: raw) {
                         // Apple Music's own player: previews, or full songs when signed in.
@@ -396,7 +403,7 @@ struct PostReaderView: View {
             case .github: gitHubActionBar(item)
             case .tiktok: tikTokActionBar(item)
             case .facebook: facebookActionBar(item)
-            case .appleMusic, .applePodcasts, .appleBooks: appleActionBar(item, platform: platform)
+            case .appleMusic, .applePodcasts, .appleBooks, .youtubeMusic: appleActionBar(item, platform: platform)
             case .reddit: redditActionBar(item)
             default:
                 // YouTube videos opened from Downloads: just the download icon.
@@ -454,6 +461,29 @@ struct PostReaderView: View {
         .overlay(alignment: .top) {
             Rectangle().fill(Theme.border).frame(height: 0.5)
         }
+    }
+
+    /// YouTube Music on iPhone: the app has no YouTube account connection here,
+    /// so adding to a playlist happens in the YouTube Music app. (The web and
+    /// Android apps add straight to a "My Feeds" playlist.)
+    private func youtubeMusicButton(_ item: FeedItem) -> some View {
+        Button {
+            if let raw = item.url { openExternal(raw) }
+        } label: {
+            HStack(spacing: 8) {
+                Image(systemName: "text.badge.plus")
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundStyle(Self.youtubeMusicRed)
+                Text("Add it in YouTube Music")
+                    .font(.system(size: 14, weight: .bold))
+                    .foregroundStyle(Theme.textPrimary)
+            }
+            .frame(maxWidth: .infinity, minHeight: 44)
+            .overlay(RoundedRectangle(cornerRadius: 10).stroke(Theme.border, lineWidth: 1))
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .disabled(item.url == nil)
     }
 
     // MARK: - Action bars
@@ -622,6 +652,7 @@ struct PostReaderView: View {
         let bookmarked = status == .watchLater
         let tint = platform == .appleMusic ? Self.appleMusicRed
             : platform == .appleBooks ? Self.appleBooksOrange
+            : platform == .youtubeMusic ? Self.youtubeMusicRed
             : Self.applePodcastsPurple
         return HStack(spacing: 4) {
             igButton(
@@ -1689,8 +1720,33 @@ private struct FacebookEmbedPlayer: View {
 }
 
 /// A web view that loads one embed page, used by the Facebook player.
+/// YouTube Music songs, albums and music videos in YouTube's embed player, 16:9.
+private struct YouTubeMusicEmbedPlayer: View {
+    let url: URL
+
+    private var playerURL: URL {
+        guard var components = URLComponents(url: url, resolvingAgainstBaseURL: false) else { return url }
+        var items = components.queryItems ?? []
+        items.append(contentsOf: [
+            URLQueryItem(name: "playsinline", value: "1"),
+            URLQueryItem(name: "rel", value: "0"),
+            URLQueryItem(name: "modestbranding", value: "1"),
+        ])
+        components.queryItems = items
+        return components.url ?? url
+    }
+
+    var body: some View {
+        // YouTube checks the Referer on embedded playback, like the video player.
+        EmbedWebView(url: playerURL, referer: "https://myfeeds.app/")
+            .aspectRatio(16 / 9, contentMode: .fit)
+            .clipShape(.rect(cornerRadius: 12))
+    }
+}
+
 private struct EmbedWebView: UIViewRepresentable {
     let url: URL
+    var referer: String? = nil
 
     func makeUIView(context: Context) -> WKWebView {
         let config = WKWebViewConfiguration()
@@ -1701,7 +1757,9 @@ private struct EmbedWebView: UIViewRepresentable {
         webView.backgroundColor = .black
         webView.scrollView.isScrollEnabled = false
         webView.scrollView.bounces = false
-        webView.load(URLRequest(url: url))
+        var request = URLRequest(url: url)
+        if let referer { request.setValue(referer, forHTTPHeaderField: "Referer") }
+        webView.load(request)
         return webView
     }
 

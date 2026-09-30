@@ -14,6 +14,7 @@ nonisolated enum SourcePlatform: String, Codable, CaseIterable, Hashable, Sendab
     case appleMusic = "apple_music"
     case applePodcasts = "apple_podcasts"
     case appleBooks = "apple_books"
+    case youtubeMusic = "youtube_music"
 
     /// Unknown or missing values (rows written before the migration) are YouTube.
     init(raw: String?) {
@@ -21,10 +22,10 @@ nonisolated enum SourcePlatform: String, Codable, CaseIterable, Hashable, Sendab
     }
 
     /// Non-YouTube items store "<platform>:<id>" in items.video_id
-    /// (x, reddit, instagram, linkedin, github, tiktok, facebook, apple_music, apple_podcasts, apple_books).
+    /// (x, reddit, instagram, linkedin, github, tiktok, facebook, apple_music, apple_podcasts, apple_books, youtube_music).
     static func isPostVideoId(_ videoId: String?) -> Bool {
         guard let videoId else { return false }
-        return ["x:", "reddit:", "instagram:", "linkedin:", "github:", "tiktok:", "facebook:", "apple_music:", "apple_podcasts:", "apple_books:"].contains { videoId.hasPrefix($0) }
+        return ["x:", "reddit:", "instagram:", "linkedin:", "github:", "tiktok:", "facebook:", "apple_music:", "apple_podcasts:", "apple_books:", "youtube_music:"].contains { videoId.hasPrefix($0) }
     }
 
     /// Platform of a post item from its "<platform>:<id>" video_id; YouTube otherwise.
@@ -50,6 +51,7 @@ extension SourcePlatform {
         case .appleMusic: return "Apple Music"
         case .applePodcasts: return "Apple Podcasts"
         case .appleBooks: return "Apple Books"
+        case .youtubeMusic: return "YouTube Music"
         }
     }
 
@@ -66,6 +68,7 @@ extension SourcePlatform {
         case .appleMusic: return "AM"
         case .applePodcasts: return "POD"
         case .appleBooks: return "BK"
+        case .youtubeMusic: return "YTM"
         }
     }
 
@@ -83,6 +86,7 @@ extension SourcePlatform {
         case .appleMusic: return Color(red: 1, green: 138 / 255, blue: 154 / 255)
         case .applePodcasts: return Color(red: 217 / 255, green: 166 / 255, blue: 1)
         case .appleBooks: return Color(red: 1, green: 179 / 255, blue: 92 / 255)
+        case .youtubeMusic: return Color(red: 1, green: 138 / 255, blue: 132 / 255)
         }
     }
 
@@ -100,6 +104,7 @@ extension SourcePlatform {
         case .appleMusic: return Color(red: 58 / 255, green: 22 / 255, blue: 32 / 255)
         case .applePodcasts: return Color(red: 42 / 255, green: 23 / 255, blue: 64 / 255)
         case .appleBooks: return Color(red: 58 / 255, green: 38 / 255, blue: 16 / 255)
+        case .youtubeMusic: return Color(red: 58 / 255, green: 29 / 255, blue: 36 / 255)
         }
     }
 
@@ -116,6 +121,7 @@ extension SourcePlatform {
         case .appleMusic: return "Artist"
         case .applePodcasts: return "Show"
         case .appleBooks: return "Author"
+        case .youtubeMusic: return "Artist"
         }
     }
 
@@ -132,6 +138,7 @@ extension SourcePlatform {
         case .appleMusic: return "Artist name or https://music.apple.com/us/artist/name/123"
         case .applePodcasts: return "Show name or https://podcasts.apple.com/us/podcast/name/id123"
         case .appleBooks: return "Author name or https://books.apple.com/us/author/name/id123"
+        case .youtubeMusic: return "Artist name or https://music.youtube.com/channel/UC..."
         }
     }
 
@@ -148,6 +155,7 @@ extension SourcePlatform {
         case .appleMusic: return "New singles and albums. Adding an artist also brings in their latest album."
         case .applePodcasts: return "New episodes, played right here. Adding a show also brings in its latest episode."
         case .appleBooks: return "New audiobooks, with a sample to listen to. Adding an author also brings in their latest audiobook."
+        case .youtubeMusic: return "New songs, albums and music videos. Adding an artist also brings in their latest album."
         }
     }
 
@@ -164,6 +172,7 @@ extension SourcePlatform {
         case .appleMusic: return "Open in Apple Music"
         case .applePodcasts: return "Open in Apple Podcasts"
         case .appleBooks: return "Open in Apple Books"
+        case .youtubeMusic: return "Open in YouTube Music"
         }
     }
 
@@ -289,11 +298,14 @@ nonisolated struct ItemMedia: Codable, Hashable, Sendable {
     var label: String?
     /// Apple Books audiobook: Apple's short sample.
     var previewUrl: String?
+    /// YouTube Music: the release's track video ids, or a music video's id.
+    var videoIds: [String]?
+    var youtubeId: String?
 
     /// Keys arrive snake_case; the service decoder converts them.
     enum CodingKeys: String, CodingKey {
         case type, url, authorName, authorHandle, authorAvatar, verified, createdAt, text, image, title, preview, videoUrl, hlsUrl
-        case audioUrl, duration, embedUrl, kind, label, previewUrl
+        case audioUrl, duration, embedUrl, kind, label, previewUrl, videoIds, youtubeId
     }
 
     init(from decoder: Decoder) throws {
@@ -317,6 +329,8 @@ nonisolated struct ItemMedia: Codable, Hashable, Sendable {
         kind = try? c.decodeIfPresent(String.self, forKey: .kind)
         label = try? c.decodeIfPresent(String.self, forKey: .label)
         previewUrl = try? c.decodeIfPresent(String.self, forKey: .previewUrl)
+        videoIds = try? c.decodeIfPresent([String].self, forKey: .videoIds)
+        youtubeId = try? c.decodeIfPresent(String.self, forKey: .youtubeId)
     }
 
     /// HLS first (it has sound for Reddit videos), MP4 otherwise.
@@ -350,6 +364,8 @@ extension SourcePlatform {
     /// Web addresses that tell us which platform a pasted link belongs to.
     /// A subdomain counts too (m.youtube.com, old.reddit.com, vm.tiktok.com).
     private static let hosts: [(String, SourcePlatform)] = [
+        // Before youtube.com, which it would otherwise match.
+        ("music.youtube.com", .youtubeMusic),
         ("youtube.com", .youtube), ("youtu.be", .youtube),
         ("x.com", .x), ("twitter.com", .x),
         ("reddit.com", .reddit), ("redd.it", .reddit),

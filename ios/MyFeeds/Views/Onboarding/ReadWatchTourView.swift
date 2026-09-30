@@ -468,6 +468,20 @@ private struct TourContent {
                 outActions: [TourAction(icon: "arrow.up.right.square", label: "Apple Books")],
                 outNote: "Opens Apple Books"
             )
+        case .youtubeMusic:
+            return TourContent(
+                author: "Nova Lane", handle: "New album", when: "1d", media: .video,
+                title: "Night Garden",
+                text: "New album by Nova Lane · 10 tracks",
+                steps: [
+                    TourStep(title: "Listen here", body: "Tap it to play the songs, or the music video, right inside My Feeds."),
+                    TourStep(title: "Heart to save", body: "The heart saves it in My Feeds. Save adds it to Watch later."),
+                    TourStep(title: "Open in YouTube Music", body: "Adding it to your library or a playlist opens YouTube Music."),
+                ],
+                saveActions: [TourAction(icon: "heart", label: "Like"), TourAction(icon: "bookmark", label: "Save")],
+                outActions: [TourAction(icon: "arrow.up.right.square", label: "YouTube Music")],
+                outNote: "Opens YouTube Music"
+            )
         }
     }
 }

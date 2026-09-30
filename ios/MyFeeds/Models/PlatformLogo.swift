@@ -369,6 +369,36 @@ nonisolated enum PlatformLogoPaths {
         return path
     }
 
+    /// YouTube Music: the red disc with the ring and play arrow cut out.
+    static func youtubeMusic(in rect: CGRect) -> Path {
+        let p = scaler(rect)
+        var path = Path()
+        path.move(to: p(12, 0))
+        path.addCurve(to: p(0, 12), control1: p(5.376, 0), control2: p(0, 5.376))
+        path.addCurve(to: p(12, 24), control1: p(0, 18.624), control2: p(5.376, 24))
+        path.addCurve(to: p(24, 12), control1: p(18.624, 24), control2: p(24, 18.624))
+        path.addCurve(to: p(12, 0), control1: p(24, 5.376), control2: p(18.624, 0))
+        path.closeSubpath()
+        path.move(to: p(12, 19.104))
+        path.addCurve(to: p(4.896, 12), control1: p(8.076, 19.104), control2: p(4.896, 15.924))
+        path.addCurve(to: p(12, 4.896), control1: p(4.896, 8.076), control2: p(8.076, 4.896))
+        path.addCurve(to: p(19.104, 12), control1: p(15.924, 4.896), control2: p(19.104, 8.076))
+        path.addCurve(to: p(12, 19.104), control1: p(19.104, 15.924), control2: p(15.924, 19.104))
+        path.closeSubpath()
+        path.move(to: p(12, 5.772))
+        path.addCurve(to: p(5.772, 12), control1: p(8.568, 5.772), control2: p(5.772, 8.568))
+        path.addCurve(to: p(12, 18.228), control1: p(5.772, 15.432), control2: p(8.568, 18.228))
+        path.addCurve(to: p(18.228, 12), control1: p(15.432, 18.228), control2: p(18.228, 15.432))
+        path.addCurve(to: p(12, 5.772), control1: p(18.228, 8.568), control2: p(15.432, 5.772))
+        path.closeSubpath()
+        path.move(to: p(9.684, 15.54))
+        path.addLine(to: p(9.684, 8.46))
+        path.addLine(to: p(15.816, 12))
+        path.addLine(to: p(9.684, 15.54))
+        path.closeSubpath()
+        return path
+    }
+
     /// Apple Books: a plain open book (drawn for My Feeds, not Apple's artwork),
     /// shown in white on an orange tile. Same path as web and Expo.
     static func appleBooks(in rect: CGRect) -> Path {
@@ -515,7 +545,7 @@ nonisolated enum PlatformLogoPaths {
 }
 
 private struct LogoShape: Shape {
-    enum Kind { case youtube, youtubePlay, x, reddit, instagram, github, tiktok, facebook, appleMusic, applePodcasts, appleBooks }
+    enum Kind { case youtube, youtubePlay, x, reddit, instagram, github, tiktok, facebook, appleMusic, applePodcasts, appleBooks, youtubeMusic }
     let kind: Kind
 
     func path(in rect: CGRect) -> Path {
@@ -531,6 +561,7 @@ private struct LogoShape: Shape {
         case .appleMusic: return PlatformLogoPaths.appleMusic(in: rect)
         case .applePodcasts: return PlatformLogoPaths.applePodcasts(in: rect)
         case .appleBooks: return PlatformLogoPaths.appleBooks(in: rect)
+        case .youtubeMusic: return PlatformLogoPaths.youtubeMusic(in: rect)
         }
     }
 }
@@ -556,6 +587,7 @@ struct PlatformLogo: View {
         case .tiktok: return 0.86
         case .facebook: return 0.9
         case .appleMusic, .applePodcasts, .appleBooks: return 0.84
+        case .youtubeMusic: return 0.9
         }
     }
 
@@ -612,6 +644,12 @@ struct PlatformLogo: View {
                     .fill(platform == .appleMusic
                           ? Color(red: 250 / 255, green: 36 / 255, blue: 60 / 255)
                           : Color(red: 153 / 255, green: 51 / 255, blue: 204 / 255))
+            }
+        case .youtubeMusic:
+            // Drawn over a white circle so the ring and play arrow show white.
+            ZStack {
+                Circle().fill(Color.white).scaleEffect(22.0 / 24.0)
+                LogoShape(kind: .youtubeMusic).fill(Color(red: 1, green: 0, blue: 0))
             }
         case .appleBooks:
             ZStack {
