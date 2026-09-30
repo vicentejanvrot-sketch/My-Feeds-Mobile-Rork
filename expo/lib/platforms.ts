@@ -2,9 +2,13 @@
 // sources the same way. Keep in sync with src/lib/platforms.ts (web) and
 // ios/MyFeeds/Models/Platform.swift in the mobile repo.
 
-export type Platform = "youtube" | "x" | "reddit" | "instagram" | "linkedin" | "github" | "tiktok" | "facebook";
+export type Platform =
+  | "youtube" | "x" | "reddit" | "instagram" | "linkedin" | "github" | "tiktok" | "facebook"
+  | "apple_music" | "apple_podcasts";
 
-export const PLATFORMS: Platform[] = ["youtube", "x", "reddit", "instagram", "linkedin", "github", "tiktok", "facebook"];
+export const PLATFORMS: Platform[] = [
+  "youtube", "x", "reddit", "instagram", "linkedin", "github", "tiktok", "facebook", "apple_music", "apple_podcasts",
+];
 
 export const PLATFORM_META: Record<Platform, {
   label: string;
@@ -103,15 +107,37 @@ export const PLATFORM_META: Record<Platform, {
     openLabel: "Open on Facebook",
     beta: true,
   },
+  apple_music: {
+    label: "Apple Music",
+    short: "AM",
+    fg: "#FF8A9A",
+    bg: "#3A1620",
+    sourceNoun: "Artist",
+    addPlaceholder: "Artist name or https://music.apple.com/us/artist/name/123",
+    addHelp: "New singles and albums. Adding an artist also brings in their latest album.",
+    openLabel: "Open in Apple Music",
+    beta: true,
+  },
+  apple_podcasts: {
+    label: "Apple Podcasts",
+    short: "POD",
+    fg: "#D9A6FF",
+    bg: "#2A1740",
+    sourceNoun: "Show",
+    addPlaceholder: "Show name or https://podcasts.apple.com/us/podcast/name/id123",
+    addHelp: "New episodes, played right here. Adding a show also brings in its latest episode.",
+    openLabel: "Open in Apple Podcasts",
+    beta: true,
+  },
 };
 
 export function platformOf(value: string | null | undefined): Platform {
-  return value === "x" || value === "reddit" || value === "instagram" || value === "linkedin" || value === "github" || value === "tiktok" || value === "facebook" ? value : "youtube";
+  return value && value !== "youtube" && (PLATFORMS as string[]).includes(value) ? (value as Platform) : "youtube";
 }
 
-// Non-YouTube items store "<platform>:<id>" in items.video_id (x, reddit, instagram, linkedin, github, tiktok, facebook).
+// Non-YouTube items store "<platform>:<id>" in items.video_id (x, reddit, instagram, linkedin, github, tiktok, facebook, apple_music, apple_podcasts).
 export function isPostVideoId(videoId: string | null | undefined): boolean {
-  return !!videoId && /^(x|reddit|instagram|linkedin|github|tiktok|facebook):/.test(videoId);
+  return !!videoId && /^(x|reddit|instagram|linkedin|github|tiktok|facebook|apple_music|apple_podcasts):/.test(videoId);
 }
 
 export function formatCount(num: number | null | undefined): string {

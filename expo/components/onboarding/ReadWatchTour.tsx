@@ -169,6 +169,38 @@ const TOURS: Record<Platform, Tour> = {
     outActions: [{ icon: MessageCircle, label: "Comment" }],
     outNote: "Opens Facebook",
   },
+  apple_music: {
+    author: "Nova Lane",
+    handle: "New single",
+    when: "1d",
+    media: "video",
+    title: "Paper Lanterns",
+    body: "New single by Nova Lane · 1 track · Pop",
+    steps: [
+      { title: "Listen here", body: "Tap it to open Apple Music's player. You hear a preview, or the full songs if you're signed in to Apple Music." },
+      { title: "Heart to save", body: "The heart saves it in My Feeds. Save adds it to Watch later." },
+      { title: "Add it in Apple Music", body: "Adding it to your library or a playlist opens Apple Music." },
+    ],
+    saveActions: [{ icon: Heart, label: "Like" }, { icon: Bookmark, label: "Save" }],
+    outActions: [{ icon: ExternalLink, label: "Apple Music" }],
+    outNote: "Opens Apple Music",
+  },
+  apple_podcasts: {
+    author: "The Long Run",
+    handle: "Podcast",
+    when: "5h",
+    media: "video",
+    title: "Episode 212: Training through the winter",
+    body: "Full episode, played inside My Feeds.",
+    steps: [
+      { title: "Listen to the whole episode", body: "Tap it to play the full episode here. It remembers where you stopped, on every device." },
+      { title: "Heart to save", body: "The heart saves it in My Feeds. Save adds it to Watch later." },
+      { title: "Follow the show on Apple Podcasts", body: "Following or rating the show opens Apple Podcasts." },
+    ],
+    saveActions: [{ icon: Heart, label: "Like" }, { icon: Bookmark, label: "Save" }],
+    outActions: [{ icon: ExternalLink, label: "Apple Podcasts" }],
+    outNote: "Opens Apple Podcasts",
+  },
 };
 
 function Marker({ n, label, active, onPick }: { n: number; label: string; active: boolean; onPick: () => void }) {
