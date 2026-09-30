@@ -193,7 +193,10 @@ export function OnboardingWizard({ visible, onClose, hidden, onHiddenChange }: O
           .insert({ agent_id: agentId, channel_url: value, priority: 3 })
           .select()
           .single();
-        if (insertError) throw insertError;
+        // 23505: the account is already in this collection.
+        if (insertError) {
+          throw new Error(insertError.code === "23505" ? insertError.message : `Couldn't add that channel: ${insertError.message}`);
+        }
         setSources((prev) => [...prev, { id: data.id as string, platform: "youtube", name: value }]);
       } else {
         const { data, error: fnError } = await supabase.functions.invoke("add-source", {

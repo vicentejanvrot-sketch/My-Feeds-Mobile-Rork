@@ -750,7 +750,8 @@ export function useAddChannel(agentId: string) {
         channel_url: payload.channel_url,
         priority: payload.priority ?? 3,
       });
-      if (error) throw error;
+      // 23505: the account is already in this collection (see channels_reject_duplicate).
+      if (error) throw new Error(error.code === "23505" ? error.message : `Couldn't add that channel: ${error.message}`);
     },
     onSettled: () => {
       void queryClient.invalidateQueries({ queryKey: ["channels"] });
