@@ -141,6 +141,10 @@ struct FollowingView: View {
         }
         .refreshable { await load() }
         .task { await load() }
+        // A darker background behind the person sheet, so the list doesn't
+        // pull the eye.
+        .onChange(of: selectedPerson != nil) { _, isOpen in SheetDimmer.shared.set(isOpen) }
+        .onDisappear { SheetDimmer.shared.set(false) }
         .sheet(isPresented: Binding(
             get: { selectedPerson != nil },
             set: { if !$0 { selectedId = nil } }

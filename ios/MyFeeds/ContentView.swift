@@ -22,6 +22,14 @@ struct ContentView: View {
                 MainTabView()
             }
 
+            // Darker background behind sheets that ask for it (see SheetDimmer).
+            if SheetDimmer.shared.isActive {
+                Color.black.opacity(SheetDimmer.extraOpacity)
+                    .ignoresSafeArea()
+                    .allowsHitTesting(false)
+                    .transition(.opacity)
+            }
+
             ToastHost()
             RunningOverlayView()
 
