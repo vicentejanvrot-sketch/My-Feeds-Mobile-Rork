@@ -41,7 +41,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="agents"
         options={{
-          title: "Agents",
+          title: "Collections",
           tabBarIcon: ({ color }) => <Bot size={22} color={color} />,
         }}
       />

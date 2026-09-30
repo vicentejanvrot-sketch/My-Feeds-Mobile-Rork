@@ -520,7 +520,7 @@ export function useRunAgent() {
       // This prevents supabase.functions.invoke from sending an anon-only
       // request (no JWT) that surfaces an opaque HTTP error downstream.
       if (authStatus === "unauthenticated" || !user) {
-        throw new Error("Not signed in — please sign in before running an agent.");
+        throw new Error("Not signed in — please sign in before running a collection.");
       }
       const now = new Date().toISOString();
 

@@ -296,7 +296,7 @@ export function useWatchTimeStats(period: TimePeriod = "all") {
         let agent = agentAgg.get(agentId);
         if (!agent) {
           agent = {
-            agentName: agentMap.get(agentId) ?? "Unknown Agent",
+            agentName: agentMap.get(agentId) ?? "Unknown Collection",
             watchedSeconds: 0,
             unwatchedSeconds: 0,
             watchedCount: 0,

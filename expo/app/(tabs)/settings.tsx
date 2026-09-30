@@ -218,7 +218,7 @@ export default function SettingsScreen() {
                 <Text style={styles.cardTitle}>Default Email</Text>
               </View>
               <Text style={styles.cardDesc}>
-                Pre-filled when adding email recipients to new agents.
+                Pre-filled when adding email recipients to new collections.
               </Text>
               <TextInput
                 style={styles.input}
@@ -413,7 +413,7 @@ export default function SettingsScreen() {
                   void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
                   Alert.alert(
                     "Delete Account?",
-                    "This will permanently delete your account and all your data, including your agents, feeds, watch history, and saved settings. This cannot be undone.",
+                    "This will permanently delete your account and all your data, including your collections, feeds, watch history, and saved settings. This cannot be undone.",
                     [
                       { text: "Cancel", style: "cancel" },
                       {

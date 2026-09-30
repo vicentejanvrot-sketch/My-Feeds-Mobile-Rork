@@ -465,10 +465,10 @@ export default function FeedScreen() {
         {/* Agent — full width */}
         <FilterDropdownFull
           icon={<Bot size={15} color={Colors.textSecondary} />}
-          label="Agent"
+          label="Collection"
           value={agentFilter}
           options={[
-            { key: "all", label: "All Agents" },
+            { key: "all", label: "All Collections" },
             ...agentList.map((a) => ({ key: a.id, label: a.name })),
           ]}
           onChange={handleAgentChange}
@@ -561,7 +561,7 @@ export default function FeedScreen() {
               <Text style={styles.emptyText}>
                 {search || agentFilter !== "all" || statusFilter !== "not_watched"
                   ? "Try adjusting your search or filters."
-                  : "Run an agent to start discovering videos."}
+                  : "Run a collection to start discovering videos."}
               </Text>
             </View>
           }

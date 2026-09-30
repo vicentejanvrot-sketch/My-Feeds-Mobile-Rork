@@ -298,11 +298,11 @@ export function initials(name: string): string {
   return letters.toUpperCase();
 }
 
-// "Not checked yet" / "Only on X" / "On 3 platforms · 1 you don't follow · 1 to check"
+// "Not searched yet" / "Only on X" / "On 3 platforms · 1 you don't follow · 1 to check"
 export function personSummary(p: Person, platformLabel: (p: Platform) => string): string {
   const total = p.following.length + p.also.length;
   const parts: string[] = [];
-  if (!p.lastScannedAt) parts.push("Not checked yet");
+  if (!p.lastScannedAt) parts.push("Not searched yet");
   else if (total === 1) parts.push("Only on " + platformLabel(p.following[0].platform));
   else parts.push("On " + total + " platforms");
   if (p.also.length) parts.push(p.also.length + " you don't follow");

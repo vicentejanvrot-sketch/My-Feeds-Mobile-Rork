@@ -236,7 +236,7 @@ function PersonPanel({ person, agents, scanning, onRescan }: {
             <View style={styles.flex1}>
               <AccountLine platform={a.platform} label={a.label} url={a.url} />
             </View>
-            <Text style={styles.agentTag} numberOfLines={1}>{agentName.get(a.channel.agent_id) ?? "Agent"}</Text>
+            <Text style={styles.agentTag} numberOfLines={1}>{agentName.get(a.channel.agent_id) ?? "Collection"}</Text>
           </View>
         ))}
       </View>
@@ -320,8 +320,8 @@ function PersonPanel({ person, agents, scanning, onRescan }: {
         <View style={styles.footerRow}>
           <Text style={styles.muted}>
             {person.lastScannedAt
-              ? "Checked " + formatDistanceToNow(new Date(person.lastScannedAt), { addSuffix: true })
-              : "Not checked yet"}
+              ? "Last searched " + formatDistanceToNow(new Date(person.lastScannedAt), { addSuffix: true })
+              : "Not searched yet"}
           </Text>
           <Pressable
             disabled={scanning}
@@ -329,7 +329,7 @@ function PersonPanel({ person, agents, scanning, onRescan }: {
             style={({ pressed }) => [styles.outlineBtn, (pressed || scanning) && styles.pressed]}
           >
             {scanning ? <ActivityIndicator size="small" color={Colors.accent} /> : <RefreshCw size={14} color={Colors.textPrimary} />}
-            <Text style={styles.outlineBtnText}>{person.lastScannedAt ? "Check again" : "Check now"}</Text>
+            <Text style={styles.outlineBtnText}>{person.lastScannedAt ? "Find more accounts" : "Find accounts"}</Text>
           </Pressable>
         </View>
         {person.scanErrors.length > 0 ? (
@@ -496,7 +496,7 @@ export default function FollowingScreen() {
       if (result.failed) {
         showToast(result.failed + " of " + result.total + " couldn't be checked: " + (result.firstError ?? ""), "error");
       } else {
-        showToast(result.total === 1 ? "Checked for other platforms" : "Checked " + result.total + " sources", "success");
+        showToast(result.total === 1 ? "Searched other platforms" : "Searched other platforms for " + result.total + " sources", "success");
       }
     },
     [scan, showToast],
@@ -527,20 +527,20 @@ export default function FollowingScreen() {
           <Pressable onPress={() => router.back()} hitSlop={8} style={styles.backBtn} accessibilityLabel="Back">
             <ArrowLeft size={20} color={Colors.textSecondary} />
           </Pressable>
-          <Text style={styles.heading}>Following</Text>
+          <Text style={styles.heading}>People</Text>
           {isScanning || (!loading && toScan.length > 0) ? (
             <Pressable
               disabled={isScanning}
               onPress={() => void runScan(toScan)}
               style={({ pressed }) => [styles.scanBtn, (pressed || isScanning) && styles.pressed]}
-              accessibilityLabel={isScanning ? "Checking sources" : "Check " + toScan.length + " sources"}
+              accessibilityLabel={isScanning ? "Searching" : "Find more accounts for " + toScan.length + " sources"}
             >
               {isScanning ? <ActivityIndicator size="small" color={Colors.white} /> : <ScanSearch size={15} color={Colors.white} />}
-              <Text style={styles.scanText}>{isScanning ? "Checking" : "Check " + toScan.length}</Text>
+              <Text style={styles.scanText}>{isScanning ? "Searching" : "Find more (" + toScan.length + ")"}</Text>
             </Pressable>
           ) : null}
         </View>
-        <Text style={[styles.muted, styles.subtitle]}>Everyone you follow across your agents, and where else they are.</Text>
+        <Text style={[styles.muted, styles.subtitle]}>Everyone you follow across your collections, and where else they are.</Text>
 
         <View style={styles.controlsRow}>
           <View style={styles.segment}>
@@ -580,7 +580,7 @@ export default function FollowingScreen() {
             style={styles.agentFilter}
             contentContainerStyle={styles.agentChips}
           >
-            {[{ id: "all", name: "All agents" }, ...agents].map((a) => {
+            {[{ id: "all", name: "All collections" }, ...agents].map((a) => {
               const active = a.id === agentFilter;
               return (
                 <Pressable
@@ -603,7 +603,7 @@ export default function FollowingScreen() {
               <View style={[styles.progressFill, { width: ((progress.done / progress.total) * 100 + "%") as unknown as number }]} />
             </View>
             <Text style={styles.muted}>
-              {"Checked " + progress.done + " of " + progress.total + (progress.failed ? " · " + progress.failed + " couldn't be checked" : "")}
+              {"Searched " + progress.done + " of " + progress.total + (progress.failed ? " · " + progress.failed + " couldn't be searched" : "")}
             </Text>
           </View>
         ) : null}
@@ -651,7 +651,7 @@ export default function FollowingScreen() {
             <View style={styles.listCard}>
               {filtered.length === 0 ? (
                 <Text style={[styles.muted, styles.emptyList]}>
-                  {people.length === 0 ? "No people or companies in your agents yet." : "Nobody matches that search."}
+                  {people.length === 0 ? "No people or companies in your collections yet." : "Nobody matches that search."}
                 </Text>
               ) : (
                 filtered.map((p) => (

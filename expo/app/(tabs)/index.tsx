@@ -261,7 +261,7 @@ export default function DashboardScreen() {
   const triggerRun = useCallback(
     async (agentId: string) => {
       const agent = list.find((a) => a.id === agentId);
-      const agentName = agent?.name ?? "Agent";
+      const agentName = agent?.name ?? "Collection";
       void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
       setPendingId(agentId);
       try {
@@ -284,11 +284,11 @@ export default function DashboardScreen() {
     // Start every agent at the same time, like the web app. Running them one
     // after another made Run All take the sum of every agent's duration.
     const total = list.length;
-    const label = `All agents (${total})`;
+    const label = `All collections (${total})`;
     let done = 0;
     let newTotal = 0;
     const failedNames: string[] = [];
-    overlay.showBatchProgress(label, 0, total, "Running every agent at once…");
+    overlay.showBatchProgress(label, 0, total, "Running every collection at once…");
 
     await Promise.all(
       list.map(async (agent) => {
@@ -317,7 +317,7 @@ export default function DashboardScreen() {
 
   const handleDelete = useCallback(
     (agentId: string, agentName: string) => {
-      Alert.alert("Delete Agent", `Delete "${agentName}"? This cannot be undone.`, [
+      Alert.alert("Delete Collection", `Delete "${agentName}"? This cannot be undone.`, [
         { text: "Cancel", style: "cancel" },
         {
           text: "Delete",
@@ -325,7 +325,7 @@ export default function DashboardScreen() {
           onPress: async () => {
             try {
               await deleteAgent.mutateAsync(agentId);
-              showToast("Agent deleted", "success");
+              showToast("Collection deleted", "success");
             } catch (e) {
               showToast(e instanceof Error ? e.message : "Delete failed", "error");
             }
@@ -394,7 +394,7 @@ export default function DashboardScreen() {
             style={({ pressed }) => [styles.newAgentBtn, pressed && styles.pressed]}
             onPress={() => router.push("/agent-form")}
           >
-            <Text style={styles.newAgentText}>+ New Agent</Text>
+            <Text style={styles.newAgentText}>+ New Collection</Text>
           </Pressable>
           {list.length > 0 ? (
             <Pressable
@@ -431,7 +431,7 @@ export default function DashboardScreen() {
           <View style={[styles.grid, isWide && styles.gridWide]}>
             <StatCard
               icon={<Bot size={20} color={statIconBlue} strokeWidth={1.75} />}
-              label="Active Agents"
+              label="Active Collections"
               value={list.length}
               isWide={isWide}
             />
@@ -456,31 +456,31 @@ export default function DashboardScreen() {
             />
           </View>
 
-          {/* ── Following ──────────────────────────────────────── */}
+          {/* ── People ─────────────────────────────────────────── */}
           <Pressable
             style={({ pressed }) => [followingStyles.card, pressed && styles.pressed]}
             onPress={() => router.push("/following")}
             accessibilityRole="button"
-            accessibilityLabel="Following: everyone you follow, and where else they are"
+            accessibilityLabel="People: everyone you follow, and where else they are"
           >
             <View style={followingStyles.iconBox}>
               <Users size={18} color={statIconBlue} strokeWidth={1.75} />
             </View>
             <View style={followingStyles.body}>
-              <Text style={followingStyles.title}>Following</Text>
+              <Text style={followingStyles.title}>People</Text>
               <Text style={followingStyles.sub} numberOfLines={1}>Everyone you follow, and where else they are</Text>
             </View>
             <ChevronRight size={18} color={Colors.textMuted} />
           </Pressable>
 
-          {/* ── My Feeds ─────────────────────────────────────────── */}
+          {/* ── Feed ─────────────────────────────────────────────── */}
           <SectionHeader
-            title="My Feeds"
+            title="Feed"
             action={list.length > 0 ? "View All" : undefined}
             onAction={() => router.push("/(tabs)/feed")}
           />
           {list.length === 0 ? (
-            <EmptyCard text="No agents yet. Create one on the web app." />
+            <EmptyCard text="No collections yet. Create one on the web app." />
           ) : (
             list.map((agent, i) => {
               const accent = getAgentColor(i);
@@ -519,9 +519,9 @@ export default function DashboardScreen() {
 
           {/* ── My Agents ────────────────────────────────────────── */}
           <View style={styles.sectionSpacer} />
-          <SectionHeader title="My Agents" />
+          <SectionHeader title="My Collections" />
           {list.length === 0 ? (
-            <EmptyCard text="No agents yet. Create one on the web app." />
+            <EmptyCard text="No collections yet. Create one on the web app." />
           ) : (
             list.map((agent, i) => {
               const accent = getAgentColor(i);

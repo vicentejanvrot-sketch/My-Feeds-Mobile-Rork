@@ -10,7 +10,7 @@ interface QA {
 const FAQ_DATA: QA[] = [
   {
     q: "What does this app do?",
-    a: "My Feeds lets you create research agents that monitor YouTube channels and playlists, automatically surface new videos into a Research Feed, and track which videos you've watched.",
+    a: "My Feeds lets you create collections that follow YouTube channels and other accounts, automatically surface new videos and posts into your Feed, and track which videos you've watched.",
   },
   {
     q: "Do I need a YouTube account?",
@@ -26,7 +26,7 @@ const FAQ_DATA: QA[] = [
   },
   {
     q: "How do I delete my account or data?",
-    a: "You can delete your account at any time from Settings → Delete Account. This permanently removes your account and all your data — your agents, feeds, watch history, and saved settings. The deletion happens immediately within the app and cannot be undone. If you have any trouble, contact us at support@travelone.ca.",
+    a: "You can delete your account at any time from Settings → Delete Account. This permanently removes your account and all your data — your collections, feeds, watch history, and saved settings. The deletion happens immediately within the app and cannot be undone. If you have any trouble, contact us at support@travelone.ca.",
   },
   {
     q: "How do I get help?",

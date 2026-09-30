@@ -678,16 +678,16 @@ export default function AgentDetailScreen() {
     if (!agentId || !agent) return;
     Alert.alert(
       `Delete ${agent.name}?`,
-      `This deletes the agent, its ${sourceCount} ${sourceCount === 1 ? "source" : "sources"}, its email recipients, its run history and every video and post it found, including ones you saved. It can't be undone. Your accounts on YouTube, X and the other platforms aren't touched.`,
+      `This deletes the collection, its ${sourceCount} ${sourceCount === 1 ? "source" : "sources"}, its email recipients, its run history and every video and post it found, including ones you saved. It can't be undone. Your accounts on YouTube, X and the other platforms aren't touched.`,
       [
         { text: "Cancel", style: "cancel" },
         {
-          text: "Delete agent",
+          text: "Delete collection",
           style: "destructive",
           onPress: async () => {
             try {
               await deleteAgent.mutateAsync(agentId);
-              showToast("Agent deleted", "success");
+              showToast("Collection deleted", "success");
               router.replace("/(tabs)/agents");
             } catch (e) {
               showToast(e instanceof Error ? e.message : "Delete failed", "error");
@@ -752,7 +752,7 @@ export default function AgentDetailScreen() {
   // ── Delete channel ───────────────────────────────────────────────
   const handleDeleteChannel = useCallback(
     (id: string, name: string) => {
-      Alert.alert("Remove Channel", `Remove "${name}" from this agent?`, [
+      Alert.alert("Remove Channel", `Remove "${name}" from this collection?`, [
         { text: "Cancel", style: "cancel" },
         {
           text: "Remove",
@@ -786,7 +786,7 @@ export default function AgentDetailScreen() {
   // ── Cancel run ───────────────────────────────────────────────────
   const handleCancelRun = useCallback(
     (runId: string) => {
-      Alert.alert("Cancel Run", "Stop this running agent?", [
+      Alert.alert("Cancel Run", "Stop this running collection?", [
         { text: "No", style: "cancel" },
         {
           text: "Cancel Run",
@@ -833,7 +833,7 @@ export default function AgentDetailScreen() {
   if (!agent) {
     return (
       <View style={[styles.root, styles.loadingBox, { paddingTop: insets.top }]}>
-        <Text style={styles.errorText}>Agent not found</Text>
+        <Text style={styles.errorText}>Collection not found</Text>
         <Pressable onPress={goBack} style={styles.backBtnInline}>
           <Text style={styles.backBtnText}>Go back</Text>
         </Pressable>
@@ -865,7 +865,7 @@ export default function AgentDetailScreen() {
           hitSlop={8}
         >
           <ArrowLeft size={20} color={Colors.textSecondary} />
-          <Text style={styles.backLabel}>Agents</Text>
+          <Text style={styles.backLabel}>Collections</Text>
         </Pressable>
 
         {/* ── HEADER ── */}
@@ -915,7 +915,7 @@ export default function AgentDetailScreen() {
                 onPress={triggerDelete}
                 disabled={deleteAgent.isPending}
                 accessibilityRole="button"
-                accessibilityLabel="Delete agent"
+                accessibilityLabel="Delete collection"
               >
                 <Trash2 size={15} color={Colors.destructive} />
               </Pressable>

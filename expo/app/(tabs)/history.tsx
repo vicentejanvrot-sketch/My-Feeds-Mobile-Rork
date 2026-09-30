@@ -161,8 +161,8 @@ export default function HistoryScreen() {
           <Text style={styles.heading}>Run History</Text>
           <Text style={styles.subheading}>
             {runData.length > 0
-              ? `${runData.length} run${runData.length === 1 ? "" : "s"} across all agents`
-              : "Timeline of agent activity"}
+              ? `${runData.length} run${runData.length === 1 ? "" : "s"} across all collections`
+              : "Timeline of collection activity"}
           </Text>
         </View>
 
@@ -213,7 +213,7 @@ export default function HistoryScreen() {
               <History size={40} color={Colors.textMuted} />
               <Text style={styles.emptyTitle}>No runs yet</Text>
               <Text style={styles.emptyBody}>
-                When you run an agent, its results will appear here.
+                When you run a collection, its results will appear here.
               </Text>
             </View>
           }
@@ -253,7 +253,7 @@ export default function HistoryScreen() {
                     style={styles.agentPressable}
                   >
                     <Text style={styles.agentName} numberOfLines={1}>
-                      {agent?.name ?? "Unknown Agent"}
+                      {agent?.name ?? "Unknown Collection"}
                     </Text>
                   </Pressable>
 

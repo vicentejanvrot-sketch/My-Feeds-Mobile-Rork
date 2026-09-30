@@ -223,7 +223,7 @@ export default function WatchTimeStats() {
             <View style={styles.card}>
               <View style={styles.chartTitleRow}>
                 <PieChart size={16} color={Colors.accent} />
-                <Text style={styles.cardTitle}>By Agent</Text>
+                <Text style={styles.cardTitle}>By Collection</Text>
               </View>
               <AgentDonut agents={data.byAgent} colorMap={agentColorMap} />
             </View>

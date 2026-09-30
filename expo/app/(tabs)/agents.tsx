@@ -118,7 +118,7 @@ export default function AgentsScreen() {
   const triggerRun = useCallback(
     async (agentId: string) => {
       const agent = list.find((a) => a.id === agentId);
-      const agentName = agent?.name ?? "Agent";
+      const agentName = agent?.name ?? "Collection";
       void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
       setPendingId(agentId);
       try {
@@ -164,7 +164,7 @@ export default function AgentsScreen() {
     >
       <View style={styles.header}>
         <View>
-          <Text style={styles.heading}>Agents</Text>
+          <Text style={styles.heading}>Collections</Text>
           <Text style={styles.subheading}>{list.length} configured</Text>
         </View>
         {list.length > 0 ? (
@@ -191,9 +191,9 @@ export default function AgentsScreen() {
         </View>
       ) : list.length === 0 ? (
         <View style={styles.emptyCard}>
-          <Text style={styles.emptyTitle}>No agents yet</Text>
+          <Text style={styles.emptyTitle}>No collections yet</Text>
           <Text style={styles.emptyText}>
-            Create an agent on the web app and it will appear here automatically.
+            Create a collection on the web app and it will appear here automatically.
           </Text>
         </View>
       ) : (

@@ -186,7 +186,7 @@ export default function AgentFormScreen() {
   const handleSave = useCallback(async () => {
     const trimmedName = name.trim();
     if (!trimmedName) {
-      showToast("Agent name is required", "error");
+      showToast("Collection name is required", "error");
       return;
     }
     if (trimmedName.length > 100) {
@@ -242,7 +242,7 @@ export default function AgentFormScreen() {
           }
         }
 
-        showToast("Agent updated", "success");
+        showToast("Collection updated", "success");
       } else {
         savedAgent = await createAgent.mutateAsync(payload);
 
@@ -257,7 +257,7 @@ export default function AgentFormScreen() {
           await supabase.from("agent_recipients").insert(rows);
         }
 
-        showToast("Agent created", "success");
+        showToast("Collection created", "success");
       }
 
       // navigate to agent detail
@@ -320,7 +320,7 @@ export default function AgentFormScreen() {
   if (isEdit && !agent) {
     return (
       <View style={[styles.root, styles.centered]}>
-        <Text style={styles.errorText}>Agent not found</Text>
+        <Text style={styles.errorText}>Collection not found</Text>
         <Pressable onPress={handleCancel} style={styles.backBtnInline}>
           <Text style={styles.backBtnText}>Go back</Text>
         </Pressable>
@@ -349,14 +349,14 @@ export default function AgentFormScreen() {
             <ArrowLeft size={20} color={Colors.textSecondary} />
           </Pressable>
           <Text style={styles.heading}>
-            {isEdit ? "Edit Agent" : "New Agent"}
+            {isEdit ? "Edit Collection" : "New Collection"}
           </Text>
           <View style={{ width: 36 }} />
         </View>
 
         {/* ── Basic Information ────────────────────────────────────── */}
         <FormSection title="Basic Information">
-          <FormLabel required>Agent Name</FormLabel>
+          <FormLabel required>Collection Name</FormLabel>
           <TextInput
             style={styles.input}
             placeholder="e.g., Crypto, AI, Power Apps"
@@ -374,7 +374,7 @@ export default function AgentFormScreen() {
           <FormLabel>Description</FormLabel>
           <TextInput
             style={[styles.input, styles.textarea]}
-            placeholder="What topics does this agent cover?"
+            placeholder="What topics does this collection cover?"
             placeholderTextColor={Colors.textMuted}
             value={description}
             onChangeText={setDescription}
@@ -389,7 +389,7 @@ export default function AgentFormScreen() {
         </FormSection>
 
         {/* ── Schedule ─────────────────────────────────────────────── */}
-        <FormSection title='Schedule — "When should this agent run?"'>
+        <FormSection title='Schedule — "When should this collection run?"'>
           <View style={styles.row}>
             <View style={styles.halfField}>
               <FormLabel>Run Time</FormLabel>
@@ -511,7 +511,7 @@ export default function AgentFormScreen() {
               <ActivityIndicator size="small" color={Colors.white} />
             ) : (
               <Text style={styles.submitText}>
-                {isEdit ? "Save Changes" : "Create Agent"}
+                {isEdit ? "Save Changes" : "Create Collection"}
               </Text>
             )}
           </Pressable>

@@ -52,7 +52,7 @@ interface AddedSource {
   name: string;
 }
 
-const STEP_LABELS = ["Your agent", "Sources", "Read & watch"];
+const STEP_LABELS = ["Your collection", "Sources", "Read & watch"];
 const LAST_STEP = 4;
 
 function deviceTimezone(): string {
@@ -158,7 +158,7 @@ export function OnboardingWizard({ visible, onClose, hidden, onHiddenChange }: O
       void queryClient.invalidateQueries({ queryKey: qk.agents });
       goTo(2);
     } catch (e) {
-      setError("Couldn't save the agent: " + (e instanceof Error ? e.message : "please try again."));
+      setError("Couldn't save the collection: " + (e instanceof Error ? e.message : "please try again."));
     } finally {
       setSaving(false);
     }
@@ -224,7 +224,7 @@ export function OnboardingWizard({ visible, onClose, hidden, onHiddenChange }: O
     const { data, error: readError } = await supabase.from("agents").select("id, name").eq("id", agentId).maybeSingle();
     setFinishing(false);
     if (readError || !data) {
-      setError("Something went wrong saving your agent. Check it on the Dashboard and try again.");
+      setError("Something went wrong saving your collection. Check it on the Dashboard and try again.");
       return;
     }
     setSavedName(data.name as string);
@@ -277,7 +277,7 @@ export function OnboardingWizard({ visible, onClose, hidden, onHiddenChange }: O
     (step === 1 && (!trimmedName || trimmedName.length > 100 || saving)) ||
     (step === 2 && sources.length === 0);
   const hint =
-    step === 1 && !trimmedName ? "Give your agent a name." :
+    step === 1 && !trimmedName ? "Give your collection a name." :
     step === 2 && sources.length === 0 ? "Add at least one source, or skip for now." : "";
   const showFooter = step >= 1 && step < LAST_STEP;
 
@@ -363,7 +363,7 @@ export function OnboardingWizard({ visible, onClose, hidden, onHiddenChange }: O
                 </Pressable>
               </View>
               <Text style={styles.muted}>
-                Get started builds a new agent in three quick steps. See how it works only shows how to read and watch.
+                Get started builds a new collection in three quick steps. See how it works only shows how to read and watch.
               </Text>
               <View style={styles.checkSection}>
                 {dontShowBox}
@@ -377,14 +377,14 @@ export function OnboardingWizard({ visible, onClose, hidden, onHiddenChange }: O
           {step === 1 && (
             <View style={{ gap: 20 }}>
               <View style={{ gap: 8 }}>
-                <Text style={styles.title}>Build your first agent</Text>
+                <Text style={styles.title}>Build your first collection</Text>
                 <Text style={styles.lead}>
-                  An agent follows one topic and pulls the best posts from its sources into one stream. Its name is the
+                  A collection follows one topic and pulls the best posts from its sources into one stream. Its name is the
                   topic, so name it after what you want to follow.
                 </Text>
               </View>
               <View style={{ gap: 8 }}>
-                <Text style={styles.label}>Agent name and topic</Text>
+                <Text style={styles.label}>Collection name and topic</Text>
                 <TextInput
                   value={name}
                   onChangeText={setName}
@@ -395,13 +395,13 @@ export function OnboardingWizard({ visible, onClose, hidden, onHiddenChange }: O
                   returnKeyType="next"
                   onSubmitEditing={() => { if (!nextDisabled) next(); }}
                   style={styles.input}
-                  accessibilityLabel="Agent name and topic"
+                  accessibilityLabel="Collection name and topic"
                 />
               </View>
               <View style={styles.switchRow}>
                 <View style={{ flex: 1, gap: 2 }}>
                   <Text style={styles.label}>Email me a digest after each run</Text>
-                  <Text style={styles.muted}>Sent to your account email. You can change it on the agent later.</Text>
+                  <Text style={styles.muted}>Sent to your account email. You can change it on the collection later.</Text>
                 </View>
                 <Switch
                   value={emailMe}
@@ -428,10 +428,10 @@ export function OnboardingWizard({ visible, onClose, hidden, onHiddenChange }: O
           {step === 2 && (
             <View style={{ gap: 20 }}>
               <View style={{ gap: 8 }}>
-                <Text style={styles.title}>Add sources to {savedName || "your agent"}</Text>
+                <Text style={styles.title}>Add sources to {savedName || "your collection"}</Text>
                 <Text style={styles.lead}>
-                  Add the channels, accounts and communities this agent should watch. You can add more later from the
-                  agent page.
+                  Add the channels, accounts and communities this collection should watch. You can add more later from the
+                  collection page.
                 </Text>
               </View>
 
@@ -495,7 +495,7 @@ export function OnboardingWizard({ visible, onClose, hidden, onHiddenChange }: O
                 {sources.length === 0 ? (
                   <View style={styles.emptyBox}>
                     <Text style={[styles.muted, { textAlign: "center" }]}>
-                      Nothing yet. Add at least one source so the agent has something to watch.
+                      Nothing yet. Add at least one source so the collection has something to watch.
                     </Text>
                   </View>
                 ) : (
@@ -539,12 +539,12 @@ export function OnboardingWizard({ visible, onClose, hidden, onHiddenChange }: O
               <View style={{ gap: 8 }}>
                 <Text style={styles.heroTitle}>Your feed is ready</Text>
                 <Text style={styles.lead}>
-                  Run the agent now to fill your feed straight away, or let it run on its own every morning.
+                  Run the collection now to fill your feed straight away, or let it run on its own every morning.
                 </Text>
               </View>
               <View style={styles.recap}>
                 <View style={styles.recapRow}>
-                  <Text style={styles.muted}>Agent</Text>
+                  <Text style={styles.muted}>Collection</Text>
                   <Text style={styles.recapValue} numberOfLines={1}>{savedName}</Text>
                 </View>
                 <View style={[styles.recapRow, styles.recapDivider]}>

@@ -413,7 +413,7 @@ function RunningCard({ state }: { state: OverlayState }) {
         <View style={cardStyles.progressBlock}>
           <View style={cardStyles.progressHeader}>
             <Text style={cardStyles.progressLabel}>
-              {state.runId === null ? "Agents finished" : "Scanning channels"}
+              {state.runId === null ? "Collections finished" : "Scanning channels"}
             </Text>
             <Text style={cardStyles.progressCount}>
               {channelsScanned} / {channelsTotal}
