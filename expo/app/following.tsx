@@ -25,6 +25,7 @@ import {
   ChevronRight,
   ExternalLink,
   Link2,
+  Lock,
   RefreshCw,
   ScanSearch,
   Search,
@@ -262,8 +263,26 @@ function PersonPanel({ person, agents, scanning, onRescan }: {
           <View key={a.channel.id} style={[styles.boxRow, i > 0 && styles.boxRowBorder]}>
             <View style={styles.flex1}>
               <AccountLine platform={a.platform} label={a.label} url={a.url} />
+              {a.channel.is_private ? (
+                <View style={styles.privateNote}>
+                  <Lock size={11} color={Colors.textMuted} />
+                  <Text style={styles.privateNoteText}>Private account. Its posts aren&apos;t in your feed.</Text>
+                </View>
+              ) : null}
             </View>
-            <Text style={styles.agentTag} numberOfLines={1}>{agentName.get(a.channel.agent_id) ?? "Collection"}</Text>
+            {a.channel.is_private ? (
+              <Pressable
+                onPress={() => void openExternalLink(a.url)}
+                style={({ pressed }) => [styles.openBtn, pressed && styles.pressed]}
+                accessibilityRole="link"
+                accessibilityLabel={PLATFORM_META[a.platform].openLabel}
+              >
+                <ExternalLink size={13} color={Colors.textPrimary} />
+                <Text style={styles.openBtnText} numberOfLines={1}>{PLATFORM_META[a.platform].openLabel}</Text>
+              </Pressable>
+            ) : (
+              <Text style={styles.agentTag} numberOfLines={1}>{agentName.get(a.channel.agent_id) ?? "Collection"}</Text>
+            )}
             <Pressable
               onPress={() => confirmRemove(a)}
               disabled={deleteChannel.isPending}
@@ -907,6 +926,20 @@ const styles = StyleSheet.create({
   accountPlatform: { fontSize: 14, fontWeight: "700" as const, color: Colors.textPrimary },
   accountLabel: { flexShrink: 1, fontSize: 14, color: Colors.textSecondary },
   agentTag: { maxWidth: "40%", fontSize: 11, color: Colors.textMuted },
+  privateNote: { flexDirection: "row", alignItems: "center", gap: 4, marginTop: 2 },
+  privateNoteText: { flex: 1, fontSize: 11, color: Colors.textMuted },
+  openBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+    height: 32,
+    maxWidth: "45%",
+    paddingHorizontal: 10,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: Colors.border,
+  },
+  openBtnText: { color: Colors.textPrimary, fontSize: 12, fontWeight: "600" as const },
   removeBtn: { width: 36, height: 36, alignItems: "center", justifyContent: "center" },
   evidenceRow: { flexDirection: "row", alignItems: "flex-start", gap: 5 },
   evidence: { flex: 1, fontSize: 12, color: Colors.success, lineHeight: 16 },
