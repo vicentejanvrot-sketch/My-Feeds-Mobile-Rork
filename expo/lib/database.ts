@@ -49,6 +49,8 @@ export interface Channel {
   handle: string | null;
   min_engagement: number | null;
   is_enabled: boolean | null;
+  // A private account the user follows: shown on People, posts never fetched.
+  is_private?: boolean | null;
   user_status: ChannelStatus | null;
   last_scanned_at: string | null;
   created_at: string;
