@@ -13,14 +13,16 @@ extension SupabaseService {
         try await client.schema("public").from("identity_scans").select().execute().value
     }
 
-    /// Checks one followed source for accounts on other platforms through the
+    /// Checks one person for accounts on other platforms through the
     /// find-also-on edge function, which saves what it finds in identity_links
-    /// and records the check in identity_scans.
-    func findAlsoOn(channelId: String) async throws {
+    /// and records the check in identity_scans. channelIds are every source the
+    /// person is followed through, most important first: they're searched
+    /// together, so their name, Wikidata and Apple are looked up once.
+    func findAlsoOn(channelIds: [String]) async throws {
         do {
             try await client.functions.invoke(
                 "find-also-on",
-                options: FunctionInvokeOptions(body: ["channelId": channelId])
+                options: FunctionInvokeOptions(body: ["channelIds": channelIds])
             )
         } catch FunctionsError.httpError(_, let data) {
             // The function explains what went wrong in {"error": "..."}.

@@ -54,23 +54,31 @@ struct FollowingView: View {
         channels.filter { !AlsoOn.isPersonSource($0) }.count
     }
 
-    /// Sources never checked, or checked more than 30 days ago.
-    private var toScan: [String] {
+    /// One search per person, covering all of their sources, when any of them
+    /// was never checked or was checked more than 30 days ago.
+    private var toScan: [ScanJob] {
         let staleBefore = Date().addingTimeInterval(-Double(AlsoOn.rescanAfterDays) * 24 * 60 * 60)
         let scannedIds = Set(scans.map { $0.channelId })
         var scannedAt: [String: Date] = [:]
         for scan in scans {
             if let date = Format.parseDate(scan.scannedAt) { scannedAt[scan.channelId] = date }
         }
-        return people.flatMap { $0.sources }.filter { ch in
-            guard scannedIds.contains(ch.id) else { return true }
-            guard let date = scannedAt[ch.id] else { return false }
-            return date < staleBefore
-        }.map { $0.id }
+        return people.filter { person in
+            person.sources.contains { ch in
+                guard scannedIds.contains(ch.id) else { return true }
+                guard let date = scannedAt[ch.id] else { return false }
+                return date < staleBefore
+            }
+        }.map(Self.job)
+    }
+
+    private static func job(for person: AlsoOnPerson) -> ScanJob {
+        ScanJob(name: person.name, channelIds: person.sources.map { $0.id })
     }
 
     private var maxCost: String {
-        String(format: "%.2f", Double(toScan.count * AlsoOn.maxLookupsPerSource) * AlsoOn.aisaPricePerCall)
+        let lookups = toScan.reduce(0) { $0 + AlsoOn.maxLookups(sources: $1.channelIds.count) }
+        return String(format: "%.2f", Double(lookups) * AlsoOn.aisaPricePerCall)
     }
 
     private var selectedPerson: AlsoOnPerson? {
@@ -155,11 +163,12 @@ struct FollowingView: View {
                     agents: sortedAgents,
                     agentNames: agentNames,
                     isScanning: isScanning,
+                    scanStatus: progress?.status,
                     busyKeys: busyKeys,
                     onFollow: { account, agentId in follow(account, agentId: agentId) },
                     onDecide: { account, same in decide(account, same: same) },
                     onRemove: { account in remove(account) },
-                    onRescan: { Task { await runScan(person.sources.map { $0.id }) } },
+                    onRescan: { Task { await runScan([Self.job(for: person)]) } },
                     onClose: { selectedId = nil }
                 )
                 .presentationDetents([.medium, .large])
@@ -194,7 +203,7 @@ struct FollowingView: View {
             .foregroundStyle(Theme.accent)
         }
         .disabled(isScanning)
-        .accessibilityLabel(isScanning ? "Searching" : "Find more accounts for \(toScan.count) sources")
+        .accessibilityLabel(isScanning ? "Searching" : "Find more accounts for \(toScan.count) " + (toScan.count == 1 ? "person" : "people"))
     }
 
     /// Everyone / Gaps switch, styled like the web tabs: a muted track with
@@ -297,7 +306,7 @@ struct FollowingView: View {
         VStack(alignment: .leading, spacing: 6) {
             ProgressView(value: Double(progress.done), total: Double(max(progress.total, 1)))
                 .tint(Theme.accent)
-            Text("Searched \(progress.done) of \(progress.total)" + (progress.failed > 0 ? " · \(progress.failed) couldn't be searched" : ""))
+            Text(progress.status + (progress.failed > 0 ? " · \(progress.failed) couldn't be searched" : ""))
                 .font(.system(size: 12))
                 .foregroundStyle(Theme.textSecondary)
         }
@@ -309,7 +318,7 @@ struct FollowingView: View {
             Text("Find where the people you follow also post")
                 .font(.system(size: 15, weight: .bold))
                 .foregroundStyle(Theme.textPrimary)
-            Text("Checks each of your \(people.count) people and companies once: the links on their profile, their link-in-bio page and website, and handles like theirs on other platforms. It uses at most \(AlsoOn.maxLookupsPerSource) AIsa lookups per source, so up to about $" + maxCost + " for this first check.")
+            Text("Checks each of your \(people.count) people and companies once: the links on their profile, their link-in-bio page and website, and handles like theirs on other platforms. Each person is searched once, across all the places you follow them, using at most \(AlsoOn.maxLookupsPerPerson) to 30 AIsa lookups, so up to about $" + maxCost + " for this first check.")
                 .font(.system(size: 13))
                 .foregroundStyle(Theme.textSecondary)
                 .fixedSize(horizontal: false, vertical: true)
@@ -319,7 +328,7 @@ struct FollowingView: View {
                 HStack(spacing: 6) {
                     Image(systemName: "magnifyingglass")
                         .font(.system(size: 13, weight: .bold))
-                    Text("Check \(toScan.count) sources")
+                    Text("Check \(toScan.count) " + (toScan.count == 1 ? "person" : "people"))
                         .font(.system(size: 14, weight: .bold))
                 }
                 .foregroundStyle(.white)
@@ -539,47 +548,55 @@ struct FollowingView: View {
         people = AlsoOn.buildPeople(channels: channels, links: links, scans: scans)
     }
 
-    /// Checks sources two at a time and shows progress, like the web and Expo apps.
-    private func runScan(_ ids: [String]) async {
-        guard progress == nil, !ids.isEmpty else { return }
-        let total = ids.count
+    /// Searches people two at a time and shows who is being checked, like the
+    /// web and Expo apps. Each person is one request with all of their sources.
+    private func runScan(_ jobs: [ScanJob]) async {
+        let list = jobs.filter { !$0.channelIds.isEmpty }
+        guard progress == nil, !list.isEmpty else { return }
+        let total = list.count
         var done = 0
         var failed = 0
         var firstError: String?
-        progress = ScanProgress(done: 0, total: total, failed: 0)
+        var current: [String] = []
+        progress = ScanProgress(done: 0, total: total, failed: 0, current: [])
 
-        await withTaskGroup(of: String?.self) { group in
-            var pending = ids.makeIterator()
+        await withTaskGroup(of: (String, String?).self) { group in
+            var pending = list.makeIterator()
             for _ in 0..<2 {
-                guard let id = pending.next() else { break }
-                group.addTask { await Self.check(channelId: id) }
+                guard let job = pending.next() else { break }
+                current.append(job.name)
+                group.addTask { (job.name, await Self.check(channelIds: job.channelIds)) }
             }
-            while let result = await group.next() {
+            progress = ScanProgress(done: done, total: total, failed: failed, current: current)
+            while let finished = await group.next() {
+                let (name, result) = finished
                 if let result {
                     failed += 1
-                    if firstError == nil { firstError = result }
+                    if firstError == nil { firstError = name + ": " + result }
                 }
                 done += 1
-                progress = ScanProgress(done: done, total: total, failed: failed)
-                await reloadIdentity()
-                if let id = pending.next() {
-                    group.addTask { await Self.check(channelId: id) }
+                if let index = current.firstIndex(of: name) { current.remove(at: index) }
+                if let job = pending.next() {
+                    current.append(job.name)
+                    group.addTask { (job.name, await Self.check(channelIds: job.channelIds)) }
                 }
+                progress = ScanProgress(done: done, total: total, failed: failed, current: current)
+                await reloadIdentity()
             }
         }
 
         progress = nil
         if failed > 0 {
-            toasts.show("\(failed) of \(total) couldn't be checked: " + (firstError ?? ""), type: .error)
+            toasts.show("\(failed) of \(total) couldn't be checked. " + (firstError ?? ""), type: .error)
         } else {
-            toasts.show(total == 1 ? "Searched other platforms" : "Searched other platforms for \(total) sources")
+            toasts.show(total == 1 ? "Searched other platforms for \(list[0].name)" : "Searched other platforms for \(total) people")
         }
     }
 
     /// Returns nil when the check worked, or the reason it failed.
-    private static func check(channelId: String) async -> String? {
+    private static func check(channelIds: [String]) async -> String? {
         do {
-            try await SupabaseService.shared.findAlsoOn(channelId: channelId)
+            try await SupabaseService.shared.findAlsoOn(channelIds: channelIds)
             return nil
         } catch {
             return error.localizedDescription
@@ -667,10 +684,30 @@ private struct GapCheck: Identifiable {
     }
 }
 
+/// One search: a person and every source they're followed through.
+nonisolated private struct ScanJob: Sendable {
+    let name: String
+    let channelIds: [String]
+}
+
 private struct ScanProgress: Equatable {
     var done: Int
     var total: Int
     var failed: Int
+    /// Names of the people being searched right now.
+    var current: [String]
+
+    /// "Checking Taylor Swift…", or "Checking Taylor Swift and Madonna…" when
+    /// two run at once.
+    var status: String {
+        let now: String
+        switch current.count {
+        case 0: now = "Finishing…"
+        case 1: now = "Checking \(current[0])…"
+        default: now = "Checking " + current.dropLast().joined(separator: ", ") + " and " + (current.last ?? "") + "…"
+        }
+        return total > 1 ? now + " · \(done) of \(total) people done" : now
+    }
 }
 
 private enum ChipVariant {
@@ -975,6 +1012,8 @@ private struct PersonSheet: View {
     let agents: [Agent]
     let agentNames: [String: String]
     let isScanning: Bool
+    /// "Checking Taylor Swift…" while a search runs.
+    let scanStatus: String?
     let busyKeys: Set<String>
     let onFollow: (AlsoOnFoundAccount, String) -> Void
     let onDecide: (AlsoOnFoundAccount, Bool) -> Void
@@ -1256,6 +1295,11 @@ private struct PersonSheet: View {
                 }
                 .buttonStyle(.plain)
                 .disabled(isScanning)
+            }
+            if isScanning, let scanStatus {
+                Text(scanStatus)
+                    .font(.system(size: 12))
+                    .foregroundStyle(Theme.textSecondary)
             }
             if let problem = person.scanErrors.first {
                 Text("Last check had a problem: " + problem)
