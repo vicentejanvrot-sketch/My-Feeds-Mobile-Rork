@@ -37,6 +37,7 @@ import {
   ThumbsUp,
   MessageCircle,
   Copy,
+  FolderOpen,
 } from "lucide-react-native";
 import { Colors } from "@/constants/colors";
 import type { ItemStatus, ItemWithAnalysis, Channel, Agent } from "@/lib/database";
@@ -487,17 +488,33 @@ export default function FeedScreen() {
 
       {/* ── Filter dropdowns — vertical stack ───────────────────── */}
       <View style={styles.filtersWrapper}>
-        {/* Agent — full width */}
-        <FilterDropdownFull
-          icon={<Bot size={15} color={Colors.textSecondary} />}
-          label="Collection"
-          value={agentFilter}
-          options={[
-            { key: "all", label: "All Collections" },
-            ...agentList.map((a) => ({ key: a.id, label: a.name })),
-          ]}
-          onChange={handleAgentChange}
-        />
+        {/* Agent — full width, with a button to the collection's own screen
+            (to add sources or change it) once one is selected */}
+        <View style={styles.filterSideRow}>
+          <View style={styles.filterHalf}>
+            <FilterDropdownFull
+              icon={<Bot size={15} color={Colors.textSecondary} />}
+              label="Collection"
+              value={agentFilter}
+              options={[
+                { key: "all", label: "All Collections" },
+                ...agentList.map((a) => ({ key: a.id, label: a.name })),
+              ]}
+              onChange={handleAgentChange}
+            />
+          </View>
+          {agentFilter !== "all" && agentList.some((a) => a.id === agentFilter) ? (
+            <Pressable
+              style={({ pressed }) => [styles.dropdownFull, styles.openCollectionBtn, pressed && styles.pressed]}
+              onPress={() => router.push({ pathname: "/(tabs)/agent-detail", params: { agentId: agentFilter } })}
+              accessibilityRole="button"
+              accessibilityLabel="Open this collection"
+            >
+              <FolderOpen size={15} color={Colors.textSecondary} />
+              <Text style={styles.openCollectionText}>Open</Text>
+            </Pressable>
+          ) : null}
+        </View>
 
         {/* Channel — full width, with badge counts */}
         {visibleChannels.length > 0 ? (
@@ -1332,6 +1349,15 @@ const styles = StyleSheet.create({
   },
   filterHalf: {
     flex: 1,
+  },
+  openCollectionBtn: {
+    justifyContent: "center",
+    gap: 6,
+  },
+  openCollectionText: {
+    fontSize: 14,
+    fontWeight: "600" as const,
+    color: Colors.textSecondary,
   },
 
   // Full-width dropdown trigger
