@@ -34,7 +34,7 @@ struct MainTabView: View {
                 FeedView()
                     .withAppRoutes()
             }
-            .tabItem { Label("Feed", image: "TabFeedIcon") }
+            .tabItem { Label("Feeds", image: "TabFeedIcon") }
             .tag(AppTab.feed)
 
             NavigationStack {

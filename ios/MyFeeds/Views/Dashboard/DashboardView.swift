@@ -43,7 +43,7 @@ struct DashboardView: View {
                     statGrid
                     followingCard
 
-                    SectionHeader(title: "Feed", actionLabel: agents.isEmpty ? nil : "View All") {
+                    SectionHeader(title: "Feeds", actionLabel: agents.isEmpty ? nil : "View All") {
                         router.openFeed(agentId: nil, status: nil)
                     }
                     if sortedAgents.isEmpty {
