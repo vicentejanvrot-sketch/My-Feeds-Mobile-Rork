@@ -28,7 +28,7 @@ struct ReadWatchTourView: View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 8) {
                 // Spotify releases work like Apple Music's, so the tour leaves it out.
-                ForEach(SourcePlatform.addable.filter { $0 != .spotify }, id: \.self) { p in
+                ForEach(SourcePlatform.addable, id: \.self) { p in
                     let selected = platform == p
                     Button {
                         platform = p
@@ -320,8 +320,19 @@ private struct TourContent {
     static func content(for platform: SourcePlatform) -> TourContent {
         switch platform {
         case .spotify:
-            // Not in the tour (Spotify can't be added as a source).
-            return content(for: .youtubeMusic)
+            return TourContent(
+                author: "Nova Lane", handle: "New single", when: "1d", media: .video,
+                title: "Paper Lanterns",
+                text: "New single by Nova Lane · 1 track · Pop",
+                steps: [
+                    TourStep(title: "Listen here", body: "Tap it to open Spotify's player and hear a preview right inside My Feeds."),
+                    TourStep(title: "Heart to save", body: "The heart saves it in My Feeds. Save adds it to Watch later."),
+                    TourStep(title: "Play it in Spotify", body: "\"Open in Spotify\" plays the full release in the Spotify app, where you can like it or add it to a playlist."),
+                ],
+                saveActions: [TourAction(icon: "heart", label: "Like"), TourAction(icon: "bookmark", label: "Save")],
+                outActions: [TourAction(icon: "arrow.up.right.square", label: "Spotify")],
+                outNote: "Opens Spotify"
+            )
         case .youtube:
             return TourContent(
                 author: "Two Minute Markets", handle: "YouTube", when: "2h", media: .video,
