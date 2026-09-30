@@ -14,7 +14,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, Check, Play, Plus, Rss, Trash2, X as XIcon } from "lucide-react-native";
+import { ArrowLeft, Check, Lock, Play, Plus, Rss, Trash2, X as XIcon } from "lucide-react-native";
 import { Colors } from "@/constants/colors";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/lib/auth-provider";
@@ -50,6 +50,7 @@ interface AddedSource {
   id: string;
   platform: Platform;
   name: string;
+  isPrivate?: boolean;
 }
 
 const STEP_LABELS = ["Your collection", "Sources", "Read & watch"];
@@ -85,6 +86,8 @@ export function OnboardingWizard({ visible, onClose, hidden, onHiddenChange }: O
   // Set when a pasted link picked the platform for the user.
   const [autoPlatform, setAutoPlatform] = useState<Platform | null>(null);
   const [sourceValue, setSourceValue] = useState("");
+  // Set when Instagram says the account is private (or can't be loaded).
+  const [privateOffer, setPrivateOffer] = useState<string | null>(null);
   const [adding, setAdding] = useState(false);
   const [removingId, setRemovingId] = useState<string | null>(null);
   const [sources, setSources] = useState<AddedSource[]>([]);
@@ -168,10 +171,11 @@ export function OnboardingWizard({ visible, onClose, hidden, onHiddenChange }: O
 
   // Step 2: YouTube channels go straight into channels (run-agent resolves them
   // on the first run); every other platform is checked by add-source.
-  const addSource = async () => {
+  const addSource = async (asPrivate = false) => {
     const value = sourceValue.trim();
     if (!value || !agentId) return;
     setError(null);
+    setPrivateOffer(null);
     const detected = detectPlatform(value);
     if (detected && detected !== platform) {
       setError(`That's a ${PLATFORM_META[detected].label} link. Select ${PLATFORM_META[detected].label} or paste a ${PLATFORM_META[platform].label} link.`);
@@ -193,12 +197,19 @@ export function OnboardingWizard({ visible, onClose, hidden, onHiddenChange }: O
         setSources((prev) => [...prev, { id: data.id as string, platform: "youtube", name: value }]);
       } else {
         const { data, error: fnError } = await supabase.functions.invoke("add-source", {
-          body: { agentId, platform, value, priority: 3 },
+          body: { agentId, platform, value, priority: 3, ...(asPrivate ? { privateAccount: true } : {}) },
         });
         if (fnError) throw new Error(await extractEdgeFunctionErrorMessage(fnError));
-        if (!data?.channel) throw new Error(data?.error ?? "Couldn't add that source.");
-        const channel = data.channel as { id: string; channel_name: string };
-        setSources((prev) => [...prev, { id: channel.id, platform, name: channel.channel_name }]);
+        if (!data?.channel) {
+          const message: string = data?.error ?? "Couldn't add that source.";
+          if (!asPrivate && (data?.code === "instagram_private" || data?.code === "instagram_unavailable")) {
+            setPrivateOffer(message);
+            return;
+          }
+          throw new Error(message);
+        }
+        const channel = data.channel as { id: string; channel_name: string; is_private?: boolean };
+        setSources((prev) => [...prev, { id: channel.id, platform, name: channel.channel_name, isPrivate: channel.is_private === true }]);
       }
       setSourceValue("");
       setAutoPlatform(null);
@@ -474,6 +485,7 @@ export function OnboardingWizard({ visible, onClose, hidden, onHiddenChange }: O
                     value={sourceValue}
                     onChangeText={(value) => {
                       setSourceValue(value);
+                      setPrivateOffer(null);
                       const detected = detectPlatform(value);
                       if (detected && detected !== platform) {
                         setPlatform(detected);
@@ -512,6 +524,31 @@ export function OnboardingWizard({ visible, onClose, hidden, onHiddenChange }: O
                 ) : (
                   <Text style={styles.muted}>{meta.addHelp}</Text>
                 )}
+                {privateOffer ? (
+                  <View style={styles.privateBox}>
+                    <View style={styles.privateRow}>
+                      <Lock size={14} color={Colors.textSecondary} style={{ marginTop: 2 }} />
+                      <Text style={styles.privateText}>{privateOffer}</Text>
+                    </View>
+                    <Text style={styles.muted}>
+                      A private account shows up on People with a button to open it in Instagram. Its posts won&apos;t appear in your feed.
+                    </Text>
+                    <Pressable
+                      onPress={() => void addSource(true)}
+                      disabled={adding}
+                      style={({ pressed }) => [styles.privateBtn, pressed && styles.pressed]}
+                    >
+                      {adding ? (
+                        <ActivityIndicator size="small" color={Colors.textPrimary} />
+                      ) : (
+                        <>
+                          <Lock size={14} color={Colors.textPrimary} />
+                          <Text style={styles.privateBtnText}>Add as private account</Text>
+                        </>
+                      )}
+                    </Pressable>
+                  </View>
+                ) : null}
               </View>
 
               <View style={{ gap: 8 }}>
@@ -527,6 +564,12 @@ export function OnboardingWizard({ visible, onClose, hidden, onHiddenChange }: O
                     <View key={s.id} style={styles.sourceRow}>
                       <PlatformBadge platform={s.platform} />
                       <Text style={styles.sourceName} numberOfLines={1}>{s.name}</Text>
+                      {s.isPrivate ? (
+                        <View style={styles.privateRow}>
+                          <Lock size={12} color={Colors.textSecondary} />
+                          <Text style={styles.muted}>Private</Text>
+                        </View>
+                      ) : null}
                       <Pressable
                         onPress={() => void removeSource(s)}
                         disabled={removingId === s.id}
@@ -733,6 +776,30 @@ const styles = StyleSheet.create({
     minHeight: 48,
   },
   sourceName: { flex: 1, color: Colors.textPrimary, fontSize: 14 },
+  privateBox: {
+    marginTop: 4,
+    padding: 12,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    backgroundColor: Colors.input,
+    gap: 6,
+  },
+  privateRow: { flexDirection: "row", alignItems: "flex-start", gap: 6 },
+  privateText: { flex: 1, color: Colors.textPrimary, fontSize: 13, lineHeight: 18 },
+  privateBtn: {
+    marginTop: 4,
+    alignSelf: "flex-start",
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: Colors.border,
+  },
+  privateBtnText: { color: Colors.textPrimary, fontSize: 13, fontWeight: "600" },
   iconBtn: { width: 44, height: 44, alignItems: "center", justifyContent: "center" },
   doneIcon: {
     width: 56,
