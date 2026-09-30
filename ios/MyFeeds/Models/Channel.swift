@@ -24,6 +24,11 @@ nonisolated struct Channel: Codable, Identifiable, Hashable, Sendable {
     var handle: String?
     /// Minimum likes (X) or upvotes (Reddit) for a post to reach the feed.
     var minEngagement: Int?
+    /// A private account the user follows (a friend's private Instagram): shown
+    /// on People with a button to open it, its posts are never fetched.
+    var isPrivate: Bool?
+
+    var isPrivateAccount: Bool { isPrivate == true }
 
     var sourcePlatform: SourcePlatform { SourcePlatform(raw: platform) }
 

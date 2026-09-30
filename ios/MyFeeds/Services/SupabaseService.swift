@@ -316,8 +316,9 @@ final class SupabaseService {
     /// Adds an X account or subreddit through the add-source edge function,
     /// which checks it exists and fills in its name and picture (same flow as
     /// the web and Expo apps). YouTube channels still use `addChannel`.
+    /// `privateAccount` keeps a private Instagram account as a private source.
     @discardableResult
-    func addSource(agentId: String, platform: SourcePlatform, value: String, priority: Int) async throws -> Channel {
+    func addSource(agentId: String, platform: SourcePlatform, value: String, priority: Int, privateAccount: Bool = false) async throws -> Channel {
         let decoder = JSONDecoder()
         decoder.keyDecodingStrategy = .convertFromSnakeCase
         let fallback = "Couldn't add this \(platform.sourceNoun.lowercased())."
@@ -326,7 +327,13 @@ final class SupabaseService {
             response = try await client.functions.invoke(
                 "add-source",
                 options: FunctionInvokeOptions(
-                    body: AddSourcePayload(agentId: agentId, platform: platform.rawValue, value: value, priority: priority)
+                    body: AddSourcePayload(
+                        agentId: agentId,
+                        platform: platform.rawValue,
+                        value: value,
+                        priority: priority,
+                        privateAccount: privateAccount ? true : nil
+                    )
                 ),
                 decoder: decoder
             )
@@ -336,7 +343,7 @@ final class SupabaseService {
             throw SourceError(message: message ?? fallback)
         }
         guard let channel = response.channel else {
-            throw SourceError(message: response.error ?? fallback)
+            throw SourceError(message: response.error ?? fallback, code: response.code)
         }
         return channel
     }
@@ -457,17 +464,26 @@ nonisolated struct AddSourcePayload: Codable, Sendable {
     var platform: String
     var value: String
     var priority: Int
+    /// Left out of the body when nil.
+    var privateAccount: Bool?
 }
 
 nonisolated struct AddSourceResponse: Codable, Sendable {
     var channel: Channel?
     var error: String?
+    /// "instagram_private" or "instagram_unavailable" when the account can be
+    /// added as a private account instead.
+    var code: String?
 }
 
 /// Readable error from add-source, shown to the user as is.
 nonisolated struct SourceError: LocalizedError, Sendable {
     let message: String
+    var code: String? = nil
     var errorDescription: String? { message }
+
+    /// Add Source can offer "Add as private account" for this error.
+    var canAddAsPrivate: Bool { code == "instagram_private" || code == "instagram_unavailable" }
 }
 
 /// A resume position, in seconds. The same rules apply on web, iOS and Android:
