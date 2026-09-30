@@ -743,13 +743,16 @@ export default function FollowingScreen() {
         <View style={styles.sheetBackdrop}>
           <Pressable style={styles.flex1} onPress={() => setSelectedId(null)} accessibilityLabel="Close" />
           <View style={[styles.sheet, isWide && styles.sheetWide, { paddingBottom: insets.bottom + 16 }]}>
+            {/* The content stops above the home indicator with the same gap as
+                the sides and is clipped with rounded corners there, so the
+                phone's rounded corners never cut through buttons or text. */}
             <View style={styles.sheetTop}>
               <View style={styles.grabber} />
               <Pressable onPress={() => setSelectedId(null)} hitSlop={10} style={styles.sheetClose} accessibilityLabel="Close">
                 <X size={20} color={Colors.textSecondary} />
               </Pressable>
             </View>
-            <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.sheetContent}>
+            <ScrollView style={styles.sheetScroll} showsVerticalScrollIndicator={false} contentContainerStyle={styles.sheetContent}>
               {selected ? (
                 <PersonPanel
                   person={selected}
@@ -1050,5 +1053,6 @@ const styles = StyleSheet.create({
   sheetTop: { alignItems: "center", paddingTop: 8, paddingBottom: 4 },
   grabber: { width: 40, height: 5, borderRadius: 3, backgroundColor: Colors.border },
   sheetClose: { position: "absolute", right: 14, top: 10, padding: 4 },
-  sheetContent: { paddingHorizontal: 18, paddingTop: 12 },
+  sheetScroll: { overflow: "hidden", borderBottomLeftRadius: 20, borderBottomRightRadius: 20 },
+  sheetContent: { paddingHorizontal: 18, paddingTop: 12, paddingBottom: 12 },
 });
