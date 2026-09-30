@@ -55,6 +55,8 @@ const X_BLUE = "#1D9BF0";
 const REDDIT_ORANGE = "#FF4500";
 const IG_RED = "#FF3040";
 const LINKEDIN_BLUE = "#378FE9";
+const TIKTOK_RED = "#FE2C55";
+const TIKTOK_YELLOW = "#FACE15";
 const GITHUB_STAR = "#E3B341";
 
 type PostMetrics = {
@@ -217,6 +219,27 @@ function PostVideo({ media, progressId, fill, autoPlay }: { media: PostEmbed; pr
   );
 }
 
+// TikTok videos play in TikTok's own embed player: TikTok's CDN links expire
+// and refuse to play outside TikTok, while the player always works.
+function TikTokPlayer({ videoId }: { videoId: string }) {
+  const { width } = useWindowDimensions();
+  const playerWidth = Math.min(width - 32, 380);
+  return (
+    <View style={styles.tiktokWrap}>
+      <WebView
+        source={{ uri: `https://www.tiktok.com/player/v1/${encodeURIComponent(videoId)}?music_info=1&description=0&rel=0&native_context_menu=0` }}
+        style={{ width: playerWidth, height: (playerWidth * 16) / 9, backgroundColor: "#000000" }}
+        allowsInlineMediaPlayback
+        allowsFullscreenVideo
+        mediaPlaybackRequiresUserAction={false}
+        javaScriptEnabled
+        scrollEnabled={false}
+        accessibilityLabel="TikTok video"
+      />
+    </View>
+  );
+}
+
 function formatPostDate(iso: string): string {
   const d = new Date(iso);
   const time = d.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
@@ -280,6 +303,7 @@ export default function PostReaderScreen() {
 
   const platform = platformOf(item.platform);
   const xPostId = item.video_id?.startsWith("x:") ? item.video_id.slice(2) : null;
+  const tiktokVideoId = item.video_id?.startsWith("tiktok:") ? item.video_id.slice(7) : null;
   const liked = status === "liked";
   const bookmarked = status === "watch_later";
   const read = status === "watched";
@@ -329,7 +353,9 @@ export default function PostReaderScreen() {
           <Text style={platform === "reddit" ? styles.body : styles.bodyLarge}>{item.body}</Text>
         ) : null}
 
-        {slides.length > 1 ? (
+        {platform === "tiktok" && tiktokVideoId && photos.length === 0 ? (
+          <TikTokPlayer videoId={tiktokVideoId} />
+        ) : slides.length > 1 ? (
           <MediaCarousel slides={slides} progressId={item.video_id} />
         ) : video ? (
           <ExpandableMedia media={video} progressId={item.video_id} />
@@ -389,6 +415,33 @@ export default function PostReaderScreen() {
               onPress={() => changeStatus(bookmarked ? "not_watched" : "watch_later")}
               icon={<Bookmark size={22} color={Colors.textPrimary} fill={bookmarked ? Colors.textPrimary : "transparent"} />}
             />
+          </View>
+        ) : platform === "tiktok" ? (
+          // TikTok: like, comment, save and share.
+          <View style={styles.xBar}>
+            <View style={{ flexDirection: "row", alignItems: "center" }}>
+              <BarButton
+                label={liked ? "Remove from Saved" : "Like (save in My Feeds)"}
+                selected={liked}
+                onPress={() => changeStatus(liked ? "watched" : "liked")}
+                icon={<Heart size={22} color={liked ? TIKTOK_RED : Colors.textPrimary} fill={liked ? TIKTOK_RED : "transparent"} />}
+                value={formatCount((metrics.likes ?? 0) + (liked ? 1 : 0))}
+              />
+              <BarButton
+                label="Comment on TikTok"
+                onPress={() => { if (item.url) openExternalLink(item.url); }}
+                icon={<MessageCircle size={22} color={Colors.textPrimary} style={{ transform: [{ scaleX: -1 }] }} />}
+                value={formatCount(metrics.comments)}
+              />
+              <BarButton
+                label={bookmarked ? "Remove from Read Later" : "Save (Read Later)"}
+                selected={bookmarked}
+                onPress={() => changeStatus(bookmarked ? "not_watched" : "watch_later")}
+                icon={<Bookmark size={22} color={bookmarked ? TIKTOK_YELLOW : Colors.textPrimary} fill={bookmarked ? TIKTOK_YELLOW : "transparent"} />}
+                value={formatCount((metrics.bookmarks ?? 0) + (bookmarked ? 1 : 0))}
+              />
+            </View>
+            <BarButton label="Share" onPress={share} icon={<Send size={21} color={Colors.textPrimary} />} value={formatCount(metrics.reposts)} />
           </View>
         ) : platform === "linkedin" ? (
           // LinkedIn: Like, Comment, Repost, Send, plus Save.
@@ -876,6 +929,7 @@ const styles = StyleSheet.create({
   carouselCounterText: { color: "#fff", fontSize: 12, fontWeight: "600" },
   dateLineStrong: { color: Colors.textPrimary, fontWeight: "700" },
   video: { width: "100%", aspectRatio: 16 / 9, borderRadius: 12, overflow: "hidden", backgroundColor: "#000" },
+  tiktokWrap: { alignItems: "center", borderRadius: 12, overflow: "hidden", backgroundColor: "#000" },
   videoFill: { width: "100%", height: "100%", backgroundColor: "#000" },
   expandBtn: {
     position: "absolute",
