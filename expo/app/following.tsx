@@ -39,7 +39,7 @@ import { useToast } from "@/components/Toast";
 import { useAgents, useChannelsAll, useDeleteChannel } from "@/lib/hooks";
 import { openExternalLink } from "@/lib/open-link";
 import { useYouTubeConnection } from "@/lib/useYouTubeConnection";
-import { PLATFORM_META, type Platform } from "@/lib/platforms";
+import { PLATFORM_META, isFollowablePlatform, type Platform } from "@/lib/platforms";
 import {
   buildPeople,
   initials,
@@ -121,6 +121,24 @@ function AccountLine({ platform, label, url }: { platform: Platform; label: stri
 }
 
 function FollowButton({ account, agentId }: { account: FoundAccount; agentId: string | undefined }) {
+  // Spotify artist pages and shows can't be followed as sources: open them instead.
+  if (!isFollowablePlatform(account.platform)) {
+    return (
+      <Pressable
+        onPress={() => void openExternalLink(account.url)}
+        style={({ pressed }) => [styles.openBtn, pressed && styles.pressed]}
+        accessibilityRole="link"
+        accessibilityLabel={PLATFORM_META[account.platform].openLabel}
+      >
+        <ExternalLink size={13} color={Colors.textPrimary} />
+        <Text style={styles.openBtnText} numberOfLines={1}>{PLATFORM_META[account.platform].openLabel}</Text>
+      </Pressable>
+    );
+  }
+  return <FollowSourceButton account={account} agentId={agentId} />;
+}
+
+function FollowSourceButton({ account, agentId }: { account: FoundAccount; agentId: string | undefined }) {
   const follow = useFollowAccount();
   const showToast = useToast();
   const youtube = useYouTubeConnection();

@@ -4,7 +4,10 @@
 
 export type Platform =
   | "youtube" | "x" | "reddit" | "instagram" | "linkedin" | "github" | "tiktok" | "facebook"
-  | "apple_music" | "apple_podcasts" | "apple_books" | "youtube_music";
+  | "apple_music" | "apple_podcasts" | "apple_books" | "youtube_music" | "spotify";
+
+// Platforms a source can be added from. Spotify is left out: its artist pages
+// and shows show on People to open in Spotify, but can't be followed as sources.
 
 export const PLATFORMS: Platform[] = [
   "youtube", "x", "reddit", "instagram", "linkedin", "github", "tiktok", "facebook", "apple_music", "apple_podcasts", "apple_books", "youtube_music",
@@ -140,6 +143,16 @@ export const PLATFORM_META: Record<Platform, {
     openLabel: "Open in Apple Books",
     beta: true,
   },
+  spotify: {
+    label: "Spotify",
+    short: "SP",
+    fg: "#1ED760",
+    bg: "#12301D",
+    sourceNoun: "Artist",
+    addPlaceholder: "",
+    addHelp: "",
+    openLabel: "Open in Spotify",
+  },
   youtube_music: {
     label: "YouTube Music",
     short: "YTM",
@@ -152,6 +165,11 @@ export const PLATFORM_META: Record<Platform, {
     beta: true,
   },
 };
+
+/** True for platforms a source can be added from (Spotify only opens). */
+export function isFollowablePlatform(platform: Platform): boolean {
+  return (PLATFORMS as string[]).includes(platform);
+}
 
 export function platformOf(value: string | null | undefined): Platform {
   return value && value !== "youtube" && (PLATFORMS as string[]).includes(value) ? (value as Platform) : "youtube";

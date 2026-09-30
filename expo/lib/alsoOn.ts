@@ -159,6 +159,7 @@ export function accountLabel(platform: Platform, handle: string | null, url: str
   if (platform === "apple_podcasts") return "Show";
   if (platform === "apple_books") return "Author";
   if (platform === "youtube_music") return "Artist";
+  if (platform === "spotify") return /\/show\//.test(url) ? "Show" : "Artist";
   if (!handle || platform === "facebook") return url.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "");
   if (platform === "x" || platform === "instagram" || platform === "tiktok") return "@" + handle;
   if (platform === "reddit") return "u/" + handle.replace(/^\/?u(ser)?\//i, "");

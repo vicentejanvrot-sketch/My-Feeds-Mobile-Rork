@@ -46,7 +46,8 @@ interface Tour {
   outNote?: string;
 }
 
-const TOURS: Record<Platform, Tour> = {
+// One tour per platform a source can be added from (Spotify only opens).
+const TOURS: Record<Exclude<Platform, "spotify">, Tour> = {
   youtube: {
     author: "Two Minute Markets",
     handle: "YouTube",
@@ -263,7 +264,7 @@ function ActionPill({ action }: { action: TourAction }) {
 export function ReadWatchTour({ defaultPlatform = "youtube" }: { defaultPlatform?: Platform }) {
   const [platform, setPlatform] = useState<Platform>(defaultPlatform);
   const [spot, setSpot] = useState(0);
-  const tour = TOURS[platform];
+  const tour = TOURS[platform as Exclude<Platform, "spotify">];
 
   const pickPlatform = (p: Platform) => {
     setPlatform(p);
