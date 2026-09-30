@@ -102,8 +102,13 @@ final class DownloadStore {
             if let raw = item.thumbnailUrl, let url = Self.httpURL(raw) {
                 images.append((url, "thumb" + Self.fileExtension(of: url, fallback: ".jpg"), .thumbnail))
             }
-            for (i, m) in media.enumerated() where !m.isEmbed {
-                if let raw = m.url, let url = Self.httpURL(raw) {
+            for (i, m) in media.enumerated() {
+                if m.isEmbed {
+                    // A quoted post or X article: its picture (the post itself is a link).
+                    if let raw = m.image, let url = Self.httpURL(raw) {
+                        images.append((url, "embed-\(i)" + Self.fileExtension(of: url, fallback: ".jpg"), .embed(i)))
+                    }
+                } else if let raw = m.url, let url = Self.httpURL(raw) {
                     images.append((url, "media-\(i)" + Self.fileExtension(of: url, fallback: ".jpg"), .media(i)))
                 }
             }
@@ -120,6 +125,9 @@ final class DownloadStore {
                         savedThumb = image.file
                     case .media(let i):
                         media[i].url = local
+                        if firstPhoto == nil { firstPhoto = image.file }
+                    case .embed(let i):
+                        media[i].image = local
                         if firstPhoto == nil { firstPhoto = image.file }
                     }
                 }
@@ -176,6 +184,7 @@ final class DownloadStore {
         item.media = item.media?.map { m in
             var m = m
             m.url = resolve(m.url, itemId: itemId)
+            m.image = resolve(m.image, itemId: itemId)
             m.audioUrl = resolve(m.audioUrl, itemId: itemId)
             return m
         }
@@ -200,6 +209,7 @@ final class DownloadStore {
     private enum ImageTarget {
         case thumbnail
         case media(Int)
+        case embed(Int)
     }
 
     private func resolve(_ value: String?, itemId: String) -> String? {

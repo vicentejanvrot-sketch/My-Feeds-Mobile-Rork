@@ -27,7 +27,7 @@ export interface DownloadEntry {
   hasAudio: boolean;
 }
 
-type MediaEntry = Record<string, unknown> & { type?: string; url?: string; audio_url?: string | null };
+type MediaEntry = Record<string, unknown> & { type?: string; url?: string; image?: string | null; audio_url?: string | null };
 
 const LOCAL = "local:";
 const ROOT = FileSystem.documentDirectory ? `${FileSystem.documentDirectory}downloads/` : null;
@@ -164,7 +164,14 @@ export async function downloadItem(itemId: string): Promise<DownloadEntry> {
       images.push({ url: item.thumbnail_url, file, apply: (local) => { item.thumbnail_url = local; thumbFile = file; } });
     }
     media.forEach((m, i) => {
-      if (m.type === "quote" || m.type === "article") return;
+      // A quoted post or X article: its picture (the post itself is a link).
+      if (m.type === "quote" || m.type === "article") {
+        if (typeof m.image === "string" && /^https?:/i.test(m.image)) {
+          const file = `embed-${i}${extensionOf(m.image, ".jpg")}`;
+          images.push({ url: m.image, file, apply: (local) => { m.image = local; } });
+        }
+        return;
+      }
       if (typeof m.url === "string" && /^https?:/i.test(m.url)) {
         const file = `media-${i}${extensionOf(m.url, ".jpg")}`;
         images.push({ url: m.url, file, apply: (local) => { m.url = local; } });
@@ -209,7 +216,7 @@ export async function downloadItem(itemId: string): Promise<DownloadEntry> {
       title: item.title,
       platform: item.platform,
       channelName: item.channel_name,
-      thumbFile: thumbFile ?? (images.find((img) => img.file.startsWith("media-"))?.file ?? null),
+      thumbFile: thumbFile ?? (images.find((img) => img.file.startsWith("media-") || img.file.startsWith("embed-"))?.file ?? null),
       savedAt: new Date().toISOString(),
       bytes: sizes.reduce((a, b) => a + b, 0),
       hasAudio: !!audio,
@@ -244,6 +251,7 @@ export async function readDownloadedItem(itemId: string): Promise<ItemWithAnalys
     item.media = ((item.media ?? []) as MediaEntry[]).map((m) => ({
       ...m,
       url: resolveLocal(itemId, m.url),
+      image: resolveLocal(itemId, m.image),
       audio_url: resolveLocal(itemId, m.audio_url),
     })) as ItemWithAnalysis["media"];
     return item;
