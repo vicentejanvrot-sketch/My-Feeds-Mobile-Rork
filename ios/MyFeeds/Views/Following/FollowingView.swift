@@ -1069,10 +1069,16 @@ private struct PersonSheet: View {
             }
             .padding(.horizontal, 16)
             .padding(.top, 20)
-            .padding(.bottom, 30)
+            .padding(.bottom, 14)
             .frame(maxWidth: 720)
             .frame(maxWidth: .infinity)
         }
+        // Scrolled content stops 16 pt above the sheet's bottom edge, the same
+        // gap as the sides, and is clipped with rounded corners there, so the
+        // phone's own rounded corners never cut through buttons or text.
+        .clipShape(UnevenRoundedRectangle(bottomLeadingRadius: 24, bottomTrailingRadius: 24, style: .continuous))
+        .padding(.bottom, 16)
+        .ignoresSafeArea(.container, edges: .bottom)
         .background(Theme.background)
         .overlay { ToastHost() }
         .onAppear { agentId = person.agentIds.first }
