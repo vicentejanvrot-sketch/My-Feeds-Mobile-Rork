@@ -1000,9 +1000,10 @@ export function useAgentItemCounts(agentIds: string[]) {
                 .eq("user_status", "liked"),
             ]);
 
+          // Same as the web Dashboard: liked items count as watched.
           results[agentId] = {
             total: totalRes.count ?? 0,
-            watched: watchedRes.count ?? 0,
+            watched: (watchedRes.count ?? 0) + (likedRes.count ?? 0),
             unwatched: unwatchedRes.count ?? 0,
             watchLater: watchLaterRes.count ?? 0,
             liked: likedRes.count ?? 0,
