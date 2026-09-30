@@ -2,7 +2,8 @@ import AVKit
 import SwiftUI
 import WebKit
 
-/// In-app reader for X posts, Reddit threads, Instagram, LinkedIn, TikTok and Facebook posts. The native twin of the web
+/// In-app reader for X posts, Reddit threads, Instagram, LinkedIn, TikTok and Facebook posts,
+/// Apple Music releases and Apple Podcasts episodes. The native twin of the web
 /// PostReaderModal and the Expo post-reader screen, so reading works the same
 /// everywhere and the user doesn't have to leave My Feeds.
 struct PostReaderView: View {
@@ -29,6 +30,8 @@ struct PostReaderView: View {
     private static let tikTokRed = Color(red: 254 / 255, green: 44 / 255, blue: 85 / 255)
     private static let tikTokYellow = Color(red: 250 / 255, green: 206 / 255, blue: 21 / 255)
     private static let facebookBlue = Color(red: 8 / 255, green: 102 / 255, blue: 1)
+    private static let appleMusicRed = Color(red: 250 / 255, green: 36 / 255, blue: 60 / 255)
+    private static let applePodcastsPurple = Color(red: 179 / 255, green: 92 / 255, blue: 242 / 255)
 
     var body: some View {
         ZStack {
@@ -95,7 +98,24 @@ struct PostReaderView: View {
 
                     let photos = item.postPhotoURLs
                     let slides = item.carouselMedia
-                    if platform == .tiktok, photos.isEmpty, let videoId = tikTokVideoId(item) {
+                    if platform == .appleMusic,
+                       let release = item.media?.first(where: { $0.type == "album" }),
+                       let raw = release.embedUrl, let embedURL = URL(string: raw) {
+                        // Apple Music's own player: previews, or full songs when signed in.
+                        AppleMusicEmbedPlayer(url: embedURL, single: release.kind == "single")
+                    } else if platform == .applePodcasts,
+                              let episode = item.media?.first(where: { $0.type == "audio" }),
+                              let raw = episode.audioUrl, let audioURL = URL(string: raw),
+                              let progressId = item.videoId {
+                        PodcastPlayerView(
+                            url: audioURL,
+                            artwork: episode.url.flatMap(URL.init(string:)),
+                            knownDuration: episode.duration,
+                            progressId: progressId
+                        ) {
+                            if status == .notWatched { changeStatus(.watched, item: item) }
+                        }
+                    } else if platform == .tiktok, photos.isEmpty, let videoId = tikTokVideoId(item) {
                         // TikTok's own player: its CDN links expire, the embed doesn't.
                         TikTokEmbedPlayer(videoId: videoId)
                     } else if platform == .facebook, item.postVideo != nil,
@@ -331,6 +351,7 @@ struct PostReaderView: View {
             case .github: gitHubActionBar(item)
             case .tiktok: tikTokActionBar(item)
             case .facebook: facebookActionBar(item)
+            case .appleMusic, .applePodcasts: appleActionBar(item, platform: platform)
             default: redditActionBar(item)
             }
 
@@ -536,6 +557,33 @@ struct PostReaderView: View {
         }
         .buttonStyle(.plain)
         .accessibilityLabel(label)
+    }
+
+    /// Apple Music and Apple Podcasts: heart to save, share, and save for later.
+    private func appleActionBar(_ item: FeedItem, platform: SourcePlatform) -> some View {
+        let liked = status == .liked
+        let bookmarked = status == .watchLater
+        let tint = platform == .appleMusic ? Self.appleMusicRed : Self.applePodcastsPurple
+        return HStack(spacing: 4) {
+            igButton(
+                icon: liked ? "heart.fill" : "heart",
+                value: nil,
+                color: liked ? tint : Theme.textPrimary,
+                label: liked ? "Remove from Saved" : "Like (save in My Feeds)"
+            ) {
+                changeStatus(liked ? .watched : .liked, item: item)
+            }
+            shareButton(item, color: Theme.textPrimary)
+            Spacer(minLength: 0)
+            igButton(
+                icon: bookmarked ? "bookmark.fill" : "bookmark",
+                value: nil,
+                color: Theme.textPrimary,
+                label: bookmarked ? "Remove from Watch Later" : "Save (Watch Later)"
+            ) {
+                changeStatus(bookmarked ? .notWatched : .watchLater, item: item)
+            }
+        }
     }
 
     /// Facebook: reaction, comment and share counts, then Like, Comment, Share, Save.
@@ -1148,6 +1196,288 @@ private struct PhotoCarousel: View {
         .aspectRatio(4 / 5, contentMode: .fit)
         .frame(maxWidth: .infinity)
         .clipShape(.rect(cornerRadius: 12))
+    }
+}
+
+/// Apple Music's embed player: previews for everyone, full songs for listeners
+/// signed in to Apple Music. A single is a short strip, an album shows its tracks.
+private struct AppleMusicEmbedPlayer: View {
+    let url: URL
+    let single: Bool
+
+    var body: some View {
+        EmbedWebView(url: url)
+            .frame(height: single ? 175 : 450)
+            .frame(maxWidth: .infinity)
+            .clipShape(.rect(cornerRadius: 12))
+    }
+}
+
+/// Plays a full podcast episode in place. The position is saved like a video's
+/// (on this phone and in video_progress), so it resumes on any device, and
+/// finishing the episode calls onFinished so it counts as watched.
+private struct PodcastPlayerView: View {
+    let url: URL
+    let artwork: URL?
+    let knownDuration: Int?
+    let progressId: String
+    let onFinished: () -> Void
+
+    @Environment(VideoPrefs.self) private var prefs
+    @Environment(\.scenePhase) private var scenePhase
+    @State private var player: AVPlayer?
+    @State private var tickTask: Task<Void, Never>?
+    @State private var endObserver: NSObjectProtocol?
+    @State private var time: Double = 0
+    @State private var duration: Double = 0
+    @State private var isPlaying = false
+    @State private var isScrubbing = false
+    @State private var speed: Float = 1
+    @State private var clearedAtEnd = false
+
+    private static let speeds: [Float] = [1, 1.25, 1.5, 2]
+
+    var body: some View {
+        VStack(spacing: 12) {
+            HStack(spacing: 12) {
+                AsyncImage(url: artwork) { phase in
+                    if let image = phase.image {
+                        image.resizable().aspectRatio(contentMode: .fill)
+                    } else {
+                        Theme.input
+                    }
+                }
+                .frame(width: 72, height: 72)
+                .clipShape(.rect(cornerRadius: 10))
+
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(totalLength > 0 ? "\(Self.clock(totalLength)) long" : "Full episode")
+                        .font(.system(size: 13))
+                        .foregroundStyle(Theme.textSecondary)
+                    Button {
+                        togglePlay()
+                    } label: {
+                        Label(isPlaying ? "Pause" : "Play", systemImage: isPlaying ? "pause.fill" : "play.fill")
+                            .font(.system(size: 15, weight: .bold))
+                            .foregroundStyle(.white)
+                            .padding(.horizontal, 16)
+                            .frame(height: 40)
+                            .background(Capsule().fill(Theme.accent))
+                    }
+                    .buttonStyle(.plain)
+                }
+                Spacer(minLength: 0)
+            }
+
+            VStack(spacing: 4) {
+                Slider(
+                    value: Binding(get: { time }, set: { time = $0 }),
+                    in: 0...max(totalLength, 1),
+                    onEditingChanged: { editing in
+                        isScrubbing = editing
+                        if !editing { seek(to: time) }
+                    }
+                )
+                .tint(Theme.accent)
+                .accessibilityLabel("Episode position")
+                HStack {
+                    Text(Self.clock(time))
+                    Spacer()
+                    Text("-" + Self.clock(max(totalLength - time, 0)))
+                }
+                .font(.system(size: 12))
+                .monospacedDigit()
+                .foregroundStyle(Theme.textSecondary)
+            }
+
+            HStack(spacing: 8) {
+                controlButton("Back 15s", systemImage: "gobackward.15") { skip(-15) }
+                controlButton("Forward 30s", systemImage: "goforward.30") { skip(30) }
+                Button {
+                    let next = Self.speeds[((Self.speeds.firstIndex(of: speed) ?? 0) + 1) % Self.speeds.count]
+                    speed = next
+                    if isPlaying { player?.rate = next }
+                } label: {
+                    Text(speed == 1 ? "1×" : String(format: "%g×", speed))
+                        .font(.system(size: 13, weight: .bold))
+                        .foregroundStyle(Theme.textPrimary)
+                        .frame(minWidth: 52, minHeight: 40)
+                        .overlay(RoundedRectangle(cornerRadius: 8).stroke(Theme.border, lineWidth: 1))
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("Playback speed \(String(format: "%g", speed)) times")
+            }
+        }
+        .padding(12)
+        .background(RoundedRectangle(cornerRadius: 12).fill(Theme.card))
+        .overlay(RoundedRectangle(cornerRadius: 12).stroke(Theme.border, lineWidth: 1))
+        .onAppear(perform: start)
+        .onDisappear(perform: stop)
+        .onChange(of: scenePhase) { _, phase in
+            if phase != .active { persistPosition() }
+        }
+    }
+
+    private var totalLength: Double {
+        duration > 0 ? duration : Double(knownDuration ?? 0)
+    }
+
+    private func controlButton(_ title: String, systemImage: String, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Image(systemName: systemImage)
+                .font(.system(size: 17, weight: .semibold))
+                .foregroundStyle(Theme.textPrimary)
+                .frame(minWidth: 52, minHeight: 40)
+                .overlay(RoundedRectangle(cornerRadius: 8).stroke(Theme.border, lineWidth: 1))
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(title)
+    }
+
+    private func start() {
+        guard player == nil else { return }
+        // Plays with the silent switch on, like any podcast app.
+        try? AVAudioSession.sharedInstance().setCategory(.playback, mode: .spokenAudio)
+        let newPlayer = AVPlayer(url: url)
+        player = newPlayer
+        endObserver = NotificationCenter.default.addObserver(
+            forName: AVPlayerItem.didPlayToEndTimeNotification,
+            object: newPlayer.currentItem,
+            queue: .main
+        ) { _ in
+            Task { @MainActor in finished() }
+        }
+        resume(newPlayer)
+        tickTask = tick(newPlayer)
+    }
+
+    private func stop() {
+        player?.pause()
+        persistPosition()
+        tickTask?.cancel()
+        tickTask = nil
+        if let endObserver { NotificationCenter.default.removeObserver(endObserver) }
+        endObserver = nil
+    }
+
+    private func togglePlay() {
+        guard let player else { return }
+        if player.timeControlStatus == .playing {
+            player.pause()
+            persistPosition()
+        } else {
+            try? AVAudioSession.sharedInstance().setActive(true)
+            player.playImmediately(atRate: speed)
+        }
+    }
+
+    private func skip(_ delta: Double) {
+        seek(to: min(max(time + delta, 0), totalLength > 0 ? totalLength : time + delta))
+    }
+
+    private func seek(to seconds: Double) {
+        time = seconds
+        player?.seek(to: CMTime(seconds: seconds, preferredTimescale: 600))
+    }
+
+    private func finished() {
+        isPlaying = false
+        time = 0
+        prefs.clearPosition(videoId: progressId)
+        Task { try? await SupabaseService.shared.deleteVideoProgress(videoId: progressId) }
+        clearedAtEnd = true
+        player?.seek(to: .zero)
+        onFinished()
+    }
+
+    /// Twice a second: refreshes the time and play state, and saves every 5 s
+    /// while playing and right after a pause.
+    private func tick(_ player: AVPlayer) -> Task<Void, Never> {
+        Task {
+            var wasPlaying = false
+            var ticksSinceSave = 0
+            while !Task.isCancelled {
+                try? await Task.sleep(for: .milliseconds(500))
+                let playing = player.timeControlStatus == .playing
+                isPlaying = playing
+                if let length = player.currentItem?.duration.seconds, length.isFinite, length > 0 {
+                    duration = length
+                }
+                if !isScrubbing {
+                    let now = player.currentTime().seconds
+                    if now.isFinite { time = now }
+                }
+                if playing {
+                    ticksSinceSave += 1
+                    if ticksSinceSave >= 10 {
+                        ticksSinceSave = 0
+                        persistPosition()
+                    }
+                } else if wasPlaying {
+                    persistPosition()
+                }
+                wasPlaying = playing
+            }
+        }
+    }
+
+    private func persistPosition() {
+        guard let player, let item = player.currentItem else { return }
+        let position = player.currentTime().seconds
+        let length = item.duration.seconds.isFinite ? item.duration.seconds : totalLength
+        guard position.isFinite, length > 0, position > 0 else { return }
+        if VideoProgress.isNearEnd(position: position, duration: length) {
+            if !clearedAtEnd {
+                clearedAtEnd = true
+                prefs.clearPosition(videoId: progressId)
+                Task { try? await SupabaseService.shared.deleteVideoProgress(videoId: progressId) }
+            }
+            return
+        }
+        clearedAtEnd = false
+        let now = Date()
+        prefs.savePosition(videoId: progressId, time: position, duration: length, updatedAt: now)
+        Task {
+            try? await SupabaseService.shared.saveVideoProgress(
+                videoId: progressId,
+                position: position,
+                duration: length,
+                updatedAt: now
+            )
+        }
+    }
+
+    /// Starts from where the listener stopped, using whichever copy is newer:
+    /// this phone's or the shared one (saved on the web or Android).
+    private func resume(_ player: AVPlayer) {
+        let local = prefs.savedPosition(videoId: progressId)
+        Task {
+            var position = local?.time
+            var length = local?.duration
+            if let remote = try? await SupabaseService.shared.fetchVideoProgress(videoId: progressId),
+               remote.updatedAt > (local?.updatedAt ?? .distantPast) {
+                position = remote.position
+                length = remote.duration
+                prefs.savePosition(videoId: progressId, time: remote.position, duration: remote.duration, updatedAt: remote.updatedAt)
+            }
+            guard let position, let length,
+                  let resumeAt = VideoProgress.resumeTime(position: position, duration: length) else { return }
+            for _ in 0..<50 {
+                if player.currentItem?.status == .readyToPlay { break }
+                try? await Task.sleep(for: .milliseconds(200))
+            }
+            guard player.currentTime().seconds < 1 else { return }
+            _ = await player.seek(to: CMTime(seconds: resumeAt, preferredTimescale: 600))
+            time = resumeAt
+        }
+    }
+
+    static func clock(_ seconds: Double) -> String {
+        let s = max(0, Int(seconds))
+        let h = s / 3600
+        let m = (s % 3600) / 60
+        let sec = s % 60
+        return h > 0 ? String(format: "%d:%02d:%02d", h, m, sec) : String(format: "%d:%02d", m, sec)
     }
 }
 
