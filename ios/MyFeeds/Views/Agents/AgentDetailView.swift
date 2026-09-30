@@ -212,6 +212,9 @@ struct AgentDetailView: View {
 
                     // This collection's posts in the Feeds tab, already filtered to it.
                     Button {
+                        // Opened from the Feeds tab: go back to it instead of
+                        // leaving this screen on top of the feed.
+                        if router.selectedTab == .feed { dismiss() }
                         router.openFeed(agentId: agent.id, status: nil)
                     } label: {
                         HStack(spacing: 6) {

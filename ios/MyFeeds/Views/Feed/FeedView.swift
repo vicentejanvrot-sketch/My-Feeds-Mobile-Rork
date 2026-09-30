@@ -389,11 +389,35 @@ struct FeedView: View {
 
     private var filterStack: some View {
         VStack(spacing: 8) {
-            filterTrigger(
-                icon: "cpu",
-                label: agentFilter.flatMap { id in agents.first { $0.id == id }?.name } ?? "All Collections",
-                badge: nil
-            ) { activeFilterModal = .agent }
+            HStack(spacing: 8) {
+                filterTrigger(
+                    icon: "cpu",
+                    label: agentFilter.flatMap { id in agents.first { $0.id == id }?.name } ?? "All Collections",
+                    badge: nil
+                ) { activeFilterModal = .agent }
+
+                // The selected collection's own screen, to add sources or change it.
+                if let agentId = agentFilter, agents.contains(where: { $0.id == agentId }) {
+                    NavigationLink(value: AppRoute.agentDetail(agentId)) {
+                        HStack(spacing: 6) {
+                            Image(systemName: "folder")
+                                .font(.system(size: 14))
+                            Text("Open")
+                                .font(.system(size: 14, weight: .semibold))
+                        }
+                        .foregroundStyle(Theme.textSecondary)
+                        .padding(12)
+                        .background(Theme.card)
+                        .clipShape(.rect(cornerRadius: 12))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 12)
+                                .stroke(Theme.border, lineWidth: 0.5)
+                        )
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel("Open this collection")
+                }
+            }
 
             if !agentChannels.isEmpty {
                 filterTrigger(
