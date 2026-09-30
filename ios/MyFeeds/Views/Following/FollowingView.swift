@@ -939,6 +939,7 @@ private struct PersonSheet: View {
     let onRescan: () -> Void
     let onClose: () -> Void
 
+    @Environment(\.openURL) private var openURL
     @State private var agentId: String?
     /// The followed account waiting for "Remove?" to be confirmed.
     @State private var toRemove: AlsoOnFollowedAccount?
@@ -965,16 +966,39 @@ private struct PersonSheet: View {
                             Rectangle().fill(Theme.border).frame(height: 0.5)
                         }
                         HStack(spacing: 10) {
-                            AccountLine(platform: account.platform, label: account.label, url: account.url)
+                            VStack(alignment: .leading, spacing: 2) {
+                                AccountLine(platform: account.platform, label: account.label, url: account.url)
+                                if account.channel.isPrivateAccount {
+                                    Label("Private account. Its posts aren't in your feed.", systemImage: "lock.fill")
+                                        .font(.system(size: 11))
+                                        .foregroundStyle(Theme.textMuted)
+                                        .lineLimit(2)
+                                }
+                            }
                             Spacer(minLength: 0)
-                            Text(agentNames[account.channel.agentId] ?? "Collection")
-                                .font(.system(size: 11, weight: .semibold))
-                                .foregroundStyle(Theme.textSecondary)
-                                .lineLimit(1)
-                                .padding(.horizontal, 8)
-                                .padding(.vertical, 3)
-                                .background(Theme.input)
-                                .clipShape(Capsule())
+                            if account.channel.isPrivateAccount {
+                                Button {
+                                    if let link = URL(string: account.url) { openURL(link) }
+                                } label: {
+                                    Text(account.platform.openLabel)
+                                        .font(.system(size: 12, weight: .semibold))
+                                        .foregroundStyle(Theme.textPrimary)
+                                        .lineLimit(1)
+                                        .padding(.horizontal, 10)
+                                        .frame(height: 30)
+                                        .overlay(RoundedRectangle(cornerRadius: 8).stroke(Theme.border, lineWidth: 1))
+                                }
+                                .buttonStyle(.plain)
+                            } else {
+                                Text(agentNames[account.channel.agentId] ?? "Collection")
+                                    .font(.system(size: 11, weight: .semibold))
+                                    .foregroundStyle(Theme.textSecondary)
+                                    .lineLimit(1)
+                                    .padding(.horizontal, 8)
+                                    .padding(.vertical, 3)
+                                    .background(Theme.input)
+                                    .clipShape(Capsule())
+                            }
                             Button {
                                 toRemove = account
                             } label: {
