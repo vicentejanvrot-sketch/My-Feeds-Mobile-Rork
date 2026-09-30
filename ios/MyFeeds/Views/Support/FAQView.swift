@@ -3,7 +3,7 @@ import SwiftUI
 struct FAQView: View {
     private let entries: [(question: String, answer: String)] = [
         ("What does this app do?",
-         "My Feeds lets you create research agents that monitor YouTube channels and playlists, automatically surface new videos into a Research Feed, and track which videos you've watched."),
+         "My Feeds lets you create collections that follow YouTube channels and other accounts, automatically surface new videos and posts into your Feed, and track which videos you've watched."),
         ("Do I need a YouTube account?",
          "Connecting your YouTube account is optional. It lets the app sync your playlists, watch history, and video actions. You can use the core feed features without connecting."),
         ("Why do you ask for API keys?",
@@ -11,7 +11,7 @@ struct FAQView: View {
         ("How is my data stored?",
          "Your settings and saved keys are stored securely in our backend. API keys are write-only — once saved, they cannot be read back by the app or displayed on screen."),
         ("How do I delete my account or data?",
-         "You can delete your account at any time from Settings → Delete Account. This permanently removes your account and all your data — your agents, feeds, watch history, and saved settings. The deletion happens immediately within the app and cannot be undone. If you have any trouble, contact us at support@travelone.ca."),
+         "You can delete your account at any time from Settings → Delete Account. This permanently removes your account and all your data — your collections, feeds, watch history, and saved settings. The deletion happens immediately within the app and cannot be undone. If you have any trouble, contact us at support@travelone.ca."),
         ("How do I get help?",
          "Contact us any time at support@travelone.ca and we'll respond as soon as possible."),
     ]

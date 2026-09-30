@@ -189,7 +189,7 @@ nonisolated enum WatchTimeStatsBuilder {
 
         for item in items {
             let agentId = item.agentId ?? "unknown"
-            let agentName = agentNames[agentId] ?? "Unknown Agent"
+            let agentName = agentNames[agentId] ?? "Unknown Collection"
             var agent = agentBuckets[agentId] ?? WatchTimeStatsData.AgentBucket(id: agentId, name: agentName)
             let duration = durations[item.id] ?? 0
             agent.totalCount += 1

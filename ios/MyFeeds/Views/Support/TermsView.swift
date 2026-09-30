@@ -15,7 +15,7 @@ struct TermsView: View {
             SupportParagraph(text: "By using My Feeds (\"the app\"), you agree to these terms. Please read them carefully.")
 
             SupportHeading(text: "Use of the App")
-            SupportParagraph(text: "You may use the app to create research agents, monitor YouTube channels, and organize videos for personal, non-commercial research. You are responsible for maintaining the confidentiality of your account credentials and for all activity under your account.")
+            SupportParagraph(text: "You may use the app to create research collections, monitor YouTube channels, and organize videos for personal, non-commercial research. You are responsible for maintaining the confidentiality of your account credentials and for all activity under your account.")
 
             SupportHeading(text: "Third-Party Services and Credentials")
             SupportParagraph(text: "The app integrates with YouTube and optional AI providers. Your use of those services is governed by their own terms. Any API keys you save must belong to you, and you are responsible for usage and costs incurred under them.")
@@ -27,7 +27,7 @@ struct TermsView: View {
             SupportParagraph(text: "The app, its design, and its software are owned by us or our licensors. Video content and thumbnails belong to their respective creators and platforms.")
 
             SupportHeading(text: "Disclaimer of Warranties")
-            SupportParagraph(text: "The app is provided \"as is\" without warranties of any kind. We do not guarantee that agents will discover every relevant video or that the service will be uninterrupted or error-free.")
+            SupportParagraph(text: "The app is provided \"as is\" without warranties of any kind. We do not guarantee that collections will discover every relevant video or that the service will be uninterrupted or error-free.")
 
             SupportHeading(text: "Limitation of Liability")
             SupportParagraph(text: "To the maximum extent permitted by law, we are not liable for any indirect, incidental, or consequential damages arising from your use of the app.")

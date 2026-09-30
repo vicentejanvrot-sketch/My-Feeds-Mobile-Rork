@@ -56,7 +56,7 @@ struct SettingsView: View {
             Button("Cancel", role: .cancel) {}
             Button("Delete", role: .destructive) { deleteAccount() }
         } message: {
-            Text("This will permanently delete your account and all your data, including your agents, feeds, watch history, and saved settings. This cannot be undone.")
+            Text("This will permanently delete your account and all your data, including your collections, feeds, watch history, and saved settings. This cannot be undone.")
         }
     }
 
@@ -91,7 +91,7 @@ struct SettingsView: View {
 
     private var defaultEmailCard: some View {
         settingsCard(icon: "envelope", iconColor: Theme.accent, title: "Default Email",
-                     description: "Pre-filled when adding email recipients to new agents.") {
+                     description: "Pre-filled when adding email recipients to new collections.") {
             TextField("your@email.com", text: $defaultEmail)
                 .font(.system(size: 15))
                 .foregroundStyle(Theme.textPrimary)

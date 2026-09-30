@@ -321,7 +321,7 @@ struct WatchTimeStatsSection: View {
                 Image(systemName: "chart.pie")
                     .font(.system(size: 14))
                     .foregroundStyle(Theme.accent)
-                Text("By Agent")
+                Text("By Collection")
                     .font(.system(size: 14, weight: .bold))
                     .foregroundStyle(Theme.textPrimary)
             }

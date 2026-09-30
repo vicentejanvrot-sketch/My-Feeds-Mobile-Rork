@@ -90,7 +90,7 @@ struct AgentFormView: View {
             }
         }
         .background(Theme.background)
-        .navigationTitle(isEdit ? "Edit Agent" : "New Agent")
+        .navigationTitle(isEdit ? "Edit Collection" : "New Collection")
         .navigationBarTitleDisplayMode(.inline)
         .toolbarBackground(Theme.background, for: .navigationBar)
         .task { await populate() }
@@ -100,7 +100,7 @@ struct AgentFormView: View {
 
     private var basicInfoSection: some View {
         formSection(title: "Basic Information") {
-            fieldLabel("Agent Name", required: true)
+            fieldLabel("Collection Name", required: true)
             TextField("e.g., Crypto, AI, Power Apps", text: $name)
                 .textInputAutocapitalization(.words)
                 .modifier(FormInputStyle())
@@ -115,7 +115,7 @@ struct AgentFormView: View {
             }
 
             fieldLabel("Description")
-            TextField("What topics does this agent cover?", text: $descriptionText, axis: .vertical)
+            TextField("What topics does this collection cover?", text: $descriptionText, axis: .vertical)
                 .lineLimit(4...8)
                 .modifier(FormInputStyle())
                 .onChange(of: descriptionText) { _, newValue in
@@ -131,7 +131,7 @@ struct AgentFormView: View {
     }
 
     private var scheduleSection: some View {
-        formSection(title: "Schedule — \"When should this agent run?\"") {
+        formSection(title: "Schedule — \"When should this collection run?\"") {
             HStack(alignment: .top, spacing: 10) {
                 VStack(alignment: .leading, spacing: 0) {
                     fieldLabel("Run Time")
@@ -253,7 +253,7 @@ struct AgentFormView: View {
                     if isSaving {
                         ProgressView().tint(.white)
                     } else {
-                        Text(isEdit ? "Save Changes" : "Create Agent")
+                        Text(isEdit ? "Save Changes" : "Create Collection")
                             .font(.system(size: 16, weight: .bold))
                     }
                 }
@@ -410,7 +410,7 @@ struct AgentFormView: View {
                 recipientEmails = loadedRecipients.map(\.email)
                 recipientIdMap = Dictionary(uniqueKeysWithValues: loadedRecipients.map { ($0.email, $0.id) })
             } catch {
-                toasts.show("Couldn't load agent", type: .error)
+                toasts.show("Couldn't load collection", type: .error)
             }
         } else {
             runTime = date(fromTimeString: "07:00")
@@ -433,7 +433,7 @@ struct AgentFormView: View {
 
     private func save() {
         guard !trimmedName.isEmpty else {
-            toasts.show("Agent name is required", type: .error)
+            toasts.show("Collection name is required", type: .error)
             return
         }
         guard trimmedName.count <= 100 else {
@@ -483,14 +483,14 @@ struct AgentFormView: View {
                     for email in validEmails where recipientIdMap[email] == nil {
                         try? await service.addRecipient(agentId: agentId, email: email)
                     }
-                    toasts.show("Agent updated")
+                    toasts.show("Collection updated")
                 } else {
                     payload.userId = auth.userId
                     let created = try await service.createAgent(payload)
                     for email in validEmails {
                         try? await service.addRecipient(agentId: created.id, email: email)
                     }
-                    toasts.show("Agent created")
+                    toasts.show("Collection created")
                 }
                 dismiss()
             } catch {

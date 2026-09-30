@@ -37,7 +37,7 @@ struct OnboardingWizardView: View {
         let name: String
     }
 
-    private let stepLabels = ["Your agent", "Sources", "Read & watch"]
+    private let stepLabels = ["Your collection", "Sources", "Read & watch"]
     private let lastStep = 4
 
     @State private var step = 0
@@ -68,7 +68,7 @@ struct OnboardingWizardView: View {
             || (step == 2 && sources.isEmpty)
     }
     private var hint: String? {
-        if step == 1 && trimmedName.isEmpty { return "Give your agent a name." }
+        if step == 1 && trimmedName.isEmpty { return "Give your collection a name." }
         if step == 2 && sources.isEmpty { return "Add at least one source, or skip for now." }
         return nil
     }
@@ -191,7 +191,7 @@ struct OnboardingWizardView: View {
                 }
                 .buttonStyle(.plain)
             }
-            Text("Get started builds a new agent in three quick steps. See how it works only shows how to read and watch.")
+            Text("Get started builds a new collection in three quick steps. See how it works only shows how to read and watch.")
                 .font(.system(size: 13))
                 .foregroundStyle(Theme.textSecondary)
                 .fixedSize(horizontal: false, vertical: true)
@@ -214,11 +214,11 @@ struct OnboardingWizardView: View {
     private var agentStep: some View {
         VStack(alignment: .leading, spacing: 20) {
             stepHeading(
-                "Build your first agent",
-                "An agent follows one topic and pulls the best posts from its sources into one stream. Its name is the topic, so name it after what you want to follow."
+                "Build your first collection",
+                "A collection follows one topic and pulls the best posts from its sources into one stream. Its name is the topic, so name it after what you want to follow."
             )
             VStack(alignment: .leading, spacing: 8) {
-                fieldLabel("Agent name and topic")
+                fieldLabel("Collection name and topic")
                 TextField("", text: $name, prompt: Text("e.g. Crypto, AI, Power Apps").foregroundColor(Theme.textMuted))
                     .modifier(WizardInputStyle())
                     .submitLabel(.next)
@@ -226,12 +226,12 @@ struct OnboardingWizardView: View {
                     .onChange(of: name) {
                         if name.count > 100 { name = String(name.prefix(100)) }
                     }
-                    .accessibilityLabel("Agent name and topic")
+                    .accessibilityLabel("Collection name and topic")
             }
             HStack(spacing: 12) {
                 VStack(alignment: .leading, spacing: 2) {
                     fieldLabel("Email me a digest after each run")
-                    Text("Sent to your account email. You can change it on the agent later.")
+                    Text("Sent to your account email. You can change it on the collection later.")
                         .font(.system(size: 13))
                         .foregroundStyle(Theme.textSecondary)
                 }
@@ -272,7 +272,7 @@ struct OnboardingWizardView: View {
         VStack(alignment: .leading, spacing: 20) {
             stepHeading(
                 "Add sources to \(savedName.isEmpty ? "your agent" : savedName)",
-                "Add the channels, accounts and communities this agent should watch. You can add more later from the agent page."
+                "Add the channels, accounts and communities this collection should watch. You can add more later from the collection page."
             )
 
             VStack(alignment: .leading, spacing: 10) {
@@ -348,7 +348,7 @@ struct OnboardingWizardView: View {
             VStack(alignment: .leading, spacing: 8) {
                 fieldLabel(sources.isEmpty ? "Added" : "Added (\(sources.count))")
                 if sources.isEmpty {
-                    Text("Nothing yet. Add at least one source so the agent has something to watch.")
+                    Text("Nothing yet. Add at least one source so the collection has something to watch.")
                         .font(.system(size: 13))
                         .foregroundStyle(Theme.textSecondary)
                         .multilineTextAlignment(.center)
@@ -413,13 +413,13 @@ struct OnboardingWizardView: View {
                 Text("Your feed is ready")
                     .font(.system(size: 32, weight: .heavy))
                     .foregroundStyle(Theme.textPrimary)
-                Text("Run the agent now to fill your feed straight away, or let it run on its own every morning.")
+                Text("Run the collection now to fill your feed straight away, or let it run on its own every morning.")
                     .font(.system(size: 16))
                     .foregroundStyle(Theme.textSecondary)
                     .lineSpacing(4)
             }
             VStack(spacing: 0) {
-                recapRow("Agent", savedName)
+                recapRow("Collection", savedName)
                 Rectangle().fill(Theme.border).frame(height: 0.5)
                 recapRow("Sources", sources.isEmpty ? "None yet" : "\(sources.count) added")
                 Rectangle().fill(Theme.border).frame(height: 0.5)
@@ -704,7 +704,7 @@ struct OnboardingWizardView: View {
                 savedEmailMe = emailMe
                 go(to: 2)
             } catch {
-                errorText = "Couldn't save the agent: \(error.localizedDescription)"
+                errorText = "Couldn't save the collection: \(error.localizedDescription)"
             }
             saving = false
         }
@@ -772,7 +772,7 @@ struct OnboardingWizardView: View {
                 savedName = agent.name
                 go(to: lastStep)
             } catch {
-                errorText = "Something went wrong saving your agent. Check it on the Dashboard and try again."
+                errorText = "Something went wrong saving your collection. Check it on the Dashboard and try again."
             }
             finishing = false
         }

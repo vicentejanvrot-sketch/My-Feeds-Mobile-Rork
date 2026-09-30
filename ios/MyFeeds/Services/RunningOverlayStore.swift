@@ -64,7 +64,7 @@ final class RunningOverlayStore {
             runCompletionCounter += 1
         }
 
-        let label = "All agents (\(agents.count))"
+        let label = "All collections (\(agents.count))"
         state = OverlayState(
             agentName: label, runId: Self.batchRunId, phase: .running,
             channelsTotal: agents.count, channelsScanned: 0, currentChannelName: nil
@@ -262,7 +262,7 @@ struct RunningOverlayView: View {
                 if state.channelsTotal > 0 {
                     VStack(spacing: 8) {
                         HStack {
-                            Text(state.runId == RunningOverlayStore.batchRunId ? "Agents finished" : "Scanning channels")
+                            Text(state.runId == RunningOverlayStore.batchRunId ? "Collections finished" : "Scanning channels")
                             Spacer()
                             Text("\(state.channelsScanned) / \(state.channelsTotal)")
                                 .monospacedDigit()

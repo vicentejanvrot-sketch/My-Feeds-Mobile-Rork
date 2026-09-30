@@ -62,7 +62,7 @@ struct AgentDetailView: View {
                         channelsSection
                         runHistorySection
                     } else {
-                        Text("Agent not found")
+                        Text("Collection not found")
                             .font(.system(size: 16, weight: .bold))
                             .foregroundStyle(Theme.textPrimary)
                             .frame(maxWidth: .infinity)
@@ -80,7 +80,7 @@ struct AgentDetailView: View {
             modalOverlays
         }
         .background(Theme.background)
-        .navigationTitle(agent?.name ?? "Agent")
+        .navigationTitle(agent?.name ?? "Collection")
         .navigationBarTitleDisplayMode(.inline)
         .toolbarBackground(Theme.background, for: .navigationBar)
         .refreshable { await load() }
@@ -108,7 +108,7 @@ struct AgentDetailView: View {
                 if let channel = channelToRemove { removeChannel(channel) }
             }
         } message: {
-            Text("Remove \"\(channelToRemove?.displayName ?? "")\" from this agent?")
+            Text("Remove \"\(channelToRemove?.displayName ?? "")\" from this collection?")
         }
         .alert("Cancel Run", isPresented: Binding(
             get: { runToCancel != nil },
@@ -121,11 +121,11 @@ struct AgentDetailView: View {
         } message: {
             Text("Stop this run in progress?")
         }
-        .alert("Delete \(agent?.name ?? "agent")?", isPresented: $showDeleteAgent) {
+        .alert("Delete \(agent?.name ?? "collection")?", isPresented: $showDeleteAgent) {
             Button("Cancel", role: .cancel) {}
-            Button("Delete agent", role: .destructive) { deleteThisAgent() }
+            Button("Delete collection", role: .destructive) { deleteThisAgent() }
         } message: {
-            Text("This deletes the agent, its \(channels.count) \(channels.count == 1 ? "source" : "sources"), its email recipients, its run history and every video and post it found, including ones you saved. It can't be undone. Your accounts on YouTube, X and the other platforms aren't touched.")
+            Text("This deletes the collection, its \(channels.count) \(channels.count == 1 ? "source" : "sources"), its email recipients, its run history and every video and post it found, including ones you saved. It can't be undone. Your accounts on YouTube, X and the other platforms aren't touched.")
         }
     }
 
@@ -137,7 +137,7 @@ struct AgentDetailView: View {
         Task {
             do {
                 try await SupabaseService.shared.deleteAgent(id: agent.id)
-                toasts.show("Agent deleted")
+                toasts.show("Collection deleted")
                 dismiss()
             } catch {
                 toasts.show(error.localizedDescription, type: .error)
@@ -150,7 +150,7 @@ struct AgentDetailView: View {
         HStack(spacing: 8) {
             Image(systemName: "wifi.slash")
                 .font(.system(size: 13))
-            Text("Offline — couldn't load latest agent data.")
+            Text("Offline — couldn't load latest collection data.")
                 .font(.system(size: 13, weight: .medium))
             Spacer()
             Button {
@@ -234,7 +234,7 @@ struct AgentDetailView: View {
                             )
                     }
                     .disabled(isDeletingAgent)
-                    .accessibilityLabel("Delete agent")
+                    .accessibilityLabel("Delete collection")
                 }
                 .padding(.top, 18)
             }

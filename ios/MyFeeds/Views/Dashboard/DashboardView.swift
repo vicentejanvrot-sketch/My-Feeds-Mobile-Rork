@@ -43,11 +43,11 @@ struct DashboardView: View {
                     statGrid
                     followingCard
 
-                    SectionHeader(title: "My Feeds", actionLabel: agents.isEmpty ? nil : "View All") {
+                    SectionHeader(title: "Feed", actionLabel: agents.isEmpty ? nil : "View All") {
                         router.openFeed(agentId: nil, status: nil)
                     }
                     if sortedAgents.isEmpty {
-                        emptyCard(text: "No agents yet. Create one to get started.")
+                        emptyCard(text: "No collections yet. Create one to get started.")
                     } else {
                         ForEach(Array(sortedAgents.enumerated()), id: \.element.id) { index, agent in
                             FeedCardView(
@@ -68,9 +68,9 @@ struct DashboardView: View {
 
                     WatchTimeStatsSection()
 
-                    SectionHeader(title: "My Agents")
+                    SectionHeader(title: "My Collections")
                     if sortedAgents.isEmpty {
-                        emptyCard(text: "No agents yet. Create one to get started.")
+                        emptyCard(text: "No collections yet. Create one to get started.")
                     } else {
                         ForEach(Array(sortedAgents.enumerated()), id: \.element.id) { index, agent in
                             DashboardAgentCard(
@@ -111,7 +111,7 @@ struct DashboardView: View {
         .onChange(of: overlay.runCompletionCounter) {
             Task { await load() }
         }
-        .alert("Delete Agent", isPresented: Binding(
+        .alert("Delete Collection", isPresented: Binding(
             get: { agentToDelete != nil },
             set: { if !$0 { agentToDelete = nil } }
         )) {
@@ -138,7 +138,7 @@ struct DashboardView: View {
 
             HStack(spacing: 10) {
                 NavigationLink(value: AppRoute.agentForm(nil)) {
-                    Text("+ New Agent")
+                    Text("+ New Collection")
                         .font(.system(size: 13, weight: .bold))
                         .foregroundStyle(.white)
                         .padding(.horizontal, 14)
@@ -179,7 +179,7 @@ struct DashboardView: View {
 
     private var statGrid: some View {
         LazyVGrid(columns: [GridItem(.flexible(), spacing: 12), GridItem(.flexible(), spacing: 12)], spacing: 12) {
-            StatCard(icon: "cpu", label: "Active Agents", value: "\(agents.count)")
+            StatCard(icon: "cpu", label: "Active Collections", value: "\(agents.count)")
             StatCard(icon: "video", label: "Channels Tracked", value: "\(channels.count)")
             StatCard(icon: "waveform.path.ecg", label: "Recent Runs", value: "\(runs.count)")
             StatCard(icon: "chart.line.uptrend.xyaxis", label: "Success Rate", value: "\(successRate)%")
@@ -199,7 +199,7 @@ struct DashboardView: View {
                         .foregroundStyle(Color(hsl: 199, 89, 55))
                 }
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("Following")
+                    Text("People")
                         .font(.system(size: 15, weight: .bold))
                         .foregroundStyle(Theme.textPrimary)
                     Text("Everyone you follow, and where else they are")
@@ -223,7 +223,7 @@ struct DashboardView: View {
         }
         .buttonStyle(.plain)
         .padding(.top, 12)
-        .accessibilityLabel("Following: everyone you follow, and where else they are")
+        .accessibilityLabel("People: everyone you follow, and where else they are")
     }
 
     private func emptyCard(text: String) -> some View {
@@ -332,7 +332,7 @@ struct DashboardView: View {
         Task {
             do {
                 try await SupabaseService.shared.deleteAgent(id: agent.id)
-                toasts.show("Agent deleted")
+                toasts.show("Collection deleted")
                 await load()
             } catch {
                 toasts.show(error.localizedDescription, type: .error)

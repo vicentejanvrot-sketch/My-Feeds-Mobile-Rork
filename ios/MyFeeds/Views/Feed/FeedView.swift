@@ -374,7 +374,7 @@ struct FeedView: View {
         VStack(spacing: 8) {
             filterTrigger(
                 icon: "cpu",
-                label: agentFilter.flatMap { id in agents.first { $0.id == id }?.name } ?? "All Agents",
+                label: agentFilter.flatMap { id in agents.first { $0.id == id }?.name } ?? "All Collections",
                 badge: nil
             ) { activeFilterModal = .agent }
 
@@ -481,7 +481,7 @@ struct FeedView: View {
             Text(hasFilters ? "No videos match your filters" : "No videos yet")
                 .font(.system(size: 16, weight: .bold))
                 .foregroundStyle(Theme.textPrimary)
-            Text(hasFilters ? "Try adjusting your search or filters." : "Run an agent to start discovering videos.")
+            Text(hasFilters ? "Try adjusting your search or filters." : "Run a collection to start discovering videos.")
                 .font(.system(size: 13))
                 .foregroundStyle(Theme.textSecondary)
                 .lineSpacing(4)
@@ -498,8 +498,8 @@ struct FeedView: View {
         if let modal = activeFilterModal {
             switch modal {
             case .agent:
-                PickerModal(title: "Agent", onDismiss: { activeFilterModal = nil }) {
-                    PickerRow(label: "All Agents", isActive: agentFilter == nil) {
+                PickerModal(title: "Collection", onDismiss: { activeFilterModal = nil }) {
+                    PickerRow(label: "All Collections", isActive: agentFilter == nil) {
                         agentFilter = nil
                         channelFilter = nil
                         activeFilterModal = nil

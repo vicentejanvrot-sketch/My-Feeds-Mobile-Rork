@@ -40,7 +40,7 @@ struct HistoryView: View {
                         Text("No runs yet")
                             .font(.system(size: 17, weight: .bold))
                             .foregroundStyle(Theme.textPrimary)
-                        Text("When you run an agent, its results will appear here.")
+                        Text("When you run a collection, its results will appear here.")
                             .font(.system(size: 13))
                             .foregroundStyle(Theme.textSecondary)
                             .multilineTextAlignment(.center)
@@ -101,8 +101,8 @@ struct HistoryView: View {
                     .font(.system(size: 24, weight: .heavy))
                     .foregroundStyle(Theme.textPrimary)
                 Text(runs.isEmpty
-                     ? "Timeline of agent activity"
-                     : "\(runs.count) run\(runs.count == 1 ? "" : "s") across all agents")
+                     ? "Timeline of collection activity"
+                     : "\(runs.count) run\(runs.count == 1 ? "" : "s") across all collections")
                     .font(.system(size: 13))
                     .foregroundStyle(Theme.textSecondary)
             }
@@ -223,7 +223,7 @@ private struct RunCard: View {
         VStack(alignment: .leading, spacing: 0) {
             HStack(spacing: 10) {
                 NavigationLink(value: AppRoute.agentDetail(run.agentId)) {
-                    Text(agent?.name ?? "Unknown Agent")
+                    Text(agent?.name ?? "Unknown Collection")
                         .font(.system(size: 16, weight: .bold))
                         .foregroundStyle(Theme.textPrimary)
                         .lineLimit(1)

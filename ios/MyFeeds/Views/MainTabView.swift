@@ -27,7 +27,7 @@ struct MainTabView: View {
                 AgentsView()
                     .withAppRoutes()
             }
-            .tabItem { Label("Agents", image: "TabAgentsIcon") }
+            .tabItem { Label("Collections", image: "TabAgentsIcon") }
             .tag(AppTab.agents)
 
             NavigationStack {

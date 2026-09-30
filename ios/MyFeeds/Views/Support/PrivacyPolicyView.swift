@@ -12,13 +12,13 @@ struct PrivacyPolicyView: View {
                 .padding(.top, 4)
                 .padding(.bottom, 12)
 
-            SupportParagraph(text: "My Feeds (\"the app\") helps you monitor YouTube channels with research agents and organize the videos they discover. This policy explains what information we collect, how we use it, and the choices you have.")
+            SupportParagraph(text: "My Feeds (\"the app\") helps you monitor YouTube channels with research collections and organize the videos they discover. This policy explains what information we collect, how we use it, and the choices you have.")
 
             SupportHeading(text: "Information We Collect")
-            SupportParagraph(text: "We collect the information you provide directly: your account email and password (managed by our authentication provider), the agents, channels, and preferences you configure, and your watch statuses for videos. We also store optional settings such as a default email for digests. If you choose to save API keys, they are stored securely and are write-only — they can never be read back by the app.")
+            SupportParagraph(text: "We collect the information you provide directly: your account email and password (managed by our authentication provider), the collections, channels, and preferences you configure, and your watch statuses for videos. We also store optional settings such as a default email for digests. If you choose to save API keys, they are stored securely and are write-only — they can never be read back by the app.")
 
             SupportHeading(text: "How We Use Your Information")
-            SupportParagraph(text: "Your data is used solely to operate the app: running your agents, building your research feed, tracking your watch progress, and sending email digests you configure. We do not sell your personal information or use it for advertising.")
+            SupportParagraph(text: "Your data is used solely to operate the app: running your collections, building your research feed, tracking your watch progress, and sending email digests you configure. We do not sell your personal information or use it for advertising.")
 
             SupportHeading(text: "Third-Party Services")
             SupportParagraph(text: "The app relies on YouTube for video content and metadata, and on our backend provider for authentication, database, and processing. Videos are played through YouTube's embedded player, which is subject to Google's privacy policy. Optional AI analysis may use the provider configured for your account.")

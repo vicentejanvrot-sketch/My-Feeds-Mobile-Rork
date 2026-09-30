@@ -26,10 +26,10 @@ struct AgentsView: View {
                         .padding(.vertical, 60)
                 } else if sortedAgents.isEmpty {
                     VStack(spacing: 6) {
-                        Text("No agents yet")
+                        Text("No collections yet")
                             .font(.system(size: 16, weight: .bold))
                             .foregroundStyle(Theme.textPrimary)
-                        Text("Create an agent and it will appear here automatically.")
+                        Text("Create a collection and it will appear here automatically.")
                             .font(.system(size: 13))
                             .foregroundStyle(Theme.textSecondary)
                             .multilineTextAlignment(.center)
@@ -69,7 +69,7 @@ struct AgentsView: View {
     private var header: some View {
         HStack(alignment: .bottom) {
             VStack(alignment: .leading, spacing: 2) {
-                Text("Agents")
+                Text("Collections")
                     .font(.system(size: 26, weight: .heavy))
                     .foregroundStyle(Theme.textPrimary)
                 Text("\(agents.count) configured")
@@ -105,7 +105,7 @@ struct AgentsView: View {
         HStack(spacing: 8) {
             Image(systemName: "wifi.slash")
                 .font(.system(size: 13))
-            Text("Offline — couldn't load latest agents.")
+            Text("Offline — couldn't load latest collections.")
                 .font(.system(size: 13, weight: .medium))
             Spacer()
             Button {

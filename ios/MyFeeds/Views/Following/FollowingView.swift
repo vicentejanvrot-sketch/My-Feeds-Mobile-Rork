@@ -81,7 +81,7 @@ struct FollowingView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 0) {
-                Text("Everyone you follow across your agents, and where else they are.")
+                Text("Everyone you follow across your collections, and where else they are.")
                     .font(.system(size: 13))
                     .foregroundStyle(Theme.textSecondary)
                     .padding(.bottom, 14)
@@ -131,7 +131,7 @@ struct FollowingView: View {
         }
         .scrollDismissesKeyboard(.interactively)
         .background(Theme.background)
-        .navigationTitle("Following")
+        .navigationTitle("People")
         .navigationBarTitleDisplayMode(.inline)
         .toolbarBackground(Theme.background, for: .navigationBar)
         .toolbar {
@@ -183,13 +183,13 @@ struct FollowingView: View {
                     Image(systemName: "magnifyingglass")
                         .font(.system(size: 13, weight: .semibold))
                 }
-                Text(isScanning ? "Checking" : "Check \(toScan.count)")
+                Text(isScanning ? "Searching" : "Find more (\(toScan.count))")
                     .font(.system(size: 14, weight: .semibold))
             }
             .foregroundStyle(Theme.accent)
         }
         .disabled(isScanning)
-        .accessibilityLabel(isScanning ? "Checking sources" : "Check \(toScan.count) sources")
+        .accessibilityLabel(isScanning ? "Searching" : "Find more accounts for \(toScan.count) sources")
     }
 
     /// Everyone / Gaps switch, styled like the web tabs: a muted track with
@@ -230,7 +230,7 @@ struct FollowingView: View {
         if agents.count > 1 {
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 6) {
-                    agentChip("All agents", id: nil)
+                    agentChip("All collections", id: nil)
                     ForEach(sortedAgents) { agent in
                         agentChip(agent.name, id: agent.id)
                     }
@@ -292,7 +292,7 @@ struct FollowingView: View {
         VStack(alignment: .leading, spacing: 6) {
             ProgressView(value: Double(progress.done), total: Double(max(progress.total, 1)))
                 .tint(Theme.accent)
-            Text("Checked \(progress.done) of \(progress.total)" + (progress.failed > 0 ? " · \(progress.failed) couldn't be checked" : ""))
+            Text("Searched \(progress.done) of \(progress.total)" + (progress.failed > 0 ? " · \(progress.failed) couldn't be searched" : ""))
                 .font(.system(size: 12))
                 .foregroundStyle(Theme.textSecondary)
         }
@@ -344,7 +344,7 @@ struct FollowingView: View {
 
             VStack(spacing: 0) {
                 if filtered.isEmpty {
-                    Text(people.isEmpty ? "No people or companies in your agents yet." : "Nobody matches that search.")
+                    Text(people.isEmpty ? "No people or companies in your collections yet." : "Nobody matches that search.")
                         .font(.system(size: 13))
                         .foregroundStyle(Theme.textSecondary)
                         .frame(maxWidth: .infinity)
@@ -545,7 +545,7 @@ struct FollowingView: View {
         if failed > 0 {
             toasts.show("\(failed) of \(total) couldn't be checked: " + (firstError ?? ""), type: .error)
         } else {
-            toasts.show(total == 1 ? "Checked for other platforms" : "Checked \(total) sources")
+            toasts.show(total == 1 ? "Searched other platforms" : "Searched other platforms for \(total) sources")
         }
     }
 
@@ -611,7 +611,7 @@ private extension AlsoOnPerson {
     var summary: String {
         var parts: [String] = []
         if lastScannedAt == nil {
-            parts.append("Not checked yet")
+            parts.append("Not searched yet")
         } else if platformCount == 1, let only = following.first {
             parts.append("Only on " + only.platform.label)
         } else {
@@ -935,7 +935,7 @@ private struct PersonSheet: View {
                         HStack(spacing: 10) {
                             AccountLine(platform: account.platform, label: account.label, url: account.url)
                             Spacer(minLength: 0)
-                            Text(agentNames[account.channel.agentId] ?? "Agent")
+                            Text(agentNames[account.channel.agentId] ?? "Collection")
                                 .font(.system(size: 11, weight: .semibold))
                                 .foregroundStyle(Theme.textSecondary)
                                 .lineLimit(1)
@@ -1080,7 +1080,7 @@ private struct PersonSheet: View {
         VStack(alignment: .leading, spacing: 10) {
             Rectangle().fill(Theme.border).frame(height: 0.5)
             HStack(spacing: 10) {
-                Text(person.lastScannedAt.map { "Checked " + Format.relativeTime($0) } ?? "Not checked yet")
+                Text(person.lastScannedAt.map { "Last searched " + Format.relativeTime($0) } ?? "Not searched yet")
                     .font(.system(size: 12))
                     .foregroundStyle(Theme.textSecondary)
                 Spacer(minLength: 0)
@@ -1092,7 +1092,7 @@ private struct PersonSheet: View {
                             Image(systemName: "arrow.clockwise")
                                 .font(.system(size: 12, weight: .bold))
                         }
-                        Text(person.lastScannedAt == nil ? "Check now" : "Check again")
+                        Text(person.lastScannedAt == nil ? "Find accounts" : "Find more accounts")
                             .font(.system(size: 13, weight: .bold))
                     }
                     .foregroundStyle(Theme.textPrimary)
