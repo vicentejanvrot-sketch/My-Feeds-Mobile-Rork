@@ -122,7 +122,9 @@ export default function FeedScreen() {
   const isWide = windowWidth >= IPAD_BREAKPOINT;
   const showToast = useToast();
   const listRef = useRef<FlatList>(null);
-  const params = useLocalSearchParams<{ agentId?: string; status?: string }>();
+  // openedAt changes on every "View Feed" from a collection, so the filter is
+  // applied again even when the same collection was opened here before.
+  const params = useLocalSearchParams<{ agentId?: string; status?: string; openedAt?: string }>();
 
   useFocusEffect(
     useCallback(() => {
@@ -163,13 +165,14 @@ export default function FeedScreen() {
   const [agentFilter, setAgentFilter] = useState<string>(params.agentId ?? "all");
   const [channelFilter, setChannelFilter] = useState<string>("all");
 
-  // Sync agentFilter when navigating here from Dashboard feed cards with an agentId param.
+  // Sync agentFilter when navigating here with an agentId param (Dashboard
+  // feed cards, a collection's View Feed).
   useEffect(() => {
     if (params.agentId && params.agentId !== agentFilter) {
       setAgentFilter(params.agentId);
       setChannelFilter("all");
     }
-  }, [params.agentId]);
+  }, [params.agentId, params.openedAt]);
   const [statusFilter, setStatusFilter] = useState<StatusFilter>(
     (params.status as StatusFilter) || "not_watched",
   );

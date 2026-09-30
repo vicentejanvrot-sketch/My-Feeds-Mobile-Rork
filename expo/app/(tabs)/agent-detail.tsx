@@ -37,6 +37,7 @@ import {
   Filter,
   Ban,
   Lock,
+  Rss,
 } from "lucide-react-native";
 import { useQueryClient } from "@tanstack/react-query";
 import { Colors } from "@/constants/colors";
@@ -920,6 +921,25 @@ export default function AgentDetailScreen() {
                 />
                 <Play size={15} color={Colors.white} fill={Colors.white} />
                 <Text style={styles.runNowText}>Run Now</Text>
+              </Pressable>
+              {/* This collection's posts in the Feeds tab, already filtered to it. */}
+              <Pressable
+                style={({ pressed }) => [
+                  styles.editBtn,
+                  { borderColor: Colors.border, paddingHorizontal: 14 },
+                  pressed && styles.pressed,
+                ]}
+                onPress={() =>
+                  router.push({
+                    pathname: "/(tabs)/feed",
+                    params: { agentId: agent.id, openedAt: String(Date.now()) },
+                  })
+                }
+                accessibilityRole="button"
+                accessibilityLabel="View this collection's feed"
+              >
+                <Rss size={15} color={Colors.textSecondary} />
+                <Text style={styles.editText}>Feed</Text>
               </Pressable>
               <Pressable
                 style={({ pressed }) => [
