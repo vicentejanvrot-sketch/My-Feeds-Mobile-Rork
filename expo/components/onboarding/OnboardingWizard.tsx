@@ -21,7 +21,7 @@ import { useAuth } from "@/lib/auth-provider";
 import { extractEdgeFunctionErrorMessage, qk } from "@/lib/hooks";
 import { PlatformBadge } from "@/components/PlatformBadge";
 import { ReadWatchTour } from "@/components/onboarding/ReadWatchTour";
-import { Platform, PLATFORMS, PLATFORM_META } from "@/lib/platforms";
+import { Platform, PLATFORMS, PLATFORM_META, detectPlatform } from "@/lib/platforms";
 
 // Onboarding wizard, same flow as the web OnboardingWizard: create an agent
 // (its name is its topic), add its sources, then a per-platform tour of
@@ -82,6 +82,8 @@ export function OnboardingWizard({ visible, onClose, hidden, onHiddenChange }: O
   const [dontShow, setDontShow] = useState(hidden);
 
   const [platform, setPlatform] = useState<Platform>("youtube");
+  // Set when a pasted link picked the platform for the user.
+  const [autoPlatform, setAutoPlatform] = useState<Platform | null>(null);
   const [sourceValue, setSourceValue] = useState("");
   const [adding, setAdding] = useState(false);
   const [removingId, setRemovingId] = useState<string | null>(null);
@@ -170,6 +172,11 @@ export function OnboardingWizard({ visible, onClose, hidden, onHiddenChange }: O
     const value = sourceValue.trim();
     if (!value || !agentId) return;
     setError(null);
+    const detected = detectPlatform(value);
+    if (detected && detected !== platform) {
+      setError(`That's a ${PLATFORM_META[detected].label} link. Select ${PLATFORM_META[detected].label} or paste a ${PLATFORM_META[platform].label} link.`);
+      return;
+    }
     if (platform === "youtube" && !/youtube\.com|youtu\.be|^@/i.test(value)) {
       setError("Paste the channel link, like youtube.com/@ChannelName.");
       return;
@@ -194,6 +201,7 @@ export function OnboardingWizard({ visible, onClose, hidden, onHiddenChange }: O
         setSources((prev) => [...prev, { id: channel.id, platform, name: channel.channel_name }]);
       }
       setSourceValue("");
+      setAutoPlatform(null);
       void queryClient.invalidateQueries({ queryKey: qk.channelsAll });
       void queryClient.invalidateQueries({ queryKey: qk.agents });
     } catch (e) {
@@ -443,7 +451,7 @@ export function OnboardingWizard({ visible, onClose, hidden, onHiddenChange }: O
                     return (
                       <Pressable
                         key={p}
-                        onPress={() => { setPlatform(p); setError(null); }}
+                        onPress={() => { setPlatform(p); setAutoPlatform(null); setError(null); }}
                         accessibilityRole="button"
                         accessibilityState={{ selected }}
                         style={[styles.platformCell, selected && styles.platformCellOn]}
@@ -464,7 +472,17 @@ export function OnboardingWizard({ visible, onClose, hidden, onHiddenChange }: O
                 <View style={styles.addRow}>
                   <TextInput
                     value={sourceValue}
-                    onChangeText={setSourceValue}
+                    onChangeText={(value) => {
+                      setSourceValue(value);
+                      const detected = detectPlatform(value);
+                      if (detected && detected !== platform) {
+                        setPlatform(detected);
+                        setAutoPlatform(detected);
+                        setError(null);
+                      } else if (!value.trim()) {
+                        setAutoPlatform(null);
+                      }
+                    }}
                     placeholder={meta.addPlaceholder}
                     placeholderTextColor={Colors.textMuted}
                     autoCapitalize="none"
@@ -487,7 +505,13 @@ export function OnboardingWizard({ visible, onClose, hidden, onHiddenChange }: O
                     {adding ? <ActivityIndicator size="small" color={Colors.white} /> : <Plus size={20} color={Colors.white} />}
                   </Pressable>
                 </View>
-                <Text style={styles.muted}>{meta.addHelp}</Text>
+                {autoPlatform === platform ? (
+                  <Text style={[styles.muted, { color: Colors.accent }]}>
+                    That&apos;s a {meta.label} link, so {meta.label} is now selected.
+                  </Text>
+                ) : (
+                  <Text style={styles.muted}>{meta.addHelp}</Text>
+                )}
               </View>
 
               <View style={{ gap: 8 }}>

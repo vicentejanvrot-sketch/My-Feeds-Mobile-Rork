@@ -72,7 +72,7 @@ import {
 import { timeAgo } from "@/lib/format";
 import { openExternalLink } from "@/lib/open-link";
 import { PlatformBadge } from "@/components/PlatformBadge";
-import { PLATFORMS, PLATFORM_META, platformOf, type Platform } from "@/lib/platforms";
+import { PLATFORMS, PLATFORM_META, platformOf, detectPlatform, type Platform } from "@/lib/platforms";
 
 // ── Helpers ────────────────────────────────────────────────────────
 
@@ -557,6 +557,8 @@ export default function AgentDetailScreen() {
   const [newChannelUrl, setNewChannelUrl] = useState("");
   const [newChannelPriority, setNewChannelPriority] = useState(3);
   const [newPlatform, setNewPlatform] = useState<Platform>("youtube");
+  // Set when a pasted link picked the platform for the user.
+  const [autoPlatform, setAutoPlatform] = useState<Platform | null>(null);
   const addSource = useAddSource(agentId ?? "");
   const [showAddRecipient, setShowAddRecipient] = useState(false);
   const [newRecipientEmail, setNewRecipientEmail] = useState("");
@@ -705,6 +707,12 @@ export default function AgentDetailScreen() {
       showToast(`Enter a ${PLATFORM_META[newPlatform].sourceNoun.toLowerCase()}`, "error");
       return;
     }
+    // The link says one platform but another is selected (picked after pasting).
+    const detected = detectPlatform(value);
+    if (detected && detected !== newPlatform) {
+      showToast(`That's a ${PLATFORM_META[detected].label} link. Select ${PLATFORM_META[detected].label} or paste a ${PLATFORM_META[newPlatform].label} link.`, "error");
+      return;
+    }
     try {
       if (newPlatform === "youtube") {
         await addChannel.mutateAsync({
@@ -724,6 +732,7 @@ export default function AgentDetailScreen() {
       setNewChannelUrl("");
       setNewChannelPriority(3);
       setNewPlatform("youtube");
+      setAutoPlatform(null);
       setShowAddChannel(false);
     } catch (e) {
       const msg = e instanceof Error ? e.message : "Failed to add source";
@@ -1281,7 +1290,10 @@ export default function AgentDetailScreen() {
                 return (
                   <Pressable
                     key={p}
-                    onPress={() => setNewPlatform(p)}
+                    onPress={() => {
+                      setNewPlatform(p);
+                      setAutoPlatform(null);
+                    }}
                     style={[sourceStyles.platformBtn, active && sourceStyles.platformBtnActive]}
                     accessibilityRole="button"
                     accessibilityState={{ selected: active }}
@@ -1300,12 +1312,27 @@ export default function AgentDetailScreen() {
               placeholder={PLATFORM_META[newPlatform].addPlaceholder}
               placeholderTextColor={Colors.textMuted}
               value={newChannelUrl}
-              onChangeText={setNewChannelUrl}
+              onChangeText={(value) => {
+                setNewChannelUrl(value);
+                const detected = detectPlatform(value);
+                if (detected && detected !== newPlatform) {
+                  setNewPlatform(detected);
+                  setAutoPlatform(detected);
+                } else if (!value.trim()) {
+                  setAutoPlatform(null);
+                }
+              }}
               autoCapitalize="none"
               autoCorrect={false}
               returnKeyType="done"
             />
-            <Text style={sourceStyles.help}>{PLATFORM_META[newPlatform].addHelp}</Text>
+            {autoPlatform === newPlatform ? (
+              <Text style={[sourceStyles.help, { color: Colors.accent }]}>
+                That&apos;s a {PLATFORM_META[newPlatform].label} link, so {PLATFORM_META[newPlatform].label} is now selected.
+              </Text>
+            ) : (
+              <Text style={sourceStyles.help}>{PLATFORM_META[newPlatform].addHelp}</Text>
+            )}
 
             <Text style={[styles.formLabel, { marginTop: 14 }]}>Priority</Text>
             <PriorityPicker

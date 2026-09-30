@@ -135,6 +135,50 @@ export function platformOf(value: string | null | undefined): Platform {
   return value && value !== "youtube" && (PLATFORMS as string[]).includes(value) ? (value as Platform) : "youtube";
 }
 
+// Web addresses that tell us which platform a pasted link belongs to.
+// A subdomain counts too (m.youtube.com, old.reddit.com, vm.tiktok.com).
+const PLATFORM_HOSTS: [string, Platform][] = [
+  ["youtube.com", "youtube"], ["youtu.be", "youtube"],
+  ["x.com", "x"], ["twitter.com", "x"],
+  ["reddit.com", "reddit"], ["redd.it", "reddit"],
+  ["instagram.com", "instagram"], ["instagr.am", "instagram"],
+  ["linkedin.com", "linkedin"], ["lnkd.in", "linkedin"],
+  ["github.com", "github"],
+  ["tiktok.com", "tiktok"],
+  ["facebook.com", "facebook"], ["fb.com", "facebook"], ["fb.watch", "facebook"],
+  ["music.apple.com", "apple_music"],
+  ["podcasts.apple.com", "apple_podcasts"],
+];
+
+/**
+ * Works out the platform from what the user pasted in Add Source, so an
+ * Instagram link can't be added with YouTube selected. Returns null when the
+ * text doesn't say (a plain @handle or a name could be any platform).
+ * Parsed by hand because URL.hostname isn't available on every RN runtime.
+ */
+export function detectPlatform(value: string): Platform | null {
+  const text = value.trim();
+  if (!text) return null;
+  if (/^\/?(r|u|user)\/[A-Za-z0-9_-]+/i.test(text)) return "reddit";
+
+  const match = /^(?:[a-z][a-z0-9+.-]*:\/\/)?([^\/?#\s:@]+)(?::\d+)?([^?#\s]*)/i.exec(text);
+  if (!match) return null;
+  const host = match[1].toLowerCase().replace(/^www\./, "");
+  const path = match[2].toLowerCase();
+  if (!host.includes(".")) return null;
+
+  // Old iTunes links use one host for both music and podcasts.
+  if (host === "itunes.apple.com") {
+    if (path.includes("/podcast")) return "apple_podcasts";
+    if (path.includes("/artist") || path.includes("/album")) return "apple_music";
+    return null;
+  }
+  for (const [domain, platform] of PLATFORM_HOSTS) {
+    if (host === domain || host.endsWith(`.${domain}`)) return platform;
+  }
+  return null;
+}
+
 // Non-YouTube items store "<platform>:<id>" in items.video_id (x, reddit, instagram, linkedin, github, tiktok, facebook, apple_music, apple_podcasts).
 export function isPostVideoId(videoId: string | null | undefined): boolean {
   return !!videoId && /^(x|reddit|instagram|linkedin|github|tiktok|facebook|apple_music|apple_podcasts):/.test(videoId);
