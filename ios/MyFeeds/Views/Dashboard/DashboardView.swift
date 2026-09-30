@@ -13,7 +13,7 @@ struct DashboardView: View {
     @State private var isOffline = false
     @State private var agentToDelete: Agent?
     // Onboarding wizard: opens by itself once per launch until the user ticks
-    // "Don't show this again".
+    // "Don't show this again"; the floating ? button opens it any time.
     @State private var wizardOpen = false
     @State private var wizardKey = 0
 
@@ -94,6 +94,11 @@ struct DashboardView: View {
             .frame(maxWidth: .infinity)
         }
         .background(Theme.background)
+        .overlay(alignment: .bottomTrailing) {
+            if overlay.pendingId == nil {
+                helpButton
+            }
+        }
         .toolbar(.hidden, for: .navigationBar)
         .refreshable { await load() }
         .task { await load() }
@@ -256,6 +261,24 @@ struct DashboardView: View {
     }
 
     // MARK: - Wizard
+
+    /// Floating button that opens the onboarding wizard again.
+    private var helpButton: some View {
+        Button {
+            openWizard()
+        } label: {
+            Image(systemName: "questionmark")
+                .font(.system(size: 22, weight: .bold))
+                .foregroundStyle(.white)
+                .frame(width: 52, height: 52)
+                .background(Circle().fill(Theme.accent))
+                .shadow(color: .black.opacity(0.35), radius: 8, y: 4)
+        }
+        .buttonStyle(.plain)
+        .padding(.trailing, 16)
+        .padding(.bottom, 16)
+        .accessibilityLabel("How it works")
+    }
 
     /// A new id gives the wizard fresh state each time it opens.
     private func openWizard() {
