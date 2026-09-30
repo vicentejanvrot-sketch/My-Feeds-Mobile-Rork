@@ -63,7 +63,10 @@ struct DownloadButton: View {
         Task {
             do {
                 try await store.download(itemId: itemId)
-                toasts.show(hasAudio ? "Episode saved for offline listening" : "Saved for offline reading")
+                // Downloads stay inside My Feeds (not Photos or Files), so say where to find them.
+                toasts.show(hasAudio
+                    ? "Episode saved in My Feeds for offline listening. Find it in Settings > Downloads."
+                    : "Saved in My Feeds for offline reading. Find it in Settings > Downloads.")
             } catch {
                 toasts.show(error.localizedDescription, type: .error)
             }
