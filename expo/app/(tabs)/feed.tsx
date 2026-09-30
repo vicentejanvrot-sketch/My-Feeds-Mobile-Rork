@@ -51,7 +51,8 @@ import {
 import { useToast } from "@/components/Toast";
 import { timeAgo, compactNumber, formatDuration } from "@/lib/format";
 import { PlatformBadge } from "@/components/PlatformBadge";
-import { PLATFORMS, PLATFORM_META, platformOf, isPostVideoId, type Platform } from "@/lib/platforms";
+// Named SourcePlatform here: react-native's Platform (Platform.OS) is imported too.
+import { PLATFORMS, PLATFORM_META, platformOf, isPostVideoId, type Platform as SourcePlatform } from "@/lib/platforms";
 
 /** Extract YouTube video ID from a watch URL (fallback when video_id is null). */
 function extractYoutubeId(url: string | null): string | null {
@@ -173,7 +174,7 @@ export default function FeedScreen() {
     (params.status as StatusFilter) || "not_watched",
   );
   const [sortMode, setSortMode] = useState<SortMode>("priority");
-  const [platformFilter, setPlatformFilter] = useState<Platform | "all">("all");
+  const [platformFilter, setPlatformFilter] = useState<SourcePlatform | "all">("all");
 
   const listUnsorted = agents.data ?? [];
   const agentList = useMemo(
@@ -304,7 +305,7 @@ export default function FeedScreen() {
   // Items per platform under the current filters; the chips only show when
   // there is more than one platform, and a platform at 0 has no chip.
   const platformCounts = useMemo(() => {
-    const counts = new Map<Platform, number>();
+    const counts = new Map<SourcePlatform, number>();
     for (const it of baseFilteredItems) {
       const p = platformOf(it.platform);
       counts.set(p, (counts.get(p) ?? 0) + 1);
@@ -534,14 +535,16 @@ export default function FeedScreen() {
             return (
               <Pressable
                 key={p}
-                onPress={() => setPlatformFilter(p as Platform | "all")}
+                onPress={() => setPlatformFilter(p as SourcePlatform | "all")}
                 style={[postPreviewStyles.chip, active && postPreviewStyles.chipActive]}
                 accessibilityRole="button"
                 accessibilityState={{ selected: active }}
               >
-                {p !== "all" ? <PlatformBadge platform={p as Platform} /> : null}
+                {p !== "all" ? <PlatformBadge platform={p as SourcePlatform} /> : null}
                 <Text style={[postPreviewStyles.chipText, active && postPreviewStyles.chipTextActive]}>
-                  {p === "all" ? `All · ${baseFilteredItems.length}` : `${PLATFORM_META[p as Platform].label} · ${platformCounts.get(p as Platform)}`}
+                  {p === "all" ? `All · ${baseFilteredItems.length}` : p === "x"
+                    ? `${platformCounts.get(p as SourcePlatform)}` // X's logo is already the letter X
+                    : `${PLATFORM_META[p as SourcePlatform].label} · ${platformCounts.get(p as SourcePlatform)}`}
                 </Text>
               </Pressable>
             );

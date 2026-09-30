@@ -273,7 +273,12 @@ struct FeedView: View {
             HStack(spacing: 8) {
                 platformChip(platform: nil, label: "All · \(total)")
                 ForEach(SourcePlatform.allCases.filter { (counts[$0] ?? 0) > 0 }, id: \.self) { platform in
-                    platformChip(platform: platform, label: "\(platform.label) · \(counts[platform] ?? 0)")
+                    // X's logo is already the letter X, so its chip shows just the count.
+                    platformChip(
+                        platform: platform,
+                        label: platform == .x ? "\(counts[platform] ?? 0)" : "\(platform.label) · \(counts[platform] ?? 0)"
+                    )
+                    .accessibilityLabel("\(platform.label), \(counts[platform] ?? 0)")
                 }
             }
             .padding(.horizontal, 16)
