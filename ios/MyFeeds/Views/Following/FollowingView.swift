@@ -1113,13 +1113,32 @@ private struct PersonSheet: View {
                     Text("Add to")
                         .font(.system(size: 13))
                         .foregroundStyle(Theme.textSecondary)
-                    Picker("Add to", selection: $agentId) {
-                        ForEach(agents) { agent in
-                            Text(agent.name).tag(agent.id as String?)
+                    // A Menu with its own one-line label: the plain menu Picker
+                    // wraps long collection names onto the card below.
+                    Menu {
+                        Picker("Add to", selection: $agentId) {
+                            ForEach(agents) { agent in
+                                Text(agent.name).tag(agent.id as String?)
+                            }
                         }
+                    } label: {
+                        HStack(spacing: 4) {
+                            Text(agents.first { $0.id == agentId }?.name ?? "Choose a collection")
+                                .font(.system(size: 13, weight: .semibold))
+                                .lineLimit(1)
+                                .truncationMode(.tail)
+                            Image(systemName: "chevron.up.chevron.down")
+                                .font(.system(size: 10, weight: .semibold))
+                                .fixedSize()
+                        }
+                        .foregroundStyle(Theme.accent)
+                        .padding(.horizontal, 10)
+                        .frame(height: 30)
+                        .background(Theme.input)
+                        .clipShape(Capsule())
+                        .overlay(Capsule().stroke(Theme.border, lineWidth: 1))
                     }
-                    .pickerStyle(.menu)
-                    .tint(Theme.accent)
+                    .accessibilityLabel("Add to collection")
                     Spacer(minLength: 0)
                 }
                 .padding(.bottom, 8)
