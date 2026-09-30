@@ -70,6 +70,11 @@ export default function TabLayout() {
         name="agent-detail"
         options={{ href: null }}
       />
+      {/* Onboarding wizard test copy of the Dashboard: reachable at /onboarding-test, no tab button. */}
+      <Tabs.Screen
+        name="onboarding-test"
+        options={{ href: null }}
+      />
     </Tabs>
   );
 }
