@@ -642,7 +642,7 @@ struct FeedView: View {
         return item.channelName ?? item.sourcePlatform.label
     }
 
-        private func toggleSelection(_ item: FeedItem) {
+    private func toggleSelection(_ item: FeedItem) {
         if selectedIds.contains(item.id) {
             selectedIds.remove(item.id)
         } else {
