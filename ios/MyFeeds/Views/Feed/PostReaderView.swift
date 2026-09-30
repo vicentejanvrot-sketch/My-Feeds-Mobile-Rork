@@ -136,7 +136,8 @@ struct PostReaderView: View {
                     } else if platform == .tiktok, photos.isEmpty, let videoId = tikTokVideoId(item) {
                         // TikTok's own player: its CDN links expire, the embed doesn't.
                         TikTokEmbedPlayer(videoId: videoId)
-                    } else if platform == .facebook, item.postVideo != nil,
+                    } else if platform == .facebook, let video = item.postVideo,
+                              video.playableURL?.isFileURL != true,
                               let embed = FacebookEmbedPlayer.embed(for: item.url) {
                         // Facebook's own player: its MP4 links expire, the post link doesn't.
                         FacebookEmbedPlayer(url: embed.url, portrait: embed.portrait)

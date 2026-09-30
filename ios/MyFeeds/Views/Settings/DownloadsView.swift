@@ -18,7 +18,7 @@ struct DownloadsView: View {
                 if list.isEmpty {
                     emptyState
                 } else {
-                    Text("\(list.count) \(list.count == 1 ? "item" : "items") · \(DownloadStore.formatBytes(store.totalBytes)) on this phone. Podcasts, photos and text are saved; videos still need a connection.")
+                    Text("\(list.count) \(list.count == 1 ? "item" : "items") · \(DownloadStore.formatBytes(store.totalBytes)) on this phone. Posts are saved with their photos and videos, and podcasts with the episode. YouTube videos still need a connection.")
                         .font(.system(size: 13))
                         .foregroundStyle(Theme.textSecondary)
                         .lineSpacing(3)
