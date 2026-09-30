@@ -116,6 +116,9 @@ type PostEmbed = {
   embed_url?: string | null;
   kind?: string | null;
   label?: string | null;
+  // Spotify release: the Apple Music link it was found from, so the reader can
+  // look for the Spotify match again while Spotify's player isn't known yet.
+  source_url?: string | null;
 };
 
 function escapeAttr(value: string): string {
@@ -389,6 +392,62 @@ function SpotifySection({ sourceUrl }: { sourceUrl: string }) {
           />
         </View>
       ) : null}
+    </View>
+  );
+}
+
+// A Spotify release saved before Songlink could match it (new releases often
+// take a few days). Asks spotify-link again from the Apple link and shows
+// Spotify's player as soon as there's a match; until then, the artwork and a
+// note, with "Open in Spotify" below searching Spotify for it.
+function SpotifyPendingRelease({ sourceUrl, image }: { sourceUrl: string; image: string | null }) {
+  const { data, isLoading } = useQuery({
+    queryKey: ["spotify-link", sourceUrl],
+    staleTime: 3600 * 1000,
+    queryFn: async () => {
+      const { data, error } = await supabase.functions.invoke("spotify-link", { body: { url: sourceUrl } });
+      if (error) return null;
+      return (data ?? null) as { spotifyUrl?: string | null; embedUrl?: string | null; kind?: string | null } | null;
+    },
+  });
+  if (data?.embedUrl) {
+    const embedUrl = data.embedUrl;
+    const spotifyUrl = data.spotifyUrl;
+    const short = data.kind === "track";
+    return (
+      <View style={{ gap: 12 }}>
+        <View style={[styles.appleEmbed, { height: short ? 152 : 352 }]}>
+          <WebView
+            source={{ uri: embedUrl }}
+            style={{ flex: 1, backgroundColor: "transparent" }}
+            allowsInlineMediaPlayback
+            mediaPlaybackRequiresUserAction={false}
+            javaScriptEnabled
+            scrollEnabled={!short}
+            accessibilityLabel="Spotify player"
+          />
+        </View>
+        {spotifyUrl ? (
+          <Pressable
+            onPress={() => void openExternalLink(spotifyUrl)}
+            style={({ pressed }) => [styles.openBtn, pressed && { opacity: 0.7 }]}
+            accessibilityRole="link"
+          >
+            <SpotifyLogo />
+            <Text style={styles.openText}>Open in Spotify</Text>
+          </Pressable>
+        ) : null}
+      </View>
+    );
+  }
+  return (
+    <View style={{ gap: 10 }}>
+      {image ? <ExpandableMedia media={{ type: "photo", url: image } as PostEmbed} /> : null}
+      <Text style={[styles.muted, { textAlign: "center" }]}>
+        {isLoading
+          ? "Looking for it on Spotify…"
+          : "Spotify's player shows here once this release is linked to Spotify, usually within a few days of release. Open in Spotify searches for it now."}
+      </Text>
     </View>
   );
 }
@@ -821,6 +880,10 @@ export default function PostReaderScreen() {
   const appleRelease = platform === "apple_music" ? embeds.find((m) => m.type === "album" && m.embed_url) ?? null : null;
   // A Spotify artist's release: Spotify's own player (album or single).
   const spotifyRelease = platform === "spotify" ? embeds.find((m) => m.type === "album" && m.embed_url) ?? null : null;
+  // Not matched to Spotify yet when it was saved: looked up again on open.
+  const spotifyPendingSource = platform === "spotify" && !spotifyRelease
+    ? embeds.find((m) => m.type === "album" && m.source_url)?.source_url ?? null
+    : null;
   const ytMusic = platform === "youtube_music" ? embeds.find((m) => (m.type === "album" || m.type === "video") && (m.video_ids?.length || m.youtube_id)) ?? null : null;
   const ytMusicIds = ytMusic ? (ytMusic.video_ids?.length ? ytMusic.video_ids : ytMusic.youtube_id ? [ytMusic.youtube_id] : []) : [];
   const audiobook = platform === "apple_books" ? embeds.find((m) => m.type === "audiobook") ?? null : null;
@@ -886,6 +949,8 @@ export default function PostReaderScreen() {
               </Pressable>
             ) : null}
           </View>
+        ) : spotifyPendingSource ? (
+          <SpotifyPendingRelease sourceUrl={spotifyPendingSource} image={image} />
         ) : ytMusic && ytMusicIds.length > 0 ? (
           <View style={{ gap: 12 }}>
             <YouTubeMusicPlayer videoIds={ytMusicIds} />
