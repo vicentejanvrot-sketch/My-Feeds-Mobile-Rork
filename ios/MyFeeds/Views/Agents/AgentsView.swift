@@ -173,19 +173,6 @@ private struct AgentListCard: View {
                     }
                     .padding(.top, 12)
 
-                    if let provider = agent.aiProvider, !provider.isEmpty {
-                        Text(provider.capitalized)
-                            .font(.system(size: 11, weight: .semibold))
-                            .foregroundStyle(accent)
-                            .padding(.horizontal, 8)
-                            .padding(.vertical, 3)
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 6)
-                                    .stroke(accent, lineWidth: 1)
-                            )
-                            .padding(.top, 12)
-                    }
-
                     Button(action: onRun) {
                         HStack(spacing: 6) {
                             if isPending {

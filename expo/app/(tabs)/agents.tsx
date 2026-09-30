@@ -224,14 +224,6 @@ export default function AgentsScreen() {
                   ) : null}
                 </View>
 
-                {agent.ai_provider ? (
-                  <View style={[styles.providerChip, { borderColor: accent }]}>
-                    <Text style={[styles.providerText, { color: accent }]}>
-                      {agent.ai_provider}
-                    </Text>
-                  </View>
-                ) : null}
-
                 <Pressable
                   style={({ pressed }) => [
                     styles.runBtn,
@@ -313,15 +305,6 @@ const styles = StyleSheet.create({
   metaRow: { flexDirection: "row", flexWrap: "wrap", gap: 14, marginTop: 12 },
   meta: { flexDirection: "row", alignItems: "center", gap: 5 },
   metaText: { fontSize: 12, color: Colors.textSecondary },
-  providerChip: {
-    alignSelf: "flex-start",
-    borderWidth: 1,
-    borderRadius: 6,
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    marginTop: 12,
-  },
-  providerText: { fontSize: 11, fontWeight: "600" as const, textTransform: "capitalize" },
   runBtn: {
     flexDirection: "row",
     alignItems: "center",
