@@ -1,4 +1,5 @@
 import SwiftUI
+import Supabase
 
 /// What the wizard hands back when the user closes it from the last screen.
 struct OnboardingResult {
