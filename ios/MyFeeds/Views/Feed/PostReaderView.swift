@@ -1256,8 +1256,6 @@ private struct PhotoCarousel: View {
     }
 }
 
-/// Apple Music's embed player: previews for everyone, full songs for listeners
-/// signed in to Apple Music. A single is a short strip, an album shows its tracks.
 /// Apple Books audiobook: the cover and Apple's short sample. The whole book is
 /// bought and played in Apple Books, so this doesn't count toward watch time.
 private struct AudiobookCardView: View {
@@ -1356,6 +1354,8 @@ private struct AudiobookCardView: View {
     }
 }
 
+/// Apple Music's embed player: previews for everyone, full songs for listeners
+/// signed in to Apple Music. A single is a short strip, an album shows its tracks.
 private struct AppleMusicEmbedPlayer: View {
     let url: URL
     let single: Bool
