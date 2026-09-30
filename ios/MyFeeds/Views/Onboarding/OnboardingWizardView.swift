@@ -35,6 +35,7 @@ struct OnboardingWizardView: View {
         let id: String
         let platform: SourcePlatform
         let name: String
+        var isPrivate = false
     }
 
     private let stepLabels = ["Your collection", "Sources", "Read & watch"]
@@ -58,6 +59,8 @@ struct OnboardingWizardView: View {
     /// Set when a pasted link picked the platform for the user.
     @State private var autoPlatform: SourcePlatform?
     @State private var sourceValue = ""
+    /// Set when Instagram says the account is private (or can't be loaded).
+    @State private var privateOffer: String?
     @State private var adding = false
     @State private var removingId: String?
     @State private var sources: [AddedSource] = []
@@ -324,6 +327,7 @@ struct OnboardingWizardView: View {
                         .onSubmit { addSource() }
                         .accessibilityLabel(platform.sourceNoun)
                         .onChange(of: sourceValue) { _, value in
+                            privateOffer = nil
                             if let detected = SourcePlatform.detect(from: value), detected != platform {
                                 platform = detected
                                 autoPlatform = detected
@@ -361,6 +365,46 @@ struct OnboardingWizardView: View {
                         .font(.system(size: 13))
                         .foregroundStyle(Theme.textSecondary)
                 }
+                if let privateOffer {
+                    VStack(alignment: .leading, spacing: 8) {
+                        HStack(alignment: .top, spacing: 8) {
+                            Image(systemName: "lock.fill")
+                                .font(.system(size: 12))
+                                .foregroundStyle(Theme.textSecondary)
+                                .padding(.top, 2)
+                            Text(privateOffer)
+                                .font(.system(size: 13))
+                                .foregroundStyle(Theme.textPrimary)
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+                        Text("A private account shows up on People with a button to open it in Instagram. Its posts won't appear in your feed.")
+                            .font(.system(size: 12))
+                            .foregroundStyle(Theme.textSecondary)
+                            .fixedSize(horizontal: false, vertical: true)
+                        Button {
+                            addSource(asPrivate: true)
+                        } label: {
+                            HStack(spacing: 6) {
+                                if adding {
+                                    ProgressView().tint(Theme.textPrimary)
+                                } else {
+                                    Image(systemName: "lock.fill").font(.system(size: 12))
+                                    Text("Add as private account").font(.system(size: 13, weight: .semibold))
+                                }
+                            }
+                            .foregroundStyle(Theme.textPrimary)
+                            .padding(.horizontal, 12)
+                            .frame(height: 36)
+                            .overlay(RoundedRectangle(cornerRadius: 8).stroke(Theme.border, lineWidth: 1))
+                        }
+                        .buttonStyle(.plain)
+                        .disabled(adding)
+                    }
+                    .padding(12)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .background(RoundedRectangle(cornerRadius: 10).fill(Theme.input))
+                    .overlay(RoundedRectangle(cornerRadius: 10).stroke(Theme.border, lineWidth: 1))
+                }
             }
 
             VStack(alignment: .leading, spacing: 8) {
@@ -381,6 +425,12 @@ struct OnboardingWizardView: View {
                                 .font(.system(size: 14))
                                 .foregroundStyle(Theme.textPrimary)
                                 .lineLimit(1)
+                            if source.isPrivate {
+                                Label("Private", systemImage: "lock.fill")
+                                    .font(.system(size: 12))
+                                    .foregroundStyle(Theme.textSecondary)
+                                    .labelStyle(.titleAndIcon)
+                            }
                             Spacer(minLength: 0)
                             Button {
                                 remove(source)
@@ -730,10 +780,11 @@ struct OnboardingWizardView: View {
 
     /// Step 2: YouTube channels go straight into channels (run-agent resolves
     /// them on the first run); every other platform is checked by add-source.
-    private func addSource() {
+    private func addSource(asPrivate: Bool = false) {
         let value = sourceValue.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !value.isEmpty, let agentId, !adding else { return }
         errorText = nil
+        privateOffer = nil
         if let detected = SourcePlatform.detect(from: value), detected != platform {
             errorText = "That's a \(detected.label) link. Select \(detected.label) or paste a \(platform.label) link."
             return
@@ -757,11 +808,19 @@ struct OnboardingWizardView: View {
                         sources.append(AddedSource(id: row.id, platform: .youtube, name: value))
                     }
                 } else {
-                    let channel = try await service.addSource(agentId: agentId, platform: chosen, value: value, priority: 3)
-                    sources.append(AddedSource(id: channel.id, platform: chosen, name: channel.displayName))
+                    let channel = try await service.addSource(
+                        agentId: agentId,
+                        platform: chosen,
+                        value: value,
+                        priority: 3,
+                        privateAccount: asPrivate
+                    )
+                    sources.append(AddedSource(id: channel.id, platform: chosen, name: channel.displayName, isPrivate: channel.isPrivateAccount))
                 }
                 sourceValue = ""
                 autoPlatform = nil
+            } catch let error as SourceError where !asPrivate && error.canAddAsPrivate {
+                privateOffer = error.message
             } catch {
                 errorText = error.localizedDescription
             }
