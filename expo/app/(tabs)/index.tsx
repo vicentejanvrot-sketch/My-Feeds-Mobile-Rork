@@ -473,9 +473,9 @@ export default function DashboardScreen() {
             <ChevronRight size={18} color={Colors.textMuted} />
           </Pressable>
 
-          {/* ── Feed ─────────────────────────────────────────────── */}
+          {/* ── Feeds ─────────────────────────────────────────────── */}
           <SectionHeader
-            title="Feed"
+            title="Feeds"
             action={list.length > 0 ? "View All" : undefined}
             onAction={() => router.push("/(tabs)/feed")}
           />
