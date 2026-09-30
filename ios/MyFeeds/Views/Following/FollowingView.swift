@@ -453,7 +453,7 @@ struct FollowingView: View {
                             FollowButton(
                                 isBusy: busyKeys.contains(account.key),
                                 isEnabled: person.agentIds.first != nil,
-                                openInstead: account.platform.isFollowable
+                                openInstead: SourcePlatform.isFollowableAccount(account.platform, url: account.url)
                                     ? nil
                                     : URL(string: account.url).map { (label: account.platform.openLabel, url: $0) }
                             ) {
@@ -1214,7 +1214,7 @@ private struct PersonSheet: View {
                         FollowButton(
                             isBusy: busyKeys.contains(account.key),
                             isEnabled: agentId != nil,
-                            openInstead: account.platform.isFollowable
+                            openInstead: SourcePlatform.isFollowableAccount(account.platform, url: account.url)
                                 ? nil
                                 : URL(string: account.url).map { (label: account.platform.openLabel, url: $0) }
                         ) {

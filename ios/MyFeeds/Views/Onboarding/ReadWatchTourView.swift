@@ -27,7 +27,8 @@ struct ReadWatchTourView: View {
     private var platformPicker: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 8) {
-                ForEach(SourcePlatform.addable, id: \.self) { p in
+                // Spotify releases work like Apple Music's, so the tour leaves it out.
+                ForEach(SourcePlatform.addable.filter { $0 != .spotify }, id: \.self) { p in
                     let selected = platform == p
                     Button {
                         platform = p

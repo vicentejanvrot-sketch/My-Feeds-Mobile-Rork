@@ -100,7 +100,12 @@ struct PostReaderView: View {
 
                     let photos = item.postPhotoURLs
                     let slides = item.carouselMedia
-                    if platform == .youtubeMusic,
+                    if platform == .spotify,
+                       let release = item.media?.first(where: { $0.type == "album" && $0.embedUrl != nil }),
+                       let raw = release.embedUrl, let embedURL = URL(string: raw) {
+                        // A Spotify artist's release in Spotify's own player.
+                        SpotifyReleasePlayer(embedURL: embedURL, spotifyURL: item.url.flatMap(URL.init(string:)))
+                    } else if platform == .youtubeMusic,
                        let music = item.media?.first(where: { ($0.type == "album" || $0.type == "video") && $0.embedUrl != nil }),
                        let raw = music.embedUrl, let embedURL = URL(string: raw) {
                         // Songs, albums (all tracks in a row) and music videos in YouTube's player.
@@ -410,7 +415,7 @@ struct PostReaderView: View {
             case .github: gitHubActionBar(item)
             case .tiktok: tikTokActionBar(item)
             case .facebook: facebookActionBar(item)
-            case .appleMusic, .applePodcasts, .appleBooks, .youtubeMusic: appleActionBar(item, platform: platform)
+            case .appleMusic, .applePodcasts, .appleBooks, .youtubeMusic, .spotify: appleActionBar(item, platform: platform)
             case .reddit: redditActionBar(item)
             default:
                 // YouTube videos opened from Downloads: just the download icon.
@@ -637,6 +642,7 @@ struct PostReaderView: View {
         let tint = platform == .appleMusic ? Self.appleMusicRed
             : platform == .appleBooks ? Self.appleBooksOrange
             : platform == .youtubeMusic ? Self.youtubeMusicRed
+            : platform == .spotify ? SpotifyLogo.green
             : Self.applePodcastsPurple
         return HStack(spacing: 4) {
             igButton(
@@ -1465,6 +1471,30 @@ private struct SpotifySection: View {
         }
         .task(id: sourceURL) {
             link = await SupabaseService.shared.spotifyLink(for: sourceURL)
+        }
+    }
+}
+
+/// A followed Spotify artist's release: Spotify's embed player (a strip for a
+/// single track, the track list for an album) and a button to open it in Spotify.
+private struct SpotifyReleasePlayer: View {
+    let embedURL: URL
+    let spotifyURL: URL?
+
+    @Environment(\.openURL) private var openURL
+
+    var body: some View {
+        VStack(spacing: 10) {
+            EmbedWebView(url: embedURL)
+                .frame(height: embedURL.path.contains("/track/") ? 152 : 352)
+                .frame(maxWidth: .infinity)
+                .clipShape(.rect(cornerRadius: 12))
+            if let spotifyURL {
+                Button { openURL(spotifyURL) } label: {
+                    spotifyButtonLabel("Open in Spotify", showLogo: true)
+                }
+                .buttonStyle(.plain)
+            }
         }
     }
 }

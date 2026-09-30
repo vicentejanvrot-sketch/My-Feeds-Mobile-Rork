@@ -15,15 +15,19 @@ nonisolated enum SourcePlatform: String, Codable, CaseIterable, Hashable, Sendab
     case applePodcasts = "apple_podcasts"
     case appleBooks = "apple_books"
     case youtubeMusic = "youtube_music"
-    /// Spotify artist pages and shows, found on People. They open in Spotify;
-    /// they can't be added as sources (see addable).
+    /// Spotify artists: new releases come from Apple's catalogue and play in
+    /// Spotify's player (see add-source / run-agent). Spotify podcast shows are
+    /// found on People but only open in Spotify.
     case spotify
 
     /// Platforms a source can be added from, in the Add Source grids.
-    static var addable: [SourcePlatform] { allCases.filter(\.isFollowable) }
+    static var addable: [SourcePlatform] { allCases }
 
-    /// False for Spotify, which only opens.
-    var isFollowable: Bool { self != .spotify }
+    /// True when an account found on People can be followed as a source.
+    /// Spotify artists can; Spotify podcast shows only open in Spotify.
+    static func isFollowableAccount(_ platform: SourcePlatform, url: String) -> Bool {
+        platform != .spotify || !url.contains("/show/")
+    }
 
     /// Unknown or missing values (rows written before the migration) are YouTube.
     init(raw: String?) {
@@ -34,7 +38,7 @@ nonisolated enum SourcePlatform: String, Codable, CaseIterable, Hashable, Sendab
     /// (x, reddit, instagram, linkedin, github, tiktok, facebook, apple_music, apple_podcasts, apple_books, youtube_music).
     static func isPostVideoId(_ videoId: String?) -> Bool {
         guard let videoId else { return false }
-        return ["x:", "reddit:", "instagram:", "linkedin:", "github:", "tiktok:", "facebook:", "apple_music:", "apple_podcasts:", "apple_books:", "youtube_music:"].contains { videoId.hasPrefix($0) }
+        return ["x:", "reddit:", "instagram:", "linkedin:", "github:", "tiktok:", "facebook:", "apple_music:", "apple_podcasts:", "apple_books:", "youtube_music:", "spotify:"].contains { videoId.hasPrefix($0) }
     }
 
     /// Platform of a post item from its "<platform>:<id>" video_id; YouTube otherwise.
@@ -153,7 +157,7 @@ extension SourcePlatform {
         case .applePodcasts: return "Show name or https://podcasts.apple.com/us/podcast/name/id123"
         case .appleBooks: return "Author name or https://books.apple.com/us/author/name/id123"
         case .youtubeMusic: return "Artist name or https://music.youtube.com/channel/UC..."
-        case .spotify: return ""
+        case .spotify: return "https://open.spotify.com/artist/..."
         }
     }
 
@@ -171,7 +175,7 @@ extension SourcePlatform {
         case .applePodcasts: return "New episodes, played right here. Adding a show also brings in its latest episode."
         case .appleBooks: return "New audiobooks, with a sample to listen to. Adding an author also brings in their latest audiobook."
         case .youtubeMusic: return "New songs, albums and music videos. Adding an artist also brings in their latest album."
-        case .spotify: return ""
+        case .spotify: return "New singles and albums, played with Spotify's player. Paste the artist's Spotify link. Adding an artist also brings in their latest album."
         }
     }
 
@@ -394,6 +398,7 @@ extension SourcePlatform {
         ("music.apple.com", .appleMusic),
         ("podcasts.apple.com", .applePodcasts),
         ("books.apple.com", .appleBooks),
+        ("open.spotify.com", .spotify),
     ]
 
     /// Works out the platform from what the user pasted in Add Source, so an

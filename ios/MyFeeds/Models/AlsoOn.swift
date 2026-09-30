@@ -138,6 +138,12 @@ nonisolated enum AlsoOn {
             if first == "c" || first == "user", let second { return "youtube:c:" + second.lowercased() }
             return nil
         }
+        if host == "open.spotify.com" {
+            // Same key as find-also-on: spotify:artist:<id> / spotify:show:<id> (ids are case-sensitive).
+            let rest = first.hasPrefix("intl-") ? Array(parts.dropFirst()) : parts
+            guard rest.count > 1, rest[0] == "artist" || rest[0] == "show" else { return nil }
+            return "spotify:" + rest[0] + ":" + rest[1]
+        }
         if host == "music.youtube.com" {
             guard let range = comps.path.range(of: #"/channel/UC[\w-]{20,}"#, options: .regularExpression) else { return nil }
             return "youtube_music:" + comps.path[range].replacingOccurrences(of: "/channel/", with: "")
