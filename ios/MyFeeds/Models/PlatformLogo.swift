@@ -289,10 +289,43 @@ nonisolated enum PlatformLogoPaths {
         path.closeSubpath()
         return path
     }
+
+    /// Facebook's round "f" mark: a circle with the f cut out.
+    static func facebook(in rect: CGRect) -> Path {
+        let p = scaler(rect)
+        var path = Path()
+        path.move(to: p(9.101, 23.691))
+        path.addLine(to: p(9.101, 15.711))
+        path.addLine(to: p(6.627, 15.711))
+        path.addLine(to: p(6.627, 12.044))
+        path.addLine(to: p(9.101, 12.044))
+        path.addLine(to: p(9.101, 10.464))
+        path.addCurve(to: p(14.959, 4.486), control1: p(9.101, 6.379), control2: p(10.949, 4.486))
+        path.addCurve(to: p(16.427, 4.589), control1: p(15.36, 4.486), control2: p(15.914, 4.528))
+        path.addCurve(to: p(17.568, 4.784), control1: p(16.811, 4.629), control2: p(17.192, 4.694))
+        path.addLine(to: p(17.568, 8.109))
+        path.addCurve(to: p(16.915, 8.073), control1: p(17.351, 8.089), control2: p(17.133, 8.077))
+        path.addCurve(to: p(16.182, 8.064), control1: p(16.671, 8.067), control2: p(16.426, 8.064))
+        path.addCurve(to: p(14.507, 8.373), control1: p(15.475, 8.064), control2: p(14.923, 8.16))
+        path.addCurve(to: p(13.828, 8.995), control1: p(14.227, 8.513), control2: p(13.992, 8.729))
+        path.addCurve(to: p(13.454, 10.747), control1: p(13.57, 9.415), control2: p(13.454, 9.99))
+        path.addLine(to: p(13.454, 12.044))
+        path.addLine(to: p(17.373, 12.044))
+        path.addLine(to: p(16.987, 14.147))
+        path.addLine(to: p(16.7, 15.711))
+        path.addLine(to: p(13.454, 15.711))
+        path.addLine(to: p(13.454, 23.956))
+        path.addCurve(to: p(24, 12.044), control1: p(19.396, 23.238), control2: p(24, 18.179))
+        path.addCurve(to: p(12, 0.044), control1: p(24, 5.417), control2: p(18.627, 0.044))
+        path.addCurve(to: p(0, 12.044), control1: p(5.373, 0.044), control2: p(0, 5.417))
+        path.addCurve(to: p(9.101, 23.691), control1: p(0, 17.672), control2: p(3.874, 22.394))
+        path.closeSubpath()
+        return path
+    }
 }
 
 private struct LogoShape: Shape {
-    enum Kind { case youtube, youtubePlay, x, reddit, instagram, github, tiktok }
+    enum Kind { case youtube, youtubePlay, x, reddit, instagram, github, tiktok, facebook }
     let kind: Kind
 
     func path(in rect: CGRect) -> Path {
@@ -304,6 +337,7 @@ private struct LogoShape: Shape {
         case .instagram: return PlatformLogoPaths.instagram(in: rect)
         case .github: return PlatformLogoPaths.github(in: rect)
         case .tiktok: return PlatformLogoPaths.tiktok(in: rect)
+        case .facebook: return PlatformLogoPaths.facebook(in: rect)
         }
     }
 }
@@ -311,7 +345,7 @@ private struct LogoShape: Shape {
 /// The logo as it appears on the platform: red YouTube button with a white play
 /// arrow, white X on the dark theme, white Snoo on the orange Reddit bubble,
 /// the Instagram camera in its gradient, LinkedIn's blue "in" tile, the
-/// GitHub Octocat mark and the TikTok note.
+/// GitHub Octocat mark, the TikTok note and Facebook's blue "f".
 struct PlatformLogo: View {
     let platform: SourcePlatform
 
@@ -327,6 +361,7 @@ struct PlatformLogo: View {
         case .reddit: return 0.92
         case .github: return 0.9
         case .tiktok: return 0.86
+        case .facebook: return 0.9
         }
     }
 
@@ -369,6 +404,11 @@ struct PlatformLogo: View {
         case .tiktok:
             LogoShape(kind: .tiktok)
                 .fill(Theme.textPrimary)
+        case .facebook:
+            ZStack {
+                Circle().fill(Color.white).scaleEffect(20.0 / 24.0)
+                LogoShape(kind: .facebook).fill(Color(red: 8 / 255, green: 102 / 255, blue: 1))
+            }
         case .linkedin:
             GeometryReader { geo in
                 let s = min(geo.size.width, geo.size.height) / 24

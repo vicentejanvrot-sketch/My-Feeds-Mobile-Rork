@@ -413,6 +413,19 @@ private struct TourContent {
                 outActions: [TourAction(icon: "bubble.left", label: "Comment")],
                 outNote: "Opens TikTok"
             )
+        case .facebook:
+            return TourContent(
+                author: "City Parks & Rec", handle: "Page", when: "6h", media: .photo,
+                text: "The riverside trail reopens Saturday. Here's what changed.",
+                steps: [
+                    TourStep(title: "Read and watch here", body: "Tap the post to read it in full. Photos open large and videos play inside My Feeds."),
+                    TourStep(title: "Like to save", body: "Like saves it in My Feeds. Save adds it to Read later."),
+                    TourStep(title: "Comments open on Facebook", body: "Commenting opens Facebook, because it posts from your account."),
+                ],
+                saveActions: [TourAction(icon: "hand.thumbsup", label: "Like"), TourAction(icon: "bookmark", label: "Save")],
+                outActions: [TourAction(icon: "bubble.left", label: "Comment")],
+                outNote: "Opens Facebook"
+            )
         }
     }
 }

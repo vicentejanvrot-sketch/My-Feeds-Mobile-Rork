@@ -197,7 +197,7 @@ nonisolated enum AlsoOn {
     }
 
     static func accountLabel(platform: SourcePlatform, handle: String?, url: String) -> String {
-        guard let handle, !handle.isEmpty else {
+        guard let handle, !handle.isEmpty, platform != .facebook else {
             var value = url
             for prefix in ["https://www.", "http://www.", "https://", "http://"] where value.hasPrefix(prefix) {
                 value = String(value.dropFirst(prefix.count))
