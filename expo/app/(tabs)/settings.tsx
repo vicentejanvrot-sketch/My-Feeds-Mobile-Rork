@@ -35,6 +35,7 @@ import {
   ShieldCheck,
   MessageSquare,
   Trash2,
+  Download,
 } from "lucide-react-native";
 import { Colors } from "@/constants/colors";
 import { useAuth } from "@/lib/auth-provider";
@@ -42,6 +43,7 @@ import { useUserSettings, useUpdateSettings, useUserSettingsSafe, useDeleteAccou
 import { useToast } from "@/components/Toast";
 import { useVideoQuality, QUALITY_KEYS, QUALITY_LABELS } from "@/lib/useVideoQuality";
 import { useYouTubeConnection } from "@/lib/useYouTubeConnection";
+import { downloadsSupported, formatBytes, loadDownloads, useDownloadsStore } from "@/lib/downloads";
 // ── Constants ─────────────────────────────────────────────────────
 
 /** Minimal email format check — matches the web app's validator. */
@@ -85,6 +87,13 @@ export default function SettingsScreen() {
   const [qualityOpen, setQualityOpen] = useState(false);
   const [keepScreenOn, setKeepScreenOn] = useState(false);
   const [accordionOpen, setAccordionOpen] = useState(false);
+  // Offline downloads on this phone (count and space used)
+  const downloadEntries = useDownloadsStore((s) => s.entries);
+  useEffect(() => {
+    void loadDownloads();
+  }, []);
+  const downloadList = Object.values(downloadEntries);
+  const downloadBytes = downloadList.reduce((sum, e) => sum + e.bytes, 0);
   const accordionAnim = useRef(new Animated.Value(0)).current;
 
   // ── Load Supabase settings (email + metadata only) ─
@@ -461,6 +470,30 @@ export default function SettingsScreen() {
                 )}
               </Pressable>
             </View>
+
+            {/* ═══ Downloads (iOS / Android only) ═══ */}
+            {downloadsSupported ? (
+              <View style={styles.card}>
+                <View style={styles.cardHeader}>
+                  <Download size={18} color={Colors.accent} />
+                  <Text style={styles.cardTitle}>Downloads</Text>
+                </View>
+                <Pressable
+                  style={({ pressed }) => [styles.supportRow, pressed && styles.pressed]}
+                  onPress={() => router.push("/downloads")}
+                >
+                  <View style={styles.supportRowLeft}>
+                    <Download size={18} color={Colors.textSecondary} />
+                    <Text style={styles.supportRowLabel}>
+                      {downloadList.length === 0
+                        ? "Saved for offline"
+                        : `${downloadList.length} saved · ${formatBytes(downloadBytes)}`}
+                    </Text>
+                  </View>
+                  <ChevronRight size={18} color={Colors.textMuted} />
+                </Pressable>
+              </View>
+            ) : null}
 
             {/* ═══ Card 5: Support ═══ */}
             <View style={styles.card}>

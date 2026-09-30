@@ -25,6 +25,7 @@ import { StatusBar } from "expo-status-bar";
 import { LinearGradient } from "expo-linear-gradient";
 import { activateKeepAwakeAsync, deactivateKeepAwake } from "expo-keep-awake";
 import VideoPlayerContent from "@/components/VideoPlayerContent";
+import { DownloadButton } from "@/components/DownloadButton";
 import type { VideoPlayerHandle } from "@/components/VideoPlayerContent";
 import {
   Check,
@@ -993,6 +994,8 @@ export default function VideoPlayerScreen() {
               </Pressable>
             </Animated.View>
             <Text style={styles.headerTitle}>Video Player</Text>
+            {/* Offline copy: the summary and key moments (the video itself needs a connection) */}
+            {itemIdStr ? <DownloadButton itemId={itemIdStr} size={20} /> : null}
             {/* Pocket Lock */}
             <Pressable
               onPress={enablePocketLock}

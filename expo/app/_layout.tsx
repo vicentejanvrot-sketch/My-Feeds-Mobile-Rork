@@ -111,6 +111,10 @@ function AuthGate() {
           }}
         />
         <Stack.Screen
+          name="downloads"
+          options={{ headerShown: false, contentStyle: { backgroundColor: Colors.background } }}
+        />
+        <Stack.Screen
           name="video-player"
           options={{
             presentation: "modal",

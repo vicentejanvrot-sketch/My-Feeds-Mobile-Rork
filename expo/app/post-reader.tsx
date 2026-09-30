@@ -46,6 +46,8 @@ import {
   clearResumePosition,
 } from "@/lib/video-progress";
 import type { ItemStatus, ItemWithAnalysis } from "@/lib/database";
+import { DownloadButton } from "@/components/DownloadButton";
+import { podcastPlayerHtml, readDownloadedItem, useDownloadsStore } from "@/lib/downloads";
 
 // The action bar copies each platform's own row under a post. In My Feeds:
 // Like / Upvote = Saved, Bookmark / Save = Read Later, the check = Read.
@@ -385,9 +387,12 @@ function PodcastPlayer({ media, progressId, onFinished }: { media: PostEmbed; pr
   };
 
   if (!media.audio_url) return null;
-  const html = `<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"><meta name="referrer" content="no-referrer">
-<style>html,body{margin:0;padding:0;background:transparent}audio{width:100%;display:block}</style></head>
-<body><audio controls preload="metadata" src="${escapeAttr(media.audio_url)}"></audio></body></html>`;
+  // A downloaded episode plays from the phone: the saved player.html sits next
+  // to the audio file, and the web view is allowed to read that folder only.
+  const localFolder = media.audio_url.startsWith("file:")
+    ? media.audio_url.slice(0, media.audio_url.lastIndexOf("/") + 1)
+    : null;
+  const source = localFolder ? { uri: `${localFolder}player.html` } : { html: podcastPlayerHtml(media.audio_url) };
   const skip = (delta: number) => webRef.current?.injectJavaScript("window.__skip&&window.__skip(" + delta + ");true;");
   const changeSpeed = () => {
     const next = PODCAST_SPEEDS[(PODCAST_SPEEDS.indexOf(speed) + 1) % PODCAST_SPEEDS.length];
@@ -400,15 +405,18 @@ function PodcastPlayer({ media, progressId, onFinished }: { media: PostEmbed; pr
       <View style={styles.podcastTop}>
         {media.url ? <Image source={{ uri: media.url }} style={styles.podcastArt} contentFit="cover" /> : null}
         <View style={{ flex: 1, gap: 2 }}>
-          <Text style={styles.muted}>{media.duration ? `${formatClock(media.duration)} long` : "Full episode"}</Text>
+          <Text style={styles.muted}>{media.duration ? `${formatClock(media.duration)} long` : "Full episode"}{localFolder ? " · Downloaded" : ""}</Text>
           {resumeAt != null ? <Text style={styles.podcastResume}>Resumes at {formatClock(resumeAt)}</Text> : null}
         </View>
       </View>
       <View style={styles.podcastAudio}>
         <WebView
           ref={webRef}
-          source={{ html }}
+          source={source}
           originWhitelist={["*"]}
+          allowFileAccess={!!localFolder}
+          allowFileAccessFromFileURLs={!!localFolder}
+          allowingReadAccessToURL={localFolder ?? undefined}
           injectedJavaScript={AUDIO_PROGRESS_JS}
           onMessage={onMessage}
           allowsInlineMediaPlayback
@@ -460,11 +468,31 @@ export default function PostReaderScreen() {
     },
   });
 
-  const item = itemQ.data ?? null;
+  // Downloaded items open from the copy on the phone (works offline, and the
+  // photos and episode don't download again). Status still comes from the
+  // server when there's a connection.
+  const savedOnPhone = useDownloadsStore((s) => (itemId ? !!s.entries[itemId] : false));
+  const [localItem, setLocalItem] = useState<ItemWithAnalysis | null>(null);
+  const [localChecked, setLocalChecked] = useState(false);
+  useEffect(() => {
+    let cancelled = false;
+    if (!itemId) return;
+    void readDownloadedItem(itemId).then((saved) => {
+      if (cancelled) return;
+      setLocalItem(saved);
+      setLocalChecked(true);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [itemId, savedOnPhone]);
+
+  const item = localItem ?? itemQ.data ?? null;
   const [status, setStatus] = useState<ItemStatus>("not_watched");
   useEffect(() => {
-    if (item) setStatus((item.user_status ?? "not_watched") as ItemStatus);
-  }, [item]);
+    const source = itemQ.data ?? localItem;
+    if (source) setStatus((source.user_status ?? "not_watched") as ItemStatus);
+  }, [itemQ.data, localItem]);
 
   const changeStatus = (next: ItemStatus) => {
     if (!item || next === status) return;
@@ -482,11 +510,16 @@ export default function PostReaderScreen() {
     );
   };
 
-  if (itemQ.isLoading || !item) {
+  if (!item) {
     return (
       <View style={[styles.screen, styles.center, { paddingTop: insets.top }]}>
-        {itemQ.isError ? (
-          <Text style={styles.muted}>Couldn't load this post.</Text>
+        {itemQ.isError && localChecked ? (
+          <>
+            <Text style={styles.muted}>Couldn't load this post. Check your connection.</Text>
+            <Pressable onPress={() => router.back()} style={[styles.openBtn, { paddingHorizontal: 20, marginTop: 16 }]}>
+              <Text style={styles.openText}>Close</Text>
+            </Pressable>
+          </>
         ) : (
           <ActivityIndicator color={Colors.accent} />
         )}
@@ -536,6 +569,7 @@ export default function PostReaderScreen() {
             {item.published_at ? ` · ${timeAgo(item.published_at)}` : ""}
           </Text>
         </View>
+        <DownloadButton itemId={item.id} hasAudio={!!podcastAudio} />
       </View>
 
       <ScrollView contentContainerStyle={styles.content}>
@@ -578,6 +612,18 @@ export default function PostReaderScreen() {
             {analysis?.short_summary ? <Text style={styles.summaryText}>{analysis.short_summary}</Text> : null}
             {keyPoints.map((p) => (
               <Text key={p} style={styles.summaryPoint}>• {p}</Text>
+            ))}
+          </View>
+        ) : null}
+
+        {/* YouTube videos opened from Downloads: the key moments, to read offline. */}
+        {platform === "youtube" && (analysis?.key_moments ?? []).length > 0 ? (
+          <View style={styles.summaryBox}>
+            <Text style={styles.summaryLabel}>KEY MOMENTS</Text>
+            {(analysis?.key_moments ?? []).map((m) => (
+              <Text key={`${m.seconds}-${m.text}`} style={styles.summaryPoint}>
+                <Text style={{ color: Colors.accent, fontWeight: "700" }}>{formatClock(m.seconds)}</Text>  {m.text}
+              </Text>
             ))}
           </View>
         ) : null}
@@ -792,7 +838,7 @@ export default function PostReaderScreen() {
             />
             <BarButton label="Share" onPress={share} icon={<ShareIcon size={19} color={Colors.textSecondary} />} />
           </View>
-        ) : (
+        ) : platform === "reddit" ? (
           <View style={styles.redditBar}>
             <View style={[styles.votePill, liked && { backgroundColor: REDDIT_ORANGE }]}>
               <Pressable
@@ -842,7 +888,7 @@ export default function PostReaderScreen() {
               <Text style={styles.redditPillText}>Share</Text>
             </Pressable>
           </View>
-        )}
+        ) : null}
 
         <View style={styles.bottomRow}>
           <Pressable
