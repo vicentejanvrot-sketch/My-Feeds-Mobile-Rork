@@ -348,6 +348,22 @@ final class SupabaseService {
         return channel
     }
 
+    /// The Spotify version of an Apple Music or YouTube Music release, found by
+    /// the spotify-link function (Songlink). nil when Spotify doesn't have it or
+    /// the lookup failed.
+    func spotifyLink(for url: String) async -> SpotifyLink? {
+        do {
+            let link: SpotifyLink = try await client.functions.invoke(
+                "spotify-link",
+                options: FunctionInvokeOptions(body: SpotifyLinkPayload(url: url)),
+                decoder: JSONDecoder()
+            )
+            return link.spotifyUrl == nil ? nil : link
+        } catch {
+            return nil
+        }
+    }
+
     func updateChannelPriority(id: String, priority: Int) async throws {
         try await db.from("channels").update(["priority": priority]).eq("id", value: id).execute()
     }
@@ -474,6 +490,14 @@ nonisolated struct AddSourceResponse: Codable, Sendable {
     /// "instagram_private" or "instagram_unavailable" when the account can be
     /// added as a private account instead.
     var code: String?
+}
+
+/// Body and answer of the spotify-link edge function (camelCase both ways).
+nonisolated struct SpotifyLinkPayload: Encodable, Sendable { let url: String }
+nonisolated struct SpotifyLink: Decodable, Sendable {
+    var spotifyUrl: String?
+    var embedUrl: String?
+    var kind: String?
 }
 
 /// Readable error from add-source, shown to the user as is.

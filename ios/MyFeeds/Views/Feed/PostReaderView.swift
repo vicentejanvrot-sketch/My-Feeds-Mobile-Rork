@@ -109,6 +109,7 @@ struct PostReaderView: View {
                             videoIds: music.videoIds ?? (music.youtubeId.map { [$0] } ?? []),
                             kind: music.type == "video" ? "video" : (music.kind ?? "album")
                         )
+                        if let url = item.url { SpotifySection(sourceURL: url) }
                     } else if platform == .appleMusic,
                        let release = item.media?.first(where: { $0.type == "album" }),
                        let raw = release.embedUrl, let embedURL = URL(string: raw) {
@@ -117,6 +118,7 @@ struct PostReaderView: View {
                         if let videoId = item.videoId, videoId.hasPrefix("apple_music:") {
                             AddToAppleMusicButton(albumId: videoId, single: release.kind == "single")
                         }
+                        if let url = item.url { SpotifySection(sourceURL: url) }
                     } else if platform == .appleBooks,
                               let book = item.media?.first(where: { $0.type == "audiobook" }) {
                         // Cover and Apple's sample; the whole book plays in Apple Books.
@@ -133,6 +135,7 @@ struct PostReaderView: View {
                         ) {
                             if status == .notWatched { changeStatus(.watched, item: item) }
                         }
+                        FindOnSpotifyButton(title: item.title ?? "", show: item.channelName)
                     } else if platform == .tiktok, photos.isEmpty, let videoId = tikTokVideoId(item) {
                         // TikTok's own player: its CDN links expire, the embed doesn't.
                         TikTokEmbedPlayer(videoId: videoId)
@@ -1374,6 +1377,137 @@ private struct AudiobookCardView: View {
         player?.play()
         isPlaying = true
     }
+}
+
+// MARK: - Spotify
+
+/// Spotify's logo (Simple Icons), in Spotify green.
+private struct SpotifyLogo: Shape {
+    func path(in rect: CGRect) -> Path {
+        let scale = min(rect.width, rect.height) / 24
+        let dx = rect.midX - 12 * scale
+        let dy = rect.midY - 12 * scale
+        let p = { (x: CGFloat, y: CGFloat) in CGPoint(x: dx + x * scale, y: dy + y * scale) }
+        var path = Path()
+        path.move(to: p(12, 0))
+        path.addCurve(to: p(0, 12), control1: p(5.4, 0), control2: p(0, 5.4))
+        path.addCurve(to: p(12, 24), control1: p(0, 18.6), control2: p(5.4, 24))
+        path.addCurve(to: p(24, 12), control1: p(18.6, 24), control2: p(24, 18.6))
+        path.addCurve(to: p(12, 0), control1: p(24, 5.4), control2: p(18.66, 0))
+        path.closeSubpath()
+        path.move(to: p(17.521, 17.34))
+        path.addCurve(to: p(16.5, 17.58), control1: p(17.281, 17.699), control2: p(16.861, 17.82))
+        path.addCurve(to: p(5.939, 16.439), control1: p(13.68, 15.84), control2: p(10.14, 15.479))
+        path.addCurve(to: p(5.04, 15.9), control1: p(5.521, 16.561), control2: p(5.16, 16.26))
+        path.addCurve(to: p(5.58, 15), control1: p(4.92, 15.479), control2: p(5.22, 15.12))
+        path.addCurve(to: p(17.22, 16.32), control1: p(10.14, 13.979), control2: p(14.1, 14.4))
+        path.addCurve(to: p(17.521, 17.34), control1: p(17.64, 16.5), control2: p(17.699, 16.979))
+        path.closeSubpath()
+        path.move(to: p(18.961, 14.04))
+        path.addCurve(to: p(17.699, 14.34), control1: p(18.66, 14.46), control2: p(18.12, 14.64))
+        path.addCurve(to: p(5.76, 12.96), control1: p(14.46, 12.36), control2: p(9.54, 11.76))
+        path.addCurve(to: p(4.62, 12.36), control1: p(5.281, 13.08), control2: p(4.74, 12.84))
+        path.addCurve(to: p(5.22, 11.219), control1: p(4.5, 11.88), control2: p(4.74, 11.339))
+        path.addCurve(to: p(18.72, 12.84), control1: p(9.6, 9.9), control2: p(15, 10.561))
+        path.addCurve(to: p(18.961, 14.04), control1: p(19.081, 13.021), control2: p(19.26, 13.62))
+        path.closeSubpath()
+        path.move(to: p(19.081, 10.68))
+        path.addCurve(to: p(5.16, 9.301), control1: p(15.24, 8.4), control2: p(8.82, 8.16))
+        path.addCurve(to: p(3.78, 8.58), control1: p(4.56, 9.48), control2: p(3.96, 9.12))
+        path.addCurve(to: p(4.5, 7.199), control1: p(3.6, 7.979), control2: p(3.96, 7.38))
+        path.addCurve(to: p(20.221, 8.82), control1: p(8.76, 5.939), control2: p(15.78, 6.179))
+        path.addCurve(to: p(20.64, 10.38), control1: p(20.76, 9.12), control2: p(20.94, 9.84))
+        path.addCurve(to: p(19.081, 10.68), control1: p(20.341, 10.801), control2: p(19.62, 10.979))
+        path.closeSubpath()
+
+        return path
+    }
+
+    static let green = Color(red: 0x1D / 255, green: 0xB9 / 255, blue: 0x54 / 255)
+}
+
+/// The same release on Spotify, found by the spotify-link function (Songlink).
+/// "Play on Spotify" opens Spotify's own embed player here (on phones it
+/// usually plays 30-second previews), "Open in Spotify" goes to the Spotify app.
+/// Nothing shows when Spotify doesn't have the release.
+private struct SpotifySection: View {
+    let sourceURL: String
+
+    @Environment(\.openURL) private var openURL
+    @State private var link: SpotifyLink?
+    @State private var playing = false
+
+    var body: some View {
+        VStack(spacing: 10) {
+            if let link, let raw = link.spotifyUrl, let spotifyURL = URL(string: raw) {
+                HStack(spacing: 10) {
+                    if link.embedUrl != nil {
+                        Button { playing.toggle() } label: {
+                            spotifyButtonLabel(playing ? "Hide player" : "Play on Spotify", showLogo: true)
+                        }
+                        .buttonStyle(.plain)
+                    }
+                    Button { openURL(spotifyURL) } label: {
+                        spotifyButtonLabel("Open in Spotify", showLogo: false)
+                    }
+                    .buttonStyle(.plain)
+                }
+                if playing, let rawEmbed = link.embedUrl, let embedURL = URL(string: rawEmbed) {
+                    EmbedWebView(url: embedURL)
+                        .frame(height: link.kind == "album" || link.kind == "playlist" ? 352 : 152)
+                        .frame(maxWidth: .infinity)
+                        .clipShape(.rect(cornerRadius: 12))
+                }
+            } else {
+                // Keeps the view on screen so the lookup below runs.
+                Color.clear.frame(height: 0)
+            }
+        }
+        .task(id: sourceURL) {
+            link = await SupabaseService.shared.spotifyLink(for: sourceURL)
+        }
+    }
+}
+
+/// Podcasts: Spotify's search for the episode (Songlink doesn't cover podcasts).
+private struct FindOnSpotifyButton: View {
+    let title: String
+    let show: String?
+
+    @Environment(\.openURL) private var openURL
+
+    var body: some View {
+        Button {
+            let query = String([title, show ?? ""].filter { !$0.isEmpty }.joined(separator: " ").prefix(120))
+            let encoded = query.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed.subtracting(CharacterSet(charactersIn: "/?#"))) ?? ""
+            if let url = URL(string: "https://open.spotify.com/search/\(encoded)/episodes") { openURL(url) }
+        } label: {
+            spotifyButtonLabel("Find on Spotify", showLogo: true)
+        }
+        .buttonStyle(.plain)
+    }
+}
+
+private func spotifyButtonLabel(_ text: String, showLogo: Bool) -> some View {
+    HStack(spacing: 8) {
+        if showLogo {
+            SpotifyLogo()
+                .fill(SpotifyLogo.green, style: FillStyle(eoFill: true))
+                .frame(width: 16, height: 16)
+        } else {
+            Image(systemName: "arrow.up.right.square")
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundStyle(Theme.textPrimary)
+        }
+        Text(text)
+            .font(.system(size: 14, weight: .bold))
+            .foregroundStyle(Theme.textPrimary)
+            .lineLimit(1)
+    }
+    .frame(maxWidth: .infinity)
+    .frame(height: 44)
+    .overlay(RoundedRectangle(cornerRadius: 10).stroke(Theme.border, lineWidth: 1))
+    .contentShape(Rectangle())
 }
 
 /// Apple Music's embed player: previews for everyone, full songs for listeners
