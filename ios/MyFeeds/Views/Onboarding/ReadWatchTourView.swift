@@ -426,6 +426,34 @@ private struct TourContent {
                 outActions: [TourAction(icon: "bubble.left", label: "Comment")],
                 outNote: "Opens Facebook"
             )
+        case .appleMusic:
+            return TourContent(
+                author: "Nova Lane", handle: "New single", when: "1d", media: .video,
+                title: "Paper Lanterns",
+                text: "New single by Nova Lane · 1 track · Pop",
+                steps: [
+                    TourStep(title: "Listen here", body: "Tap it to open Apple Music's player. You hear a preview, or the full songs if you're signed in to Apple Music."),
+                    TourStep(title: "Heart to save", body: "The heart saves it in My Feeds. Save adds it to Watch later."),
+                    TourStep(title: "Add it in Apple Music", body: "Adding it to your library or a playlist opens Apple Music."),
+                ],
+                saveActions: [TourAction(icon: "heart", label: "Like"), TourAction(icon: "bookmark", label: "Save")],
+                outActions: [TourAction(icon: "arrow.up.right.square", label: "Apple Music")],
+                outNote: "Opens Apple Music"
+            )
+        case .applePodcasts:
+            return TourContent(
+                author: "The Long Run", handle: "Podcast", when: "5h", media: .video,
+                title: "Episode 212: Training through the winter",
+                text: "Full episode, played inside My Feeds.",
+                steps: [
+                    TourStep(title: "Listen to the whole episode", body: "Tap it to play the full episode here. It remembers where you stopped, on every device."),
+                    TourStep(title: "Heart to save", body: "The heart saves it in My Feeds. Save adds it to Watch later."),
+                    TourStep(title: "Follow the show on Apple Podcasts", body: "Following or rating the show opens Apple Podcasts."),
+                ],
+                saveActions: [TourAction(icon: "heart", label: "Like"), TourAction(icon: "bookmark", label: "Save")],
+                outActions: [TourAction(icon: "arrow.up.right.square", label: "Apple Podcasts")],
+                outNote: "Opens Apple Podcasts"
+            )
         }
     }
 }

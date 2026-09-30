@@ -938,6 +938,8 @@ private struct FeedItemCard: View {
                     if let plays = item.metrics?.plays, plays > 0 {
                         statChip(icon: "play", value: plays)
                     }
+                } else if item.sourcePlatform == .appleMusic || item.sourcePlatform == .applePodcasts {
+                    appleChip(item)
                 } else if item.sourcePlatform == .github {
                     statChip(icon: "star", value: item.metrics?.stars ?? 0)
                     statChip(icon: "arrow.triangle.branch", value: item.metrics?.forks ?? 0)
@@ -955,6 +957,32 @@ private struct FeedItemCard: View {
             .padding(.top, 10)
         }
         .padding(12)
+    }
+
+    /// Apple Music: "New single" / "Latest album"; Apple Podcasts: the episode length.
+    @ViewBuilder
+    private func appleChip(_ item: FeedItem) -> some View {
+        let media = item.media?.first { $0.type == "album" || $0.type == "audio" }
+        HStack(spacing: 4) {
+            if item.sourcePlatform == .applePodcasts {
+                Image(systemName: "headphones")
+                    .font(.system(size: 11))
+                if let seconds = media?.duration, seconds > 0 {
+                    Text(seconds >= 3600
+                         ? "\(seconds / 3600) h \((seconds % 3600) / 60) min"
+                         : "\(max(1, seconds / 60)) min")
+                        .font(.system(size: 12))
+                } else {
+                    Text("Episode").font(.system(size: 12))
+                }
+            } else {
+                Image(systemName: "music.note")
+                    .font(.system(size: 11))
+                Text(media?.label ?? "New release")
+                    .font(.system(size: 12))
+            }
+        }
+        .foregroundStyle(Theme.textMuted)
     }
 
     private func statChip(icon: String, value: Int) -> some View {

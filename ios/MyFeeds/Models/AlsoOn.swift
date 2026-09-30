@@ -138,6 +138,19 @@ nonisolated enum AlsoOn {
             if first == "c" || first == "user", let second { return "youtube:c:" + second.lowercased() }
             return nil
         }
+        if host == "music.apple.com" || host == "itunes.apple.com" || host == "podcasts.apple.com" {
+            let path = comps.path
+            if host != "podcasts.apple.com",
+               let range = path.range(of: #"/artist/(?:[^/]+/)?(?:id)?\d+"#, options: .regularExpression) {
+                let digits = path[range].split(separator: "/").last.map { String($0).replacingOccurrences(of: "id", with: "") } ?? ""
+                return digits.isEmpty ? nil : "apple_music:" + digits
+            }
+            if let range = path.range(of: #"/podcast/(?:[^/]+/)?id\d+"#, options: .regularExpression) {
+                let digits = path[range].split(separator: "/").last.map { String($0).replacingOccurrences(of: "id", with: "") } ?? ""
+                return digits.isEmpty ? nil : "apple_podcasts:" + digits
+            }
+            return nil
+        }
         if host == "reddit.com" {
             let kind = first.lowercased()
             guard kind == "user" || kind == "u", let second else { return nil }
@@ -197,6 +210,8 @@ nonisolated enum AlsoOn {
     }
 
     static func accountLabel(platform: SourcePlatform, handle: String?, url: String) -> String {
+        if platform == .appleMusic { return "Artist page" }
+        if platform == .applePodcasts { return "Show" }
         guard let handle, !handle.isEmpty, platform != .facebook else {
             var value = url
             for prefix in ["https://www.", "http://www.", "https://", "http://"] where value.hasPrefix(prefix) {

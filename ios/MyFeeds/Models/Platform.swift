@@ -11,6 +11,8 @@ nonisolated enum SourcePlatform: String, Codable, CaseIterable, Hashable, Sendab
     case github
     case tiktok
     case facebook
+    case appleMusic = "apple_music"
+    case applePodcasts = "apple_podcasts"
 
     /// Unknown or missing values (rows written before the migration) are YouTube.
     init(raw: String?) {
@@ -18,10 +20,10 @@ nonisolated enum SourcePlatform: String, Codable, CaseIterable, Hashable, Sendab
     }
 
     /// Non-YouTube items store "<platform>:<id>" in items.video_id
-    /// (x, reddit, instagram, linkedin, github, tiktok, facebook).
+    /// (x, reddit, instagram, linkedin, github, tiktok, facebook, apple_music, apple_podcasts).
     static func isPostVideoId(_ videoId: String?) -> Bool {
         guard let videoId else { return false }
-        return ["x:", "reddit:", "instagram:", "linkedin:", "github:", "tiktok:", "facebook:"].contains { videoId.hasPrefix($0) }
+        return ["x:", "reddit:", "instagram:", "linkedin:", "github:", "tiktok:", "facebook:", "apple_music:", "apple_podcasts:"].contains { videoId.hasPrefix($0) }
     }
 
     /// Platform of a post item from its "<platform>:<id>" video_id; YouTube otherwise.
@@ -44,6 +46,8 @@ extension SourcePlatform {
         case .github: return "GitHub"
         case .tiktok: return "TikTok"
         case .facebook: return "Facebook"
+        case .appleMusic: return "Apple Music"
+        case .applePodcasts: return "Apple Podcasts"
         }
     }
 
@@ -57,6 +61,8 @@ extension SourcePlatform {
         case .github: return "GH"
         case .tiktok: return "TT"
         case .facebook: return "FB"
+        case .appleMusic: return "AM"
+        case .applePodcasts: return "POD"
         }
     }
 
@@ -71,6 +77,8 @@ extension SourcePlatform {
         case .github: return Color(red: 230 / 255, green: 237 / 255, blue: 243 / 255)
         case .tiktok: return Color(red: 241 / 255, green: 243 / 255, blue: 245 / 255)
         case .facebook: return Color(red: 138 / 255, green: 180 / 255, blue: 1)
+        case .appleMusic: return Color(red: 1, green: 138 / 255, blue: 154 / 255)
+        case .applePodcasts: return Color(red: 217 / 255, green: 166 / 255, blue: 1)
         }
     }
 
@@ -85,6 +93,8 @@ extension SourcePlatform {
         case .github: return Color(red: 33 / 255, green: 38 / 255, blue: 45 / 255)
         case .tiktok: return Color(red: 31 / 255, green: 31 / 255, blue: 36 / 255)
         case .facebook: return Color(red: 20 / 255, green: 38 / 255, blue: 74 / 255)
+        case .appleMusic: return Color(red: 58 / 255, green: 22 / 255, blue: 32 / 255)
+        case .applePodcasts: return Color(red: 42 / 255, green: 23 / 255, blue: 64 / 255)
         }
     }
 
@@ -98,6 +108,8 @@ extension SourcePlatform {
         case .github: return "User or organization"
         case .tiktok: return "Account"
         case .facebook: return "Page"
+        case .appleMusic: return "Artist"
+        case .applePodcasts: return "Show"
         }
     }
 
@@ -111,6 +123,8 @@ extension SourcePlatform {
         case .github: return "@username or https://github.com/username"
         case .tiktok: return "@username or https://www.tiktok.com/@username"
         case .facebook: return "https://www.facebook.com/PageName"
+        case .appleMusic: return "Artist name or https://music.apple.com/us/artist/name/123"
+        case .applePodcasts: return "Show name or https://podcasts.apple.com/us/podcast/name/id123"
         }
     }
 
@@ -124,6 +138,8 @@ extension SourcePlatform {
         case .github: return "New repositories and releases from the lookback window."
         case .tiktok: return "Public accounts only. Videos from the lookback window."
         case .facebook: return "Public Pages only. Posts from the lookback window."
+        case .appleMusic: return "New singles and albums. Adding an artist also brings in their latest album."
+        case .applePodcasts: return "New episodes, played right here. Adding a show also brings in its latest episode."
         }
     }
 
@@ -137,11 +153,13 @@ extension SourcePlatform {
         case .github: return "Open on GitHub"
         case .tiktok: return "Open on TikTok"
         case .facebook: return "Open on Facebook"
+        case .appleMusic: return "Open in Apple Music"
+        case .applePodcasts: return "Open in Apple Podcasts"
         }
     }
 
     /// Newer sources whose data provider is still settling in.
-    var isBeta: Bool { self == .instagram || self == .linkedin || self == .tiktok || self == .facebook }
+    var isBeta: Bool { self != .youtube && self != .x && self != .reddit && self != .github }
 }
 
 /// Platform logo used on cards, lists and filters, same look as the web and Expo apps.
@@ -253,10 +271,18 @@ nonisolated struct ItemMedia: Codable, Hashable, Sendable {
     /// Playable video: MP4, and an HLS stream (plays with sound).
     var videoUrl: String?
     var hlsUrl: String?
+    /// Apple Podcasts episode: the audio file and its length in seconds.
+    var audioUrl: String?
+    var duration: Int?
+    /// Apple Music release: Apple's embed player link, and single / ep / album.
+    var embedUrl: String?
+    var kind: String?
+    var label: String?
 
     /// Keys arrive snake_case; the service decoder converts them.
     enum CodingKeys: String, CodingKey {
         case type, url, authorName, authorHandle, authorAvatar, verified, createdAt, text, image, title, preview, videoUrl, hlsUrl
+        case audioUrl, duration, embedUrl, kind, label
     }
 
     init(from decoder: Decoder) throws {
@@ -274,6 +300,11 @@ nonisolated struct ItemMedia: Codable, Hashable, Sendable {
         preview = try? c.decodeIfPresent(String.self, forKey: .preview)
         videoUrl = try? c.decodeIfPresent(String.self, forKey: .videoUrl)
         hlsUrl = try? c.decodeIfPresent(String.self, forKey: .hlsUrl)
+        audioUrl = try? c.decodeIfPresent(String.self, forKey: .audioUrl)
+        duration = decodeLenientInt(c, .duration)
+        embedUrl = try? c.decodeIfPresent(String.self, forKey: .embedUrl)
+        kind = try? c.decodeIfPresent(String.self, forKey: .kind)
+        label = try? c.decodeIfPresent(String.self, forKey: .label)
     }
 
     /// HLS first (it has sound for Reddit videos), MP4 otherwise.
