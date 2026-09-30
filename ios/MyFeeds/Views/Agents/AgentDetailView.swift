@@ -91,6 +91,10 @@ struct AgentDetailView: View {
         .toolbarBackground(Theme.background, for: .navigationBar)
         .refreshable { await load() }
         .task { await load() }
+        // Closed without adding: clear it too, so the next open starts empty.
+        .onChange(of: showAddChannel) { _, isShown in
+            if !isShown { resetAddSourceForm() }
+        }
         .onChange(of: overlay.runCompletionCounter) {
             Task { await load() }
         }
@@ -406,12 +410,7 @@ struct AgentDetailView: View {
                 }
                 Spacer()
                 Button {
-                    newChannelUrl = ""
-                    newChannelPriority = 3
-                    newSourcePlatform = .youtube
-                    autoPlatform = nil
-                    privateOffer = nil
-                    showAddChannel = true
+                    openAddSource()
                 } label: {
                     Text("+ Add Source")
                         .font(.system(size: 13, weight: .semibold))
@@ -1152,6 +1151,21 @@ struct AgentDetailView: View {
             }
             channelToRemove = nil
         }
+    }
+
+    /// The Add Source sheet always opens empty: YouTube, no link, Normal
+    /// priority, so nothing from the last attempt carries over.
+    private func openAddSource() {
+        resetAddSourceForm()
+        showAddChannel = true
+    }
+
+    private func resetAddSourceForm() {
+        newChannelUrl = ""
+        newChannelPriority = 3
+        newSourcePlatform = .youtube
+        autoPlatform = nil
+        privateOffer = nil
     }
 
     private func addChannel(asPrivate: Bool = false) {
