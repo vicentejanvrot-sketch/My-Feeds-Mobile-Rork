@@ -57,6 +57,7 @@ const IG_RED = "#FF3040";
 const LINKEDIN_BLUE = "#378FE9";
 const TIKTOK_RED = "#FE2C55";
 const TIKTOK_YELLOW = "#FACE15";
+const FACEBOOK_BLUE = "#0866FF";
 const GITHUB_STAR = "#E3B341";
 
 type PostMetrics = {
@@ -240,6 +241,39 @@ function TikTokPlayer({ videoId }: { videoId: string }) {
   );
 }
 
+// Facebook videos and reels play in Facebook's own embed player: the MP4 links
+// expire after a few days, while the post link always works. Reels are
+// portrait, other videos landscape.
+function facebookEmbed(postUrl: string | null | undefined): { uri: string; portrait: boolean } | null {
+  if (!postUrl || !/facebook\.com\//i.test(postUrl)) return null;
+  const reel = postUrl.match(/facebook\.com\/reel\/(\d+)/i);
+  const href = reel ? `https://www.facebook.com/watch/?v=${reel[1]}` : postUrl;
+  return {
+    uri: `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(href)}&show_text=false&autoplay=false`,
+    portrait: !!reel,
+  };
+}
+
+function FacebookPlayer({ uri, portrait }: { uri: string; portrait: boolean }) {
+  const { width } = useWindowDimensions();
+  const playerWidth = portrait ? Math.min(width - 32, 380) : width - 32;
+  const playerHeight = portrait ? (playerWidth * 16) / 9 : (playerWidth * 9) / 16;
+  return (
+    <View style={styles.tiktokWrap}>
+      <WebView
+        source={{ uri }}
+        style={{ width: playerWidth, height: playerHeight, backgroundColor: "#000000" }}
+        allowsInlineMediaPlayback
+        allowsFullscreenVideo
+        mediaPlaybackRequiresUserAction={false}
+        javaScriptEnabled
+        scrollEnabled={false}
+        accessibilityLabel="Facebook video"
+      />
+    </View>
+  );
+}
+
 function formatPostDate(iso: string): string {
   const d = new Date(iso);
   const time = d.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
@@ -355,6 +389,8 @@ export default function PostReaderScreen() {
 
         {platform === "tiktok" && tiktokVideoId && photos.length === 0 ? (
           <TikTokPlayer videoId={tiktokVideoId} />
+        ) : platform === "facebook" && video && facebookEmbed(item.url) ? (
+          <FacebookPlayer {...facebookEmbed(item.url)!} />
         ) : slides.length > 1 ? (
           <MediaCarousel slides={slides} progressId={item.video_id} />
         ) : video ? (
@@ -442,6 +478,41 @@ export default function PostReaderScreen() {
               />
             </View>
             <BarButton label="Share" onPress={share} icon={<Send size={21} color={Colors.textPrimary} />} value={formatCount(metrics.reposts)} />
+          </View>
+        ) : platform === "facebook" ? (
+          // Facebook: reaction, comment and share counts, then Like, Comment, Share, plus Save.
+          <View style={{ gap: 6 }}>
+            <View style={styles.liCounts}>
+              <View style={[styles.liLikeDot, { backgroundColor: FACEBOOK_BLUE }]}>
+                <ThumbsUp size={9} color="#FFFFFF" fill="#FFFFFF" />
+              </View>
+              <Text style={styles.barText}>{formatCount((metrics.likes ?? 0) + (liked ? 1 : 0))}</Text>
+              <Text style={[styles.barText, { marginLeft: "auto" }]}>
+                {formatCount(metrics.comments)} comments{metrics.reposts ? ` · ${formatCount(metrics.reposts)} shares` : ""}
+              </Text>
+            </View>
+            <View style={styles.liBar}>
+              <LinkedInAction
+                label="Like"
+                active={liked}
+                activeColor={FACEBOOK_BLUE}
+                onPress={() => changeStatus(liked ? "watched" : "liked")}
+                icon={<ThumbsUp size={19} color={liked ? FACEBOOK_BLUE : Colors.textSecondary} fill={liked ? FACEBOOK_BLUE : "transparent"} />}
+              />
+              <LinkedInAction
+                label="Comment"
+                onPress={() => { if (item.url) openExternalLink(item.url); }}
+                icon={<MessageCircle size={19} color={Colors.textSecondary} />}
+              />
+              <LinkedInAction label="Share" onPress={share} icon={<ShareIcon size={19} color={Colors.textSecondary} />} />
+              <LinkedInAction
+                label="Save"
+                active={bookmarked}
+                activeColor={FACEBOOK_BLUE}
+                onPress={() => changeStatus(bookmarked ? "not_watched" : "watch_later")}
+                icon={<Bookmark size={19} color={bookmarked ? FACEBOOK_BLUE : Colors.textSecondary} fill={bookmarked ? FACEBOOK_BLUE : "transparent"} />}
+              />
+            </View>
           </View>
         ) : platform === "linkedin" ? (
           // LinkedIn: Like, Comment, Repost, Send, plus Save.
@@ -808,7 +879,7 @@ function PhotoCarousel({ urls }: { urls: string[] }) {
   );
 }
 
-function LinkedInAction({ label, icon, active, onPress }: { label: string; icon: React.ReactNode; active?: boolean; onPress: () => void }) {
+function LinkedInAction({ label, icon, active, activeColor = LINKEDIN_BLUE, onPress }: { label: string; icon: React.ReactNode; active?: boolean; activeColor?: string; onPress: () => void }) {
   return (
     <Pressable
       onPress={onPress}
@@ -818,7 +889,7 @@ function LinkedInAction({ label, icon, active, onPress }: { label: string; icon:
       accessibilityState={{ selected: !!active }}
     >
       {icon}
-      <Text style={[styles.liActionText, active && { color: LINKEDIN_BLUE }]}>{label}</Text>
+      <Text style={[styles.liActionText, active && { color: activeColor }]}>{label}</Text>
     </Pressable>
   );
 }
