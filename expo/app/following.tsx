@@ -55,11 +55,16 @@ import {
   useIdentityLinks,
   useIdentityScans,
   useScanSources,
+  scanStatus,
+  type ScanJob,
 } from "@/lib/useAlsoOn";
 
 const RESCAN_AFTER_DAYS = 30;
-// Upper bound per source, and AIsa's listed median price per call.
-const MAX_LOOKUPS_PER_SOURCE = 16;
+// AIsa lookups one person's search may use (more when they're followed in
+// several places, up to a cap, matching find-also-on), and AIsa's listed
+// median price per call.
+const MAX_LOOKUPS_PER_PERSON = 20;
+const maxLookupsFor = (sources: number) => Math.min(MAX_LOOKUPS_PER_PERSON + 3 * Math.max(0, sources - 1), 30);
 const AISA_PRICE_PER_CALL = 0.012;
 const IPAD_BREAKPOINT = 768;
 
@@ -227,10 +232,12 @@ function DecisionButtons({ account, channelIds }: { account: FoundAccount; chann
   );
 }
 
-function PersonPanel({ person, agents, scanning, onRescan }: {
+function PersonPanel({ person, agents, scanning, status, onRescan }: {
   person: Person;
   agents: { id: string; name: string }[];
   scanning: boolean;
+  // "Checking Taylor Swift…" while a search runs.
+  status?: string | null;
   onRescan: () => void;
 }) {
   const decide = useDecideLink();
@@ -409,6 +416,7 @@ function PersonPanel({ person, agents, scanning, onRescan }: {
             <Text style={styles.outlineBtnText}>{person.lastScannedAt ? "Find more accounts" : "Find accounts"}</Text>
           </Pressable>
         </View>
+        {scanning && status ? <Text style={styles.muted}>{status}</Text> : null}
         {person.scanErrors.length > 0 ? (
           <Text style={styles.warningText}>Last check had a problem: {person.scanErrors[0]}</Text>
         ) : null}
@@ -558,22 +566,29 @@ export default function FollowingScreen() {
   const scanList = scans.data ?? [];
   const staleBefore = Date.now() - RESCAN_AFTER_DAYS * 24 * 60 * 60 * 1000;
   const scanTimes = new Map(scanList.map((s) => [s.channel_id, new Date(s.scanned_at).getTime()]));
+  // One search per person, covering all of their sources, when any of them
+  // hasn't been searched lately.
+  const jobFor = (p: Person): ScanJob => ({ name: p.name, channelIds: p.sources.map((c) => c.id) });
   const toScan = people
-    .flatMap((p) => p.sources)
-    .filter((c) => !scanTimes.has(c.id) || (scanTimes.get(c.id) ?? 0) < staleBefore)
-    .map((c) => c.id);
-  const maxCost = (toScan.length * MAX_LOOKUPS_PER_SOURCE * AISA_PRICE_PER_CALL).toFixed(2);
+    .filter((p) => p.sources.some((c) => !scanTimes.has(c.id) || (scanTimes.get(c.id) ?? 0) < staleBefore))
+    .map(jobFor);
+  const maxCost = (
+    toScan.reduce((n, job) => n + maxLookupsFor(job.channelIds.length), 0) * AISA_PRICE_PER_CALL
+  ).toFixed(2);
   const loading = sources.isLoading || scans.isLoading;
   const selected = people.find((p) => p.id === selectedId) ?? null;
 
   const runScan = useCallback(
-    async (ids: string[]) => {
-      const result = await scan(ids);
+    async (jobs: ScanJob[]) => {
+      const result = await scan(jobs);
       if (!result) return;
       if (result.failed) {
-        showToast(result.failed + " of " + result.total + " couldn't be checked: " + (result.firstError ?? ""), "error");
+        showToast(result.failed + " of " + result.total + " couldn't be checked. " + (result.firstError ?? ""), "error");
       } else {
-        showToast(result.total === 1 ? "Searched other platforms" : "Searched other platforms for " + result.total + " sources", "success");
+        showToast(
+          result.total === 1 && jobs[0] ? "Searched other platforms for " + jobs[0].name : "Searched other platforms for " + result.total + " people",
+          "success",
+        );
       }
     },
     [scan, showToast],
@@ -610,7 +625,7 @@ export default function FollowingScreen() {
               disabled={isScanning}
               onPress={() => void runScan(toScan)}
               style={({ pressed }) => [styles.scanBtn, (pressed || isScanning) && styles.pressed]}
-              accessibilityLabel={isScanning ? "Searching" : "Find more accounts for " + toScan.length + " sources"}
+              accessibilityLabel={isScanning ? "Searching" : "Find more accounts for " + toScan.length + (toScan.length === 1 ? " person" : " people")}
             >
               {isScanning ? <ActivityIndicator size="small" color={Colors.white} /> : <ScanSearch size={15} color={Colors.white} />}
               <Text style={styles.scanText}>{isScanning ? "Searching" : "Find more (" + toScan.length + ")"}</Text>
@@ -680,7 +695,7 @@ export default function FollowingScreen() {
               <View style={[styles.progressFill, { width: ((progress.done / progress.total) * 100 + "%") as unknown as number }]} />
             </View>
             <Text style={styles.muted}>
-              {"Searched " + progress.done + " of " + progress.total + (progress.failed ? " · " + progress.failed + " couldn't be searched" : "")}
+              {scanStatus(progress) + (progress.failed ? " · " + progress.failed + " couldn't be searched" : "")}
             </Text>
           </View>
         ) : null}
@@ -695,12 +710,12 @@ export default function FollowingScreen() {
           <View style={styles.introCard}>
             <Text style={styles.introTitle}>Find where the people you follow also post</Text>
             <Text style={styles.muted}>
-              {"Checks each of your " + people.length + " people and companies once: the links on their profile, their link-in-bio page and website, and handles like theirs on other platforms. It uses at most " +
-                MAX_LOOKUPS_PER_SOURCE + " AIsa lookups per source, so up to about $" + maxCost + " for this first check."}
+              {"Checks each of your " + people.length + " people and companies once: the links on their profile, their link-in-bio page and website, and handles like theirs on other platforms. Each person is searched once, across all the places you follow them, using at most " +
+                MAX_LOOKUPS_PER_PERSON + " to 30 AIsa lookups, so up to about $" + maxCost + " for this first check."}
             </Text>
             <Pressable onPress={() => void runScan(toScan)} style={({ pressed }) => [styles.introBtn, pressed && styles.pressed]}>
               <ScanSearch size={16} color={Colors.white} />
-              <Text style={styles.scanText}>{"Check " + toScan.length + " sources"}</Text>
+              <Text style={styles.scanText}>{"Check " + toScan.length + (toScan.length === 1 ? " person" : " people")}</Text>
             </Pressable>
           </View>
         ) : null}
@@ -776,7 +791,8 @@ export default function FollowingScreen() {
                   person={selected}
                   agents={agents}
                   scanning={isScanning}
-                  onRescan={() => void runScan(selected.sources.map((c) => c.id))}
+                  status={progress ? scanStatus(progress) : null}
+                  onRescan={() => void runScan([jobFor(selected)])}
                 />
               ) : null}
             </ScrollView>

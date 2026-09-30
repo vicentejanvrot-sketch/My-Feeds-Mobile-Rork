@@ -46,32 +46,53 @@ export interface ScanResult {
   firstError: string | null;
 }
 
-// Checks sources two at a time and reports progress to the screen.
+// One search per person: every source they're followed through goes in the
+// same request, so their name, Wikidata and Apple are looked up once.
+export interface ScanJob {
+  name: string;
+  channelIds: string[];
+}
+
+export interface ScanProgress {
+  done: number;
+  total: number;
+  failed: number;
+  // Names of the people being searched right now.
+  current: string[];
+}
+
+// Searches people two at a time and reports progress to the screen.
 export function useScanSources() {
   const queryClient = useQueryClient();
-  const [progress, setProgress] = useState<{ done: number; total: number; failed: number } | null>(null);
+  const [progress, setProgress] = useState<ScanProgress | null>(null);
   const running = useRef(false);
 
   const scan = useCallback(
-    async (channelIds: string[]): Promise<ScanResult | null> => {
-      if (running.current || channelIds.length === 0) return null;
+    async (jobs: ScanJob[]): Promise<ScanResult | null> => {
+      const list = jobs.filter((j) => j.channelIds.length > 0);
+      if (running.current || list.length === 0) return null;
       running.current = true;
       let done = 0;
       let failed = 0;
       let firstError: string | null = null;
-      setProgress({ done, total: channelIds.length, failed });
-      const queue = [...channelIds];
+      const current: string[] = [];
+      const report = () => setProgress({ done, total: list.length, failed, current: [...current] });
+      report();
+      const queue = [...list];
 
       const worker = async () => {
         while (queue.length) {
-          const channelId = queue.shift()!;
-          const { error } = await supabase.functions.invoke("find-also-on", { body: { channelId } });
+          const job = queue.shift()!;
+          current.push(job.name);
+          report();
+          const { error } = await supabase.functions.invoke("find-also-on", { body: { channelIds: job.channelIds } });
           if (error) {
             failed++;
-            if (!firstError) firstError = await extractEdgeFunctionErrorMessage(error);
+            if (!firstError) firstError = job.name + ": " + (await extractEdgeFunctionErrorMessage(error));
           }
           done++;
-          setProgress({ done, total: channelIds.length, failed });
+          current.splice(current.indexOf(job.name), 1);
+          report();
           void queryClient.invalidateQueries({ queryKey: alsoOnKeys.links });
           void queryClient.invalidateQueries({ queryKey: alsoOnKeys.scans });
         }
@@ -83,12 +104,24 @@ export function useScanSources() {
         running.current = false;
         setProgress(null);
       }
-      return { total: channelIds.length, failed, firstError };
+      return { total: list.length, failed, firstError };
     },
     [queryClient],
   );
 
   return { scan, progress, isScanning: progress !== null };
+}
+
+// "Checking Taylor Swift…", or "Checking Taylor Swift and Madonna…" when two
+// run at once.
+export function scanStatus(progress: ScanProgress): string {
+  const names = progress.current;
+  const now = names.length === 0
+    ? "Finishing…"
+    : names.length === 1
+    ? "Checking " + names[0] + "…"
+    : "Checking " + names.slice(0, -1).join(", ") + " and " + names[names.length - 1] + "…";
+  return progress.total > 1 ? now + " · " + progress.done + " of " + progress.total + " people done" : now;
 }
 
 // "Same person" / "Not them". channelIds are all the sources of this person
