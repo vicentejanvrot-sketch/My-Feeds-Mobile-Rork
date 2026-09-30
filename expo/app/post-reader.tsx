@@ -58,6 +58,8 @@ const LINKEDIN_BLUE = "#378FE9";
 const TIKTOK_RED = "#FE2C55";
 const TIKTOK_YELLOW = "#FACE15";
 const FACEBOOK_BLUE = "#0866FF";
+const APPLE_MUSIC_RED = "#FA243C";
+const APPLE_PODCASTS_PURPLE = "#B35CF2";
 const GITHUB_STAR = "#E3B341";
 
 type PostMetrics = {
@@ -90,6 +92,13 @@ type PostEmbed = {
   // Playable video: MP4, and an HLS stream (plays with sound on iOS).
   video_url?: string | null;
   hls_url?: string | null;
+  // Apple Podcasts episode: the audio file and its length in seconds.
+  audio_url?: string | null;
+  duration?: number | null;
+  // Apple Music release: Apple's embed player link, and single / ep / album.
+  embed_url?: string | null;
+  kind?: string | null;
+  label?: string | null;
 };
 
 function escapeAttr(value: string): string {
@@ -274,6 +283,156 @@ function FacebookPlayer({ uri, portrait }: { uri: string; portrait: boolean }) {
   );
 }
 
+// Apple Music's own player: previews for everyone, full songs for listeners
+// signed in to Apple Music. A single is a short strip, an album shows its tracks.
+function AppleMusicPlayer({ embedUrl, single }: { embedUrl: string; single: boolean }) {
+  return (
+    <View style={[styles.appleEmbed, { height: single ? 175 : 450 }]}>
+      <WebView
+        source={{ uri: embedUrl }}
+        style={{ flex: 1, backgroundColor: "transparent" }}
+        allowsInlineMediaPlayback
+        mediaPlaybackRequiresUserAction={false}
+        javaScriptEnabled
+        scrollEnabled={!single}
+        accessibilityLabel="Apple Music player"
+      />
+    </View>
+  );
+}
+
+function formatClock(seconds: number): string {
+  const s = Math.max(0, Math.floor(seconds));
+  const h = Math.floor(s / 3600);
+  const m = Math.floor((s % 3600) / 60);
+  const sec = String(s % 60).padStart(2, "0");
+  return h > 0 ? `${h}:${String(m).padStart(2, "0")}:${sec}` : `${m}:${sec}`;
+}
+
+const PODCAST_SPEEDS = [1, 1.25, 1.5, 2];
+
+// Same bridge as VIDEO_PROGRESS_JS, for the <audio> element, plus skip and speed.
+const AUDIO_PROGRESS_JS =
+  "(function(){" +
+  "var v=document.querySelector('audio');if(!v)return;" +
+  "function send(type){try{window.ReactNativeWebView.postMessage(JSON.stringify({type:type,t:v.currentTime||0,d:isFinite(v.duration)?v.duration:0}));}catch(e){}}" +
+  "var last=0;" +
+  "v.addEventListener('loadedmetadata',function(){send('ready');});" +
+  "v.addEventListener('timeupdate',function(){var now=Date.now();if(now-last>=1000){last=now;send('time');}});" +
+  "v.addEventListener('pause',function(){if(!v.ended)send('pause');});" +
+  "v.addEventListener('ended',function(){send('ended');});" +
+  "window.__seekTo=function(s){try{if(v.currentTime<1)v.currentTime=s;}catch(e){}};" +
+  "window.__skip=function(d){try{v.currentTime=Math.max(0,v.currentTime+d);}catch(e){}};" +
+  "window.__speed=function(r){try{v.playbackRate=r;}catch(e){}};" +
+  "if(v.readyState>=1)send('ready');" +
+  "})();true;";
+
+// Full podcast episodes play right here. The position is saved like a video's
+// (on the phone and in video_progress), so it resumes on any device, and
+// finishing an episode marks it as watched so it counts in watch time.
+function PodcastPlayer({ media, progressId, onFinished }: { media: PostEmbed; progressId: string; onFinished: () => void }) {
+  const webRef = useRef<WebView>(null);
+  const latest = useRef({ t: 0, d: 0 });
+  const lastSave = useRef(0);
+  const resumed = useRef(false);
+  const [speed, setSpeed] = useState(1);
+  const [resumeAt, setResumeAt] = useState<number | null>(null);
+
+  useEffect(() => {
+    resumed.current = false;
+    const sub = AppState.addEventListener("change", (state) => {
+      if (state !== "active") void saveResumePosition(progressId, latest.current.t, latest.current.d);
+    });
+    return () => {
+      sub.remove();
+      void saveResumePosition(progressId, latest.current.t, latest.current.d);
+    };
+  }, [progressId]);
+
+  const onMessage = (event: WebViewMessageEvent) => {
+    let msg: { type?: string; t?: number; d?: number };
+    try {
+      msg = JSON.parse(event.nativeEvent.data);
+    } catch {
+      return;
+    }
+    const t = Number(msg.t) || 0;
+    const d = Number(msg.d) || media.duration || 0;
+    latest.current = { t, d };
+    if (msg.type === "ready") {
+      if (resumed.current) return;
+      resumed.current = true;
+      void loadResumePosition(progressId).then((saved) => {
+        if (!saved || saved.duration <= 0) return;
+        if (isNearEnd(saved.currentTime, saved.duration)) {
+          void clearResumePosition(progressId);
+        } else if (saved.currentTime >= minResumeSeconds(saved.duration)) {
+          setResumeAt(saved.currentTime);
+          webRef.current?.injectJavaScript("window.__seekTo&&window.__seekTo(" + saved.currentTime + ");true;");
+        }
+      });
+    } else if (msg.type === "ended") {
+      latest.current = { t: 0, d };
+      void clearResumePosition(progressId);
+      onFinished();
+    } else if (msg.type === "pause") {
+      lastSave.current = Date.now();
+      void saveResumePosition(progressId, t, d);
+    } else if (msg.type === "time" && Date.now() - lastSave.current >= POSITION_SAVE_INTERVAL_MS) {
+      lastSave.current = Date.now();
+      void saveResumePosition(progressId, t, d);
+    }
+  };
+
+  if (!media.audio_url) return null;
+  const html = `<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"><meta name="referrer" content="no-referrer">
+<style>html,body{margin:0;padding:0;background:transparent}audio{width:100%;display:block}</style></head>
+<body><audio controls preload="metadata" src="${escapeAttr(media.audio_url)}"></audio></body></html>`;
+  const skip = (delta: number) => webRef.current?.injectJavaScript("window.__skip&&window.__skip(" + delta + ");true;");
+  const changeSpeed = () => {
+    const next = PODCAST_SPEEDS[(PODCAST_SPEEDS.indexOf(speed) + 1) % PODCAST_SPEEDS.length];
+    setSpeed(next);
+    webRef.current?.injectJavaScript("window.__speed&&window.__speed(" + next + ");true;");
+  };
+
+  return (
+    <View style={styles.podcastCard}>
+      <View style={styles.podcastTop}>
+        {media.url ? <Image source={{ uri: media.url }} style={styles.podcastArt} contentFit="cover" /> : null}
+        <View style={{ flex: 1, gap: 2 }}>
+          <Text style={styles.muted}>{media.duration ? `${formatClock(media.duration)} long` : "Full episode"}</Text>
+          {resumeAt != null ? <Text style={styles.podcastResume}>Resumes at {formatClock(resumeAt)}</Text> : null}
+        </View>
+      </View>
+      <View style={styles.podcastAudio}>
+        <WebView
+          ref={webRef}
+          source={{ html }}
+          originWhitelist={["*"]}
+          injectedJavaScript={AUDIO_PROGRESS_JS}
+          onMessage={onMessage}
+          allowsInlineMediaPlayback
+          mediaPlaybackRequiresUserAction
+          scrollEnabled={false}
+          style={{ backgroundColor: "transparent" }}
+          accessibilityLabel="Podcast player"
+        />
+      </View>
+      <View style={styles.podcastControls}>
+        <Pressable onPress={() => skip(-15)} style={styles.podcastBtn} accessibilityRole="button" accessibilityLabel="Back 15 seconds">
+          <Text style={styles.podcastBtnText}>Back 15s</Text>
+        </Pressable>
+        <Pressable onPress={() => skip(30)} style={styles.podcastBtn} accessibilityRole="button" accessibilityLabel="Forward 30 seconds">
+          <Text style={styles.podcastBtnText}>Forward 30s</Text>
+        </Pressable>
+        <Pressable onPress={changeSpeed} style={styles.podcastBtn} accessibilityRole="button" accessibilityLabel="Playback speed">
+          <Text style={styles.podcastBtnText}>{speed}×</Text>
+        </Pressable>
+      </View>
+    </View>
+  );
+}
+
 function formatPostDate(iso: string): string {
   const d = new Date(iso);
   const time = d.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
@@ -352,6 +511,8 @@ export default function PostReaderScreen() {
   const embeds = (item.media ?? []) as PostEmbed[];
   const quote = embeds.find((m) => m.type === "quote" || m.type === "article") ?? null;
   const video = embeds.find((m) => m.type !== "quote" && m.type !== "article" && (m.video_url || m.hls_url)) ?? null;
+  const appleRelease = platform === "apple_music" ? embeds.find((m) => m.type === "album" && m.embed_url) ?? null : null;
+  const podcastAudio = platform === "apple_podcasts" ? embeds.find((m) => m.type === "audio" && m.audio_url) ?? null : null;
   // Carousels (Instagram, LinkedIn) swipe through every photo.
   const photos = embeds.filter((m) => m.type !== "video" && m.type !== "quote" && m.type !== "article" && !!m.url);
   // Every photo and video in the post itself. More than one is a carousel.
@@ -387,7 +548,15 @@ export default function PostReaderScreen() {
           <Text style={platform === "reddit" ? styles.body : styles.bodyLarge}>{item.body}</Text>
         ) : null}
 
-        {platform === "tiktok" && tiktokVideoId && photos.length === 0 ? (
+        {appleRelease?.embed_url ? (
+          <AppleMusicPlayer embedUrl={appleRelease.embed_url} single={appleRelease.kind === "single"} />
+        ) : podcastAudio && item.video_id ? (
+          <PodcastPlayer
+            media={podcastAudio}
+            progressId={item.video_id}
+            onFinished={() => { if (status === "not_watched") changeStatus("watched"); }}
+          />
+        ) : platform === "tiktok" && tiktokVideoId && photos.length === 0 ? (
           <TikTokPlayer videoId={tiktokVideoId} />
         ) : platform === "facebook" && video && facebookEmbed(item.url) ? (
           <FacebookPlayer {...facebookEmbed(item.url)!} />
@@ -478,6 +647,28 @@ export default function PostReaderScreen() {
               />
             </View>
             <BarButton label="Share" onPress={share} icon={<Send size={21} color={Colors.textPrimary} />} value={formatCount(metrics.reposts)} />
+          </View>
+        ) : platform === "apple_music" || platform === "apple_podcasts" ? (
+          // Apple Music and Apple Podcasts: heart to save, share, save for later.
+          <View style={styles.xBar}>
+            <View style={{ flexDirection: "row", alignItems: "center" }}>
+              <BarButton
+                label={liked ? "Remove from Saved" : "Like (save in My Feeds)"}
+                selected={liked}
+                onPress={() => changeStatus(liked ? "watched" : "liked")}
+                icon={(() => {
+                  const tint = platform === "apple_music" ? APPLE_MUSIC_RED : APPLE_PODCASTS_PURPLE;
+                  return <Heart size={22} color={liked ? tint : Colors.textPrimary} fill={liked ? tint : "transparent"} />;
+                })()}
+              />
+              <BarButton label="Share" onPress={share} icon={<ShareIcon size={21} color={Colors.textPrimary} />} />
+            </View>
+            <BarButton
+              label={bookmarked ? "Remove from Watch Later" : "Save (Watch Later)"}
+              selected={bookmarked}
+              onPress={() => changeStatus(bookmarked ? "not_watched" : "watch_later")}
+              icon={<Bookmark size={22} color={Colors.textPrimary} fill={bookmarked ? Colors.textPrimary : "transparent"} />}
+            />
           </View>
         ) : platform === "facebook" ? (
           // Facebook: reaction, comment and share counts, then Like, Comment, Share, plus Save.
@@ -1002,6 +1193,30 @@ const styles = StyleSheet.create({
   video: { width: "100%", aspectRatio: 16 / 9, borderRadius: 12, overflow: "hidden", backgroundColor: "#000" },
   tiktokWrap: { alignItems: "center", borderRadius: 12, overflow: "hidden", backgroundColor: "#000" },
   videoFill: { width: "100%", height: "100%", backgroundColor: "#000" },
+  appleEmbed: { width: "100%", borderRadius: 12, overflow: "hidden" },
+  podcastCard: {
+    borderWidth: 1,
+    borderColor: Colors.border,
+    borderRadius: 12,
+    backgroundColor: Colors.card,
+    padding: 12,
+    gap: 10,
+  },
+  podcastTop: { flexDirection: "row", alignItems: "center", gap: 12 },
+  podcastArt: { width: 72, height: 72, borderRadius: 10 },
+  podcastResume: { color: Colors.textPrimary, fontSize: 13, fontWeight: "600" as const },
+  podcastAudio: { height: 56 },
+  podcastControls: { flexDirection: "row", justifyContent: "center", gap: 8 },
+  podcastBtn: {
+    borderWidth: 1,
+    borderColor: Colors.border,
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    minHeight: 40,
+    justifyContent: "center",
+  },
+  podcastBtnText: { color: Colors.textPrimary, fontSize: 13, fontWeight: "700" as const },
   expandBtn: {
     position: "absolute",
     top: 10,
