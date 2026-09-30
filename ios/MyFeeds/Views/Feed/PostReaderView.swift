@@ -105,7 +105,10 @@ struct PostReaderView: View {
                        let raw = music.embedUrl, let embedURL = URL(string: raw) {
                         // Songs, albums (all tracks in a row) and music videos in YouTube's player.
                         YouTubeMusicEmbedPlayer(url: embedURL)
-                        youtubeMusicButton(item)
+                        AddToYouTubeMusicButton(
+                            videoIds: music.videoIds ?? (music.youtubeId.map { [$0] } ?? []),
+                            kind: music.type == "video" ? "video" : (music.kind ?? "album")
+                        )
                     } else if platform == .appleMusic,
                        let release = item.media?.first(where: { $0.type == "album" }),
                        let raw = release.embedUrl, let embedURL = URL(string: raw) {
@@ -461,29 +464,6 @@ struct PostReaderView: View {
         .overlay(alignment: .top) {
             Rectangle().fill(Theme.border).frame(height: 0.5)
         }
-    }
-
-    /// YouTube Music on iPhone: the app has no YouTube account connection here,
-    /// so adding to a playlist happens in the YouTube Music app. (The web and
-    /// Android apps add straight to a "My Feeds" playlist.)
-    private func youtubeMusicButton(_ item: FeedItem) -> some View {
-        Button {
-            if let raw = item.url { openExternal(raw) }
-        } label: {
-            HStack(spacing: 8) {
-                Image(systemName: "text.badge.plus")
-                    .font(.system(size: 14, weight: .semibold))
-                    .foregroundStyle(Self.youtubeMusicRed)
-                Text("Add it in YouTube Music")
-                    .font(.system(size: 14, weight: .bold))
-                    .foregroundStyle(Theme.textPrimary)
-            }
-            .frame(maxWidth: .infinity, minHeight: 44)
-            .overlay(RoundedRectangle(cornerRadius: 10).stroke(Theme.border, lineWidth: 1))
-            .contentShape(Rectangle())
-        }
-        .buttonStyle(.plain)
-        .disabled(item.url == nil)
     }
 
     // MARK: - Action bars

@@ -476,7 +476,7 @@ private struct TourContent {
                 steps: [
                     TourStep(title: "Listen here", body: "Tap it to play the songs, or the music video, right inside My Feeds."),
                     TourStep(title: "Heart to save", body: "The heart saves it in My Feeds. Save adds it to Watch later."),
-                    TourStep(title: "Open in YouTube Music", body: "Adding it to your library or a playlist opens YouTube Music."),
+                    TourStep(title: "Add it to YouTube Music", body: "\"Add to YouTube Music\" puts the songs in your My Feeds playlist there, using your connected YouTube account."),
                 ],
                 saveActions: [TourAction(icon: "heart", label: "Like"), TourAction(icon: "bookmark", label: "Save")],
                 outActions: [TourAction(icon: "arrow.up.right.square", label: "YouTube Music")],

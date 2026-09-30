@@ -33,6 +33,7 @@ struct SettingsView: View {
                 } else {
                     defaultEmailCard
                     videoPlaybackCard
+                    youtubeCard
                     biometricCard
                     aboutCard
                     dangerZoneCard
@@ -107,6 +108,52 @@ struct SettingsView: View {
                     RoundedRectangle(cornerRadius: 8)
                         .stroke(Theme.border, lineWidth: 1)
                 )
+        }
+    }
+
+    /// The YouTube account used by "Add to YouTube Music" (kept on this phone).
+    private var youtubeCard: some View {
+        let account = YouTubeAccount.shared
+        return settingsCard(icon: "play.rectangle", iconColor: Theme.accent, title: "YouTube",
+                            description: "Connect your YouTube account to add songs to a \"My Feeds\" playlist in YouTube Music.") {
+            HStack(spacing: 12) {
+                Image(systemName: account.isConnected ? "checkmark.circle.fill" : "person.crop.circle.badge.questionmark")
+                    .font(.system(size: 18))
+                    .foregroundStyle(account.isConnected ? Theme.success : Theme.textMuted)
+                Text(account.isConnected ? (account.channelName ?? "Connected") : "Not connected")
+                    .font(.system(size: 15, weight: .semibold))
+                    .foregroundStyle(Theme.textPrimary)
+                    .lineLimit(1)
+                Spacer()
+                Button {
+                    if account.isConnected {
+                        account.disconnect()
+                        toasts.show("YouTube disconnected")
+                    } else {
+                        Task {
+                            do {
+                                try await account.connect()
+                                toasts.show("YouTube connected")
+                            } catch YouTubeAccountError.cancelled {
+                                // closed the sign-in sheet
+                            } catch {
+                                toasts.show(error.localizedDescription, type: .error)
+                            }
+                        }
+                    }
+                } label: {
+                    if account.isConnecting {
+                        ProgressView().tint(Theme.accent)
+                    } else {
+                        Text(account.isConnected ? "Disconnect" : "Connect")
+                            .font(.system(size: 14, weight: .bold))
+                            .foregroundStyle(account.isConnected ? Theme.destructive : Theme.accent)
+                    }
+                }
+                .buttonStyle(.plain)
+                .disabled(account.isConnecting)
+            }
+            .padding(.vertical, 6)
         }
     }
 
