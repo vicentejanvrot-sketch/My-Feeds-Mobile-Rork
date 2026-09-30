@@ -23,10 +23,12 @@ import { PlatformBadge } from "@/components/PlatformBadge";
 import { ReadWatchTour } from "@/components/onboarding/ReadWatchTour";
 import { Platform, PLATFORMS, PLATFORM_META } from "@/lib/platforms";
 
-// First-run wizard, same flow as the web OnboardingWizard: create the first
-// agent (its name is its topic), add its sources, then a per-platform tour of
+// Onboarding wizard, same flow as the web OnboardingWizard: create an agent
+// (its name is its topic), add its sources, then a per-platform tour of
 // reading and watching in the app. Saves to the same tables and the same
-// add-source edge function as the rest of the app.
+// add-source edge function as the rest of the app. It opens on the Dashboard
+// until the user ticks "Don't show this again", and from the Dashboard's
+// floating help button any time. "See how it works" jumps to the tour only.
 
 export interface OnboardingResult {
   agentId: string;
@@ -39,6 +41,9 @@ interface OnboardingWizardProps {
   // result is set when the user reached the last screen, so the caller can
   // show the success message and start a run.
   onClose: (result?: OnboardingResult) => void;
+  /** The user ticked "Don't show this again". */
+  hidden: boolean;
+  onHiddenChange: (hidden: boolean) => void;
 }
 
 interface AddedSource {
@@ -58,7 +63,7 @@ function deviceTimezone(): string {
   }
 }
 
-export function OnboardingWizard({ visible, onClose }: OnboardingWizardProps) {
+export function OnboardingWizard({ visible, onClose, hidden, onHiddenChange }: OnboardingWizardProps) {
   const insets = useSafeAreaInsets();
   const { user } = useAuth();
   const queryClient = useQueryClient();
@@ -72,6 +77,9 @@ export function OnboardingWizard({ visible, onClose }: OnboardingWizardProps) {
   const [saving, setSaving] = useState(false);
   const [finishing, setFinishing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Opened only to see the reading tour: no agent is created.
+  const [tourOnly, setTourOnly] = useState(false);
+  const [dontShow, setDontShow] = useState(hidden);
 
   const [platform, setPlatform] = useState<Platform>("youtube");
   const [sourceValue, setSourceValue] = useState("");
@@ -224,7 +232,22 @@ export function OnboardingWizard({ visible, onClose }: OnboardingWizardProps) {
     goTo(LAST_STEP);
   };
 
+  const toggleDontShow = () => {
+    const value = !dontShow;
+    setDontShow(value);
+    onHiddenChange(value);
+  };
+
+  const startTour = () => {
+    setTourOnly(true);
+    goTo(3);
+  };
+
   const next = () => {
+    if (tourOnly) {
+      onClose();
+      return;
+    }
     if (step === 1) {
       void saveAgent();
       return;
@@ -235,7 +258,14 @@ export function OnboardingWizard({ visible, onClose }: OnboardingWizardProps) {
     }
     goTo(Math.min(LAST_STEP, step + 1));
   };
-  const back = () => goTo(Math.max(0, step - 1));
+  const back = () => {
+    if (tourOnly) {
+      setTourOnly(false);
+      goTo(0);
+      return;
+    }
+    goTo(Math.max(0, step - 1));
+  };
 
   const close = (runNow = false) => {
     if (step === LAST_STEP && agentId) onClose({ agentId, agentName: savedName, runNow });
@@ -251,6 +281,21 @@ export function OnboardingWizard({ visible, onClose }: OnboardingWizardProps) {
     step === 2 && sources.length === 0 ? "Add at least one source, or skip for now." : "";
   const showFooter = step >= 1 && step < LAST_STEP;
 
+  const dontShowBox = (
+    <Pressable
+      onPress={toggleDontShow}
+      accessibilityRole="checkbox"
+      accessibilityState={{ checked: dontShow }}
+      hitSlop={6}
+      style={styles.checkRow}
+    >
+      <View style={[styles.checkBox, dontShow && styles.checkBoxOn]}>
+        {dontShow ? <Check size={14} color={Colors.white} strokeWidth={3} /> : null}
+      </View>
+      <Text style={styles.checkText}>Don't show this again</Text>
+    </Pressable>
+  );
+
   return (
     <Modal visible={visible} animationType="slide" presentationStyle="fullScreen" onRequestClose={() => close()}>
       <KeyboardAvoidingView
@@ -260,7 +305,9 @@ export function OnboardingWizard({ visible, onClose }: OnboardingWizardProps) {
         {/* Header: progress + close */}
         <View style={styles.header}>
           <View style={{ flex: 1 }}>
-            {showFooter ? (
+            {showFooter && tourOnly ? (
+              <Text style={styles.stepLabel}>HOW IT WORKS</Text>
+            ) : showFooter ? (
               <View style={{ gap: 8 }}>
                 <View style={styles.segments}>
                   {STEP_LABELS.map((label, i) => (
@@ -308,11 +355,22 @@ export function OnboardingWizard({ visible, onClose }: OnboardingWizardProps) {
                 <Pressable style={({ pressed }) => [styles.primaryBtn, pressed && styles.pressed]} onPress={() => goTo(1)}>
                   <Text style={styles.primaryText}>Get started</Text>
                 </Pressable>
-                <Pressable style={({ pressed }) => [styles.outlineBtn, pressed && styles.pressed]} onPress={() => close()}>
-                  <Text style={styles.outlineText}>Skip for now</Text>
+                <Pressable style={({ pressed }) => [styles.outlineBtn, pressed && styles.pressed]} onPress={startTour}>
+                  <Text style={styles.outlineText}>See how it works</Text>
+                </Pressable>
+                <Pressable style={({ pressed }) => [styles.skipBtn, pressed && styles.pressed]} onPress={() => close()}>
+                  <Text style={styles.skipText}>Skip for now</Text>
                 </Pressable>
               </View>
-              <Text style={styles.muted}>Three quick steps, about two minutes.</Text>
+              <Text style={styles.muted}>
+                Get started builds a new agent in three quick steps. See how it works only shows how to read and watch.
+              </Text>
+              <View style={styles.checkSection}>
+                {dontShowBox}
+                <Text style={[styles.muted, { paddingLeft: 32 }]}>
+                  You can open this again any time with the ? button on the Dashboard.
+                </Text>
+              </View>
             </View>
           )}
 
@@ -511,6 +569,7 @@ export function OnboardingWizard({ visible, onClose }: OnboardingWizardProps) {
                   <Text style={styles.outlineText}>Go to my feed</Text>
                 </Pressable>
               </View>
+              <View style={styles.checkSection}>{dontShowBox}</View>
             </View>
           )}
 
@@ -520,6 +579,7 @@ export function OnboardingWizard({ visible, onClose }: OnboardingWizardProps) {
         {showFooter && (
           <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 12) }]}>
             {error ? <Text style={styles.error}>{error}</Text> : hint ? <Text style={styles.hint}>{hint}</Text> : null}
+            {tourOnly ? dontShowBox : null}
             <View style={styles.footerRow}>
               <Pressable onPress={back} accessibilityLabel="Back" style={({ pressed }) => [styles.backBtn, pressed && styles.pressed]}>
                 <ArrowLeft size={20} color={Colors.textPrimary} />
@@ -535,7 +595,7 @@ export function OnboardingWizard({ visible, onClose }: OnboardingWizardProps) {
                 style={({ pressed }) => [styles.primaryBtn, { flex: 1 }, nextDisabled && styles.disabled, pressed && styles.pressed]}
               >
                 {saving || finishing ? <ActivityIndicator size="small" color={Colors.white} /> : null}
-                <Text style={styles.primaryText}>{step === LAST_STEP - 1 ? "Finish" : "Continue"}</Text>
+                <Text style={styles.primaryText}>{tourOnly ? "Done" : step === LAST_STEP - 1 ? "Finish" : "Continue"}</Text>
               </Pressable>
             </View>
           </View>
@@ -702,6 +762,24 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   outlineText: { color: Colors.textPrimary, fontSize: 16, fontWeight: "700" as const },
+  checkSection: {
+    gap: 6,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: Colors.border,
+    paddingTop: 16,
+  },
+  checkRow: { flexDirection: "row", alignItems: "center", gap: 10, minHeight: 44 },
+  checkBox: {
+    width: 22,
+    height: 22,
+    borderRadius: 6,
+    borderWidth: 1.5,
+    borderColor: Colors.textSecondary,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  checkBoxOn: { backgroundColor: Colors.accent, borderColor: Colors.accent },
+  checkText: { color: Colors.textPrimary, fontSize: 15 },
   hint: { color: Colors.textSecondary, fontSize: 13, textAlign: "center" },
   error: { color: Colors.destructive, fontSize: 13, textAlign: "center", marginTop: 8 },
   disabled: { opacity: 0.45 },

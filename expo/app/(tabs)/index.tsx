@@ -1,4 +1,4 @@
-import { useMemo, useState, useCallback, useRef } from "react";
+import { useMemo, useState, useCallback, useEffect, useRef } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import {
   ActivityIndicator,
@@ -55,6 +55,14 @@ import { StatusPill } from "@/components/StatusPill";
 import WatchTimeStats from "@/components/WatchTimeStats";
 import { useRunningOverlay } from "@/lib/running-overlay";
 import type { ItemStatus, Run, Channel } from "@/lib/database";
+import { OnboardingWizard, type OnboardingResult } from "@/components/onboarding/OnboardingWizard";
+import { useAuth } from "@/lib/auth-provider";
+import {
+  HIDE_ONBOARDING_KEY,
+  markOnboardingShown,
+  setOnboardingHidden,
+  shouldAutoOpenOnboarding,
+} from "@/lib/onboarding";
 
 const IPAD_BREAKPOINT = 768;
 
@@ -78,6 +86,35 @@ export default function DashboardScreen() {
 
   const scrollRef = useRef<ScrollView>(null);
   const [pendingId, setPendingId] = useState<string | null>(null);
+
+  // Onboarding wizard: opens by itself once per launch until the user ticks
+  // "Don't show this again".
+  const { user } = useAuth();
+  const onboardingHidden = user?.user_metadata?.[HIDE_ONBOARDING_KEY] === true;
+  const [wizardOpen, setWizardOpen] = useState(false);
+  // A new key gives the wizard fresh state each time it opens.
+  const [wizardKey, setWizardKey] = useState(0);
+  const openWizard = useCallback(() => {
+    markOnboardingShown();
+    setWizardKey((k) => k + 1);
+    setWizardOpen(true);
+  }, []);
+  useEffect(() => {
+    let cancelled = false;
+    void shouldAutoOpenOnboarding().then((open) => {
+      if (open && !cancelled) openWizard();
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [openWizard]);
+  const handleHiddenChange = useCallback(
+    async (hidden: boolean) => {
+      const message = await setOnboardingHidden(hidden);
+      if (message) showToast("Couldn't save that setting: " + message, "error");
+    },
+    [showToast],
+  );
 
   useFocusEffect(
     useCallback(() => {
@@ -298,6 +335,26 @@ export default function DashboardScreen() {
     [deleteAgent, showToast],
   );
 
+  // The wizard closes from its last screen with the new agent: say it worked,
+  // and start the first run if they asked for it.
+  const handleWizardClose = useCallback(
+    async (result?: OnboardingResult) => {
+      setWizardOpen(false);
+      if (!result) return;
+      showToast(`${result.agentName} is set up`, "success");
+      if (!result.runNow) return;
+      setPendingId(result.agentId);
+      try {
+        await runOne(result.agentId, result.agentName);
+      } catch (e) {
+        overlay.showError(result.agentName, e instanceof Error ? e.message : "Failed to start run");
+      } finally {
+        setPendingId(null);
+      }
+    },
+    [showToast, runOne, overlay],
+  );
+
   const loading =
     agents.isLoading || runs.isLoading || items.isLoading || channels.isLoading || agentCounts.isLoading;
 
@@ -484,6 +541,14 @@ export default function DashboardScreen() {
         </>
         )}
       </ScrollView>
+
+      <OnboardingWizard
+        key={wizardKey}
+        visible={wizardOpen}
+        onClose={(result) => void handleWizardClose(result)}
+        hidden={onboardingHidden}
+        onHiddenChange={(hidden) => void handleHiddenChange(hidden)}
+      />
     </View>
   );
 }
