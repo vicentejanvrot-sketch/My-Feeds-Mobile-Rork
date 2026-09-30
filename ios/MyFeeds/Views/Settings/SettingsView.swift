@@ -326,6 +326,9 @@ struct SettingsView: View {
                 Rectangle().fill(Theme.border).frame(height: 0.5)
                 supportRow(icon: "doc.text", label: "Terms of Service", route: .terms)
                 Rectangle().fill(Theme.border).frame(height: 0.5)
+                // Temporary: opens the Dashboard copy with the onboarding wizard for testing.
+                supportRow(icon: "sparkles", label: "Onboarding test", route: .onboardingTest)
+                Rectangle().fill(Theme.border).frame(height: 0.5)
                 Button {
                     if let url = URL(string: "mailto:support@travelone.ca") {
                         UIApplication.shared.open(url)
