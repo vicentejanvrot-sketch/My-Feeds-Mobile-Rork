@@ -179,7 +179,7 @@ const TOURS: Record<Platform, Tour> = {
     steps: [
       { title: "Listen here", body: "Tap it to open Apple Music's player. You hear a preview, or the full songs if you're signed in to Apple Music." },
       { title: "Heart to save", body: "The heart saves it in My Feeds. Save adds it to Watch later." },
-      { title: "Add it in Apple Music", body: "Adding it to your library or a playlist opens Apple Music." },
+      { title: "Add it to Apple Music", body: "\"Add album to Apple Music\" puts the songs in your My Feeds playlist there, ready to download for offline." },
     ],
     saveActions: [{ icon: Heart, label: "Like" }, { icon: Bookmark, label: "Save" }],
     outActions: [{ icon: ExternalLink, label: "Apple Music" }],
@@ -200,6 +200,22 @@ const TOURS: Record<Platform, Tour> = {
     saveActions: [{ icon: Heart, label: "Like" }, { icon: Bookmark, label: "Save" }],
     outActions: [{ icon: ExternalLink, label: "Apple Podcasts" }],
     outNote: "Opens Apple Podcasts",
+  },
+  apple_books: {
+    author: "Maya Ortiz",
+    handle: "Audiobook",
+    when: "2d",
+    media: "photo",
+    title: "The Quiet Harbor",
+    body: "New audiobook by Maya Ortiz · Fiction",
+    steps: [
+      { title: "Hear a sample", body: "Tap it to see the cover and description, and play Apple's sample right here." },
+      { title: "Heart to save", body: "The heart saves it in My Feeds. Save adds it to Watch later." },
+      { title: "Listen in Apple Books", body: "Buying and listening to the whole book opens Apple Books." },
+    ],
+    saveActions: [{ icon: Heart, label: "Like" }, { icon: Bookmark, label: "Save" }],
+    outActions: [{ icon: ExternalLink, label: "Apple Books" }],
+    outNote: "Opens Apple Books",
   },
 };
 

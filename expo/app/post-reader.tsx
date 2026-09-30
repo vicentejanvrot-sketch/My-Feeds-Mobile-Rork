@@ -64,6 +64,7 @@ const TIKTOK_YELLOW = "#FACE15";
 const FACEBOOK_BLUE = "#0866FF";
 const APPLE_MUSIC_RED = "#FA243C";
 const APPLE_PODCASTS_PURPLE = "#B35CF2";
+const APPLE_BOOKS_ORANGE = "#FF9500";
 const GITHUB_STAR = "#E3B341";
 
 type PostMetrics = {
@@ -99,6 +100,8 @@ type PostEmbed = {
   // Apple Podcasts episode: the audio file and its length in seconds.
   audio_url?: string | null;
   duration?: number | null;
+  // Apple Books audiobook: Apple's short sample.
+  preview_url?: string | null;
   // Apple Music release: Apple's embed player link, and single / ep / album.
   embed_url?: string | null;
   kind?: string | null;
@@ -353,6 +356,42 @@ function AddToAppleMusic({ albumId, single }: { albumId: string; single: boolean
   );
 }
 
+// Apple Books audiobook: the cover and Apple's short sample. The whole book is
+// bought and played in Apple Books, so this doesn't count toward watch time.
+function AudiobookCard({ media }: { media: PostEmbed }) {
+  const html = media.preview_url
+    ? `<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"><meta name="referrer" content="no-referrer">
+<style>html,body{margin:0;padding:0;background:transparent}audio{width:100%;display:block}</style></head>
+<body><audio controls preload="none" src="${escapeAttr(media.preview_url)}"></audio></body></html>`
+    : null;
+  return (
+    <View style={styles.podcastCard}>
+      <View style={styles.podcastTop}>
+        {media.url ? <Image source={{ uri: media.url }} style={styles.audiobookCover} contentFit="cover" /> : null}
+        <View style={{ flex: 1, gap: 4 }}>
+          {media.label ? <Text style={styles.audiobookLabel}>{media.label.toUpperCase()}</Text> : null}
+          <Text style={styles.muted}>
+            {html ? "Sample from Apple Books. The full book plays in Apple Books." : "No sample for this one. The full book plays in Apple Books."}
+          </Text>
+        </View>
+      </View>
+      {html ? (
+        <View style={styles.podcastAudio}>
+          <WebView
+            source={{ html }}
+            originWhitelist={["*"]}
+            allowsInlineMediaPlayback
+            mediaPlaybackRequiresUserAction
+            scrollEnabled={false}
+            style={{ backgroundColor: "transparent" }}
+            accessibilityLabel="Audiobook sample"
+          />
+        </View>
+      ) : null}
+    </View>
+  );
+}
+
 function formatClock(seconds: number): string {
   const s = Math.max(0, Math.floor(seconds));
   const h = Math.floor(s / 3600);
@@ -595,6 +634,7 @@ export default function PostReaderScreen() {
   const quote = embeds.find((m) => m.type === "quote" || m.type === "article") ?? null;
   const video = embeds.find((m) => m.type !== "quote" && m.type !== "article" && (m.video_url || m.hls_url)) ?? null;
   const appleRelease = platform === "apple_music" ? embeds.find((m) => m.type === "album" && m.embed_url) ?? null : null;
+  const audiobook = platform === "apple_books" ? embeds.find((m) => m.type === "audiobook") ?? null : null;
   const podcastAudio = platform === "apple_podcasts" ? embeds.find((m) => m.type === "audio" && m.audio_url) ?? null : null;
   // Carousels (Instagram, LinkedIn) swipe through every photo.
   const photos = embeds.filter((m) => m.type !== "video" && m.type !== "quote" && m.type !== "article" && !!m.url);
@@ -639,6 +679,8 @@ export default function PostReaderScreen() {
               <AddToAppleMusic albumId={item.video_id.slice("apple_music:".length)} single={appleRelease.kind === "single"} />
             ) : null}
           </View>
+        ) : audiobook ? (
+          <AudiobookCard media={audiobook} />
         ) : podcastAudio && item.video_id ? (
           <PodcastPlayer
             media={podcastAudio}
@@ -749,7 +791,7 @@ export default function PostReaderScreen() {
             </View>
             <BarButton label="Share" onPress={share} icon={<Send size={21} color={Colors.textPrimary} />} value={formatCount(metrics.reposts)} />
           </View>
-        ) : platform === "apple_music" || platform === "apple_podcasts" ? (
+        ) : platform === "apple_music" || platform === "apple_podcasts" || platform === "apple_books" ? (
           // Apple Music and Apple Podcasts: heart to save, share, save for later.
           <View style={styles.xBar}>
             <View style={{ flexDirection: "row", alignItems: "center" }}>
@@ -758,7 +800,7 @@ export default function PostReaderScreen() {
                 selected={liked}
                 onPress={() => changeStatus(liked ? "watched" : "liked")}
                 icon={(() => {
-                  const tint = platform === "apple_music" ? APPLE_MUSIC_RED : APPLE_PODCASTS_PURPLE;
+                  const tint = platform === "apple_music" ? APPLE_MUSIC_RED : platform === "apple_books" ? APPLE_BOOKS_ORANGE : APPLE_PODCASTS_PURPLE;
                   return <Heart size={22} color={liked ? tint : Colors.textPrimary} fill={liked ? tint : "transparent"} />;
                 })()}
               />
@@ -1305,6 +1347,8 @@ const styles = StyleSheet.create({
   },
   podcastTop: { flexDirection: "row", alignItems: "center", gap: 12 },
   podcastArt: { width: 72, height: 72, borderRadius: 10 },
+  audiobookCover: { width: 96, height: 96, borderRadius: 8 },
+  audiobookLabel: { color: APPLE_BOOKS_ORANGE, fontSize: 11, fontWeight: "800" as const, letterSpacing: 0.6 },
   podcastResume: { color: Colors.textPrimary, fontSize: 13, fontWeight: "600" as const },
   podcastAudio: { height: 56 },
   podcastControls: { flexDirection: "row", justifyContent: "center", gap: 8 },

@@ -4,10 +4,10 @@
 
 export type Platform =
   | "youtube" | "x" | "reddit" | "instagram" | "linkedin" | "github" | "tiktok" | "facebook"
-  | "apple_music" | "apple_podcasts";
+  | "apple_music" | "apple_podcasts" | "apple_books";
 
 export const PLATFORMS: Platform[] = [
-  "youtube", "x", "reddit", "instagram", "linkedin", "github", "tiktok", "facebook", "apple_music", "apple_podcasts",
+  "youtube", "x", "reddit", "instagram", "linkedin", "github", "tiktok", "facebook", "apple_music", "apple_podcasts", "apple_books",
 ];
 
 export const PLATFORM_META: Record<Platform, {
@@ -129,6 +129,17 @@ export const PLATFORM_META: Record<Platform, {
     openLabel: "Open in Apple Podcasts",
     beta: true,
   },
+  apple_books: {
+    label: "Apple Books",
+    short: "BK",
+    fg: "#FFB35C",
+    bg: "#3A2610",
+    sourceNoun: "Author",
+    addPlaceholder: "Author name or https://books.apple.com/us/author/name/id123",
+    addHelp: "New audiobooks, with a sample to listen to. Adding an author also brings in their latest audiobook.",
+    openLabel: "Open in Apple Books",
+    beta: true,
+  },
 };
 
 export function platformOf(value: string | null | undefined): Platform {
@@ -148,6 +159,7 @@ const PLATFORM_HOSTS: [string, Platform][] = [
   ["facebook.com", "facebook"], ["fb.com", "facebook"], ["fb.watch", "facebook"],
   ["music.apple.com", "apple_music"],
   ["podcasts.apple.com", "apple_podcasts"],
+  ["books.apple.com", "apple_books"],
 ];
 
 /**
@@ -170,6 +182,7 @@ export function detectPlatform(value: string): Platform | null {
   // Old iTunes links use one host for both music and podcasts.
   if (host === "itunes.apple.com") {
     if (path.includes("/podcast")) return "apple_podcasts";
+    if (path.includes("/audiobook") || path.includes("/author") || path.includes("/book/")) return "apple_books";
     if (path.includes("/artist") || path.includes("/album")) return "apple_music";
     return null;
   }
@@ -179,9 +192,9 @@ export function detectPlatform(value: string): Platform | null {
   return null;
 }
 
-// Non-YouTube items store "<platform>:<id>" in items.video_id (x, reddit, instagram, linkedin, github, tiktok, facebook, apple_music, apple_podcasts).
+// Non-YouTube items store "<platform>:<id>" in items.video_id (x, reddit, instagram, linkedin, github, tiktok, facebook, apple_music, apple_podcasts, apple_books).
 export function isPostVideoId(videoId: string | null | undefined): boolean {
-  return !!videoId && /^(x|reddit|instagram|linkedin|github|tiktok|facebook|apple_music|apple_podcasts):/.test(videoId);
+  return !!videoId && /^(x|reddit|instagram|linkedin|github|tiktok|facebook|apple_music|apple_podcasts|apple_books):/.test(videoId);
 }
 
 export function formatCount(num: number | null | undefined): string {

@@ -92,6 +92,10 @@ function accountKeyFromUrl(raw: string | null | undefined): string | null {
     return first ? "x:" + first.replace(/^@/, "").toLowerCase() : null;
   }
   if (host === "instagram.com") return first ? "instagram:" + first.toLowerCase() : null;
+  if (host === "books.apple.com" || (host === "itunes.apple.com" && /\/author\//i.test(u.pathname))) {
+    const author = u.pathname.match(/\/author\/(?:[^/]+\/)?(?:id)?(\d+)/i);
+    return author ? "apple_books:" + author[1] : null;
+  }
   if (host === "music.apple.com" || host === "itunes.apple.com" || host === "podcasts.apple.com") {
     const artist = u.pathname.match(/\/artist\/(?:[^/]+\/)?(?:id)?(\d+)/i);
     if (artist && host !== "podcasts.apple.com") return "apple_music:" + artist[1];
@@ -149,6 +153,7 @@ export function cleanName(name: string | null | undefined, fallback: string): st
 export function accountLabel(platform: Platform, handle: string | null, url: string): string {
   if (platform === "apple_music") return "Artist page";
   if (platform === "apple_podcasts") return "Show";
+  if (platform === "apple_books") return "Author";
   if (!handle || platform === "facebook") return url.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "");
   if (platform === "x" || platform === "instagram" || platform === "tiktok") return "@" + handle;
   if (platform === "reddit") return "u/" + handle.replace(/^\/?u(ser)?\//i, "");
