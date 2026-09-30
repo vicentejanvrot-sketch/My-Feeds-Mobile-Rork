@@ -367,6 +367,12 @@ final class SupabaseService {
             .eq("id", value: id).select().single().execute().value
     }
 
+    /// Sets (or clears, with nil) just a collection's description.
+    func updateAgentDescription(id: String, description: String?) async throws {
+        try await db.from("agents").update(AgentDescriptionPatch(description: description))
+            .eq("id", value: id).execute()
+    }
+
     func deleteAgent(id: String) async throws {
         try await db.from("agents").delete().eq("id", value: id).execute()
     }

@@ -53,7 +53,8 @@ struct DashboardView: View {
                             FeedCardView(
                                 agent: agent,
                                 accent: Theme.agentAccent(index),
-                                counts: counts[agent.id] ?? AgentItemCounts()
+                                counts: counts[agent.id] ?? AgentItemCounts(),
+                                onDescriptionChange: { saveDescription($0, for: agent) }
                             ) {
                                 let c = counts[agent.id] ?? AgentItemCounts()
                                 let status: ItemStatus
@@ -312,6 +313,24 @@ struct DashboardView: View {
 
     // MARK: - Data
 
+    /// Saves a description typed on a Feeds card, updating the card right away.
+    private func saveDescription(_ text: String, for agent: Agent) {
+        let trimmed = String(text.trimmingCharacters(in: .whitespacesAndNewlines).prefix(500))
+        let next: String? = trimmed.isEmpty ? nil : trimmed
+        guard next != agent.description, let index = agents.firstIndex(where: { $0.id == agent.id }) else { return }
+        let previous = agents[index].description
+        agents[index].description = next
+        Task {
+            do {
+                try await SupabaseService.shared.updateAgentDescription(id: agent.id, description: next)
+                toasts.show(next == nil ? "Description removed" : "Description saved")
+            } catch {
+                if let i = agents.firstIndex(where: { $0.id == agent.id }) { agents[i].description = previous }
+                toasts.show("Couldn't save the description", type: .error)
+            }
+        }
+    }
+
     private func load() async {
         let service = SupabaseService.shared
         do {
@@ -392,7 +411,11 @@ private struct FeedCardView: View {
     let agent: Agent
     let accent: Color
     let counts: AgentItemCounts
+    let onDescriptionChange: (String) -> Void
     let onTap: () -> Void
+
+    @State private var editingDescription = false
+    @State private var descriptionDraft = ""
 
     private var watchedPct: Int {
         guard counts.total > 0 else { return 0 }
@@ -428,13 +451,33 @@ private struct FeedCardView: View {
                         }
                     }
 
-                    if let description = agent.description, !description.isEmpty {
-                        Text(description)
-                            .font(.system(size: 12))
-                            .foregroundStyle(Theme.textSecondary)
-                            .lineLimit(1)
-                            .padding(.top, 4)
+                    // Tap to add or edit the collection's description (same field as the edit screen).
+                    Button {
+                        descriptionDraft = agent.description ?? ""
+                        editingDescription = true
+                    } label: {
+                        HStack(spacing: 4) {
+                            if let description = agent.description, !description.isEmpty {
+                                Text(description)
+                                    .font(.system(size: 12))
+                                    .foregroundStyle(Theme.textSecondary)
+                                    .lineLimit(1)
+                                Image(systemName: "pencil")
+                                    .font(.system(size: 10))
+                                    .foregroundStyle(Theme.textMuted)
+                            } else {
+                                Image(systemName: "plus")
+                                    .font(.system(size: 10, weight: .semibold))
+                                Text("Add a description")
+                                    .font(.system(size: 12))
+                            }
+                        }
+                        .foregroundStyle(Theme.textMuted)
+                        .padding(.vertical, 4)
+                        .contentShape(Rectangle())
                     }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel(agent.description?.isEmpty == false ? "Edit description" : "Add a description")
 
                     if counts.total > 0 {
                         HStack(spacing: 8) {
@@ -475,6 +518,13 @@ private struct FeedCardView: View {
             .padding(.bottom, 12)
         }
         .buttonStyle(.plain)
+        .alert("Collection description", isPresented: $editingDescription) {
+            TextField("What is this collection about?", text: $descriptionDraft)
+            Button("Cancel", role: .cancel) {}
+            Button("Save") { onDescriptionChange(descriptionDraft) }
+        } message: {
+            Text(agent.name)
+        }
     }
 
     private func countChip(icon: String, iconColor: Color, value: Int, valueColor: Color) -> some View {

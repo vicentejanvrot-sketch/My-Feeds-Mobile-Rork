@@ -8,6 +8,7 @@ import {
   ScrollView,
   StyleSheet,
   Text,
+  TextInput,
   useWindowDimensions,
   View,
 } from "react-native";
@@ -30,6 +31,8 @@ import {
   Sparkles,
   Users,
   ChevronRight,
+  Plus,
+  Pencil,
 } from "lucide-react-native";
 import { Colors } from "@/constants/colors";
 
@@ -46,6 +49,7 @@ import {
   useDeleteAgent,
   useDashboardRealtime,
   useAgentItemCounts,
+  useUpdateAgent,
   getAgentColor,
   qk,
   extractEdgeFunctionErrorMessage,
@@ -615,6 +619,78 @@ const statStyles = StyleSheet.create({
   value: { fontSize: 28, fontWeight: "800" as const, color: Colors.textPrimary, marginTop: 4 },
 });
 
+const DESCRIPTION_MAX = 500;
+
+/**
+ * The collection's description, editable right on the card: tap it (or
+ * "Add a description") to type; Done or tapping away saves. Same field as the
+ * Description on the collection's edit screen.
+ */
+function CardDescription({ agentId, description }: { agentId: string; description: string | null }) {
+  const updateAgent = useUpdateAgent();
+  const showToast = useToast();
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState(description ?? "");
+
+  useEffect(() => {
+    if (!editing) setDraft(description ?? "");
+  }, [description, editing]);
+
+  const save = () => {
+    setEditing(false);
+    const next = draft.trim().slice(0, DESCRIPTION_MAX);
+    if (next === (description ?? "").trim()) return;
+    updateAgent.mutate(
+      { id: agentId, description: next || null },
+      {
+        onSuccess: () => showToast(next ? "Description saved" : "Description removed", "success"),
+        onError: () => showToast("Couldn't save the description", "error"),
+      },
+    );
+  };
+
+  if (editing) {
+    return (
+      <TextInput
+        value={draft}
+        onChangeText={setDraft}
+        onBlur={save}
+        onSubmitEditing={save}
+        autoFocus
+        maxLength={DESCRIPTION_MAX}
+        returnKeyType="done"
+        blurOnSubmit
+        placeholder="What is this collection about?"
+        placeholderTextColor={Colors.textMuted}
+        style={feedStyles.descInput}
+        accessibilityLabel="Collection description"
+      />
+    );
+  }
+
+  return (
+    <Pressable
+      onPress={() => setEditing(true)}
+      hitSlop={6}
+      style={feedStyles.descRow}
+      accessibilityRole="button"
+      accessibilityLabel={description ? "Edit description" : "Add a description"}
+    >
+      {description ? (
+        <>
+          <Text style={[feedStyles.desc, { marginTop: 0, flexShrink: 1 }]} numberOfLines={1}>{description}</Text>
+          <Pencil size={11} color={Colors.textMuted} />
+        </>
+      ) : (
+        <>
+          <Plus size={12} color={Colors.textMuted} />
+          <Text style={feedStyles.descAdd}>Add a description</Text>
+        </>
+      )}
+    </Pressable>
+  );
+}
+
 function FeedCard({
   agent,
   accent,
@@ -648,9 +724,7 @@ function FeedCard({
           </View>
         </View>
 
-        {agent.description ? (
-          <Text style={feedStyles.desc} numberOfLines={1}>{agent.description}</Text>
-        ) : null}
+        <CardDescription agentId={agent.id} description={agent.description} />
 
         {/* progress bar */}
         {stats.total > 0 ? (
@@ -703,6 +777,19 @@ const feedStyles = StyleSheet.create({
   },
   caughtUpText: { fontSize: 10, fontWeight: "600" as const },
   desc: { fontSize: 12, color: Colors.textSecondary, marginTop: 4 },
+  descRow: { flexDirection: "row", alignItems: "center", gap: 4, marginTop: 4, alignSelf: "flex-start", maxWidth: "100%" },
+  descAdd: { fontSize: 12, color: Colors.textMuted },
+  descInput: {
+    marginTop: 4,
+    fontSize: 12,
+    color: Colors.textPrimary,
+    borderWidth: 1,
+    borderColor: Colors.borderFocus,
+    borderRadius: 6,
+    paddingHorizontal: 8,
+    paddingVertical: 6,
+    backgroundColor: Colors.input,
+  },
   progressSection: {
     flexDirection: "row",
     alignItems: "center",
