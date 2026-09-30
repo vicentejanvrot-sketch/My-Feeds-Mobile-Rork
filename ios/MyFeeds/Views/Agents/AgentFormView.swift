@@ -31,8 +31,9 @@ struct AgentFormView: View {
     @State private var runTime = Date()
     @State private var timezone = "America/New_York"
     @State private var lookbackHours = "36"
-    @State private var includeShorts = false
-    @State private var includeLive = false
+    // New collections include Shorts and live videos; the user can turn them off.
+    @State private var includeShorts = true
+    @State private var includeLive = true
     @State private var minDurationMinutes: Double = 3
     @State private var freshnessWeight: Double = 1.0
     @State private var priorityWeight: Double = 1.0

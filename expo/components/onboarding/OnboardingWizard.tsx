@@ -136,8 +136,8 @@ export function OnboardingWizard({ visible, onClose, hidden, onHiddenChange }: O
             run_time_local: "07:00",
             timezone: deviceTimezone(),
             lookback_hours: 36,
-            include_shorts: false,
-            include_live: false,
+            include_shorts: true,
+            include_live: true,
             ai_provider: "lovable",
             user_id: user.id,
           })

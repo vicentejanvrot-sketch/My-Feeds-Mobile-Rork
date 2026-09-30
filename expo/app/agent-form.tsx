@@ -112,8 +112,9 @@ export default function AgentFormScreen() {
   const [runTime, setRunTime] = useState("07:00");
   const [timezone, setTimezone] = useState("America/New_York");
   const [lookbackHours, setLookbackHours] = useState("36");
-  const [includeShorts, setIncludeShorts] = useState(false);
-  const [includeLive, setIncludeLive] = useState(false);
+  // New collections include Shorts and live videos; the user can turn them off.
+  const [includeShorts, setIncludeShorts] = useState(true);
+  const [includeLive, setIncludeLive] = useState(true);
   const [recipients, setRecipients] = useState<string[]>([]);
 
   const [recipientInput, setRecipientInput] = useState("");
