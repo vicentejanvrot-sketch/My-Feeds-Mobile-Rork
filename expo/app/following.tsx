@@ -4,6 +4,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
+  Alert,
   Modal,
   Pressable,
   RefreshControl,
@@ -27,13 +28,14 @@ import {
   RefreshCw,
   ScanSearch,
   Search,
+  Trash2,
   UserPlus,
   X,
 } from "lucide-react-native";
 import { Colors } from "@/constants/colors";
 import { PlatformBadge } from "@/components/PlatformBadge";
 import { useToast } from "@/components/Toast";
-import { useAgents, useChannelsAll } from "@/lib/hooks";
+import { useAgents, useChannelsAll, useDeleteChannel } from "@/lib/hooks";
 import { openExternalLink } from "@/lib/open-link";
 import { useYouTubeConnection } from "@/lib/useYouTubeConnection";
 import { PLATFORM_META, type Platform } from "@/lib/platforms";
@@ -214,10 +216,35 @@ function PersonPanel({ person, agents, scanning, onRescan }: {
 }) {
   const decide = useDecideLink();
   const showToast = useToast();
+  const deleteChannel = useDeleteChannel();
   const [agentId, setAgentId] = useState<string | undefined>(person.agentIds[0]);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => setAgentId(person.agentIds[0]), [person.id]);
   const agentName = new Map(agents.map((a) => [a.id, a.name]));
+
+  // Stop following one of their accounts: removes that source from its
+  // collection. Posts already in the feed stay.
+  const confirmRemove = (a: Person["following"][number]) => {
+    const collection = agentName.get(a.channel.agent_id) ?? "your collection";
+    const platformName = platformLabel(a.platform);
+    Alert.alert(
+      `Remove ${person.name} on ${platformName}?`,
+      `${a.label} is removed from ${collection}, so new posts from it stop coming in. What's already in your feed stays.` +
+        (person.following.length === 1 ? " This is the only account you follow for them, so they'll leave your People list." : ""),
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Remove",
+          style: "destructive",
+          onPress: () =>
+            deleteChannel.mutate(a.channel.id, {
+              onSuccess: () => showToast(`Removed. You no longer follow them on ${platformName} here.`, "success"),
+              onError: (e) => showToast("Couldn't remove it: " + (e instanceof Error ? e.message : "try again"), "error"),
+            }),
+        },
+      ],
+    );
+  };
 
   return (
     <View style={styles.panel}>
@@ -237,6 +264,16 @@ function PersonPanel({ person, agents, scanning, onRescan }: {
               <AccountLine platform={a.platform} label={a.label} url={a.url} />
             </View>
             <Text style={styles.agentTag} numberOfLines={1}>{agentName.get(a.channel.agent_id) ?? "Collection"}</Text>
+            <Pressable
+              onPress={() => confirmRemove(a)}
+              disabled={deleteChannel.isPending}
+              hitSlop={8}
+              style={({ pressed }) => [styles.removeBtn, pressed && styles.pressed]}
+              accessibilityRole="button"
+              accessibilityLabel={`Remove ${platformLabel(a.platform)} ${a.label}`}
+            >
+              <Trash2 size={16} color={Colors.textMuted} />
+            </Pressable>
           </View>
         ))}
       </View>
@@ -870,6 +907,7 @@ const styles = StyleSheet.create({
   accountPlatform: { fontSize: 14, fontWeight: "700" as const, color: Colors.textPrimary },
   accountLabel: { flexShrink: 1, fontSize: 14, color: Colors.textSecondary },
   agentTag: { maxWidth: "40%", fontSize: 11, color: Colors.textMuted },
+  removeBtn: { width: 36, height: 36, alignItems: "center", justifyContent: "center" },
   evidenceRow: { flexDirection: "row", alignItems: "flex-start", gap: 5 },
   evidence: { flex: 1, fontSize: 12, color: Colors.success, lineHeight: 16 },
   removeLink: { fontSize: 12, color: Colors.textMuted, textDecorationLine: "underline" },

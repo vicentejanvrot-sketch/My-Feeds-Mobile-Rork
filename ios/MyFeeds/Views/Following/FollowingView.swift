@@ -154,6 +154,7 @@ struct FollowingView: View {
                     busyKeys: busyKeys,
                     onFollow: { account, agentId in follow(account, agentId: agentId) },
                     onDecide: { account, same in decide(account, same: same) },
+                    onRemove: { account in remove(account) },
                     onRescan: { Task { await runScan(person.sources.map { $0.id }) } },
                     onClose: { selectedId = nil }
                 )
@@ -480,6 +481,24 @@ struct FollowingView: View {
     }
 
     // MARK: - Data
+
+    /// Stops following one of a person's accounts: removes that source from its
+    /// collection. Posts already in the feed stay.
+    private func remove(_ account: AlsoOnFollowedAccount) {
+        let removed = account.channel
+        channels.removeAll { $0.id == removed.id }
+        rebuild()
+        Task {
+            do {
+                try await SupabaseService.shared.deleteChannel(id: removed.id)
+                toasts.show("Removed. You no longer follow them on \(account.platform.label) here.")
+            } catch {
+                channels.append(removed)
+                rebuild()
+                toasts.show("Couldn't remove it: \(error.localizedDescription)", type: .error)
+            }
+        }
+    }
 
     private func load() async {
         let service = SupabaseService.shared
@@ -916,10 +935,23 @@ private struct PersonSheet: View {
     let busyKeys: Set<String>
     let onFollow: (AlsoOnFoundAccount, String) -> Void
     let onDecide: (AlsoOnFoundAccount, Bool) -> Void
+    let onRemove: (AlsoOnFollowedAccount) -> Void
     let onRescan: () -> Void
     let onClose: () -> Void
 
     @State private var agentId: String?
+    /// The followed account waiting for "Remove?" to be confirmed.
+    @State private var toRemove: AlsoOnFollowedAccount?
+
+    private var removeMessage: String {
+        guard let account = toRemove else { return "" }
+        let collection = agentNames[account.channel.agentId] ?? "your collection"
+        var text = "\(account.label) is removed from \(collection), so new posts from it stop coming in. What's already in your feed stays."
+        if person.following.count == 1 {
+            text += " This is the only account you follow for them, so they'll leave your People list."
+        }
+        return text
+    }
 
     var body: some View {
         ScrollView {
@@ -943,11 +975,36 @@ private struct PersonSheet: View {
                                 .padding(.vertical, 3)
                                 .background(Theme.input)
                                 .clipShape(Capsule())
+                            Button {
+                                toRemove = account
+                            } label: {
+                                Image(systemName: "trash")
+                                    .font(.system(size: 14))
+                                    .foregroundStyle(Theme.textMuted)
+                                    .frame(width: 36, height: 36)
+                                    .contentShape(Rectangle())
+                            }
+                            .buttonStyle(.plain)
+                            .accessibilityLabel("Remove \(account.platform.label) \(account.label)")
                         }
-                        .padding(12)
+                        .padding(.vertical, 6)
+                        .padding(.leading, 12)
+                        .padding(.trailing, 4)
                     }
                 }
                 .cardStyle(radius: 10)
+                .alert(
+                    "Remove \(person.name) on \(toRemove?.platform.label ?? "")?",
+                    isPresented: Binding(get: { toRemove != nil }, set: { if !$0 { toRemove = nil } })
+                ) {
+                    Button("Cancel", role: .cancel) { toRemove = nil }
+                    Button("Remove", role: .destructive) {
+                        if let account = toRemove { onRemove(account) }
+                        toRemove = nil
+                    }
+                } message: {
+                    Text(removeMessage)
+                }
 
                 if !person.also.isEmpty { alsoSection }
 
