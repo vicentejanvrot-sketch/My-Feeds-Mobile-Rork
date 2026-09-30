@@ -145,9 +145,11 @@ final class SupabaseService {
                     async let unwatched = svc.countItems(agentId: agentId, status: nil, unwatched: true)
                     async let later = svc.countItems(agentId: agentId, status: .watchLater, unwatched: false)
                     async let liked = svc.countItems(agentId: agentId, status: .liked, unwatched: false)
+                    // Same as the web Dashboard: liked items count as watched.
+                    let likedCount = try await liked
                     let counts = try await AgentItemCounts(
-                        total: total, watched: watched, unwatched: unwatched,
-                        watchLater: later, liked: liked
+                        total: total, watched: watched + likedCount, unwatched: unwatched,
+                        watchLater: later, liked: likedCount
                     )
                     return (agentId, counts)
                 }
