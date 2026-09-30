@@ -30,6 +30,7 @@ import {
   Sparkles,
   Users,
   ChevronRight,
+  CircleHelp,
 } from "lucide-react-native";
 import { Colors } from "@/constants/colors";
 
@@ -88,7 +89,7 @@ export default function DashboardScreen() {
   const [pendingId, setPendingId] = useState<string | null>(null);
 
   // Onboarding wizard: opens by itself once per launch until the user ticks
-  // "Don't show this again".
+  // "Don't show this again"; the floating ? button opens it any time.
   const { user } = useAuth();
   const onboardingHidden = user?.user_metadata?.[HIDE_ONBOARDING_KEY] === true;
   const [wizardOpen, setWizardOpen] = useState(false);
@@ -542,6 +543,18 @@ export default function DashboardScreen() {
         )}
       </ScrollView>
 
+      {!overlay.state.status ? (
+        <Pressable
+          onPress={openWizard}
+          accessibilityRole="button"
+          accessibilityLabel="How it works"
+          hitSlop={6}
+          style={({ pressed }) => [styles.helpFab, pressed && styles.pressed]}
+        >
+          <CircleHelp size={26} color={Colors.white} />
+        </Pressable>
+      ) : null}
+
       <OnboardingWizard
         key={wizardKey}
         visible={wizardOpen}
@@ -974,6 +987,22 @@ const emptyStyles = StyleSheet.create({
 // ── Shared styles ──────────────────────────────────────────────────
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: Colors.background },
+  helpFab: {
+    position: "absolute",
+    right: 16,
+    bottom: 16,
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    backgroundColor: Colors.accent,
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#000",
+    shadowOpacity: 0.35,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 6,
+  },
   content: { paddingHorizontal: 16 },
   contentWide: {
     maxWidth: 720,
