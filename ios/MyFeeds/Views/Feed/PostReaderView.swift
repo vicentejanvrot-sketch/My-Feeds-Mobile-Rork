@@ -105,6 +105,10 @@ struct PostReaderView: View {
                        let raw = release.embedUrl, let embedURL = URL(string: raw) {
                         // A Spotify artist's release in Spotify's own player.
                         SpotifyReleasePlayer(embedURL: embedURL, spotifyURL: item.url.flatMap(URL.init(string:)))
+                    } else if platform == .spotify,
+                              let source = item.media?.first(where: { $0.type == "album" && $0.sourceUrl != nil })?.sourceUrl {
+                        // Saved before Spotify had it: looked up again here.
+                        SpotifyPendingRelease(sourceURL: source, imageURL: item.postImageURL)
                     } else if platform == .youtubeMusic,
                        let music = item.media?.first(where: { ($0.type == "album" || $0.type == "video") && $0.embedUrl != nil }),
                        let raw = music.embedUrl, let embedURL = URL(string: raw) {
@@ -1495,6 +1499,39 @@ private struct SpotifyReleasePlayer: View {
                 }
                 .buttonStyle(.plain)
             }
+        }
+    }
+}
+
+/// A Spotify release saved before Songlink could match it (new releases often
+/// take a few days). Asks spotify-link again from the Apple link and shows
+/// Spotify's player as soon as there's a match; until then, the artwork and a
+/// note, with "Open in Spotify" below searching Spotify for it.
+private struct SpotifyPendingRelease: View {
+    let sourceURL: String
+    let imageURL: URL?
+
+    @State private var link: SpotifyLink?
+    @State private var checked = false
+
+    var body: some View {
+        VStack(spacing: 10) {
+            if let link, let rawEmbed = link.embedUrl, let embedURL = URL(string: rawEmbed) {
+                SpotifyReleasePlayer(embedURL: embedURL, spotifyURL: link.spotifyUrl.flatMap(URL.init(string:)))
+            } else {
+                if let imageURL { ExpandablePhoto(url: imageURL) }
+                Text(checked
+                     ? "Spotify's player shows here once this release is linked to Spotify, usually within a few days of release. Open in Spotify searches for it now."
+                     : "Looking for it on Spotify…")
+                    .font(.system(size: 12))
+                    .foregroundStyle(Theme.textSecondary)
+                    .multilineTextAlignment(.center)
+                    .frame(maxWidth: .infinity)
+            }
+        }
+        .task(id: sourceURL) {
+            link = await SupabaseService.shared.spotifyLink(for: sourceURL)
+            checked = true
         }
     }
 }

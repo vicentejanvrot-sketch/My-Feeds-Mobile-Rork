@@ -322,11 +322,14 @@ nonisolated struct ItemMedia: Codable, Hashable, Sendable {
     /// YouTube Music: the release's track video ids, or a music video's id.
     var videoIds: [String]?
     var youtubeId: String?
+    /// Spotify release: the Apple Music link it was found from, so the reader
+    /// can look for the Spotify match again while Spotify's player isn't known yet.
+    var sourceUrl: String?
 
     /// Keys arrive snake_case; the service decoder converts them.
     enum CodingKeys: String, CodingKey {
         case type, url, authorName, authorHandle, authorAvatar, verified, createdAt, text, image, title, preview, videoUrl, hlsUrl
-        case audioUrl, duration, embedUrl, kind, label, previewUrl, videoIds, youtubeId
+        case audioUrl, duration, embedUrl, kind, label, previewUrl, videoIds, youtubeId, sourceUrl
     }
 
     init(from decoder: Decoder) throws {
@@ -352,6 +355,7 @@ nonisolated struct ItemMedia: Codable, Hashable, Sendable {
         previewUrl = try? c.decodeIfPresent(String.self, forKey: .previewUrl)
         videoIds = try? c.decodeIfPresent([String].self, forKey: .videoIds)
         youtubeId = try? c.decodeIfPresent(String.self, forKey: .youtubeId)
+        sourceUrl = try? c.decodeIfPresent(String.self, forKey: .sourceUrl)
     }
 
     /// HLS first (it has sound for Reddit videos), MP4 otherwise.
