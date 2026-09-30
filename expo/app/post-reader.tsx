@@ -856,7 +856,7 @@ export default function PostReaderScreen() {
                 onPress={() => changeStatus(bookmarked ? "not_watched" : "watch_later")}
                 icon={<Bookmark size={19} color={bookmarked ? FACEBOOK_BLUE : Colors.textSecondary} fill={bookmarked ? FACEBOOK_BLUE : "transparent"} />}
               />
-              {downloadButton}
+              <View style={{ marginLeft: "auto" }}>{downloadButton}</View>
             </View>
           </View>
         ) : platform === "linkedin" ? (
@@ -887,11 +887,13 @@ export default function PostReaderScreen() {
                 onPress={() => changeStatus(bookmarked ? "not_watched" : "watch_later")}
                 icon={<Bookmark size={19} color={bookmarked ? LINKEDIN_BLUE : Colors.textSecondary} fill={bookmarked ? LINKEDIN_BLUE : "transparent"} />}
               />
-              {downloadButton}
+              <View style={{ marginLeft: "auto" }}>{downloadButton}</View>
             </View>
           </View>
         ) : platform === "x" ? (
+          // X: reply, repost, like and bookmark on the left; download and share on the right.
           <View style={styles.xBar}>
+            <View style={styles.barGroup}>
             <BarButton
               label="Reply on X"
               onPress={xPostId ? () => openExternalLink(`https://x.com/intent/post?in_reply_to=${xPostId}`) : undefined}
@@ -920,12 +922,16 @@ export default function PostReaderScreen() {
               value={formatCount((metrics.bookmarks ?? 0) + (bookmarked ? 1 : 0))}
               valueColor={bookmarked ? X_BLUE : undefined}
             />
-            {downloadButton}
-            <BarButton label="Share" onPress={share} icon={<ShareIcon size={19} color={Colors.textSecondary} />} />
+            </View>
+            <View style={styles.barGroup}>
+              {downloadButton}
+              <BarButton label="Share" onPress={share} icon={<ShareIcon size={19} color={Colors.textSecondary} />} />
+            </View>
           </View>
         ) : platform === "github" ? (
-          // GitHub: Star (= Saved), Fork, plus Save and Share.
+          // GitHub: Star (= Saved), Fork and Save on the left; download and share on the right.
           <View style={styles.xBar}>
+            <View style={styles.barGroup}>
             <BarButton
               label={liked ? "Remove from Saved" : "Star (save in My Feeds)"}
               selected={liked}
@@ -946,8 +952,11 @@ export default function PostReaderScreen() {
               onPress={() => changeStatus(bookmarked ? "not_watched" : "watch_later")}
               icon={<Bookmark size={19} color={bookmarked ? X_BLUE : Colors.textSecondary} fill={bookmarked ? X_BLUE : "transparent"} />}
             />
-            {downloadButton}
-            <BarButton label="Share" onPress={share} icon={<ShareIcon size={19} color={Colors.textSecondary} />} />
+            </View>
+            <View style={styles.barGroup}>
+              {downloadButton}
+              <BarButton label="Share" onPress={share} icon={<ShareIcon size={19} color={Colors.textSecondary} />} />
+            </View>
           </View>
         ) : platform === "reddit" ? (
           <View style={styles.redditBar}>
@@ -1319,6 +1328,7 @@ const styles = StyleSheet.create({
   },
   xBar: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
   barGroup: { flexDirection: "row", alignItems: "center" },
+  xBarEnd: { flexDirection: "row", alignItems: "center" },
   dateLine: { color: Colors.textSecondary, fontSize: 13, paddingHorizontal: 4 },
   liCounts: { flexDirection: "row", alignItems: "center", gap: 5, paddingHorizontal: 4 },
   liLikeDot: { width: 16, height: 16, borderRadius: 8, backgroundColor: LINKEDIN_BLUE, alignItems: "center", justifyContent: "center" },
@@ -1328,7 +1338,7 @@ const styles = StyleSheet.create({
     borderTopColor: Colors.border,
     paddingTop: 4,
   },
-  liAction: { flex: 1, alignItems: "center", justifyContent: "center", gap: 2, minHeight: 48 },
+  liAction: { alignItems: "center", justifyContent: "center", gap: 2, minHeight: 48, minWidth: 56, paddingHorizontal: 8 },
   liActionText: { color: Colors.textSecondary, fontSize: 11, fontWeight: "600" },
   dots: { flexDirection: "row", justifyContent: "center", gap: 5 },
   dot: { width: 6, height: 6, borderRadius: 3, backgroundColor: Colors.border },

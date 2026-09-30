@@ -468,7 +468,8 @@ struct PostReaderView: View {
         let liked = status == .liked
         let bookmarked = status == .watchLater
         let postId = item.videoId.flatMap { $0.hasPrefix("x:") ? String($0.dropFirst(2)) : nil }
-        return HStack {
+        // X: reply, repost, like and bookmark on the left; download and share on the right.
+        return HStack(spacing: 6) {
             barButton(
                 icon: "bubble.left",
                 value: metrics?.replies ?? 0,
@@ -477,7 +478,6 @@ struct PostReaderView: View {
             ) {
                 if let postId { openExternal("https://x.com/intent/post?in_reply_to=\(postId)") }
             }
-            Spacer(minLength: 0)
             barButton(
                 icon: "arrow.2.squarepath",
                 value: metrics?.reposts ?? 0,
@@ -486,7 +486,6 @@ struct PostReaderView: View {
             ) {
                 if let postId { openExternal("https://x.com/intent/retweet?tweet_id=\(postId)") }
             }
-            Spacer(minLength: 0)
             barButton(
                 icon: liked ? "heart.fill" : "heart",
                 value: (metrics?.likes ?? 0) + (liked ? 1 : 0),
@@ -495,7 +494,6 @@ struct PostReaderView: View {
             ) {
                 changeStatus(liked ? .watched : .liked, item: item)
             }
-            Spacer(minLength: 0)
             barButton(
                 icon: bookmarked ? "bookmark.fill" : "bookmark",
                 value: (metrics?.bookmarks ?? 0) + (bookmarked ? 1 : 0),
@@ -689,10 +687,8 @@ struct PostReaderView: View {
                         linkedInLabel(icon: "arrowshape.turn.up.right", title: "Share", active: false)
                     }
                     .buttonStyle(.plain)
-                    .frame(maxWidth: .infinity)
                 } else {
                     linkedInLabel(icon: "arrowshape.turn.up.right", title: "Share", active: false)
-                        .frame(maxWidth: .infinity)
                         .opacity(0.4)
                 }
                 linkedInAction(
@@ -703,6 +699,7 @@ struct PostReaderView: View {
                 ) {
                     changeStatus(bookmarked ? .notWatched : .watchLater, item: item)
                 }
+                Spacer(minLength: 0)
                 downloadButton(item)
             }
             .overlay(alignment: .top) {
@@ -751,10 +748,8 @@ struct PostReaderView: View {
                         linkedInLabel(icon: "paperplane.fill", title: "Send", active: false)
                     }
                     .buttonStyle(.plain)
-                    .frame(maxWidth: .infinity)
                 } else {
                     linkedInLabel(icon: "paperplane.fill", title: "Send", active: false)
-                        .frame(maxWidth: .infinity)
                         .opacity(0.4)
                 }
                 linkedInAction(
@@ -764,6 +759,7 @@ struct PostReaderView: View {
                 ) {
                     changeStatus(bookmarked ? .notWatched : .watchLater, item: item)
                 }
+                Spacer(minLength: 0)
                 downloadButton(item)
             }
             .overlay(alignment: .top) {
@@ -783,7 +779,6 @@ struct PostReaderView: View {
             linkedInLabel(icon: icon, title: title, active: active, activeColor: activeColor)
         }
         .buttonStyle(.plain)
-        .frame(maxWidth: .infinity)
         .accessibilityAddTraits(active ? .isSelected : [])
     }
 
@@ -800,16 +795,17 @@ struct PostReaderView: View {
                 .font(.system(size: 11, weight: .semibold))
         }
         .foregroundStyle(active ? activeColor : Theme.textSecondary)
-        .frame(maxWidth: .infinity, minHeight: 48)
+        .frame(minWidth: 56, minHeight: 48)
+        .padding(.horizontal, 4)
         .contentShape(Rectangle())
     }
 
-    /// GitHub: Star (= Saved), Fork, plus Save and Share.
+    /// GitHub: Star (= Saved), Fork and Save on the left; download and share on the right.
     private func gitHubActionBar(_ item: FeedItem) -> some View {
         let metrics = item.metrics
         let liked = status == .liked
         let bookmarked = status == .watchLater
-        return HStack {
+        return HStack(spacing: 6) {
             barButton(
                 icon: liked ? "star.fill" : "star",
                 value: (metrics?.stars ?? 0) + (liked ? 1 : 0),
@@ -818,7 +814,6 @@ struct PostReaderView: View {
             ) {
                 changeStatus(liked ? .watched : .liked, item: item)
             }
-            Spacer(minLength: 0)
             barButton(
                 icon: "arrow.triangle.branch",
                 value: metrics?.forks ?? 0,
@@ -827,7 +822,6 @@ struct PostReaderView: View {
             ) {
                 if let raw = item.url { openExternal(raw) }
             }
-            Spacer(minLength: 0)
             Button {
                 changeStatus(bookmarked ? .notWatched : .watchLater, item: item)
             } label: {
