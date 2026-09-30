@@ -30,11 +30,12 @@ import {
   Sparkles,
   Users,
   ChevronRight,
-  CircleHelp,
 } from "lucide-react-native";
 import { Colors } from "@/constants/colors";
 
 const statIconBlue = "hsl(199, 89%, 55%)" as const;
+// Light red for the ? button, so it's easy to spot without shouting.
+const HELP_RED = "#FF8A8A";
 const statIconBg = "hsla(199, 89%, 55%, 0.16)" as const;
 import {
   useAgents,
@@ -386,7 +387,7 @@ export default function DashboardScreen() {
             hitSlop={8}
             style={({ pressed }) => [styles.helpBtn, pressed && styles.pressed]}
           >
-            <CircleHelp size={18} color={Colors.textSecondary} />
+            <Text style={styles.helpText}>?</Text>
           </Pressable>
         </View>
         <View style={styles.headerBtns}>
@@ -992,10 +993,11 @@ const styles = StyleSheet.create({
     height: 32,
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: Colors.border,
+    borderColor: HELP_RED,
     alignItems: "center",
     justifyContent: "center",
   },
+  helpText: { color: HELP_RED, fontSize: 16, fontWeight: "700" as const, lineHeight: 18 },
   content: { paddingHorizontal: 16 },
   contentWide: {
     maxWidth: 720,
