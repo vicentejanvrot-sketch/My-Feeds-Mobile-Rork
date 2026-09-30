@@ -308,9 +308,14 @@ final class SupabaseService {
     }
 
     func addChannel(agentId: String, url: String, priority: Int) async throws {
-        try await db.from("channels")
-            .insert(AddChannelPayload(agentId: agentId, channelUrl: url, priority: priority))
-            .execute()
+        do {
+            try await db.from("channels")
+                .insert(AddChannelPayload(agentId: agentId, channelUrl: url, priority: priority))
+                .execute()
+        } catch let error as PostgrestError where error.code == "23505" {
+            // The account is already in this collection (see channels_reject_duplicate).
+            throw SourceError(message: error.message)
+        }
     }
 
     /// Adds an X account or subreddit through the add-source edge function,
