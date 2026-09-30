@@ -792,18 +792,25 @@ private struct AccountLine: View {
         Button {
             if let link = URL(string: url) { openURL(link) }
         } label: {
+            // The platform name never wraps ("YouTub/e"); the handle gives way
+            // and truncates instead.
             HStack(spacing: 6) {
                 PlatformBadge(platform: platform, size: 16)
                 Text(platform.label)
                     .font(.system(size: 13, weight: .semibold))
                     .foregroundStyle(Theme.textPrimary)
+                    .lineLimit(1)
+                    .fixedSize()
                 Text(label)
                     .font(.system(size: 13))
                     .foregroundStyle(Theme.textSecondary)
                     .lineLimit(1)
+                    .truncationMode(.tail)
+                    .layoutPriority(-1)
                 Image(systemName: "arrow.up.right.square")
                     .font(.system(size: 11))
                     .foregroundStyle(Theme.textMuted)
+                    .fixedSize()
             }
             .contentShape(Rectangle())
         }
@@ -965,31 +972,11 @@ private struct PersonSheet: View {
                         if index > 0 {
                             Rectangle().fill(Theme.border).frame(height: 0.5)
                         }
+                        // Account on the first line, collection underneath, so
+                        // nothing has to squeeze onto one line on a narrow phone.
                         HStack(spacing: 10) {
-                            VStack(alignment: .leading, spacing: 2) {
+                            VStack(alignment: .leading, spacing: 4) {
                                 AccountLine(platform: account.platform, label: account.label, url: account.url)
-                                if account.channel.isPrivateAccount {
-                                    Label("Private account. Its posts aren't in your feed.", systemImage: "lock.fill")
-                                        .font(.system(size: 11))
-                                        .foregroundStyle(Theme.textMuted)
-                                        .lineLimit(2)
-                                }
-                            }
-                            Spacer(minLength: 0)
-                            if account.channel.isPrivateAccount {
-                                Button {
-                                    if let link = URL(string: account.url) { openURL(link) }
-                                } label: {
-                                    Text(account.platform.openLabel)
-                                        .font(.system(size: 12, weight: .semibold))
-                                        .foregroundStyle(Theme.textPrimary)
-                                        .lineLimit(1)
-                                        .padding(.horizontal, 10)
-                                        .frame(height: 30)
-                                        .overlay(RoundedRectangle(cornerRadius: 8).stroke(Theme.border, lineWidth: 1))
-                                }
-                                .buttonStyle(.plain)
-                            } else {
                                 Text(agentNames[account.channel.agentId] ?? "Collection")
                                     .font(.system(size: 11, weight: .semibold))
                                     .foregroundStyle(Theme.textSecondary)
@@ -998,7 +985,27 @@ private struct PersonSheet: View {
                                     .padding(.vertical, 3)
                                     .background(Theme.input)
                                     .clipShape(Capsule())
+                                if account.channel.isPrivateAccount {
+                                    Label("Private account. Its posts aren't in your feed.", systemImage: "lock.fill")
+                                        .font(.system(size: 11))
+                                        .foregroundStyle(Theme.textMuted)
+                                        .lineLimit(2)
+                                        .fixedSize(horizontal: false, vertical: true)
+                                    Button {
+                                        if let link = URL(string: account.url) { openURL(link) }
+                                    } label: {
+                                        Text(account.platform.openLabel)
+                                            .font(.system(size: 12, weight: .semibold))
+                                            .foregroundStyle(Theme.textPrimary)
+                                            .lineLimit(1)
+                                            .padding(.horizontal, 10)
+                                            .frame(height: 30)
+                                            .overlay(RoundedRectangle(cornerRadius: 8).stroke(Theme.border, lineWidth: 1))
+                                    }
+                                    .buttonStyle(.plain)
+                                }
                             }
+                            .frame(maxWidth: .infinity, alignment: .leading)
                             Button {
                                 toRemove = account
                             } label: {
