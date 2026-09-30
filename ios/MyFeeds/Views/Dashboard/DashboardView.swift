@@ -13,7 +13,7 @@ struct DashboardView: View {
     @State private var isOffline = false
     @State private var agentToDelete: Agent?
     // Onboarding wizard: opens by itself once per launch until the user ticks
-    // "Don't show this again"; the floating ? button opens it any time.
+    // "Don't show this again"; the ? button next to the title opens it any time.
     @State private var wizardOpen = false
     @State private var wizardKey = 0
 
@@ -94,11 +94,6 @@ struct DashboardView: View {
             .frame(maxWidth: .infinity)
         }
         .background(Theme.background)
-        .overlay(alignment: .bottomTrailing) {
-            if overlay.pendingId == nil {
-                helpButton
-            }
-        }
         .toolbar(.hidden, for: .navigationBar)
         .refreshable { await load() }
         .task { await load() }
@@ -133,9 +128,13 @@ struct DashboardView: View {
 
     private var header: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Dashboard")
-                .font(.system(size: 26, weight: .heavy))
-                .foregroundStyle(Theme.textPrimary)
+            HStack(alignment: .center) {
+                Text("Dashboard")
+                    .font(.system(size: 26, weight: .heavy))
+                    .foregroundStyle(Theme.textPrimary)
+                Spacer(minLength: 0)
+                helpButton
+            }
 
             HStack(spacing: 10) {
                 NavigationLink(value: AppRoute.agentForm(nil)) {
@@ -262,21 +261,21 @@ struct DashboardView: View {
 
     // MARK: - Wizard
 
-    /// Floating button that opens the onboarding wizard again.
+    /// Small ? next to the title that opens the onboarding wizard again.
     private var helpButton: some View {
         Button {
             openWizard()
         } label: {
             Image(systemName: "questionmark")
-                .font(.system(size: 22, weight: .bold))
-                .foregroundStyle(.white)
-                .frame(width: 52, height: 52)
-                .background(Circle().fill(Theme.accent))
-                .shadow(color: .black.opacity(0.35), radius: 8, y: 4)
+                .font(.system(size: 14, weight: .bold))
+                .foregroundStyle(Theme.textSecondary)
+                .frame(width: 30, height: 30)
+                .overlay(Circle().stroke(Theme.border, lineWidth: 1))
+                .frame(width: 44, height: 44)
+                .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .padding(.trailing, 16)
-        .padding(.bottom, 16)
+        .padding(.trailing, -7)
         .accessibilityLabel("How it works")
     }
 
