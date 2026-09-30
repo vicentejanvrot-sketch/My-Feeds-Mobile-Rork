@@ -191,7 +191,7 @@ final class YouTubeAccount {
     }
 }
 
-enum YouTubeAccountError: LocalizedError {
+nonisolated enum YouTubeAccountError: LocalizedError {
     case cancelled
     case notConnected
     case message(String)
