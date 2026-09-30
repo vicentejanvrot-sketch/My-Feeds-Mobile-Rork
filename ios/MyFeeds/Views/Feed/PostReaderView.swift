@@ -1,7 +1,8 @@
 import AVKit
 import SwiftUI
+import WebKit
 
-/// In-app reader for X posts, Reddit threads, Instagram posts and LinkedIn posts. The native twin of the web
+/// In-app reader for X posts, Reddit threads, Instagram, LinkedIn and TikTok posts. The native twin of the web
 /// PostReaderModal and the Expo post-reader screen, so reading works the same
 /// everywhere and the user doesn't have to leave My Feeds.
 struct PostReaderView: View {
@@ -25,6 +26,8 @@ struct PostReaderView: View {
     private static let igRed = Color(red: 1, green: 48 / 255, blue: 64 / 255)
     private static let linkedInBlue = Color(red: 55 / 255, green: 143 / 255, blue: 233 / 255)
     private static let gitHubStar = Color(red: 227 / 255, green: 179 / 255, blue: 65 / 255)
+    private static let tikTokRed = Color(red: 254 / 255, green: 44 / 255, blue: 85 / 255)
+    private static let tikTokYellow = Color(red: 250 / 255, green: 206 / 255, blue: 21 / 255)
 
     var body: some View {
         ZStack {
@@ -91,7 +94,10 @@ struct PostReaderView: View {
 
                     let photos = item.postPhotoURLs
                     let slides = item.carouselMedia
-                    if slides.count > 1 {
+                    if platform == .tiktok, photos.isEmpty, let videoId = tikTokVideoId(item) {
+                        // TikTok's own player: its CDN links expire, the embed doesn't.
+                        TikTokEmbedPlayer(videoId: videoId)
+                    } else if slides.count > 1 {
                         MediaCarousel(slides: slides, progressId: item.videoId)
                     } else if let video = item.postVideo, let url = video.playableURL {
                         PostVideoPlayer(url: url, progressId: item.videoId)
@@ -318,6 +324,7 @@ struct PostReaderView: View {
             case .instagram: instagramActionBar(item)
             case .linkedin: linkedInActionBar(item)
             case .github: gitHubActionBar(item)
+            case .tiktok: tikTokActionBar(item)
             default: redditActionBar(item)
             }
 
@@ -461,6 +468,48 @@ struct PostReaderView: View {
                 changeStatus(bookmarked ? .notWatched : .watchLater, item: item)
             }
         }
+    }
+
+    /// TikTok: like, comment, save, then share, with TikTok's own colours.
+    private func tikTokActionBar(_ item: FeedItem) -> some View {
+        let metrics = item.metrics
+        let liked = status == .liked
+        let bookmarked = status == .watchLater
+        return HStack(spacing: 4) {
+            igButton(
+                icon: liked ? "heart.fill" : "heart",
+                value: (metrics?.likes ?? 0) + (liked ? 1 : 0),
+                color: liked ? Self.tikTokRed : Theme.textPrimary,
+                label: liked ? "Remove from Saved" : "Like (save in My Feeds)"
+            ) {
+                changeStatus(liked ? .watched : .liked, item: item)
+            }
+            igButton(
+                icon: "bubble.right",
+                value: metrics?.comments,
+                color: Theme.textPrimary,
+                label: "Comment on TikTok"
+            ) {
+                if let raw = item.url { openExternal(raw) }
+            }
+            igButton(
+                icon: bookmarked ? "bookmark.fill" : "bookmark",
+                value: nil,
+                color: bookmarked ? Self.tikTokYellow : Theme.textPrimary,
+                label: bookmarked ? "Remove from Read Later" : "Save (Read Later)"
+            ) {
+                changeStatus(bookmarked ? .notWatched : .watchLater, item: item)
+            }
+            Spacer(minLength: 0)
+            shareButton(item, color: Theme.textPrimary)
+        }
+    }
+
+    /// The TikTok video id from "tiktok:<id>" in items.video_id.
+    private func tikTokVideoId(_ item: FeedItem) -> String? {
+        guard let raw = item.videoId, raw.hasPrefix("tiktok:") else { return nil }
+        let id = String(raw.dropFirst("tiktok:".count))
+        return id.isEmpty ? nil : id
     }
 
     private func igButton(icon: String, value: Int?, color: Color, label: String, action: @escaping () -> Void) -> some View {
@@ -1020,6 +1069,59 @@ private struct PhotoCarousel: View {
         .aspectRatio(4 / 5, contentMode: .fit)
         .frame(maxWidth: .infinity)
         .clipShape(.rect(cornerRadius: 12))
+    }
+}
+
+/// TikTok's official embed player, 9:16 like on TikTok. Plays the original
+/// upload in TikTok's own player, since TikTok's direct video links expire.
+private struct TikTokEmbedPlayer: View {
+    let videoId: String
+
+    var body: some View {
+        TikTokEmbedWebView(videoId: videoId)
+            .aspectRatio(9 / 16, contentMode: .fit)
+            .frame(maxWidth: 380)
+            .background(Color.black)
+            .clipShape(.rect(cornerRadius: 12))
+            .frame(maxWidth: .infinity)
+    }
+}
+
+private struct TikTokEmbedWebView: UIViewRepresentable {
+    let videoId: String
+
+    func makeUIView(context: Context) -> WKWebView {
+        let config = WKWebViewConfiguration()
+        config.allowsInlineMediaPlayback = true
+        config.mediaTypesRequiringUserActionForPlayback = []
+        let webView = WKWebView(frame: .zero, configuration: config)
+        webView.isOpaque = false
+        webView.backgroundColor = .black
+        webView.scrollView.isScrollEnabled = false
+        webView.scrollView.bounces = false
+        if let url = Self.playerURL(videoId) { webView.load(URLRequest(url: url)) }
+        return webView
+    }
+
+    func updateUIView(_ webView: WKWebView, context: Context) {}
+
+    static func dismantleUIView(_ webView: WKWebView, coordinator: ()) {
+        webView.stopLoading()
+        webView.loadHTMLString("", baseURL: nil)
+    }
+
+    private static func playerURL(_ videoId: String) -> URL? {
+        var components = URLComponents()
+        components.scheme = "https"
+        components.host = "www.tiktok.com"
+        components.path = "/player/v1/\(videoId)"
+        components.queryItems = [
+            URLQueryItem(name: "music_info", value: "1"),
+            URLQueryItem(name: "description", value: "0"),
+            URLQueryItem(name: "rel", value: "0"),
+            URLQueryItem(name: "native_context_menu", value: "0"),
+        ]
+        return components.url
     }
 }
 
