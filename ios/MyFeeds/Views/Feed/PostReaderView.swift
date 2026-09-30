@@ -1719,7 +1719,6 @@ private struct FacebookEmbedPlayer: View {
     }
 }
 
-/// A web view that loads one embed page, used by the Facebook player.
 /// YouTube Music songs, albums and music videos in YouTube's embed player, 16:9.
 private struct YouTubeMusicEmbedPlayer: View {
     let url: URL
@@ -1744,6 +1743,7 @@ private struct YouTubeMusicEmbedPlayer: View {
     }
 }
 
+/// A web view that loads one embed page, used by the Facebook player.
 private struct EmbedWebView: UIViewRepresentable {
     let url: URL
     var referer: String? = nil
