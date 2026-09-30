@@ -27,8 +27,8 @@ export function DownloadButton({ itemId, hasAudio, size = 20 }: { itemId: string
       // Downloads stay inside My Feeds (not Photos or Files), so say where to find them.
       showToast(
         hasAudio
-          ? "Episode saved in My Feeds for offline listening. Find it in Settings > Downloads."
-          : "Saved in My Feeds for offline reading. Find it in Settings > Downloads.",
+          ? "Episode saved inside My Feeds for offline listening. See it in this app's Settings tab > Downloads."
+          : "Saved inside My Feeds for offline reading. See it in this app's Settings tab > Downloads.",
         "success",
       );
     } catch (e) {
