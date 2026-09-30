@@ -28,6 +28,9 @@ struct AgentDetailView: View {
     @State private var newSourcePlatform: SourcePlatform = .youtube
     /// Set when a pasted link picked the platform for the user.
     @State private var autoPlatform: SourcePlatform?
+    /// Set when Instagram says the account is private (or can't be loaded), so
+    /// the sheet can offer to add it as a private account.
+    @State private var privateOffer: String?
     @State private var isSubmittingModal = false
     @State private var recipientToRemove: AgentRecipient?
     @State private var channelToRemove: Channel?
@@ -382,6 +385,7 @@ struct AgentDetailView: View {
                     newChannelPriority = 3
                     newSourcePlatform = .youtube
                     autoPlatform = nil
+                    privateOffer = nil
                     showAddChannel = true
                 } label: {
                     Text("+ Add Source")
@@ -489,6 +493,19 @@ struct AgentDetailView: View {
                                     .font(.system(size: 10))
                                     .foregroundStyle(Theme.textSecondary)
                             }
+                            if channel.isPrivateAccount {
+                                HStack(spacing: 3) {
+                                    Image(systemName: "lock.fill")
+                                        .font(.system(size: 8))
+                                    Text("Private")
+                                        .font(.system(size: 10, weight: .semibold))
+                                }
+                                .foregroundStyle(Theme.textMuted)
+                                .padding(.horizontal, 6)
+                                .padding(.vertical, 2)
+                                .overlay(Capsule().stroke(Theme.border, lineWidth: 1))
+                                .padding(.leading, 2)
+                            }
                         }
                     }
                     .buttonStyle(.plain)
@@ -552,7 +569,9 @@ struct AgentDetailView: View {
                 }
                 .padding(.top, 10)
 
-                Text(channel.lastScannedAt != nil
+                Text(channel.isPrivateAccount
+                     ? "Not scanned (private)"
+                     : channel.lastScannedAt != nil
                      ? "Scanned \(Format.timeAgo(channel.lastScannedAt))"
                      : "Never scanned")
                     .font(.system(size: 11))
@@ -916,6 +935,7 @@ struct AgentDetailView: View {
                             .stroke(Theme.border, lineWidth: 1)
                     )
                     .onChange(of: newChannelUrl) { _, value in
+                        privateOffer = nil
                         if let detected = SourcePlatform.detect(from: value), detected != newSourcePlatform {
                             newSourcePlatform = detected
                             autoPlatform = detected
@@ -931,6 +951,9 @@ struct AgentDetailView: View {
                     Text(newSourcePlatform.addHelp)
                         .font(.system(size: 12))
                         .foregroundStyle(Theme.textMuted)
+                }
+                if let privateOffer {
+                    privateOfferBox(privateOffer)
                 }
                 Text("Priority")
                     .font(.system(size: 12, weight: .semibold))
@@ -981,6 +1004,49 @@ struct AgentDetailView: View {
             .clipShape(.rect(cornerRadius: 16))
             .padding(.horizontal, 24)
         }
+    }
+
+    /// "Add as private account", shown when Instagram says the account is private.
+    private func privateOfferBox(_ message: String) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack(alignment: .top, spacing: 8) {
+                Image(systemName: "lock.fill")
+                    .font(.system(size: 12))
+                    .foregroundStyle(Theme.textMuted)
+                    .padding(.top, 2)
+                Text(message)
+                    .font(.system(size: 13))
+                    .foregroundStyle(Theme.textPrimary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            Text("A private account shows up on People with a button to open it in Instagram. Its posts won't appear in your feed.")
+                .font(.system(size: 12))
+                .foregroundStyle(Theme.textMuted)
+                .fixedSize(horizontal: false, vertical: true)
+            Button {
+                addChannel(asPrivate: true)
+            } label: {
+                HStack(spacing: 6) {
+                    if isSubmittingModal {
+                        ProgressView().tint(Theme.textPrimary)
+                    } else {
+                        Image(systemName: "lock.fill").font(.system(size: 12))
+                        Text("Add as private account").font(.system(size: 13, weight: .semibold))
+                    }
+                }
+                .foregroundStyle(Theme.textPrimary)
+                .padding(.horizontal, 12)
+                .frame(height: 34)
+                .overlay(RoundedRectangle(cornerRadius: 8).stroke(Theme.border, lineWidth: 1))
+            }
+            .buttonStyle(.plain)
+            .disabled(isSubmittingModal)
+        }
+        .padding(12)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Theme.input)
+        .clipShape(.rect(cornerRadius: 10))
+        .overlay(RoundedRectangle(cornerRadius: 10).stroke(Theme.border, lineWidth: 1))
     }
 
     // MARK: - Data & mutations
@@ -1062,9 +1128,10 @@ struct AgentDetailView: View {
         }
     }
 
-    private func addChannel() {
+    private func addChannel(asPrivate: Bool = false) {
         let url = newChannelUrl.trimmingCharacters(in: .whitespaces)
         guard !url.isEmpty else { return }
+        privateOffer = nil
         // The link says one platform but another is selected (picked after pasting).
         if let detected = SourcePlatform.detect(from: url), detected != newSourcePlatform {
             toasts.show("That's a \(detected.label) link. Select \(detected.label) or paste a \(newSourcePlatform.label) link.", type: .error)
@@ -1082,12 +1149,17 @@ struct AgentDetailView: View {
                         agentId: agentId,
                         platform: newSourcePlatform,
                         value: url,
-                        priority: newChannelPriority
+                        priority: newChannelPriority,
+                        privateAccount: asPrivate
                     )
-                    toasts.show("Added \(channel.displayName)")
+                    toasts.show(channel.isPrivateAccount
+                        ? "Added \(channel.displayName) as a private account"
+                        : "Added \(channel.displayName)")
                 }
                 showAddChannel = false
                 await load()
+            } catch let error as SourceError where !asPrivate && error.canAddAsPrivate {
+                privateOffer = error.message
             } catch {
                 let fallback = "Couldn't add \(newSourcePlatform.sourceNoun.lowercased())"
                 toasts.show((error as? SourceError)?.message ?? fallback, type: .error)
