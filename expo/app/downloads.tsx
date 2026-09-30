@@ -97,8 +97,8 @@ export default function DownloadsScreen() {
           contentContainerStyle={{ padding: 16, gap: 10, paddingBottom: insets.bottom + 24 }}
           ListHeaderComponent={
             <Text style={styles.summary}>
-              {list.length} {list.length === 1 ? "item" : "items"} · {formatBytes(totalBytes)} on this phone. Podcasts, photos
-              and text are saved; videos still need a connection.
+              {list.length} {list.length === 1 ? "item" : "items"} · {formatBytes(totalBytes)} on this phone. Posts are saved
+              with their photos and videos, and podcasts with the episode. YouTube videos still need a connection.
             </Text>
           }
           renderItem={({ item: entry }) => (

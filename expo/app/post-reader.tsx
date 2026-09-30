@@ -100,6 +100,8 @@ type PostEmbed = {
   // Playable video: MP4, and an HLS stream (plays with sound on iOS).
   video_url?: string | null;
   hls_url?: string | null;
+  // Downloaded copy only: the page on the phone that plays the saved video.
+  local_player?: string | null;
   // Apple Podcasts episode: the audio file and its length in seconds.
   audio_url?: string | null;
   duration?: number | null;
@@ -213,6 +215,30 @@ function PostVideo({ media, progressId, fill, autoPlay }: { media: PostEmbed; pr
       void saveResumePosition(progressId, t, d);
     }
   };
+
+  // A downloaded video plays from the phone, through the page saved next to it.
+  if (media.local_player) {
+    const folder = media.local_player.slice(0, media.local_player.lastIndexOf("/") + 1);
+    return (
+      <View style={fill ? styles.videoFill : styles.video}>
+        <WebView
+          ref={webRef}
+          source={{ uri: media.local_player }}
+          originWhitelist={["*"]}
+          injectedJavaScript={progressId ? VIDEO_PROGRESS_JS : undefined}
+          onMessage={progressId ? onMessage : undefined}
+          allowsInlineMediaPlayback
+          mediaPlaybackRequiresUserAction={!autoPlay}
+          allowsFullscreenVideo
+          allowFileAccess
+          allowFileAccessFromFileURLs
+          allowingReadAccessToURL={folder}
+          scrollEnabled={false}
+          style={styles.videoWeb}
+        />
+      </View>
+    );
+  }
 
   const main =
     (RNPlatform.OS === "ios" ? media.hls_url || media.video_url : media.video_url || media.hls_url) || "";
@@ -780,7 +806,7 @@ export default function PostReaderScreen() {
           />
         ) : platform === "tiktok" && tiktokVideoId && photos.length === 0 ? (
           <TikTokPlayer videoId={tiktokVideoId} />
-        ) : platform === "facebook" && video && facebookEmbed(item.url) ? (
+        ) : platform === "facebook" && video && !video.local_player && facebookEmbed(item.url) ? (
           <FacebookPlayer {...facebookEmbed(item.url)!} />
         ) : slides.length > 1 ? (
           <MediaCarousel slides={slides} progressId={item.video_id} />

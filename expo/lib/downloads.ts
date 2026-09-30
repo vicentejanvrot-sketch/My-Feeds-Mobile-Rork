@@ -1,12 +1,14 @@
 // Offline downloads: keeps an item on the phone so it can be read or played
 // with no connection (plane, road trip). What's kept: the text, the AI summary,
-// photos and cover art, and full podcast episodes. Videos are not downloaded
-// (copyright, see the App Store's rule 5.2.3), so they still need a connection.
+// photos and cover art, full podcast episodes, and post videos (X, Instagram,
+// Facebook, LinkedIn, Reddit). YouTube videos can't be downloaded: YouTube only
+// allows its own player, so they still need a connection.
 //
 // Layout on the phone, under the app's Documents folder:
 //   downloads/index.json          list of downloads (DownloadEntry)
 //   downloads/<itemId>/item.json  the item, with "local:<file>" in place of links
-//   downloads/<itemId>/<files>    thumb, media-0, audio, player.html
+//   downloads/<itemId>/<files>    thumb, media-0, audio, player.html,
+//                                 video-0.mp4 (+ video-0-audio.mp4 for Reddit), video-0.html
 // Links are saved as "local:<file>" and resolved on read, because the Documents
 // folder's full path changes when iOS updates the app.
 import * as FileSystem from "expo-file-system/legacy";
@@ -27,7 +29,16 @@ export interface DownloadEntry {
   hasAudio: boolean;
 }
 
-type MediaEntry = Record<string, unknown> & { type?: string; url?: string; image?: string | null; audio_url?: string | null };
+type MediaEntry = Record<string, unknown> & {
+  type?: string;
+  url?: string;
+  image?: string | null;
+  audio_url?: string | null;
+  video_url?: string | null;
+  hls_url?: string | null;
+  /** Saved copy only: the page that plays the downloaded video (see videoPlayerHtml). */
+  local_player?: string | null;
+};
 
 const LOCAL = "local:";
 const ROOT = FileSystem.documentDirectory ? `${FileSystem.documentDirectory}downloads/` : null;
@@ -54,6 +65,51 @@ export function podcastPlayerHtml(src: string): string {
   return `<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"><meta name="referrer" content="no-referrer">
 <style>html,body{margin:0;padding:0;background:transparent}audio{width:100%;display:block}</style></head>
 <body><audio controls preload="metadata" src="${safe}"></audio></body></html>`;
+}
+
+/**
+ * Page that plays a downloaded video from the phone. Reddit keeps a video's
+ * sound in a separate file, so when there is one it plays alongside, kept in
+ * step with the picture (play, pause, seek, speed, mute).
+ */
+export function videoPlayerHtml(videoFile: string, posterFile: string | null, audioFile: string | null): string {
+  const esc = (v: string) => v.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;");
+  const sync = audioFile
+    ? `<audio src="${esc(audioFile)}" preload="auto"></audio>
+<script>(function(){var v=document.querySelector('video'),a=document.querySelector('audio');if(!v||!a)return;
+function at(){if(Math.abs(a.currentTime-v.currentTime)>0.25)a.currentTime=v.currentTime}
+v.addEventListener('play',function(){at();a.play().catch(function(){})});
+v.addEventListener('pause',function(){a.pause()});
+v.addEventListener('seeking',at);v.addEventListener('seeked',at);
+v.addEventListener('waiting',function(){a.pause()});v.addEventListener('playing',function(){at();a.play().catch(function(){})});
+v.addEventListener('ratechange',function(){a.playbackRate=v.playbackRate});
+v.addEventListener('volumechange',function(){a.muted=v.muted;a.volume=v.volume});
+v.addEventListener('ended',function(){a.pause()});
+setInterval(function(){if(!v.paused)at()},1000);})();</script>`
+    : "";
+  return `<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<style>html,body{margin:0;padding:0;background:#000;height:100%}video{width:100%;height:100%;object-fit:contain;background:#000}</style></head>
+<body><video src="${esc(videoFile)}"${posterFile ? ` poster="${esc(posterFile)}"` : ""} controls playsinline webkit-playsinline preload="auto"></video>${sync}</body></html>`;
+}
+
+/** Instagram videos are stored behind our media proxy; the file itself downloads straight from Instagram's CDN. */
+function directVideoSource(url: string): string {
+  try {
+    const parsed = new URL(url);
+    if (!parsed.pathname.endsWith("/functions/v1/media-proxy")) return url;
+    const inner = new URL(parsed.searchParams.get("u") ?? "");
+    const host = inner.hostname.toLowerCase();
+    return host.endsWith(".cdninstagram.com") || host.endsWith(".fbcdn.net") ? inner.toString() : url;
+  } catch {
+    return url;
+  }
+}
+
+/** Reddit's MP4 has no sound; its sound sits next to it as DASH_AUDIO_128.mp4 (or older names). */
+function redditAudioCandidates(videoUrl: string): string[] {
+  const match = videoUrl.match(/^(https:\/\/v\.redd\.it\/[^/]+)\//i);
+  if (!match) return [];
+  return ["DASH_AUDIO_128.mp4", "DASH_AUDIO_64.mp4", "DASH_audio.mp4", "audio"].map((f) => `${match[1]}/${f}`);
 }
 
 function extensionOf(url: string, fallback: string): string {
@@ -155,6 +211,10 @@ export async function downloadItem(itemId: string): Promise<DownloadEntry> {
 
     const media = ((item.media ?? []) as MediaEntry[]).map((m) => ({ ...m }));
     const audio = media.find((m) => m.type === "audio" && typeof m.audio_url === "string" && m.audio_url);
+    // The post's own videos (not a quoted post's), as MP4 files.
+    const videos = media
+      .map((m, i) => ({ m, i }))
+      .filter(({ m }) => m.type !== "quote" && m.type !== "article" && typeof m.video_url === "string" && /^https?:/i.test(m.video_url));
 
     // Photos and cover art first (small), then the episode (large, shows progress).
     const images: { url: string; file: string; apply: (local: string) => void }[] = [];
@@ -178,7 +238,7 @@ export async function downloadItem(itemId: string): Promise<DownloadEntry> {
       }
     });
 
-    const share = audio ? 0.1 : 1;
+    const share = audio || videos.length ? 0.1 : 1;
     for (let i = 0; i < images.length; i++) {
       const img = images[i];
       try {
@@ -204,6 +264,61 @@ export async function downloadItem(itemId: string): Promise<DownloadEntry> {
       }
       audio.audio_url = LOCAL + file;
       await FileSystem.writeAsStringAsync(folder + "player.html", podcastPlayerHtml(file));
+    }
+
+    // Videos, one after another, sharing what's left of the progress bar.
+    const heavy = (audio ? 1 : 0) + videos.length;
+    let done = audio ? 1 : 0;
+    for (const { m, i } of videos) {
+      const base = share + (done / heavy) * (1 - share);
+      const span = (1 - share) / heavy;
+      const file = `video-${i}.mp4`;
+      const source = directVideoSource(String(m.video_url));
+      let saved = false;
+      for (const url of source === m.video_url ? [source] : [source, String(m.video_url)]) {
+        try {
+          const task = FileSystem.createDownloadResumable(url, folder + file, {}, (p) => {
+            if (p.totalBytesExpectedToWrite > 0) {
+              setProgress(itemId, base + (p.totalBytesWritten / p.totalBytesExpectedToWrite) * span);
+            }
+          });
+          const result = await task.downloadAsync();
+          if (result && result.status >= 200 && result.status < 300) {
+            saved = true;
+            break;
+          }
+        } catch {
+          // Try the next address.
+        }
+        await FileSystem.deleteAsync(folder + file, { idempotent: true }).catch(() => undefined);
+      }
+      done++;
+      if (!saved) {
+        // A video link that expired (Facebook's do after a few days) stays a
+        // link; the rest of the post is still saved.
+        continue;
+      }
+      // Reddit: fetch the sound that goes with the picture.
+      let audioFile: string | null = null;
+      for (const url of redditAudioCandidates(String(m.video_url))) {
+        const name = `video-${i}-audio.mp4`;
+        try {
+          const result = await FileSystem.downloadAsync(url, folder + name);
+          if (result.status >= 200 && result.status < 300) {
+            audioFile = name;
+            break;
+          }
+        } catch {
+          // Try the next name.
+        }
+        await FileSystem.deleteAsync(folder + name, { idempotent: true }).catch(() => undefined);
+      }
+      const poster = typeof m.url === "string" && m.url.startsWith(LOCAL) ? m.url.slice(LOCAL.length) : null;
+      const page = `video-${i}.html`;
+      await FileSystem.writeAsStringAsync(folder + page, videoPlayerHtml(file, poster, audioFile));
+      m.video_url = LOCAL + file;
+      m.hls_url = null;
+      m.local_player = LOCAL + page;
     }
 
     item.media = media as ItemWithAnalysis["media"];
@@ -253,6 +368,8 @@ export async function readDownloadedItem(itemId: string): Promise<ItemWithAnalys
       url: resolveLocal(itemId, m.url),
       image: resolveLocal(itemId, m.image),
       audio_url: resolveLocal(itemId, m.audio_url),
+      video_url: resolveLocal(itemId, m.video_url),
+      local_player: resolveLocal(itemId, m.local_player),
     })) as ItemWithAnalysis["media"];
     return item;
   } catch {
