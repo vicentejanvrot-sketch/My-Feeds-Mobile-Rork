@@ -566,6 +566,16 @@ export default function AgentDetailScreen() {
   // Set when Instagram says the account is private (or can't be loaded), so
   // the sheet can offer to add it as a private account.
   const [privateOffer, setPrivateOffer] = useState<string | null>(null);
+  // The Add Source sheet always opens empty: YouTube, no link, Normal
+  // priority, so nothing from the last attempt carries over.
+  const openAddSource = useCallback(() => {
+    setNewChannelUrl("");
+    setNewChannelPriority(3);
+    setNewPlatform("youtube");
+    setAutoPlatform(null);
+    setPrivateOffer(null);
+    setShowAddChannel(true);
+  }, []);
   const [showAddRecipient, setShowAddRecipient] = useState(false);
   const [newRecipientEmail, setNewRecipientEmail] = useState("");
 
@@ -1026,7 +1036,7 @@ export default function AgentDetailScreen() {
         {/* ── CHANNELS SECTION ── */}
         <SectionHeader
           title={`Channels (${allChannels.length})`}
-          onAdd={() => { setPrivateOffer(null); setShowAddChannel(true); }}
+          onAdd={openAddSource}
           addLabel="Add Source"
           badge={
             channelFilter !== "all"
