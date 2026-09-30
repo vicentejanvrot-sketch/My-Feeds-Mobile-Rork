@@ -13,6 +13,7 @@ nonisolated enum SourcePlatform: String, Codable, CaseIterable, Hashable, Sendab
     case facebook
     case appleMusic = "apple_music"
     case applePodcasts = "apple_podcasts"
+    case appleBooks = "apple_books"
 
     /// Unknown or missing values (rows written before the migration) are YouTube.
     init(raw: String?) {
@@ -20,10 +21,10 @@ nonisolated enum SourcePlatform: String, Codable, CaseIterable, Hashable, Sendab
     }
 
     /// Non-YouTube items store "<platform>:<id>" in items.video_id
-    /// (x, reddit, instagram, linkedin, github, tiktok, facebook, apple_music, apple_podcasts).
+    /// (x, reddit, instagram, linkedin, github, tiktok, facebook, apple_music, apple_podcasts, apple_books).
     static func isPostVideoId(_ videoId: String?) -> Bool {
         guard let videoId else { return false }
-        return ["x:", "reddit:", "instagram:", "linkedin:", "github:", "tiktok:", "facebook:", "apple_music:", "apple_podcasts:"].contains { videoId.hasPrefix($0) }
+        return ["x:", "reddit:", "instagram:", "linkedin:", "github:", "tiktok:", "facebook:", "apple_music:", "apple_podcasts:", "apple_books:"].contains { videoId.hasPrefix($0) }
     }
 
     /// Platform of a post item from its "<platform>:<id>" video_id; YouTube otherwise.
@@ -48,6 +49,7 @@ extension SourcePlatform {
         case .facebook: return "Facebook"
         case .appleMusic: return "Apple Music"
         case .applePodcasts: return "Apple Podcasts"
+        case .appleBooks: return "Apple Books"
         }
     }
 
@@ -63,6 +65,7 @@ extension SourcePlatform {
         case .facebook: return "FB"
         case .appleMusic: return "AM"
         case .applePodcasts: return "POD"
+        case .appleBooks: return "BK"
         }
     }
 
@@ -79,6 +82,7 @@ extension SourcePlatform {
         case .facebook: return Color(red: 138 / 255, green: 180 / 255, blue: 1)
         case .appleMusic: return Color(red: 1, green: 138 / 255, blue: 154 / 255)
         case .applePodcasts: return Color(red: 217 / 255, green: 166 / 255, blue: 1)
+        case .appleBooks: return Color(red: 1, green: 179 / 255, blue: 92 / 255)
         }
     }
 
@@ -95,6 +99,7 @@ extension SourcePlatform {
         case .facebook: return Color(red: 20 / 255, green: 38 / 255, blue: 74 / 255)
         case .appleMusic: return Color(red: 58 / 255, green: 22 / 255, blue: 32 / 255)
         case .applePodcasts: return Color(red: 42 / 255, green: 23 / 255, blue: 64 / 255)
+        case .appleBooks: return Color(red: 58 / 255, green: 38 / 255, blue: 16 / 255)
         }
     }
 
@@ -110,6 +115,7 @@ extension SourcePlatform {
         case .facebook: return "Page"
         case .appleMusic: return "Artist"
         case .applePodcasts: return "Show"
+        case .appleBooks: return "Author"
         }
     }
 
@@ -125,6 +131,7 @@ extension SourcePlatform {
         case .facebook: return "https://www.facebook.com/PageName"
         case .appleMusic: return "Artist name or https://music.apple.com/us/artist/name/123"
         case .applePodcasts: return "Show name or https://podcasts.apple.com/us/podcast/name/id123"
+        case .appleBooks: return "Author name or https://books.apple.com/us/author/name/id123"
         }
     }
 
@@ -140,6 +147,7 @@ extension SourcePlatform {
         case .facebook: return "Public Pages only. Posts from the lookback window."
         case .appleMusic: return "New singles and albums. Adding an artist also brings in their latest album."
         case .applePodcasts: return "New episodes, played right here. Adding a show also brings in its latest episode."
+        case .appleBooks: return "New audiobooks, with a sample to listen to. Adding an author also brings in their latest audiobook."
         }
     }
 
@@ -155,6 +163,7 @@ extension SourcePlatform {
         case .facebook: return "Open on Facebook"
         case .appleMusic: return "Open in Apple Music"
         case .applePodcasts: return "Open in Apple Podcasts"
+        case .appleBooks: return "Open in Apple Books"
         }
     }
 
@@ -278,11 +287,13 @@ nonisolated struct ItemMedia: Codable, Hashable, Sendable {
     var embedUrl: String?
     var kind: String?
     var label: String?
+    /// Apple Books audiobook: Apple's short sample.
+    var previewUrl: String?
 
     /// Keys arrive snake_case; the service decoder converts them.
     enum CodingKeys: String, CodingKey {
         case type, url, authorName, authorHandle, authorAvatar, verified, createdAt, text, image, title, preview, videoUrl, hlsUrl
-        case audioUrl, duration, embedUrl, kind, label
+        case audioUrl, duration, embedUrl, kind, label, previewUrl
     }
 
     init(from decoder: Decoder) throws {
@@ -305,6 +316,7 @@ nonisolated struct ItemMedia: Codable, Hashable, Sendable {
         embedUrl = try? c.decodeIfPresent(String.self, forKey: .embedUrl)
         kind = try? c.decodeIfPresent(String.self, forKey: .kind)
         label = try? c.decodeIfPresent(String.self, forKey: .label)
+        previewUrl = try? c.decodeIfPresent(String.self, forKey: .previewUrl)
     }
 
     /// HLS first (it has sound for Reddit videos), MP4 otherwise.
@@ -348,6 +360,7 @@ extension SourcePlatform {
         ("facebook.com", .facebook), ("fb.com", .facebook), ("fb.watch", .facebook),
         ("music.apple.com", .appleMusic),
         ("podcasts.apple.com", .applePodcasts),
+        ("books.apple.com", .appleBooks),
     ]
 
     /// Works out the platform from what the user pasted in Add Source, so an
@@ -370,6 +383,7 @@ extension SourcePlatform {
         // Old iTunes links use one host for both music and podcasts.
         if host == "itunes.apple.com" {
             if path.contains("/podcast") { return .applePodcasts }
+            if path.contains("/audiobook") || path.contains("/author") || path.contains("/book/") { return .appleBooks }
             if path.contains("/artist") || path.contains("/album") { return .appleMusic }
             return nil
         }

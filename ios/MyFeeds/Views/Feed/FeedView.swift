@@ -938,7 +938,7 @@ private struct FeedItemCard: View {
                     if let plays = item.metrics?.plays, plays > 0 {
                         statChip(icon: "play", value: plays)
                     }
-                } else if item.sourcePlatform == .appleMusic || item.sourcePlatform == .applePodcasts {
+                } else if item.sourcePlatform == .appleMusic || item.sourcePlatform == .applePodcasts || item.sourcePlatform == .appleBooks {
                     appleChip(item)
                 } else if item.sourcePlatform == .github {
                     statChip(icon: "star", value: item.metrics?.stars ?? 0)
@@ -959,12 +959,18 @@ private struct FeedItemCard: View {
         .padding(12)
     }
 
-    /// Apple Music: "New single" / "Latest album"; Apple Podcasts: the episode length.
+    /// Apple Music: "New single" / "Latest album"; Apple Podcasts: the episode
+    /// length; Apple Books: "New audiobook" / "Latest audiobook".
     @ViewBuilder
     private func appleChip(_ item: FeedItem) -> some View {
-        let media = item.media?.first { $0.type == "album" || $0.type == "audio" }
+        let media = item.media?.first { $0.type == "album" || $0.type == "audio" || $0.type == "audiobook" }
         HStack(spacing: 4) {
-            if item.sourcePlatform == .applePodcasts {
+            if item.sourcePlatform == .appleBooks {
+                Image(systemName: "book")
+                    .font(.system(size: 11))
+                Text(media?.label ?? "Audiobook")
+                    .font(.system(size: 12))
+            } else if item.sourcePlatform == .applePodcasts {
                 Image(systemName: "headphones")
                     .font(.system(size: 11))
                 if let seconds = media?.duration, seconds > 0 {

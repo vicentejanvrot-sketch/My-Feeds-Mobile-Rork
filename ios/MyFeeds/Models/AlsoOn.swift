@@ -138,6 +138,11 @@ nonisolated enum AlsoOn {
             if first == "c" || first == "user", let second { return "youtube:c:" + second.lowercased() }
             return nil
         }
+        if host == "books.apple.com" || (host == "itunes.apple.com" && comps.path.contains("/author/")) {
+            guard let range = comps.path.range(of: #"/author/(?:[^/]+/)?(?:id)?\d+"#, options: .regularExpression) else { return nil }
+            let digits = comps.path[range].split(separator: "/").last.map { String($0).replacingOccurrences(of: "id", with: "") } ?? ""
+            return digits.isEmpty ? nil : "apple_books:" + digits
+        }
         if host == "music.apple.com" || host == "itunes.apple.com" || host == "podcasts.apple.com" {
             let path = comps.path
             if host != "podcasts.apple.com",
@@ -212,6 +217,7 @@ nonisolated enum AlsoOn {
     static func accountLabel(platform: SourcePlatform, handle: String?, url: String) -> String {
         if platform == .appleMusic { return "Artist page" }
         if platform == .applePodcasts { return "Show" }
+        if platform == .appleBooks { return "Author" }
         guard let handle, !handle.isEmpty, platform != .facebook else {
             var value = url
             for prefix in ["https://www.", "http://www.", "https://", "http://"] where value.hasPrefix(prefix) {

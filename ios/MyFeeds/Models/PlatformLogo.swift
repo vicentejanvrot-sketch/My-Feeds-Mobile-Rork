@@ -369,6 +369,24 @@ nonisolated enum PlatformLogoPaths {
         return path
     }
 
+    /// Apple Books: a plain open book (drawn for My Feeds, not Apple's artwork),
+    /// shown in white on an orange tile. Same path as web and Expo.
+    static func appleBooks(in rect: CGRect) -> Path {
+        let p = scaler(rect)
+        var path = Path()
+        path.move(to: p(6.2, 7.4))
+        path.addCurve(to: p(11.7, 8.0), control1: p(8.2, 6.8), control2: p(10.3, 7.0))
+        path.addLine(to: p(11.7, 17.3))
+        path.addCurve(to: p(6.2, 16.7), control1: p(10.3, 16.4), control2: p(8.2, 16.2))
+        path.closeSubpath()
+        path.move(to: p(17.8, 7.4))
+        path.addCurve(to: p(12.3, 8.0), control1: p(15.8, 6.8), control2: p(13.7, 7.0))
+        path.addLine(to: p(12.3, 17.3))
+        path.addCurve(to: p(17.8, 16.7), control1: p(13.7, 16.4), control2: p(15.8, 16.2))
+        path.closeSubpath()
+        return path
+    }
+
     /// Apple Podcasts' microphone, cut out of a rounded square.
     static func applePodcasts(in rect: CGRect) -> Path {
         let p = scaler(rect)
@@ -497,7 +515,7 @@ nonisolated enum PlatformLogoPaths {
 }
 
 private struct LogoShape: Shape {
-    enum Kind { case youtube, youtubePlay, x, reddit, instagram, github, tiktok, facebook, appleMusic, applePodcasts }
+    enum Kind { case youtube, youtubePlay, x, reddit, instagram, github, tiktok, facebook, appleMusic, applePodcasts, appleBooks }
     let kind: Kind
 
     func path(in rect: CGRect) -> Path {
@@ -512,6 +530,7 @@ private struct LogoShape: Shape {
         case .facebook: return PlatformLogoPaths.facebook(in: rect)
         case .appleMusic: return PlatformLogoPaths.appleMusic(in: rect)
         case .applePodcasts: return PlatformLogoPaths.applePodcasts(in: rect)
+        case .appleBooks: return PlatformLogoPaths.appleBooks(in: rect)
         }
     }
 }
@@ -536,7 +555,7 @@ struct PlatformLogo: View {
         case .github: return 0.9
         case .tiktok: return 0.86
         case .facebook: return 0.9
-        case .appleMusic, .applePodcasts: return 0.84
+        case .appleMusic, .applePodcasts, .appleBooks: return 0.84
         }
     }
 
@@ -593,6 +612,17 @@ struct PlatformLogo: View {
                     .fill(platform == .appleMusic
                           ? Color(red: 250 / 255, green: 36 / 255, blue: 60 / 255)
                           : Color(red: 153 / 255, green: 51 / 255, blue: 204 / 255))
+            }
+        case .appleBooks:
+            ZStack {
+                GeometryReader { geo in
+                    let s = min(geo.size.width, geo.size.height) / 24
+                    RoundedRectangle(cornerRadius: 4 * s)
+                        .fill(Color(red: 1, green: 149 / 255, blue: 0))
+                        .frame(width: 19 * s, height: 19 * s)
+                        .frame(width: geo.size.width, height: geo.size.height)
+                }
+                LogoShape(kind: .appleBooks).fill(Color.white)
             }
         case .facebook:
             ZStack {

@@ -32,6 +32,7 @@ struct PostReaderView: View {
     private static let facebookBlue = Color(red: 8 / 255, green: 102 / 255, blue: 1)
     private static let appleMusicRed = Color(red: 250 / 255, green: 36 / 255, blue: 60 / 255)
     private static let applePodcastsPurple = Color(red: 179 / 255, green: 92 / 255, blue: 242 / 255)
+    private static let appleBooksOrange = Color(red: 1, green: 149 / 255, blue: 0)
 
     var body: some View {
         ZStack {
@@ -106,6 +107,10 @@ struct PostReaderView: View {
                         if let videoId = item.videoId, videoId.hasPrefix("apple_music:") {
                             AddToAppleMusicButton(albumId: videoId, single: release.kind == "single")
                         }
+                    } else if platform == .appleBooks,
+                              let book = item.media?.first(where: { $0.type == "audiobook" }) {
+                        // Cover and Apple's sample; the whole book plays in Apple Books.
+                        AudiobookCardView(media: book)
                     } else if platform == .applePodcasts,
                               let episode = item.media?.first(where: { $0.type == "audio" }),
                               let raw = episode.audioUrl, let audioURL = URL(string: raw),
@@ -393,7 +398,7 @@ struct PostReaderView: View {
             case .github: gitHubActionBar(item)
             case .tiktok: tikTokActionBar(item)
             case .facebook: facebookActionBar(item)
-            case .appleMusic, .applePodcasts: appleActionBar(item, platform: platform)
+            case .appleMusic, .applePodcasts, .appleBooks: appleActionBar(item, platform: platform)
             case .reddit: redditActionBar(item)
             default: EmptyView()
             }
@@ -602,11 +607,13 @@ struct PostReaderView: View {
         .accessibilityLabel(label)
     }
 
-    /// Apple Music and Apple Podcasts: heart to save, share, and save for later.
+    /// Apple Music, Apple Podcasts and Apple Books: heart to save, share, and save for later.
     private func appleActionBar(_ item: FeedItem, platform: SourcePlatform) -> some View {
         let liked = status == .liked
         let bookmarked = status == .watchLater
-        let tint = platform == .appleMusic ? Self.appleMusicRed : Self.applePodcastsPurple
+        let tint = platform == .appleMusic ? Self.appleMusicRed
+            : platform == .appleBooks ? Self.appleBooksOrange
+            : Self.applePodcastsPurple
         return HStack(spacing: 4) {
             igButton(
                 icon: liked ? "heart.fill" : "heart",
@@ -1251,6 +1258,104 @@ private struct PhotoCarousel: View {
 
 /// Apple Music's embed player: previews for everyone, full songs for listeners
 /// signed in to Apple Music. A single is a short strip, an album shows its tracks.
+/// Apple Books audiobook: the cover and Apple's short sample. The whole book is
+/// bought and played in Apple Books, so this doesn't count toward watch time.
+private struct AudiobookCardView: View {
+    let media: ItemMedia
+
+    @State private var player: AVPlayer?
+    @State private var isPlaying = false
+    @State private var endObserver: NSObjectProtocol?
+
+    private static let orange = Color(red: 1, green: 149 / 255, blue: 0)
+
+    private var sampleURL: URL? {
+        guard let raw = media.previewUrl, !raw.isEmpty else { return nil }
+        return URL(string: raw.hasPrefix("http://") ? "https://" + raw.dropFirst("http://".count) : raw)
+    }
+
+    var body: some View {
+        HStack(alignment: .center, spacing: 14) {
+            AsyncImage(url: media.url.flatMap(URL.init(string:))) { phase in
+                if let image = phase.image {
+                    image.resizable().aspectRatio(contentMode: .fill)
+                } else {
+                    Theme.input
+                }
+            }
+            .frame(width: 104, height: 104)
+            .clipShape(.rect(cornerRadius: 8))
+
+            VStack(alignment: .leading, spacing: 8) {
+                if let label = media.label, !label.isEmpty {
+                    Text(label.uppercased())
+                        .font(.system(size: 11, weight: .heavy))
+                        .kerning(0.6)
+                        .foregroundStyle(Self.orange)
+                }
+                if sampleURL != nil {
+                    Button {
+                        toggle()
+                    } label: {
+                        Label(isPlaying ? "Pause sample" : "Play sample", systemImage: isPlaying ? "pause.fill" : "play.fill")
+                            .font(.system(size: 14, weight: .bold))
+                            .foregroundStyle(.white)
+                            .padding(.horizontal, 14)
+                            .frame(height: 38)
+                            .background(Capsule().fill(Self.orange))
+                    }
+                    .buttonStyle(.plain)
+                    Text("Sample from Apple Books. The full book plays in Apple Books.")
+                        .font(.system(size: 12))
+                        .foregroundStyle(Theme.textSecondary)
+                } else {
+                    Text("No sample for this one. The full book plays in Apple Books.")
+                        .font(.system(size: 12))
+                        .foregroundStyle(Theme.textSecondary)
+                }
+            }
+            Spacer(minLength: 0)
+        }
+        .padding(12)
+        .background(Theme.card)
+        .clipShape(.rect(cornerRadius: 12))
+        .overlay(RoundedRectangle(cornerRadius: 12).stroke(Theme.border, lineWidth: 1))
+        .onDisappear {
+            player?.pause()
+            isPlaying = false
+            if let endObserver { NotificationCenter.default.removeObserver(endObserver) }
+            endObserver = nil
+        }
+    }
+
+    private func toggle() {
+        if isPlaying {
+            player?.pause()
+            isPlaying = false
+            return
+        }
+        guard let url = sampleURL else { return }
+        try? AVAudioSession.sharedInstance().setCategory(.playback, mode: .spokenAudio)
+        try? AVAudioSession.sharedInstance().setActive(true)
+        if player == nil {
+            let newPlayer = AVPlayer(url: url)
+            player = newPlayer
+            endObserver = NotificationCenter.default.addObserver(
+                forName: AVPlayerItem.didPlayToEndTimeNotification,
+                object: newPlayer.currentItem,
+                queue: .main
+            ) { _ in
+                Task { @MainActor in
+                    isPlaying = false
+                    player?.seek(to: .zero)
+                }
+            }
+        }
+        player?.play()
+        isPlaying = true
+    }
+}
+
 private struct AppleMusicEmbedPlayer: View {
     let url: URL
     let single: Bool

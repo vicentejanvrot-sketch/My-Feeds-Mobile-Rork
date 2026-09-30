@@ -434,7 +434,7 @@ private struct TourContent {
                 steps: [
                     TourStep(title: "Listen here", body: "Tap it to open Apple Music's player. You hear a preview, or the full songs if you're signed in to Apple Music."),
                     TourStep(title: "Heart to save", body: "The heart saves it in My Feeds. Save adds it to Watch later."),
-                    TourStep(title: "Add it in Apple Music", body: "Adding it to your library or a playlist opens Apple Music."),
+                    TourStep(title: "Add it to Apple Music", body: "\"Add album to Apple Music\" puts the songs in your My Feeds playlist there, ready to download for offline."),
                 ],
                 saveActions: [TourAction(icon: "heart", label: "Like"), TourAction(icon: "bookmark", label: "Save")],
                 outActions: [TourAction(icon: "arrow.up.right.square", label: "Apple Music")],
@@ -453,6 +453,20 @@ private struct TourContent {
                 saveActions: [TourAction(icon: "heart", label: "Like"), TourAction(icon: "bookmark", label: "Save")],
                 outActions: [TourAction(icon: "arrow.up.right.square", label: "Apple Podcasts")],
                 outNote: "Opens Apple Podcasts"
+            )
+        case .appleBooks:
+            return TourContent(
+                author: "Maya Ortiz", handle: "Audiobook", when: "2d", media: .photo,
+                title: "The Quiet Harbor",
+                text: "New audiobook by Maya Ortiz · Fiction",
+                steps: [
+                    TourStep(title: "Hear a sample", body: "Tap it to see the cover and description, and play Apple's sample right here."),
+                    TourStep(title: "Heart to save", body: "The heart saves it in My Feeds. Save adds it to Watch later."),
+                    TourStep(title: "Listen in Apple Books", body: "Buying and listening to the whole book opens Apple Books."),
+                ],
+                saveActions: [TourAction(icon: "heart", label: "Like"), TourAction(icon: "bookmark", label: "Save")],
+                outActions: [TourAction(icon: "arrow.up.right.square", label: "Apple Books")],
+                outNote: "Opens Apple Books"
             )
         }
     }
