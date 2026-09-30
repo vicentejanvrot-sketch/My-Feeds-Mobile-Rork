@@ -14,6 +14,10 @@ struct OnboardingWizardView: View {
     /// Called with a result when the user leaves from the last screen, nil otherwise.
     let onClose: (OnboardingResult?) -> Void
 
+    init(onClose: @escaping (OnboardingResult?) -> Void) {
+        self.onClose = onClose
+    }
+
     @Environment(AuthStore.self) private var auth
 
     private struct AddedSource: Identifiable {
