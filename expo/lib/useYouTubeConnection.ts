@@ -22,6 +22,8 @@ export interface YouTubeConnectionState {
   syncAction: (videoId: string, action: YouTubeAction) => Promise<void>;
   // Subscribes to a channel; "already" if it was subscribed before. Throws on failure.
   subscribe: (channelUrl: string) => Promise<"subscribed" | "already">;
+  // Add to YouTube Music: puts the songs in the user's "My Feeds" playlist. Throws on failure.
+  addToMusicPlaylist: (videoIds: string[]) => Promise<{ added: number; alreadyThere: number }>;
 }
 
 export type YouTubeAction = "rate" | "watch_later" | "unwatch_later";
@@ -348,6 +350,20 @@ export const [YouTubeConnectionProvider, useYouTubeConnection] =
       [status, getAccessToken],
     );
 
+    const addToMusicPlaylist = useCallback(
+      async (videoIds: string[]) => {
+        if (status !== "connected") throw new Error("Connect YouTube in Settings first");
+        const accessToken = await getAccessToken();
+        const result = await callYouTubeApi<{ added?: number; alreadyThere?: number }>({
+          action: "add_tracks_to_music_playlist",
+          accessToken,
+          videoIds,
+        });
+        return { added: result.added ?? 0, alreadyThere: result.alreadyThere ?? 0 };
+      },
+      [status, getAccessToken],
+    );
+
     return {
       status,
       channelName,
@@ -358,5 +374,6 @@ export const [YouTubeConnectionProvider, useYouTubeConnection] =
       disconnect,
       syncAction,
       subscribe,
+      addToMusicPlaylist,
     };
   });

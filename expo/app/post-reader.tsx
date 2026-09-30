@@ -50,6 +50,8 @@ import type { ItemStatus, ItemWithAnalysis } from "@/lib/database";
 import { DownloadButton } from "@/components/DownloadButton";
 import { podcastPlayerHtml, readDownloadedItem, useDownloadsStore } from "@/lib/downloads";
 import { AppleMusicError, addReleaseToAppleMusic, appleMusicSupported } from "@/lib/appleMusic";
+import YoutubeIframe from "react-native-youtube-iframe";
+import { useYouTubeConnection } from "@/lib/useYouTubeConnection";
 
 // The action bar copies each platform's own row under a post. In My Feeds:
 // Like / Upvote = Saved, Bookmark / Save = Read Later, the check = Read.
@@ -65,6 +67,7 @@ const FACEBOOK_BLUE = "#0866FF";
 const APPLE_MUSIC_RED = "#FA243C";
 const APPLE_PODCASTS_PURPLE = "#B35CF2";
 const APPLE_BOOKS_ORANGE = "#FF9500";
+const YOUTUBE_MUSIC_RED = "#FF0033";
 const GITHUB_STAR = "#E3B341";
 
 type PostMetrics = {
@@ -102,6 +105,10 @@ type PostEmbed = {
   duration?: number | null;
   // Apple Books audiobook: Apple's short sample.
   preview_url?: string | null;
+  // YouTube Music: the release's track video ids, or a music video's id.
+  video_ids?: string[] | null;
+  youtube_id?: string | null;
+  track_count?: number | null;
   // Apple Music release: Apple's embed player link, and single / ep / album.
   embed_url?: string | null;
   kind?: string | null;
@@ -351,6 +358,82 @@ function AddToAppleMusic({ albumId, single }: { albumId: string; single: boolean
       <Text style={[styles.muted, { textAlign: "center", fontSize: 12 }]}>
         Goes into your "My Feeds" playlist. Needs an Apple Music subscription. Turn on Automatic Downloads in Apple Music to
         keep the songs offline.
+      </Text>
+    </View>
+  );
+}
+
+// YouTube Music songs, albums (all tracks in a row) and music videos, in
+// YouTube's own player.
+function YouTubeMusicPlayer({ videoIds }: { videoIds: string[] }) {
+  const { width } = useWindowDimensions();
+  const playerWidth = Math.min(width, 720) - 32;
+  return (
+    <View style={styles.video}>
+      <YoutubeIframe
+        width={playerWidth}
+        height={(playerWidth * 9) / 16}
+        videoId={videoIds[0]}
+        playList={videoIds.length > 1 ? videoIds : undefined}
+        initialPlayerParams={{ modestbranding: true, rel: false }}
+      />
+    </View>
+  );
+}
+
+// "Add to YouTube Music": puts the songs in the user's "My Feeds" playlist,
+// through the YouTube account connected in Settings. YouTube Music shows that
+// playlist, where the songs can be played or downloaded (with Premium).
+function AddToYouTubeMusic({ videoIds, kind }: { videoIds: string[]; kind: string }) {
+  const showToast = useToast();
+  const youtube = useYouTubeConnection();
+  const [state, setState] = useState<"idle" | "adding" | "added">("idle");
+  const connected = youtube.status === "connected";
+  const what = kind === "video" ? "video" : kind === "single" ? "song" : kind === "ep" ? "EP" : "album";
+
+  const add = async () => {
+    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    if (!connected) {
+      await youtube.connect();
+      return;
+    }
+    setState("adding");
+    try {
+      const { added } = await youtube.addToMusicPlaylist(videoIds);
+      setState("added");
+      showToast(
+        added > 0
+          ? `Added ${added} ${added === 1 ? (kind === "video" ? "video" : "song") : kind === "video" ? "videos" : "songs"} to "My Feeds" in YouTube Music`
+          : `Already in your "My Feeds" playlist`,
+        "success",
+      );
+    } catch (e) {
+      setState("idle");
+      showToast(e instanceof Error ? e.message : "Couldn't add to YouTube Music", "error");
+    }
+  };
+
+  return (
+    <View style={{ gap: 6 }}>
+      <Pressable
+        onPress={() => void add()}
+        disabled={state !== "idle" || youtube.connecting}
+        style={({ pressed }) => [styles.openBtn, pressed && { opacity: 0.7 }, state === "adding" && { opacity: 0.6 }]}
+        accessibilityRole="button"
+      >
+        {state === "adding" || youtube.connecting ? (
+          <ActivityIndicator size="small" color={YOUTUBE_MUSIC_RED} />
+        ) : state === "added" ? (
+          <Check size={16} color={YOUTUBE_MUSIC_RED} />
+        ) : (
+          <ListPlus size={16} color={YOUTUBE_MUSIC_RED} />
+        )}
+        <Text style={styles.openText}>
+          {state === "added" ? "Added to YouTube Music" : connected ? `Add ${what} to YouTube Music` : "Connect YouTube to add it"}
+        </Text>
+      </Pressable>
+      <Text style={[styles.muted, { textAlign: "center", fontSize: 12 }]}>
+        Goes into your "My Feeds" playlist. With YouTube Music Premium you can download it for offline listening.
       </Text>
     </View>
   );
@@ -634,6 +717,8 @@ export default function PostReaderScreen() {
   const quote = embeds.find((m) => m.type === "quote" || m.type === "article") ?? null;
   const video = embeds.find((m) => m.type !== "quote" && m.type !== "article" && (m.video_url || m.hls_url)) ?? null;
   const appleRelease = platform === "apple_music" ? embeds.find((m) => m.type === "album" && m.embed_url) ?? null : null;
+  const ytMusic = platform === "youtube_music" ? embeds.find((m) => (m.type === "album" || m.type === "video") && (m.video_ids?.length || m.youtube_id)) ?? null : null;
+  const ytMusicIds = ytMusic ? (ytMusic.video_ids?.length ? ytMusic.video_ids : ytMusic.youtube_id ? [ytMusic.youtube_id] : []) : [];
   const audiobook = platform === "apple_books" ? embeds.find((m) => m.type === "audiobook") ?? null : null;
   const podcastAudio = platform === "apple_podcasts" ? embeds.find((m) => m.type === "audio" && m.audio_url) ?? null : null;
   // Carousels (Instagram, LinkedIn) swipe through every photo.
@@ -673,7 +758,12 @@ export default function PostReaderScreen() {
           <Text style={platform === "reddit" ? styles.body : styles.bodyLarge}>{item.body}</Text>
         ) : null}
 
-        {appleRelease?.embed_url ? (
+        {ytMusic && ytMusicIds.length > 0 ? (
+          <View style={{ gap: 12 }}>
+            <YouTubeMusicPlayer videoIds={ytMusicIds} />
+            <AddToYouTubeMusic videoIds={ytMusicIds} kind={ytMusic.type === "video" ? "video" : ytMusic.kind ?? "album"} />
+          </View>
+        ) : appleRelease?.embed_url ? (
           <View style={{ gap: 12 }}>
             <AppleMusicPlayer embedUrl={appleRelease.embed_url} single={appleRelease.kind === "single"} />
             {item.video_id?.startsWith("apple_music:") ? (
@@ -798,7 +888,7 @@ export default function PostReaderScreen() {
               <BarButton label="Share" onPress={share} icon={<Send size={21} color={Colors.textPrimary} />} value={formatCount(metrics.reposts)} />
             </View>
           </View>
-        ) : platform === "apple_music" || platform === "apple_podcasts" || platform === "apple_books" ? (
+        ) : platform === "apple_music" || platform === "apple_podcasts" || platform === "apple_books" || platform === "youtube_music" ? (
           // Apple Music and Apple Podcasts: heart to save, share, save for later.
           <View style={styles.xBar}>
             <View style={{ flexDirection: "row", alignItems: "center" }}>
@@ -807,7 +897,7 @@ export default function PostReaderScreen() {
                 selected={liked}
                 onPress={() => changeStatus(liked ? "watched" : "liked")}
                 icon={(() => {
-                  const tint = platform === "apple_music" ? APPLE_MUSIC_RED : platform === "apple_books" ? APPLE_BOOKS_ORANGE : APPLE_PODCASTS_PURPLE;
+                  const tint = platform === "apple_music" ? APPLE_MUSIC_RED : platform === "apple_books" ? APPLE_BOOKS_ORANGE : platform === "youtube_music" ? YOUTUBE_MUSIC_RED : APPLE_PODCASTS_PURPLE;
                   return <Heart size={22} color={liked ? tint : Colors.textPrimary} fill={liked ? tint : "transparent"} />;
                 })()}
               />

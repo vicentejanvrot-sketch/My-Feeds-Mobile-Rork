@@ -31,6 +31,11 @@ const APPLE_PODCASTS_PATH =
 const APPLE_BOOKS_PATH =
   "M6.2 7.4c2-.6 4.1-.4 5.5.6v9.3c-1.4-.9-3.5-1.1-5.5-.6zM17.8 7.4c-2-.6-4.1-.4-5.5.6v9.3c1.4-.9 3.5-1.1 5.5-.6z";
 
+// YouTube Music: the red disc with the ring and play arrow cut out, drawn over
+// a white circle so they show white on any background.
+const YOUTUBE_MUSIC_PATH =
+  "M12 0C5.376 0 0 5.376 0 12s5.376 12 12 12 12-5.376 12-12S18.624 0 12 0zm0 19.104c-3.924 0-7.104-3.18-7.104-7.104S8.076 4.896 12 4.896s7.104 3.18 7.104 7.104-3.18 7.104-7.104 7.104zm0-13.332c-3.432 0-6.228 2.796-6.228 6.228S8.568 18.228 12 18.228s6.228-2.796 6.228-6.228S15.432 5.772 12 5.772zM9.684 15.54V8.46L15.816 12l-6.132 3.54z";
+
 // Facebook's round "f" mark: a blue circle with the f cut out, drawn over a
 // white circle so the f shows white.
 const FACEBOOK_PATH =
@@ -58,6 +63,7 @@ const LOGO_SCALE: Record<Platform, number> = {
   apple_music: 0.84,
   apple_podcasts: 0.84,
   apple_books: 0.84,
+  youtube_music: 0.9,
 };
 
 // Zooms the 24x24 artwork out around its centre.
@@ -107,6 +113,14 @@ export function PlatformLogo({ platform, size }: { platform: Platform; size: num
           d={platform === "apple_music" ? APPLE_MUSIC_PATH : APPLE_PODCASTS_PATH}
           fill={platform === "apple_music" ? "#FA243C" : "#9933CC"}
         />
+      </Svg>
+    );
+  }
+  if (platform === "youtube_music") {
+    return (
+      <Svg width={size} height={size} viewBox={viewBoxFor(platform)}>
+        <Circle cx={12} cy={12} r={11} fill="#FFFFFF" />
+        <Path d={YOUTUBE_MUSIC_PATH} fill="#FF0000" />
       </Svg>
     );
   }

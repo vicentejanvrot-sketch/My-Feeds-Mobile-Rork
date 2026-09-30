@@ -92,6 +92,10 @@ function accountKeyFromUrl(raw: string | null | undefined): string | null {
     return first ? "x:" + first.replace(/^@/, "").toLowerCase() : null;
   }
   if (host === "instagram.com") return first ? "instagram:" + first.toLowerCase() : null;
+  if (host === "music.youtube.com") {
+    const channel = u.pathname.match(/\/channel\/(UC[\w-]{20,})/);
+    return channel ? "youtube_music:" + channel[1] : null;
+  }
   if (host === "books.apple.com" || (host === "itunes.apple.com" && /\/author\//i.test(u.pathname))) {
     const author = u.pathname.match(/\/author\/(?:[^/]+\/)?(?:id)?(\d+)/i);
     return author ? "apple_books:" + author[1] : null;
@@ -154,6 +158,7 @@ export function accountLabel(platform: Platform, handle: string | null, url: str
   if (platform === "apple_music") return "Artist page";
   if (platform === "apple_podcasts") return "Show";
   if (platform === "apple_books") return "Author";
+  if (platform === "youtube_music") return "Artist";
   if (!handle || platform === "facebook") return url.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "");
   if (platform === "x" || platform === "instagram" || platform === "tiktok") return "@" + handle;
   if (platform === "reddit") return "u/" + handle.replace(/^\/?u(ser)?\//i, "");

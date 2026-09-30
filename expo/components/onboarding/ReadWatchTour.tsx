@@ -217,6 +217,22 @@ const TOURS: Record<Platform, Tour> = {
     outActions: [{ icon: ExternalLink, label: "Apple Books" }],
     outNote: "Opens Apple Books",
   },
+  youtube_music: {
+    author: "Nova Lane",
+    handle: "New album",
+    when: "1d",
+    media: "video",
+    title: "Night Garden",
+    body: "New album by Nova Lane · 10 tracks",
+    steps: [
+      { title: "Listen here", body: "Tap it to play the songs, or the music video, right inside My Feeds." },
+      { title: "Heart to save", body: "The heart saves it in My Feeds. Save adds it to Watch later." },
+      { title: "Add it to YouTube Music", body: "\"Add to YouTube Music\" puts the songs in your My Feeds playlist there, using your connected YouTube account." },
+    ],
+    saveActions: [{ icon: Heart, label: "Like" }, { icon: Bookmark, label: "Save" }],
+    outActions: [{ icon: ExternalLink, label: "YouTube Music" }],
+    outNote: "Opens YouTube Music",
+  },
 };
 
 function Marker({ n, label, active, onPick }: { n: number; label: string; active: boolean; onPick: () => void }) {
