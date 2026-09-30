@@ -36,6 +36,7 @@ import {
   ChevronDown,
   Filter,
   Ban,
+  Lock,
 } from "lucide-react-native";
 import { useQueryClient } from "@tanstack/react-query";
 import { Colors } from "@/constants/colors";
@@ -50,6 +51,7 @@ import {
   useDeleteChannel,
   useAddChannel,
   useAddSource,
+  canAddAsPrivate,
   useAddRecipient,
   useDeleteRecipient,
   useCancelRun,
@@ -560,6 +562,9 @@ export default function AgentDetailScreen() {
   // Set when a pasted link picked the platform for the user.
   const [autoPlatform, setAutoPlatform] = useState<Platform | null>(null);
   const addSource = useAddSource(agentId ?? "");
+  // Set when Instagram says the account is private (or can't be loaded), so
+  // the sheet can offer to add it as a private account.
+  const [privateOffer, setPrivateOffer] = useState<string | null>(null);
   const [showAddRecipient, setShowAddRecipient] = useState(false);
   const [newRecipientEmail, setNewRecipientEmail] = useState("");
 
@@ -701,8 +706,9 @@ export default function AgentDetailScreen() {
   }, [agentId, agent, sourceCount, deleteAgent, showToast, router]);
 
   // ── Add channel ──────────────────────────────────────────────────
-  const handleAddChannel = useCallback(async () => {
+  const handleAddChannel = useCallback(async (asPrivate = false) => {
     const value = newChannelUrl.trim();
+    setPrivateOffer(null);
     if (!value) {
       showToast(`Enter a ${PLATFORM_META[newPlatform].sourceNoun.toLowerCase()}`, "error");
       return;
@@ -726,8 +732,14 @@ export default function AgentDetailScreen() {
           platform: newPlatform,
           value,
           priority: newChannelPriority,
+          privateAccount: asPrivate,
         });
-        showToast(`${channel.channel_name ?? "Source"} added`, "success");
+        showToast(
+          channel.is_private
+            ? `${channel.channel_name ?? "Account"} added as a private account`
+            : `${channel.channel_name ?? "Source"} added`,
+          "success",
+        );
       }
       setNewChannelUrl("");
       setNewChannelPriority(3);
@@ -736,6 +748,10 @@ export default function AgentDetailScreen() {
       setShowAddChannel(false);
     } catch (e) {
       const msg = e instanceof Error ? e.message : "Failed to add source";
+      if (!asPrivate && canAddAsPrivate(e)) {
+        setPrivateOffer(msg);
+        return;
+      }
       showToast(msg, "error");
     }
   }, [newChannelUrl, newChannelPriority, newPlatform, addChannel, addSource, showToast]);
@@ -989,7 +1005,7 @@ export default function AgentDetailScreen() {
         {/* ── CHANNELS SECTION ── */}
         <SectionHeader
           title={`Channels (${allChannels.length})`}
-          onAdd={() => setShowAddChannel(true)}
+          onAdd={() => { setPrivateOffer(null); setShowAddChannel(true); }}
           addLabel="Add Source"
           badge={
             channelFilter !== "all"
@@ -1314,6 +1330,7 @@ export default function AgentDetailScreen() {
               value={newChannelUrl}
               onChangeText={(value) => {
                 setNewChannelUrl(value);
+                setPrivateOffer(null);
                 const detected = detectPlatform(value);
                 if (detected && detected !== newPlatform) {
                   setNewPlatform(detected);
@@ -1333,6 +1350,32 @@ export default function AgentDetailScreen() {
             ) : (
               <Text style={sourceStyles.help}>{PLATFORM_META[newPlatform].addHelp}</Text>
             )}
+
+            {privateOffer ? (
+              <View style={sourceStyles.privateBox}>
+                <View style={sourceStyles.privateRow}>
+                  <Lock size={14} color={Colors.textMuted} style={{ marginTop: 2 }} />
+                  <Text style={sourceStyles.privateText}>{privateOffer}</Text>
+                </View>
+                <Text style={sourceStyles.help}>
+                  A private account shows up on People with a button to open it in Instagram. Its posts won&apos;t appear in your feed.
+                </Text>
+                <Pressable
+                  style={({ pressed }) => [sourceStyles.privateBtn, pressed && styles.pressed]}
+                  onPress={() => void handleAddChannel(true)}
+                  disabled={addSource.isPending}
+                >
+                  {addSource.isPending ? (
+                    <ActivityIndicator size="small" color={Colors.textPrimary} />
+                  ) : (
+                    <>
+                      <Lock size={14} color={Colors.textPrimary} />
+                      <Text style={sourceStyles.privateBtnText}>Add as private account</Text>
+                    </>
+                  )}
+                </Pressable>
+              </View>
+            ) : null}
 
             <Text style={[styles.formLabel, { marginTop: 14 }]}>Priority</Text>
             <PriorityPicker
@@ -1381,6 +1424,7 @@ function ChannelCard({
     priority: number | null;
     platform?: string | null;
     is_enabled: boolean | null;
+    is_private?: boolean | null;
     last_scanned_at: string | null;
     user_status: import("@/lib/database").ChannelStatus | null;
   };
@@ -1420,6 +1464,12 @@ function ChannelCard({
             {channel.channel_url ? (
               <Link2 size={12} color={Colors.textMuted} style={styles.ml4} />
             ) : null}
+            {channel.is_private ? (
+              <View style={sourceStyles.privateBadge}>
+                <Lock size={10} color={Colors.textMuted} />
+                <Text style={sourceStyles.privateBadgeText}>Private</Text>
+              </View>
+            ) : null}
           </Pressable>
           <Pressable
             style={({ pressed }) => [styles.iconBtn, pressed && styles.pressed]}
@@ -1458,7 +1508,9 @@ function ChannelCard({
         </View>
 
         <Text style={styles.channelScanned}>
-          {channel.last_scanned_at
+          {channel.is_private
+            ? "Not scanned (private)"
+            : channel.last_scanned_at
             ? `Scanned ${timeAgo(channel.last_scanned_at)}`
             : "Never scanned"}
         </Text>
@@ -1870,4 +1922,40 @@ const sourceStyles = StyleSheet.create({
   platformText: { color: Colors.textPrimary, fontSize: 12, fontWeight: "700" },
   help: { color: Colors.textMuted, fontSize: 12, marginTop: 6 },
   beta: { color: Colors.textMuted, fontSize: 10, fontWeight: "600", marginTop: -3 },
+  privateBox: {
+    marginTop: 12,
+    padding: 12,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    backgroundColor: Colors.input,
+    gap: 4,
+  },
+  privateRow: { flexDirection: "row", alignItems: "flex-start", gap: 8 },
+  privateText: { flex: 1, color: Colors.textPrimary, fontSize: 13 },
+  privateBtn: {
+    marginTop: 8,
+    alignSelf: "flex-start",
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: Colors.border,
+  },
+  privateBtnText: { color: Colors.textPrimary, fontSize: 13, fontWeight: "600" },
+  privateBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 3,
+    marginLeft: 6,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: Colors.border,
+  },
+  privateBadgeText: { color: Colors.textMuted, fontSize: 10, fontWeight: "600" },
 });
