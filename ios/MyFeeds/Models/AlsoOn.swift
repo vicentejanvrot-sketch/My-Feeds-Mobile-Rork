@@ -207,7 +207,7 @@ nonisolated enum AlsoOn {
             return value
         }
         switch platform {
-        case .x, .instagram: return "@" + handle
+        case .x, .instagram, .tiktok: return "@" + handle
         case .youtube: return isYouTubeChannelId(handle) ? "Channel" : "@" + handle
         case .reddit: return "u/" + redditName(handle)
         default: return handle
@@ -216,7 +216,7 @@ nonisolated enum AlsoOn {
 
     static func sourceLabel(_ ch: Channel) -> String {
         let platform = ch.sourcePlatform
-        if let handle = ch.handle, !handle.isEmpty, platform == .x || platform == .instagram {
+        if let handle = ch.handle, !handle.isEmpty, platform == .x || platform == .instagram || platform == .tiktok {
             return "@" + stripAt(handle)
         }
         if let url = ch.channelUrl, let range = url.range(of: "youtube\\.com/@[^/?#]+", options: .regularExpression) {

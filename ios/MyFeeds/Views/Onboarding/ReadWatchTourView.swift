@@ -400,6 +400,19 @@ private struct TourContent {
                 outActions: [TourAction(icon: "bubble.left", label: "Comment"), TourAction(icon: "arrow.2.squarepath", label: "Repost")],
                 outNote: "Opens LinkedIn"
             )
+        case .tiktok:
+            return TourContent(
+                author: "Ember Kitchen", handle: "@emberkitchen", when: "4h", media: .video,
+                text: "Crispy rice in 60 seconds.",
+                steps: [
+                    TourStep(title: "Watch it here", body: "Tap the video to play it inside My Feeds with TikTok's own player."),
+                    TourStep(title: "Like to save", body: "Like saves it in My Feeds. Save adds it to Read later."),
+                    TourStep(title: "Comments open on TikTok", body: "Commenting opens TikTok, because it posts from your account."),
+                ],
+                saveActions: [TourAction(icon: "heart", label: "Like"), TourAction(icon: "bookmark", label: "Save")],
+                outActions: [TourAction(icon: "bubble.left", label: "Comment")],
+                outNote: "Opens TikTok"
+            )
         }
     }
 }

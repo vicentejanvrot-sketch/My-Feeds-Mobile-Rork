@@ -257,10 +257,42 @@ nonisolated enum PlatformLogoPaths {
         path.closeSubpath()
         return path
     }
+
+    /// TikTok note mark.
+    static func tiktok(in rect: CGRect) -> Path {
+        let p = scaler(rect)
+        var path = Path()
+        path.move(to: p(12.525, 0.02))
+        path.addCurve(to: p(16.435, 0), control1: p(13.835, 0), control2: p(15.135, 0.01))
+        path.addCurve(to: p(18.185, 4.17), control1: p(16.515, 1.53), control2: p(17.065, 3.09))
+        path.addCurve(to: p(22.425, 5.96), control1: p(19.305, 5.28), control2: p(20.885, 5.79))
+        path.addLine(to: p(22.425, 9.99))
+        path.addCurve(to: p(18.225, 9.02), control1: p(20.985, 9.94), control2: p(19.535, 9.64))
+        path.addCurve(to: p(16.605, 8.09), control1: p(17.655, 8.76), control2: p(17.125, 8.43))
+        path.addCurve(to: p(16.585, 16.84), control1: p(16.595, 11.01), control2: p(16.615, 13.93))
+        path.addCurve(to: p(15.235, 20.78), control1: p(16.505, 18.24), control2: p(16.045, 19.63))
+        path.addCurve(to: p(9.325, 23.99), control1: p(13.925, 22.7), control2: p(11.655, 23.95))
+        path.addCurve(to: p(5.245, 22.96), control1: p(7.895, 24.07), control2: p(6.465, 23.68))
+        path.addCurve(to: p(1.595, 17.25), control1: p(3.225, 21.77), control2: p(1.805, 19.59))
+        path.addCurve(to: p(1.585, 15.76), control1: p(1.575, 16.75), control2: p(1.565, 16.25))
+        path.addCurve(to: p(4.165, 10.8), control1: p(1.765, 13.86), control2: p(2.705, 12.04))
+        path.addCurve(to: p(10.315, 9.08), control1: p(5.825, 9.36), control2: p(8.145, 8.67))
+        path.addCurve(to: p(10.275, 13.52), control1: p(10.335, 10.56), control2: p(10.275, 12.04))
+        path.addCurve(to: p(7.255, 13.89), control1: p(9.285, 13.2), control2: p(8.125, 13.29))
+        path.addCurve(to: p(5.895, 15.64), control1: p(6.625, 14.3), control2: p(6.145, 14.93))
+        path.addCurve(to: p(5.755, 17.25), control1: p(5.685, 16.15), control2: p(5.745, 16.71))
+        path.addCurve(to: p(9.255, 20.12), control1: p(5.995, 18.89), control2: p(7.575, 20.27))
+        path.addCurve(to: p(12.025, 18.51), control1: p(10.375, 20.11), control2: p(11.445, 19.46))
+        path.addCurve(to: p(12.435, 17.45), control1: p(12.215, 18.18), control2: p(12.425, 17.84))
+        path.addCurve(to: p(12.505, 12.09), control1: p(12.535, 15.66), control2: p(12.495, 13.88))
+        path.addCurve(to: p(12.525, 0.02), control1: p(12.515, 8.06), control2: p(12.495, 4.04))
+        path.closeSubpath()
+        return path
+    }
 }
 
 private struct LogoShape: Shape {
-    enum Kind { case youtube, youtubePlay, x, reddit, instagram, github }
+    enum Kind { case youtube, youtubePlay, x, reddit, instagram, github, tiktok }
     let kind: Kind
 
     func path(in rect: CGRect) -> Path {
@@ -271,14 +303,15 @@ private struct LogoShape: Shape {
         case .reddit: return PlatformLogoPaths.reddit(in: rect)
         case .instagram: return PlatformLogoPaths.instagram(in: rect)
         case .github: return PlatformLogoPaths.github(in: rect)
+        case .tiktok: return PlatformLogoPaths.tiktok(in: rect)
         }
     }
 }
 
 /// The logo as it appears on the platform: red YouTube button with a white play
 /// arrow, white X on the dark theme, white Snoo on the orange Reddit bubble,
-/// the Instagram camera in its gradient, LinkedIn's blue "in" tile and the
-/// GitHub Octocat mark.
+/// the Instagram camera in its gradient, LinkedIn's blue "in" tile, the
+/// GitHub Octocat mark and the TikTok note.
 struct PlatformLogo: View {
     let platform: SourcePlatform
 
@@ -293,6 +326,7 @@ struct PlatformLogo: View {
         case .linkedin: return 0.84
         case .reddit: return 0.92
         case .github: return 0.9
+        case .tiktok: return 0.86
         }
     }
 
@@ -331,6 +365,9 @@ struct PlatformLogo: View {
                 ))
         case .github:
             LogoShape(kind: .github)
+                .fill(Theme.textPrimary)
+        case .tiktok:
+            LogoShape(kind: .tiktok)
                 .fill(Theme.textPrimary)
         case .linkedin:
             GeometryReader { geo in

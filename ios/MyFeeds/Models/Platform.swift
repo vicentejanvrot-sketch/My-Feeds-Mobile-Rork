@@ -9,6 +9,7 @@ nonisolated enum SourcePlatform: String, Codable, CaseIterable, Hashable, Sendab
     case instagram
     case linkedin
     case github
+    case tiktok
 
     /// Unknown or missing values (rows written before the migration) are YouTube.
     init(raw: String?) {
@@ -16,10 +17,10 @@ nonisolated enum SourcePlatform: String, Codable, CaseIterable, Hashable, Sendab
     }
 
     /// Non-YouTube items store "<platform>:<id>" in items.video_id
-    /// (x, reddit, instagram, linkedin, github).
+    /// (x, reddit, instagram, linkedin, github, tiktok).
     static func isPostVideoId(_ videoId: String?) -> Bool {
         guard let videoId else { return false }
-        return ["x:", "reddit:", "instagram:", "linkedin:", "github:"].contains { videoId.hasPrefix($0) }
+        return ["x:", "reddit:", "instagram:", "linkedin:", "github:", "tiktok:"].contains { videoId.hasPrefix($0) }
     }
 
     /// Platform of a post item from its "<platform>:<id>" video_id; YouTube otherwise.
@@ -40,6 +41,7 @@ extension SourcePlatform {
         case .instagram: return "Instagram"
         case .linkedin: return "LinkedIn"
         case .github: return "GitHub"
+        case .tiktok: return "TikTok"
         }
     }
 
@@ -51,6 +53,7 @@ extension SourcePlatform {
         case .instagram: return "IG"
         case .linkedin: return "in"
         case .github: return "GH"
+        case .tiktok: return "TT"
         }
     }
 
@@ -63,6 +66,7 @@ extension SourcePlatform {
         case .instagram: return Color(red: 1, green: 122 / 255, blue: 178 / 255)
         case .linkedin: return Color(red: 127 / 255, green: 184 / 255, blue: 240 / 255)
         case .github: return Color(red: 230 / 255, green: 237 / 255, blue: 243 / 255)
+        case .tiktok: return Color(red: 241 / 255, green: 243 / 255, blue: 245 / 255)
         }
     }
 
@@ -75,6 +79,7 @@ extension SourcePlatform {
         case .instagram: return Color(red: 58 / 255, green: 24 / 255, blue: 48 / 255)
         case .linkedin: return Color(red: 20 / 255, green: 40 / 255, blue: 61 / 255)
         case .github: return Color(red: 33 / 255, green: 38 / 255, blue: 45 / 255)
+        case .tiktok: return Color(red: 31 / 255, green: 31 / 255, blue: 36 / 255)
         }
     }
 
@@ -86,6 +91,7 @@ extension SourcePlatform {
         case .instagram: return "Account"
         case .linkedin: return "Profile or company"
         case .github: return "User or organization"
+        case .tiktok: return "Account"
         }
     }
 
@@ -97,6 +103,7 @@ extension SourcePlatform {
         case .instagram: return "@handle or https://www.instagram.com/handle"
         case .linkedin: return "https://www.linkedin.com/in/name or /company/name"
         case .github: return "@username or https://github.com/username"
+        case .tiktok: return "@username or https://www.tiktok.com/@username"
         }
     }
 
@@ -108,6 +115,7 @@ extension SourcePlatform {
         case .instagram: return "Public accounts only. Posts and reels from the lookback window."
         case .linkedin: return "Paste a person's profile link or a company page link."
         case .github: return "New repositories and releases from the lookback window."
+        case .tiktok: return "Public accounts only. Videos from the lookback window."
         }
     }
 
@@ -119,11 +127,12 @@ extension SourcePlatform {
         case .instagram: return "Open on Instagram"
         case .linkedin: return "Open on LinkedIn"
         case .github: return "Open on GitHub"
+        case .tiktok: return "Open on TikTok"
         }
     }
 
     /// Newer sources whose data provider is still settling in.
-    var isBeta: Bool { self == .instagram || self == .linkedin }
+    var isBeta: Bool { self == .instagram || self == .linkedin || self == .tiktok }
 }
 
 /// Platform logo used on cards, lists and filters, same look as the web and Expo apps.
@@ -184,7 +193,7 @@ nonisolated struct KeyMoment: Codable, Hashable, Sendable {
     }
 }
 
-/// Engagement numbers for X, Reddit, Instagram, LinkedIn and GitHub posts (items.metrics).
+/// Engagement numbers for X, Reddit, Instagram, LinkedIn, GitHub and TikTok posts (items.metrics).
 nonisolated struct ItemMetrics: Codable, Hashable, Sendable {
     var likes: Int?
     var reposts: Int?
