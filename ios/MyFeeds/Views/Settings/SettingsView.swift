@@ -36,6 +36,7 @@ struct SettingsView: View {
                     biometricCard
                     aboutCard
                     dangerZoneCard
+                    downloadsCard
                     supportCard
                     saveButton
                 }
@@ -315,6 +316,19 @@ struct SettingsView: View {
             .buttonStyle(.plain)
             .disabled(isDeleting)
         }
+    }
+
+    /// Items saved on this phone for offline use (count and space used).
+    private var downloadsCard: some View {
+        let store = DownloadStore.shared
+        let count = store.entries.count
+        let label = count == 0
+            ? "Saved for offline"
+            : "\(count) saved · \(DownloadStore.formatBytes(store.totalBytes))"
+        return settingsCard(icon: "arrow.down.circle", iconColor: Theme.accent, title: "Downloads", description: nil) {
+            supportRow(icon: "arrow.down.circle", label: label, route: .downloads)
+        }
+        .onAppear { store.load() }
     }
 
     private var supportCard: some View {

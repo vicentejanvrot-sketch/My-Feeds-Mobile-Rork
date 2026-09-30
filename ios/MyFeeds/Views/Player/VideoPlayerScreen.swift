@@ -347,6 +347,11 @@ struct VideoPlayerScreen: View {
                 .foregroundStyle(Theme.textPrimary)
             Spacer()
             HStack(spacing: 4) {
+                // Offline copy: the summary and key moments (the video itself needs a connection).
+                if let itemId = request.itemId {
+                    DownloadButton(itemId: itemId, iconSize: 15)
+                        .frame(width: 36, height: 36)
+                }
                 Button {
                     enablePocketLock()
                 } label: {

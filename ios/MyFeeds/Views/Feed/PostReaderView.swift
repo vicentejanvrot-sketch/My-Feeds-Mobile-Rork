@@ -40,7 +40,7 @@ struct PostReaderView: View {
                 content(item)
             } else if loadFailed {
                 VStack(spacing: 12) {
-                    Text("Couldn't load this post.")
+                    Text("Couldn't load this post. Check your connection.")
                         .font(.system(size: 15, weight: .semibold))
                         .foregroundStyle(Theme.textSecondary)
                     Button("Close") { dismiss() }
@@ -137,6 +137,10 @@ struct PostReaderView: View {
                     }
 
                     summaryBox(item, platform: platform)
+                    if platform == .youtube {
+                        // YouTube videos opened from Downloads: the key moments, to read offline.
+                        keyMomentsBox(item)
+                    }
 
                     if let tags = item.analysis?.tags, !tags.isEmpty {
                         FlowLayoutWrap(spacing: 6) {
@@ -179,6 +183,8 @@ struct PostReaderView: View {
                 .lineLimit(1)
 
             Spacer(minLength: 0)
+
+            DownloadButton(itemId: item.id, hasAudio: platform == .applePodcasts)
         }
         .padding(.horizontal, 8)
         .padding(.vertical, 4)
@@ -336,6 +342,39 @@ struct PostReaderView: View {
         }
     }
 
+    @ViewBuilder
+    private func keyMomentsBox(_ item: FeedItem) -> some View {
+        let moments = item.analysis?.moments ?? []
+        if !moments.isEmpty {
+            VStack(alignment: .leading, spacing: 6) {
+                Text("KEY MOMENTS")
+                    .font(.system(size: 11, weight: .heavy))
+                    .kerning(0.8)
+                    .foregroundStyle(Theme.accent)
+                ForEach(moments, id: \.self) { moment in
+                    (Text(Self.clock(moment.seconds)).foregroundColor(Theme.accent).bold()
+                        + Text("  \(moment.text)").foregroundColor(Theme.textPrimary))
+                        .font(.system(size: 14))
+                        .lineSpacing(4)
+                }
+            }
+            .padding(12)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(Theme.accent.opacity(0.10))
+            .clipShape(.rect(cornerRadius: 12))
+            .overlay(
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(Theme.accent.opacity(0.25), lineWidth: 1)
+            )
+        }
+    }
+
+    private static func clock(_ seconds: Int) -> String {
+        let s = max(0, seconds)
+        let h = s / 3600, m = (s % 3600) / 60, sec = s % 60
+        return h > 0 ? String(format: "%d:%02d:%02d", h, m, sec) : String(format: "%d:%02d", m, sec)
+    }
+
     private func footer(_ item: FeedItem, platform: SourcePlatform) -> some View {
         VStack(spacing: 10) {
             if platform != .reddit, let line = dateLine(item, platform: platform) {
@@ -352,7 +391,8 @@ struct PostReaderView: View {
             case .tiktok: tikTokActionBar(item)
             case .facebook: facebookActionBar(item)
             case .appleMusic, .applePodcasts: appleActionBar(item, platform: platform)
-            default: redditActionBar(item)
+            case .reddit: redditActionBar(item)
+            default: EmptyView()
             }
 
             HStack(spacing: 8) {
@@ -897,13 +937,20 @@ struct PostReaderView: View {
 
     // MARK: - Behavior
 
+    /// Downloaded items open from the copy on the phone (works offline, and the
+    /// photos and episode don't download again). The status still comes from the
+    /// server when there's a connection.
     private func load() async {
+        if let saved = DownloadStore.shared.localItem(request.itemId) {
+            item = saved
+            status = router.pendingStatuses[saved.id] ?? saved.status
+        }
         do {
             let loaded = try await SupabaseService.shared.fetchItem(id: request.itemId)
-            item = loaded
+            if item == nil { item = loaded }
             status = router.pendingStatuses[loaded.id] ?? loaded.status
         } catch {
-            loadFailed = true
+            if item == nil { loadFailed = true }
         }
     }
 
@@ -1251,7 +1298,7 @@ private struct PodcastPlayerView: View {
                 .clipShape(.rect(cornerRadius: 10))
 
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(totalLength > 0 ? "\(Self.clock(totalLength)) long" : "Full episode")
+                    Text((totalLength > 0 ? "\(Self.clock(totalLength)) long" : "Full episode") + (url.isFileURL ? " · Downloaded" : ""))
                         .font(.system(size: 13))
                         .foregroundStyle(Theme.textSecondary)
                     Button {
