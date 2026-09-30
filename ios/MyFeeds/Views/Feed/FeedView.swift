@@ -932,7 +932,7 @@ private struct FeedItemCard: View {
                 } else if item.sourcePlatform == .reddit {
                     statChip(icon: "arrow.up", value: item.metrics?.score ?? 0)
                     statChip(icon: "bubble.left", value: item.metrics?.comments ?? 0)
-                } else if item.sourcePlatform == .instagram || item.sourcePlatform == .tiktok {
+                } else if item.sourcePlatform == .instagram || item.sourcePlatform == .tiktok || item.sourcePlatform == .facebook {
                     statChip(icon: "heart", value: item.metrics?.likes ?? 0)
                     statChip(icon: "bubble.right", value: item.metrics?.comments ?? 0)
                     if let plays = item.metrics?.plays, plays > 0 {
