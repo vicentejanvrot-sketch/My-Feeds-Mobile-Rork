@@ -457,6 +457,7 @@ struct FeedView: View {
                     ForEach(filteredItems) { item in
                         FeedItemCard(
                             item: item,
+                            sourceLabel: sourceLabel(for: item),
                             isSelected: selectedIds.contains(item.id),
                             onTap: {
                                 if let videoId = item.resolvedVideoId {
@@ -625,7 +626,23 @@ struct FeedView: View {
         isLoading = false
     }
 
-    private func toggleSelection(_ item: FeedItem) {
+    /// Card header text: the post's @handle, or for YouTube the channel's @handle
+    /// from its youtube.com/@name link (the channel name when it has none).
+    private func sourceLabel(for item: FeedItem) -> String {
+        if item.sourcePlatform == .youtube {
+            if let channelId = item.channelId,
+               let url = channels.first(where: { $0.channelId == channelId })?.channelUrl,
+               let range = url.range(of: #"youtube\.com/@[^/?#]+"#, options: [.regularExpression, .caseInsensitive]) {
+                let handle = url[range].split(separator: "@", maxSplits: 1).last.map(String.init) ?? ""
+                if !handle.isEmpty { return "@" + (handle.removingPercentEncoding ?? handle) }
+            }
+            return item.channelName ?? "YouTube"
+        }
+        if let handle = item.authorHandle, !handle.isEmpty { return handle }
+        return item.channelName ?? item.sourcePlatform.label
+    }
+
+        private func toggleSelection(_ item: FeedItem) {
         if selectedIds.contains(item.id) {
             selectedIds.remove(item.id)
         } else {
@@ -679,6 +696,8 @@ struct FeedView: View {
 
 private struct FeedItemCard: View {
     let item: FeedItem
+    /// Shown next to the platform logo above the picture: @handle or channel name.
+    let sourceLabel: String
     let isSelected: Bool
     let onTap: () -> Void
     let onSelectionTap: () -> Void
@@ -688,6 +707,17 @@ private struct FeedItemCard: View {
         ZStack(alignment: .bottomTrailing) {
             Button(action: onTap) {
                 VStack(alignment: .leading, spacing: 0) {
+                    // Platform and account, the same header on every card (YouTube, X, Instagram, ...).
+                    HStack(spacing: 8) {
+                        PlatformBadge(platform: item.sourcePlatform, size: 20)
+                        Text(sourceLabel)
+                            .font(.system(size: 12))
+                            .foregroundStyle(Theme.textSecondary)
+                            .lineLimit(1)
+                        Spacer(minLength: 0)
+                    }
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 8)
                     if item.isPost { postPreview } else { thumbnail }
                     body12
                 }
@@ -762,11 +792,6 @@ private struct FeedItemCard: View {
                     text: text
                 )
                 .allowsHitTesting(false)
-            }
-            .overlay(alignment: .topLeading) {
-                PlatformBadge(platform: item.sourcePlatform, size: 24)
-                    .padding(10)
-                    .allowsHitTesting(false)
             }
             .overlay(alignment: .topTrailing) {
                 // Carousel: the card shows the first photo/video; the count says how many are inside.

@@ -133,6 +133,23 @@ export default function FeedScreen() {
   const items = useFeedItems();
   const agents = useAgents();
   const channels = useChannelsAll();
+  // Card header text: the post's @handle, or for YouTube the channel's @handle
+  // from its youtube.com/@name link (the channel name when it has none).
+  const youtubeHandles = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const c of channels.data ?? []) {
+      const match = c.channel_url?.match(/youtube\.com\/@([^/?#]+)/i);
+      if (c.channel_id && match) map.set(c.channel_id, "@" + decodeURIComponent(match[1]));
+    }
+    return map;
+  }, [channels.data]);
+  const sourceLabelFor = useCallback(
+    (item: ItemWithAnalysis) =>
+      platformOf(item.platform) === "youtube"
+        ? (item.channel_id && youtubeHandles.get(item.channel_id)) || item.channel_name || "YouTube"
+        : item.author_handle || item.channel_name || PLATFORM_META[platformOf(item.platform)].label,
+    [youtubeHandles],
+  );
   const updateStatus = useUpdateItemStatus();
   const bulkUpdateStatus = useBulkUpdateItemStatus();
   const [selectionMode, setSelectionMode] = useState(false);
@@ -363,6 +380,7 @@ export default function FeedScreen() {
     ({ item }: { item: ItemWithAnalysis }) => (
       <FeedCardMemo
         item={item}
+        sourceLabel={sourceLabelFor(item)}
         onOpen={openVideo}
         onStatus={setStatus}
         selectionMode={selectionMode}
@@ -370,7 +388,7 @@ export default function FeedScreen() {
         onToggleSelection={toggleSelection}
       />
     ),
-    [openVideo, setStatus, selectionMode, selectedIds, toggleSelection],
+    [openVideo, setStatus, selectionMode, selectedIds, toggleSelection, sourceLabelFor],
   );
 
   const handleAgentChange = useCallback(
@@ -749,8 +767,11 @@ const FeedCard = React.memo(function FeedCard({
   selectionMode,
   selected,
   onToggleSelection,
+  sourceLabel,
 }: {
   item: ItemWithAnalysis;
+  /** Shown next to the platform logo above the picture: @handle or channel name. */
+  sourceLabel: string;
   onOpen: (item: ItemWithAnalysis) => void;
   onStatus: (id: string, status: ItemStatus) => void;
   selectionMode: boolean;
@@ -814,6 +835,9 @@ const FeedCard = React.memo(function FeedCard({
   // Photos and videos in the post itself (quoted posts don't count): more than one is a carousel.
   const carouselCount = ((item.media ?? []) as { type: string; url?: string | null; video_url?: string | null; hls_url?: string | null }[])
     .filter((m) => m.type !== "quote" && m.type !== "article" && (!!m.url || !!m.video_url || !!m.hls_url)).length;
+  // Posts get the play icon only when they hold a video (the logo is in the header now).
+  const postHasVideo = ((item.media ?? []) as { type: string; video_url?: string | null; hls_url?: string | null }[])
+    .some((m) => m.type !== "quote" && m.type !== "article" && (m.type === "video" || !!m.video_url || !!m.hls_url));
 
   return (
     <Pressable
@@ -824,6 +848,12 @@ const FeedCard = React.memo(function FeedCard({
       ]}
       onPress={() => selectionMode ? onToggleSelection(item.id) : onOpen(item)}
     >
+      {/* Platform and account, the same header on every card (YouTube, X, Instagram, ...) */}
+      <View style={styles.sourceRow}>
+        <PlatformBadge platform={platform} />
+        <Text style={styles.sourceText} numberOfLines={1}>{sourceLabel}</Text>
+      </View>
+
       {/* Thumbnail */}
       <View style={styles.thumbWrap}>
         {thumbUri ? (
@@ -849,9 +879,11 @@ const FeedCard = React.memo(function FeedCard({
           <View style={[styles.thumb, styles.thumbFallback]} />
         )
         )}
-        <View style={styles.playOverlay}>
-          {isPost ? <PlatformBadge platform={platform} size="md" /> : <Play size={22} color={Colors.white} fill={Colors.white} />}
-        </View>
+        {!isPost || postHasVideo ? (
+          <View style={styles.playOverlay}>
+            <Play size={22} color={Colors.white} fill={Colors.white} />
+          </View>
+        ) : null}
         {/* Carousel: the card shows the first photo/video; the count says how many are inside */}
         {isPost && carouselCount > 1 && !selectionMode ? (
           <View style={postPreviewStyles.carouselBadge} accessibilityLabel={`Carousel: ${carouselCount} photos and videos`}>
@@ -1460,6 +1492,14 @@ const styles = StyleSheet.create({
     borderColor: Colors.accent,
     borderWidth: 2,
   },
+  sourceRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+  },
+  sourceText: { flex: 1, fontSize: 12, color: Colors.textSecondary },
   thumbWrap: {
     width: "100%",
     aspectRatio: 16 / 9,
