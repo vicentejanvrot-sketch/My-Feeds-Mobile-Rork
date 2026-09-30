@@ -191,8 +191,6 @@ struct PostReaderView: View {
                 .lineLimit(1)
 
             Spacer(minLength: 0)
-
-            DownloadButton(itemId: item.id, hasAudio: platform == .applePodcasts)
         }
         .padding(.horizontal, 8)
         .padding(.vertical, 4)
@@ -400,7 +398,12 @@ struct PostReaderView: View {
             case .facebook: facebookActionBar(item)
             case .appleMusic, .applePodcasts, .appleBooks: appleActionBar(item, platform: platform)
             case .reddit: redditActionBar(item)
-            default: EmptyView()
+            default:
+                // YouTube videos opened from Downloads: just the download icon.
+                HStack {
+                    Spacer(minLength: 0)
+                    downloadButton(item)
+                }
             }
 
             HStack(spacing: 8) {
@@ -455,6 +458,11 @@ struct PostReaderView: View {
 
     // MARK: - Action bars
 
+    /// Download for offline, in the action row next to Share / Save.
+    private func downloadButton(_ item: FeedItem) -> some View {
+        DownloadButton(itemId: item.id, hasAudio: item.sourcePlatform == .applePodcasts, iconSize: 18)
+    }
+
     private func xActionBar(_ item: FeedItem) -> some View {
         let metrics = item.metrics
         let liked = status == .liked
@@ -497,6 +505,7 @@ struct PostReaderView: View {
                 changeStatus(bookmarked ? .notWatched : .watchLater, item: item)
             }
             Spacer(minLength: 0)
+            downloadButton(item)
             shareButton(item, color: Theme.textSecondary)
         }
         .padding(.horizontal, 4)
@@ -534,6 +543,7 @@ struct PostReaderView: View {
                 .accessibilityLabel("Share")
             }
             Spacer(minLength: 0)
+            downloadButton(item)
             igButton(
                 icon: bookmarked ? "bookmark.fill" : "bookmark",
                 value: nil,
@@ -576,6 +586,7 @@ struct PostReaderView: View {
                 changeStatus(bookmarked ? .notWatched : .watchLater, item: item)
             }
             Spacer(minLength: 0)
+            downloadButton(item)
             shareButton(item, color: Theme.textPrimary)
         }
     }
@@ -625,6 +636,7 @@ struct PostReaderView: View {
             }
             shareButton(item, color: Theme.textPrimary)
             Spacer(minLength: 0)
+            downloadButton(item)
             igButton(
                 icon: bookmarked ? "bookmark.fill" : "bookmark",
                 value: nil,
@@ -691,6 +703,7 @@ struct PostReaderView: View {
                 ) {
                     changeStatus(bookmarked ? .notWatched : .watchLater, item: item)
                 }
+                downloadButton(item)
             }
             .overlay(alignment: .top) {
                 Rectangle().fill(Theme.border).frame(height: 0.5)
@@ -751,6 +764,7 @@ struct PostReaderView: View {
                 ) {
                     changeStatus(bookmarked ? .notWatched : .watchLater, item: item)
                 }
+                downloadButton(item)
             }
             .overlay(alignment: .top) {
                 Rectangle().fill(Theme.border).frame(height: 0.5)
@@ -826,6 +840,7 @@ struct PostReaderView: View {
             .buttonStyle(.plain)
             .accessibilityLabel(bookmarked ? "Remove from Read Later" : "Save (Read Later)")
             Spacer(minLength: 0)
+            downloadButton(item)
             shareButton(item, color: Theme.textSecondary)
         }
         .padding(.horizontal, 4)
@@ -891,6 +906,7 @@ struct PostReaderView: View {
                 }
             }
             Spacer(minLength: 0)
+            downloadButton(item)
         }
     }
 

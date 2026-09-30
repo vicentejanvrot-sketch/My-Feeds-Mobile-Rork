@@ -645,6 +645,8 @@ export default function PostReaderScreen() {
     (!quote ? item.thumbnail_url : null) ??
     null;
   const keyPoints = analysis?.key_points ?? [];
+  // Download for offline, in the action row next to Share / Save.
+  const downloadButton = <DownloadButton itemId={item.id} hasAudio={!!podcastAudio} size={21} />;
 
   return (
     <View style={[styles.screen, { paddingTop: insets.top }]}>
@@ -659,7 +661,6 @@ export default function PostReaderScreen() {
             {item.published_at ? ` · ${timeAgo(item.published_at)}` : ""}
           </Text>
         </View>
-        <DownloadButton itemId={item.id} hasAudio={!!podcastAudio} />
       </View>
 
       <ScrollView contentContainerStyle={styles.content}>
@@ -757,12 +758,15 @@ export default function PostReaderScreen() {
               />
               <BarButton label="Share" onPress={share} icon={<Send size={21} color={Colors.textPrimary} />} />
             </View>
-            <BarButton
-              label={bookmarked ? "Remove from Read Later" : "Save (Read Later)"}
-              selected={bookmarked}
-              onPress={() => changeStatus(bookmarked ? "not_watched" : "watch_later")}
-              icon={<Bookmark size={22} color={Colors.textPrimary} fill={bookmarked ? Colors.textPrimary : "transparent"} />}
-            />
+            <View style={styles.barGroup}>
+              {downloadButton}
+              <BarButton
+                label={bookmarked ? "Remove from Read Later" : "Save (Read Later)"}
+                selected={bookmarked}
+                onPress={() => changeStatus(bookmarked ? "not_watched" : "watch_later")}
+                icon={<Bookmark size={22} color={Colors.textPrimary} fill={bookmarked ? Colors.textPrimary : "transparent"} />}
+              />
+            </View>
           </View>
         ) : platform === "tiktok" ? (
           // TikTok: like, comment, save and share.
@@ -789,7 +793,10 @@ export default function PostReaderScreen() {
                 value={formatCount((metrics.bookmarks ?? 0) + (bookmarked ? 1 : 0))}
               />
             </View>
-            <BarButton label="Share" onPress={share} icon={<Send size={21} color={Colors.textPrimary} />} value={formatCount(metrics.reposts)} />
+            <View style={styles.barGroup}>
+              {downloadButton}
+              <BarButton label="Share" onPress={share} icon={<Send size={21} color={Colors.textPrimary} />} value={formatCount(metrics.reposts)} />
+            </View>
           </View>
         ) : platform === "apple_music" || platform === "apple_podcasts" || platform === "apple_books" ? (
           // Apple Music and Apple Podcasts: heart to save, share, save for later.
@@ -806,12 +813,15 @@ export default function PostReaderScreen() {
               />
               <BarButton label="Share" onPress={share} icon={<ShareIcon size={21} color={Colors.textPrimary} />} />
             </View>
-            <BarButton
-              label={bookmarked ? "Remove from Watch Later" : "Save (Watch Later)"}
-              selected={bookmarked}
-              onPress={() => changeStatus(bookmarked ? "not_watched" : "watch_later")}
-              icon={<Bookmark size={22} color={Colors.textPrimary} fill={bookmarked ? Colors.textPrimary : "transparent"} />}
-            />
+            <View style={styles.barGroup}>
+              {downloadButton}
+              <BarButton
+                label={bookmarked ? "Remove from Watch Later" : "Save (Watch Later)"}
+                selected={bookmarked}
+                onPress={() => changeStatus(bookmarked ? "not_watched" : "watch_later")}
+                icon={<Bookmark size={22} color={Colors.textPrimary} fill={bookmarked ? Colors.textPrimary : "transparent"} />}
+              />
+            </View>
           </View>
         ) : platform === "facebook" ? (
           // Facebook: reaction, comment and share counts, then Like, Comment, Share, plus Save.
@@ -846,6 +856,7 @@ export default function PostReaderScreen() {
                 onPress={() => changeStatus(bookmarked ? "not_watched" : "watch_later")}
                 icon={<Bookmark size={19} color={bookmarked ? FACEBOOK_BLUE : Colors.textSecondary} fill={bookmarked ? FACEBOOK_BLUE : "transparent"} />}
               />
+              {downloadButton}
             </View>
           </View>
         ) : platform === "linkedin" ? (
@@ -876,6 +887,7 @@ export default function PostReaderScreen() {
                 onPress={() => changeStatus(bookmarked ? "not_watched" : "watch_later")}
                 icon={<Bookmark size={19} color={bookmarked ? LINKEDIN_BLUE : Colors.textSecondary} fill={bookmarked ? LINKEDIN_BLUE : "transparent"} />}
               />
+              {downloadButton}
             </View>
           </View>
         ) : platform === "x" ? (
@@ -908,6 +920,7 @@ export default function PostReaderScreen() {
               value={formatCount((metrics.bookmarks ?? 0) + (bookmarked ? 1 : 0))}
               valueColor={bookmarked ? X_BLUE : undefined}
             />
+            {downloadButton}
             <BarButton label="Share" onPress={share} icon={<ShareIcon size={19} color={Colors.textSecondary} />} />
           </View>
         ) : platform === "github" ? (
@@ -933,6 +946,7 @@ export default function PostReaderScreen() {
               onPress={() => changeStatus(bookmarked ? "not_watched" : "watch_later")}
               icon={<Bookmark size={19} color={bookmarked ? X_BLUE : Colors.textSecondary} fill={bookmarked ? X_BLUE : "transparent"} />}
             />
+            {downloadButton}
             <BarButton label="Share" onPress={share} icon={<ShareIcon size={19} color={Colors.textSecondary} />} />
           </View>
         ) : platform === "reddit" ? (
@@ -984,8 +998,12 @@ export default function PostReaderScreen() {
               <ShareIcon size={18} color={Colors.textPrimary} />
               <Text style={styles.redditPillText}>Share</Text>
             </Pressable>
+            <View style={{ marginLeft: "auto" }}>{downloadButton}</View>
           </View>
-        ) : null}
+        ) : (
+          // YouTube videos opened from Downloads: just the download icon.
+          <View style={[styles.xBar, { justifyContent: "flex-end" }]}>{downloadButton}</View>
+        )}
 
         <View style={styles.bottomRow}>
           <Pressable
@@ -1300,6 +1318,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.card,
   },
   xBar: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
+  barGroup: { flexDirection: "row", alignItems: "center" },
   dateLine: { color: Colors.textSecondary, fontSize: 13, paddingHorizontal: 4 },
   liCounts: { flexDirection: "row", alignItems: "center", gap: 5, paddingHorizontal: 4 },
   liLikeDot: { width: 16, height: 16, borderRadius: 8, backgroundColor: LINKEDIN_BLUE, alignItems: "center", justifyContent: "center" },
