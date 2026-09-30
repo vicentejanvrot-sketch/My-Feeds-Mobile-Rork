@@ -154,6 +154,21 @@ const TOURS: Record<Platform, Tour> = {
     outActions: [{ icon: MessageCircle, label: "Comment" }],
     outNote: "Opens TikTok",
   },
+  facebook: {
+    author: "City Parks & Rec",
+    handle: "Page",
+    when: "6h",
+    media: "photo",
+    body: "The riverside trail reopens Saturday. Here's what changed.",
+    steps: [
+      { title: "Read and watch here", body: "Tap the post to read it in full. Photos open large and videos play inside My Feeds." },
+      { title: "Like to save", body: "Like saves it in My Feeds. Save adds it to Read later." },
+      { title: "Comments open on Facebook", body: "Commenting opens Facebook, because it posts from your account." },
+    ],
+    saveActions: [{ icon: ThumbsUp, label: "Like" }, { icon: Bookmark, label: "Save" }],
+    outActions: [{ icon: MessageCircle, label: "Comment" }],
+    outNote: "Opens Facebook",
+  },
 };
 
 function Marker({ n, label, active, onPick }: { n: number; label: string; active: boolean; onPick: () => void }) {

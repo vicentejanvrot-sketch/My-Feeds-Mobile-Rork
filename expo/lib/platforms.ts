@@ -2,9 +2,9 @@
 // sources the same way. Keep in sync with src/lib/platforms.ts (web) and
 // ios/MyFeeds/Models/Platform.swift in the mobile repo.
 
-export type Platform = "youtube" | "x" | "reddit" | "instagram" | "linkedin" | "github" | "tiktok";
+export type Platform = "youtube" | "x" | "reddit" | "instagram" | "linkedin" | "github" | "tiktok" | "facebook";
 
-export const PLATFORMS: Platform[] = ["youtube", "x", "reddit", "instagram", "linkedin", "github", "tiktok"];
+export const PLATFORMS: Platform[] = ["youtube", "x", "reddit", "instagram", "linkedin", "github", "tiktok", "facebook"];
 
 export const PLATFORM_META: Record<Platform, {
   label: string;
@@ -92,15 +92,26 @@ export const PLATFORM_META: Record<Platform, {
     openLabel: "Open on TikTok",
     beta: true,
   },
+  facebook: {
+    label: "Facebook",
+    short: "FB",
+    fg: "#8AB4FF",
+    bg: "#14264A",
+    sourceNoun: "Page",
+    addPlaceholder: "https://www.facebook.com/PageName",
+    addHelp: "Public Pages only. Posts from the lookback window.",
+    openLabel: "Open on Facebook",
+    beta: true,
+  },
 };
 
 export function platformOf(value: string | null | undefined): Platform {
-  return value === "x" || value === "reddit" || value === "instagram" || value === "linkedin" || value === "github" || value === "tiktok" ? value : "youtube";
+  return value === "x" || value === "reddit" || value === "instagram" || value === "linkedin" || value === "github" || value === "tiktok" || value === "facebook" ? value : "youtube";
 }
 
-// Non-YouTube items store "<platform>:<id>" in items.video_id (x, reddit, instagram, linkedin, github, tiktok).
+// Non-YouTube items store "<platform>:<id>" in items.video_id (x, reddit, instagram, linkedin, github, tiktok, facebook).
 export function isPostVideoId(videoId: string | null | undefined): boolean {
-  return !!videoId && /^(x|reddit|instagram|linkedin|github|tiktok):/.test(videoId);
+  return !!videoId && /^(x|reddit|instagram|linkedin|github|tiktok|facebook):/.test(videoId);
 }
 
 export function formatCount(num: number | null | undefined): string {

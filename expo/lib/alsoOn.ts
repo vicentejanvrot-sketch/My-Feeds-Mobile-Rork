@@ -141,7 +141,7 @@ export function cleanName(name: string | null | undefined, fallback: string): st
 }
 
 export function accountLabel(platform: Platform, handle: string | null, url: string): string {
-  if (!handle) return url.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "");
+  if (!handle || platform === "facebook") return url.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "");
   if (platform === "x" || platform === "instagram" || platform === "tiktok") return "@" + handle;
   if (platform === "reddit") return "u/" + handle.replace(/^\/?u(ser)?\//i, "");
   if (platform === "youtube") return /^UC[A-Za-z0-9_-]{10,}$/.test(handle) ? "Channel" : "@" + handle;
