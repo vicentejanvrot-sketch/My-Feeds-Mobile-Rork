@@ -103,6 +103,9 @@ struct PostReaderView: View {
                        let raw = release.embedUrl, let embedURL = URL(string: raw) {
                         // Apple Music's own player: previews, or full songs when signed in.
                         AppleMusicEmbedPlayer(url: embedURL, single: release.kind == "single")
+                        if let videoId = item.videoId, videoId.hasPrefix("apple_music:") {
+                            AddToAppleMusicButton(albumId: videoId, single: release.kind == "single")
+                        }
                     } else if platform == .applePodcasts,
                               let episode = item.media?.first(where: { $0.type == "audio" }),
                               let raw = episode.audioUrl, let audioURL = URL(string: raw),

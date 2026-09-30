@@ -437,6 +437,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
+				INFOPLIST_KEY_NSAppleMusicUsageDescription = "My Feeds adds the songs you pick to a \"My Feeds\" playlist in your Apple Music library.";
 				INFOPLIST_KEY_NSFaceIDUsageDescription = "Use Face ID to quickly sign in to your My Feeds account.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -473,6 +474,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
+				INFOPLIST_KEY_NSAppleMusicUsageDescription = "My Feeds adds the songs you pick to a \"My Feeds\" playlist in your Apple Music library.";
 				INFOPLIST_KEY_NSFaceIDUsageDescription = "Use Face ID to quickly sign in to your My Feeds account.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
