@@ -1030,7 +1030,8 @@ const styles = StyleSheet.create({
   },
   footerRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 10 },
   footNote: { fontSize: 11, color: Colors.textMuted, lineHeight: 15 },
-  sheetBackdrop: { flex: 1, backgroundColor: "rgba(0,0,0,0.6)" },
+  // Dark enough that the list behind the person sheet doesn't pull the eye.
+  sheetBackdrop: { flex: 1, backgroundColor: "rgba(0,0,0,0.8)" },
   sheet: {
     maxHeight: "88%",
     backgroundColor: Colors.card,
