@@ -349,7 +349,7 @@ function PersonPanel({ person, agents, scanning, onRescan }: {
 
       {person.lastScannedAt && person.also.length === 0 && person.possible.length === 0 ? (
         <Text style={[styles.muted, styles.noneFound]}>
-          No other accounts found. Their profile doesn't link anywhere we can follow, and no handle like theirs turned up on X, Instagram, YouTube or Reddit.
+          No other accounts found. Their profile doesn't link anywhere we can follow, and no handle or name like theirs turned up on X, Instagram, YouTube, LinkedIn or Reddit.
         </Text>
       ) : null}
 
