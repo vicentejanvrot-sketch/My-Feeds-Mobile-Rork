@@ -261,6 +261,9 @@ struct DashboardView: View {
 
     // MARK: - Wizard
 
+    /// Light red for the ? button, so it's easy to spot without shouting.
+    private static let helpRed = Color(red: 1, green: 138 / 255, blue: 138 / 255)
+
     /// Small ? next to the title that opens the onboarding wizard again.
     private var helpButton: some View {
         Button {
@@ -268,9 +271,9 @@ struct DashboardView: View {
         } label: {
             Image(systemName: "questionmark")
                 .font(.system(size: 14, weight: .bold))
-                .foregroundStyle(Theme.textSecondary)
+                .foregroundStyle(Self.helpRed)
                 .frame(width: 30, height: 30)
-                .overlay(Circle().stroke(Theme.border, lineWidth: 1))
+                .overlay(Circle().stroke(Self.helpRed, lineWidth: 1))
                 .frame(width: 44, height: 44)
                 .contentShape(Rectangle())
         }
