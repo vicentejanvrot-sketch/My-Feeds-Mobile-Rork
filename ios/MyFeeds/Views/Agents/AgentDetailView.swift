@@ -5,6 +5,7 @@ struct AgentDetailView: View {
 
     @Environment(RunningOverlayStore.self) private var overlay
     @Environment(ToastCenter.self) private var toasts
+    @Environment(AppRouter.self) private var router
     @Environment(\.dismiss) private var dismiss
     @Environment(\.openURL) private var openURL
 
@@ -208,6 +209,27 @@ struct AgentDetailView: View {
                         .clipShape(.rect(cornerRadius: 10))
                     }
                     .disabled(overlay.pendingId != nil)
+
+                    // This collection's posts in the Feeds tab, already filtered to it.
+                    Button {
+                        router.openFeed(agentId: agent.id, status: nil)
+                    } label: {
+                        HStack(spacing: 6) {
+                            Image(systemName: "dot.radiowaves.up.forward")
+                                .font(.system(size: 14))
+                            Text("Feed")
+                                .font(.system(size: 14, weight: .semibold))
+                        }
+                        .foregroundStyle(Theme.textSecondary)
+                        .padding(.horizontal, 14)
+                        .frame(height: 44)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 10)
+                                .stroke(Theme.border, lineWidth: 1.5)
+                        )
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel("View this collection's feed")
 
                     NavigationLink(value: AppRoute.agentForm(agent.id)) {
                         HStack(spacing: 6) {
