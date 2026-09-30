@@ -113,9 +113,9 @@ function AccountLine({ platform, label, url }: { platform: Platform; label: stri
       accessibilityLabel={platformLabel(platform) + " " + label}
     >
       <PlatformBadge platform={platform} />
-      <Text style={styles.accountPlatform}>{platformLabel(platform)}</Text>
+      <Text style={styles.accountPlatform} numberOfLines={1}>{platformLabel(platform)}</Text>
       <Text style={styles.accountLabel} numberOfLines={1}>{label}</Text>
-      <ExternalLink size={12} color={Colors.textMuted} />
+      <ExternalLink size={12} color={Colors.textMuted} style={styles.noShrink} />
     </Pressable>
   );
 }
@@ -261,28 +261,31 @@ function PersonPanel({ person, agents, scanning, onRescan }: {
       <View style={styles.box}>
         {person.following.map((a, i) => (
           <View key={a.channel.id} style={[styles.boxRow, i > 0 && styles.boxRowBorder]}>
-            <View style={styles.flex1}>
+            {/* Account on the first line, collection underneath, so nothing
+                has to squeeze onto one line on a narrow phone. */}
+            <View style={[styles.flex1, styles.gap4]}>
               <AccountLine platform={a.platform} label={a.label} url={a.url} />
+              <Text style={styles.agentTag} numberOfLines={1}>
+                {"In " + (agentName.get(a.channel.agent_id) ?? "a collection")}
+              </Text>
               {a.channel.is_private ? (
-                <View style={styles.privateNote}>
-                  <Lock size={11} color={Colors.textMuted} />
-                  <Text style={styles.privateNoteText}>Private account. Its posts aren&apos;t in your feed.</Text>
-                </View>
+                <>
+                  <View style={styles.privateNote}>
+                    <Lock size={11} color={Colors.textMuted} />
+                    <Text style={styles.privateNoteText}>Private account. Its posts aren&apos;t in your feed.</Text>
+                  </View>
+                  <Pressable
+                    onPress={() => void openExternalLink(a.url)}
+                    style={({ pressed }) => [styles.openBtn, pressed && styles.pressed]}
+                    accessibilityRole="link"
+                    accessibilityLabel={PLATFORM_META[a.platform].openLabel}
+                  >
+                    <ExternalLink size={13} color={Colors.textPrimary} />
+                    <Text style={styles.openBtnText} numberOfLines={1}>{PLATFORM_META[a.platform].openLabel}</Text>
+                  </Pressable>
+                </>
               ) : null}
             </View>
-            {a.channel.is_private ? (
-              <Pressable
-                onPress={() => void openExternalLink(a.url)}
-                style={({ pressed }) => [styles.openBtn, pressed && styles.pressed]}
-                accessibilityRole="link"
-                accessibilityLabel={PLATFORM_META[a.platform].openLabel}
-              >
-                <ExternalLink size={13} color={Colors.textPrimary} />
-                <Text style={styles.openBtnText} numberOfLines={1}>{PLATFORM_META[a.platform].openLabel}</Text>
-              </Pressable>
-            ) : (
-              <Text style={styles.agentTag} numberOfLines={1}>{agentName.get(a.channel.agent_id) ?? "Collection"}</Text>
-            )}
             <Pressable
               onPress={() => confirmRemove(a)}
               disabled={deleteChannel.isPending}
@@ -922,18 +925,21 @@ const styles = StyleSheet.create({
   },
   boxRow: { flexDirection: "row", alignItems: "center", gap: 10, paddingHorizontal: 12, paddingVertical: 10 },
   boxRowBorder: { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: Colors.border },
-  accountLine: { flexDirection: "row", alignItems: "center", gap: 6, flexShrink: 1 },
-  accountPlatform: { fontSize: 14, fontWeight: "700" as const, color: Colors.textPrimary },
-  accountLabel: { flexShrink: 1, fontSize: 14, color: Colors.textSecondary },
-  agentTag: { maxWidth: "40%", fontSize: 11, color: Colors.textMuted },
+  // The platform name never wraps ("YouTub/e"); the handle gives way instead.
+  accountLine: { flexDirection: "row", alignItems: "center", gap: 6, flexShrink: 1, minWidth: 0 },
+  accountPlatform: { flexShrink: 0, fontSize: 14, fontWeight: "700" as const, color: Colors.textPrimary },
+  accountLabel: { flexShrink: 1, minWidth: 0, fontSize: 14, color: Colors.textSecondary },
+  noShrink: { flexShrink: 0 },
+  agentTag: { fontSize: 11, color: Colors.textMuted },
   privateNote: { flexDirection: "row", alignItems: "center", gap: 4, marginTop: 2 },
   privateNoteText: { flex: 1, fontSize: 11, color: Colors.textMuted },
   openBtn: {
+    alignSelf: "flex-start",
+    marginTop: 2,
     flexDirection: "row",
     alignItems: "center",
     gap: 5,
     height: 32,
-    maxWidth: "45%",
     paddingHorizontal: 10,
     borderRadius: 8,
     borderWidth: 1,
