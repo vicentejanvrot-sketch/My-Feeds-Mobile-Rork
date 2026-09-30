@@ -393,10 +393,23 @@ nonisolated enum AlsoOn {
             var agentIds: [String] = []
             for ch in sorted where !agentIds.contains(ch.agentId) { agentIds.append(ch.agentId) }
 
+            // A source added moments ago (a YouTube link before its first run)
+            // has no name or picture yet; a confirmed match on another
+            // platform stands in.
+            let named = sorted.first(where: { !($0.channelName ?? "").isEmpty })
+            let matchName = also.first(where: { !($0.link.displayName ?? "").isEmpty })?.link.displayName
+            let matchPicture = also.first(where: { !($0.link.thumbnail ?? "").isEmpty })?.link.thumbnail
+            let personName: String
+            if let named {
+                personName = cleanName(named.channelName, fallback: sourceLabel(named))
+            } else {
+                personName = matchName ?? cleanName(lead.channelName, fallback: sourceLabel(lead))
+            }
+
             people.append(AlsoOnPerson(
                 id: root,
-                name: cleanName(lead.channelName, fallback: sourceLabel(lead)),
-                thumbnail: sorted.first(where: { !($0.channelThumbnail ?? "").isEmpty })?.channelThumbnail,
+                name: personName,
+                thumbnail: sorted.first(where: { !($0.channelThumbnail ?? "").isEmpty })?.channelThumbnail ?? matchPicture,
                 sources: sorted,
                 agentIds: agentIds,
                 following: following,

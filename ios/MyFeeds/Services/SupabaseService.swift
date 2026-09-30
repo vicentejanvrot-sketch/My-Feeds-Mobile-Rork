@@ -307,20 +307,16 @@ final class SupabaseService {
         try await db.from("channels").delete().eq("id", value: id).execute()
     }
 
+    /// Adds a YouTube channel. add-source looks it up so it has its name,
+    /// picture and uploads playlist from the start (the People screen shows
+    /// them right away), the same as the web and Expo apps.
     func addChannel(agentId: String, url: String, priority: Int) async throws {
-        do {
-            try await db.from("channels")
-                .insert(AddChannelPayload(agentId: agentId, channelUrl: url, priority: priority))
-                .execute()
-        } catch let error as PostgrestError where error.code == "23505" {
-            // The account is already in this collection (see channels_reject_duplicate).
-            throw SourceError(message: error.message)
-        }
+        try await addSource(agentId: agentId, platform: .youtube, value: url, priority: priority)
     }
 
-    /// Adds an X account or subreddit through the add-source edge function,
-    /// which checks it exists and fills in its name and picture (same flow as
-    /// the web and Expo apps). YouTube channels still use `addChannel`.
+    /// Adds an account through the add-source edge function, which checks it
+    /// exists and fills in its name and picture (same flow as the web and Expo
+    /// apps).
     /// `privateAccount` keeps a private Instagram account as a private source.
     @discardableResult
     func addSource(agentId: String, platform: SourcePlatform, value: String, priority: Int, privateAccount: Bool = false) async throws -> Channel {
@@ -471,12 +467,6 @@ final class SupabaseService {
             return false
         }
     }
-}
-
-nonisolated struct AddChannelPayload: Codable, Sendable {
-    var agentId: String
-    var channelUrl: String
-    var priority: Int
 }
 
 /// Body for the add-source edge function (camelCase, as the function expects).

@@ -798,25 +798,16 @@ struct OnboardingWizardView: View {
         adding = true
         Task {
             do {
-                let service = SupabaseService.shared
-                if chosen == .youtube {
-                    try await service.addChannel(agentId: agentId, url: value, priority: 3)
-                    // addChannel doesn't return the row; find it so it can be removed again.
-                    let channels = try await service.fetchChannels(agentId: agentId)
-                    let known = Set(sources.map(\.id))
-                    if let row = channels.first(where: { $0.channelUrl == value && !known.contains($0.id) }) {
-                        sources.append(AddedSource(id: row.id, platform: .youtube, name: value))
-                    }
-                } else {
-                    let channel = try await service.addSource(
-                        agentId: agentId,
-                        platform: chosen,
-                        value: value,
-                        priority: 3,
-                        privateAccount: asPrivate
-                    )
-                    sources.append(AddedSource(id: channel.id, platform: chosen, name: channel.displayName, isPrivate: channel.isPrivateAccount))
-                }
+                // Every platform, YouTube included, goes through add-source, which
+                // looks the account up so it has its name and picture from the start.
+                let channel = try await SupabaseService.shared.addSource(
+                    agentId: agentId,
+                    platform: chosen,
+                    value: value,
+                    priority: 3,
+                    privateAccount: asPrivate
+                )
+                sources.append(AddedSource(id: channel.id, platform: chosen, name: channel.displayName, isPrivate: channel.isPrivateAccount))
                 sourceValue = ""
                 autoPlatform = nil
             } catch let error as SourceError where !asPrivate && error.canAddAsPrivate {
