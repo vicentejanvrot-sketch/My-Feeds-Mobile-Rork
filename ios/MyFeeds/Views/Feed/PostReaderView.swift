@@ -2,7 +2,7 @@ import AVKit
 import SwiftUI
 import WebKit
 
-/// In-app reader for X posts, Reddit threads, Instagram, LinkedIn and TikTok posts. The native twin of the web
+/// In-app reader for X posts, Reddit threads, Instagram, LinkedIn, TikTok and Facebook posts. The native twin of the web
 /// PostReaderModal and the Expo post-reader screen, so reading works the same
 /// everywhere and the user doesn't have to leave My Feeds.
 struct PostReaderView: View {
@@ -28,6 +28,7 @@ struct PostReaderView: View {
     private static let gitHubStar = Color(red: 227 / 255, green: 179 / 255, blue: 65 / 255)
     private static let tikTokRed = Color(red: 254 / 255, green: 44 / 255, blue: 85 / 255)
     private static let tikTokYellow = Color(red: 250 / 255, green: 206 / 255, blue: 21 / 255)
+    private static let facebookBlue = Color(red: 8 / 255, green: 102 / 255, blue: 1)
 
     var body: some View {
         ZStack {
@@ -97,6 +98,10 @@ struct PostReaderView: View {
                     if platform == .tiktok, photos.isEmpty, let videoId = tikTokVideoId(item) {
                         // TikTok's own player: its CDN links expire, the embed doesn't.
                         TikTokEmbedPlayer(videoId: videoId)
+                    } else if platform == .facebook, item.postVideo != nil,
+                              let embed = FacebookEmbedPlayer.embed(for: item.url) {
+                        // Facebook's own player: its MP4 links expire, the post link doesn't.
+                        FacebookEmbedPlayer(url: embed.url, portrait: embed.portrait)
                     } else if slides.count > 1 {
                         MediaCarousel(slides: slides, progressId: item.videoId)
                     } else if let video = item.postVideo, let url = video.playableURL {
@@ -325,6 +330,7 @@ struct PostReaderView: View {
             case .linkedin: linkedInActionBar(item)
             case .github: gitHubActionBar(item)
             case .tiktok: tikTokActionBar(item)
+            case .facebook: facebookActionBar(item)
             default: redditActionBar(item)
             }
 
@@ -532,6 +538,68 @@ struct PostReaderView: View {
         .accessibilityLabel(label)
     }
 
+    /// Facebook: reaction, comment and share counts, then Like, Comment, Share, Save.
+    private func facebookActionBar(_ item: FeedItem) -> some View {
+        let metrics = item.metrics
+        let liked = status == .liked
+        let bookmarked = status == .watchLater
+        let shares = metrics?.reposts ?? 0
+        return VStack(spacing: 6) {
+            HStack(spacing: 6) {
+                Image(systemName: "hand.thumbsup.fill")
+                    .font(.system(size: 9))
+                    .foregroundStyle(Color.white)
+                    .frame(width: 16, height: 16)
+                    .background(Self.facebookBlue)
+                    .clipShape(Circle())
+                Text(Format.compactNumber((metrics?.likes ?? 0) + (liked ? 1 : 0)))
+                Spacer(minLength: 0)
+                Text(shares > 0
+                     ? "\(Format.compactNumber(metrics?.comments ?? 0)) comments · \(Format.compactNumber(shares)) shares"
+                     : "\(Format.compactNumber(metrics?.comments ?? 0)) comments")
+            }
+            .font(.system(size: 13))
+            .foregroundStyle(Theme.textSecondary)
+            .padding(.horizontal, 4)
+
+            HStack(spacing: 0) {
+                linkedInAction(
+                    icon: liked ? "hand.thumbsup.fill" : "hand.thumbsup",
+                    title: "Like",
+                    active: liked,
+                    activeColor: Self.facebookBlue
+                ) {
+                    changeStatus(liked ? .watched : .liked, item: item)
+                }
+                linkedInAction(icon: "bubble.left", title: "Comment", active: false) {
+                    if let raw = item.url { openExternal(raw) }
+                }
+                if let raw = item.url, let url = URL(string: raw) {
+                    ShareLink(item: url) {
+                        linkedInLabel(icon: "arrowshape.turn.up.right", title: "Share", active: false)
+                    }
+                    .buttonStyle(.plain)
+                    .frame(maxWidth: .infinity)
+                } else {
+                    linkedInLabel(icon: "arrowshape.turn.up.right", title: "Share", active: false)
+                        .frame(maxWidth: .infinity)
+                        .opacity(0.4)
+                }
+                linkedInAction(
+                    icon: bookmarked ? "bookmark.fill" : "bookmark",
+                    title: "Save",
+                    active: bookmarked,
+                    activeColor: Self.facebookBlue
+                ) {
+                    changeStatus(bookmarked ? .notWatched : .watchLater, item: item)
+                }
+            }
+            .overlay(alignment: .top) {
+                Rectangle().fill(Theme.border).frame(height: 0.5)
+            }
+        }
+    }
+
     /// LinkedIn: reaction and comment counts, then Like, Comment, Repost, Send, Save.
     private func linkedInActionBar(_ item: FeedItem) -> some View {
         let metrics = item.metrics
@@ -592,23 +660,34 @@ struct PostReaderView: View {
         }
     }
 
-    private func linkedInAction(icon: String, title: String, active: Bool, action: @escaping () -> Void) -> some View {
+    private func linkedInAction(
+        icon: String,
+        title: String,
+        active: Bool,
+        activeColor: Color = PostReaderView.linkedInBlue,
+        action: @escaping () -> Void
+    ) -> some View {
         Button(action: action) {
-            linkedInLabel(icon: icon, title: title, active: active)
+            linkedInLabel(icon: icon, title: title, active: active, activeColor: activeColor)
         }
         .buttonStyle(.plain)
         .frame(maxWidth: .infinity)
         .accessibilityAddTraits(active ? .isSelected : [])
     }
 
-    private func linkedInLabel(icon: String, title: String, active: Bool) -> some View {
+    private func linkedInLabel(
+        icon: String,
+        title: String,
+        active: Bool,
+        activeColor: Color = PostReaderView.linkedInBlue
+    ) -> some View {
         VStack(spacing: 3) {
             Image(systemName: icon)
                 .font(.system(size: 17))
             Text(title)
                 .font(.system(size: 11, weight: .semibold))
         }
-        .foregroundStyle(active ? Self.linkedInBlue : Theme.textSecondary)
+        .foregroundStyle(active ? activeColor : Theme.textSecondary)
         .frame(maxWidth: .infinity, minHeight: 48)
         .contentShape(Rectangle())
     }
@@ -1069,6 +1148,73 @@ private struct PhotoCarousel: View {
         .aspectRatio(4 / 5, contentMode: .fit)
         .frame(maxWidth: .infinity)
         .clipShape(.rect(cornerRadius: 12))
+    }
+}
+
+/// Facebook's official video embed player. Reels are 9:16, other videos 16:9.
+/// Plays through Facebook's own player, since Facebook's direct MP4 links expire.
+private struct FacebookEmbedPlayer: View {
+    let url: URL
+    let portrait: Bool
+
+    /// Embed URL for a Facebook post link; reel links become watch links,
+    /// which the embed player understands.
+    static func embed(for postURL: String?) -> (url: URL, portrait: Bool)? {
+        guard let postURL, postURL.range(of: "facebook.com/", options: .caseInsensitive) != nil else { return nil }
+        var href = postURL
+        var portrait = false
+        if let match = postURL.range(of: #"facebook\.com/reel/(\d+)"#, options: [.regularExpression, .caseInsensitive]) {
+            let digits = postURL[match].split(separator: "/").last.map(String.init) ?? ""
+            if !digits.isEmpty {
+                href = "https://www.facebook.com/watch/?v=\(digits)"
+                portrait = true
+            }
+        }
+        var components = URLComponents()
+        components.scheme = "https"
+        components.host = "www.facebook.com"
+        components.path = "/plugins/video.php"
+        components.queryItems = [
+            URLQueryItem(name: "href", value: href),
+            URLQueryItem(name: "show_text", value: "false"),
+            URLQueryItem(name: "autoplay", value: "false"),
+        ]
+        guard let url = components.url else { return nil }
+        return (url, portrait)
+    }
+
+    var body: some View {
+        EmbedWebView(url: url)
+            .aspectRatio(portrait ? 9 / 16 : 16 / 9, contentMode: .fit)
+            .frame(maxWidth: portrait ? 380 : .infinity)
+            .background(Color.black)
+            .clipShape(.rect(cornerRadius: 12))
+            .frame(maxWidth: .infinity)
+    }
+}
+
+/// A web view that loads one embed page, used by the Facebook player.
+private struct EmbedWebView: UIViewRepresentable {
+    let url: URL
+
+    func makeUIView(context: Context) -> WKWebView {
+        let config = WKWebViewConfiguration()
+        config.allowsInlineMediaPlayback = true
+        config.mediaTypesRequiringUserActionForPlayback = []
+        let webView = WKWebView(frame: .zero, configuration: config)
+        webView.isOpaque = false
+        webView.backgroundColor = .black
+        webView.scrollView.isScrollEnabled = false
+        webView.scrollView.bounces = false
+        webView.load(URLRequest(url: url))
+        return webView
+    }
+
+    func updateUIView(_ webView: WKWebView, context: Context) {}
+
+    static func dismantleUIView(_ webView: WKWebView, coordinator: ()) {
+        webView.stopLoading()
+        webView.loadHTMLString("", baseURL: nil)
     }
 }
 
