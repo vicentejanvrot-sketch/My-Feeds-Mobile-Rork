@@ -187,33 +187,22 @@ export function OnboardingWizard({ visible, onClose, hidden, onHiddenChange }: O
     }
     setAdding(true);
     try {
-      if (platform === "youtube") {
-        const { data, error: insertError } = await supabase
-          .from("channels")
-          .insert({ agent_id: agentId, channel_url: value, priority: 3 })
-          .select()
-          .single();
-        // 23505: the account is already in this collection.
-        if (insertError) {
-          throw new Error(insertError.code === "23505" ? insertError.message : `Couldn't add that channel: ${insertError.message}`);
+      // Every platform, YouTube included, goes through add-source, which looks
+      // the account up so it has its name and picture from the start.
+      const { data, error: fnError } = await supabase.functions.invoke("add-source", {
+        body: { agentId, platform, value, priority: 3, ...(asPrivate ? { privateAccount: true } : {}) },
+      });
+      if (fnError) throw new Error(await extractEdgeFunctionErrorMessage(fnError));
+      if (!data?.channel) {
+        const message: string = data?.error ?? "Couldn't add that source.";
+        if (!asPrivate && (data?.code === "instagram_private" || data?.code === "instagram_unavailable")) {
+          setPrivateOffer(message);
+          return;
         }
-        setSources((prev) => [...prev, { id: data.id as string, platform: "youtube", name: value }]);
-      } else {
-        const { data, error: fnError } = await supabase.functions.invoke("add-source", {
-          body: { agentId, platform, value, priority: 3, ...(asPrivate ? { privateAccount: true } : {}) },
-        });
-        if (fnError) throw new Error(await extractEdgeFunctionErrorMessage(fnError));
-        if (!data?.channel) {
-          const message: string = data?.error ?? "Couldn't add that source.";
-          if (!asPrivate && (data?.code === "instagram_private" || data?.code === "instagram_unavailable")) {
-            setPrivateOffer(message);
-            return;
-          }
-          throw new Error(message);
-        }
-        const channel = data.channel as { id: string; channel_name: string; is_private?: boolean };
-        setSources((prev) => [...prev, { id: channel.id, platform, name: channel.channel_name, isPrivate: channel.is_private === true }]);
+        throw new Error(message);
       }
+      const channel = data.channel as { id: string; channel_name: string | null; is_private?: boolean };
+      setSources((prev) => [...prev, { id: channel.id, platform, name: channel.channel_name ?? value, isPrivate: channel.is_private === true }]);
       setSourceValue("");
       setAutoPlatform(null);
       void queryClient.invalidateQueries({ queryKey: qk.channelsAll });

@@ -150,16 +150,11 @@ export function useDecideLink() {
 }
 
 // Adds a found account to an agent the same way the agent screen's Add Source
-// does: YouTube as a channel row, everything else through add-source.
+// does, through add-source (YouTube too, so it has its name and picture).
 export function useFollowAccount() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async ({ platform, url, agentId }: { platform: Platform; url: string; agentId: string }) => {
-      if (platform === "youtube") {
-        const { error } = await supabase.from("channels").insert({ agent_id: agentId, channel_url: url, priority: 3 });
-        if (error) throw error;
-        return;
-      }
       const { data, error } = await supabase.functions.invoke("add-source", {
         body: { agentId, platform, value: url, priority: 3 },
       });

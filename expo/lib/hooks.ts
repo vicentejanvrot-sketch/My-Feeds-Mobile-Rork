@@ -744,14 +744,14 @@ export function useDeleteChannel() {
 export function useAddChannel(agentId: string) {
   const queryClient = useQueryClient();
   return useMutation({
+    // A YouTube channel: add-source looks it up so it has its name, picture and
+    // uploads playlist from the start (the People screen shows them right away).
     mutationFn: async (payload: { channel_url: string; priority?: number }) => {
-      const { error } = await supabase.from("channels").insert({
-        agent_id: agentId,
-        channel_url: payload.channel_url,
-        priority: payload.priority ?? 3,
+      const { data, error } = await supabase.functions.invoke("add-source", {
+        body: { agentId, platform: "youtube", value: payload.channel_url, priority: payload.priority ?? 3 },
       });
-      // 23505: the account is already in this collection (see channels_reject_duplicate).
-      if (error) throw new Error(error.code === "23505" ? error.message : `Couldn't add that channel: ${error.message}`);
+      if (error) throw new Error(await extractEdgeFunctionErrorMessage(error));
+      if (!data?.channel) throw new Error(data?.error ?? "Couldn't add that channel.");
     },
     onSettled: () => {
       void queryClient.invalidateQueries({ queryKey: ["channels"] });

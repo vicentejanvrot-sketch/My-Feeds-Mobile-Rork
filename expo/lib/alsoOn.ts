@@ -271,10 +271,16 @@ export function buildPeople(channels: Channel[], links: IdentityLink[], scans: I
     const groupScans = group.map((c) => scanById.get(c.id)).filter(Boolean) as IdentityScan[];
     const lastScannedAt = groupScans.length ? groupScans.map((s) => s.scanned_at).sort().slice(-1)[0] : null;
 
+    // A source added moments ago (a YouTube link before its first run) has no
+    // name or picture yet; a confirmed match on another platform stands in.
+    const named = sorted.find((c) => c.channel_name);
+    const matchName = also.find((a) => a.link.display_name)?.link.display_name ?? null;
+    const matchPicture = also.find((a) => a.link.thumbnail)?.link.thumbnail ?? null;
+
     people.push({
       id: root,
-      name: cleanName(lead.channel_name, sourceLabel(lead)),
-      thumbnail: sorted.find((c) => c.channel_thumbnail)?.channel_thumbnail ?? null,
+      name: named ? cleanName(named.channel_name, sourceLabel(named)) : matchName ?? cleanName(lead.channel_name, sourceLabel(lead)),
+      thumbnail: sorted.find((c) => c.channel_thumbnail)?.channel_thumbnail ?? matchPicture,
       sources: sorted,
       agentIds: [...new Set(sorted.map((c) => c.agent_id))],
       following,
