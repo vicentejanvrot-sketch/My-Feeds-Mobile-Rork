@@ -28,6 +28,7 @@ import {
   Maximize2,
   Star,
   GitFork,
+  ListPlus,
 } from "lucide-react-native";
 import { Colors } from "@/constants/colors";
 import { supabase } from "@/lib/supabase";
@@ -48,6 +49,7 @@ import {
 import type { ItemStatus, ItemWithAnalysis } from "@/lib/database";
 import { DownloadButton } from "@/components/DownloadButton";
 import { podcastPlayerHtml, readDownloadedItem, useDownloadsStore } from "@/lib/downloads";
+import { AppleMusicError, addReleaseToAppleMusic, appleMusicSupported } from "@/lib/appleMusic";
 
 // The action bar copies each platform's own row under a post. In My Feeds:
 // Like / Upvote = Saved, Bookmark / Save = Read Later, the check = Read.
@@ -299,6 +301,54 @@ function AppleMusicPlayer({ embedUrl, single }: { embedUrl: string; single: bool
         scrollEnabled={!single}
         accessibilityLabel="Apple Music player"
       />
+    </View>
+  );
+}
+
+// "Add to Apple Music": puts the release's songs in the user's "My Feeds"
+// playlist in Apple Music, where they can listen and download them for offline.
+function AddToAppleMusic({ albumId, single }: { albumId: string; single: boolean }) {
+  const showToast = useToast();
+  const [state, setState] = useState<"idle" | "adding" | "added">("idle");
+  if (!appleMusicSupported) return null;
+
+  const add = async () => {
+    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setState("adding");
+    try {
+      const { added } = await addReleaseToAppleMusic(albumId);
+      setState("added");
+      showToast(`Added ${added} ${added === 1 ? "song" : "songs"} to "My Feeds" in Apple Music`, "success");
+    } catch (e) {
+      setState("idle");
+      if (e instanceof AppleMusicError && e.code === "cancelled") return;
+      showToast(e instanceof Error ? e.message : "Couldn't add to Apple Music", "error");
+    }
+  };
+
+  return (
+    <View style={{ gap: 6 }}>
+      <Pressable
+        onPress={() => void add()}
+        disabled={state !== "idle"}
+        style={({ pressed }) => [styles.openBtn, pressed && { opacity: 0.7 }, state === "adding" && { opacity: 0.6 }]}
+        accessibilityRole="button"
+      >
+        {state === "adding" ? (
+          <ActivityIndicator size="small" color={APPLE_MUSIC_RED} />
+        ) : state === "added" ? (
+          <Check size={16} color={APPLE_MUSIC_RED} />
+        ) : (
+          <ListPlus size={16} color={APPLE_MUSIC_RED} />
+        )}
+        <Text style={styles.openText}>
+          {state === "added" ? "Added to Apple Music" : single ? "Add song to Apple Music" : "Add album to Apple Music"}
+        </Text>
+      </Pressable>
+      <Text style={[styles.muted, { textAlign: "center", fontSize: 12 }]}>
+        Goes into your "My Feeds" playlist. Needs an Apple Music subscription. Turn on Automatic Downloads in Apple Music to
+        keep the songs offline.
+      </Text>
     </View>
   );
 }
@@ -583,7 +633,12 @@ export default function PostReaderScreen() {
         ) : null}
 
         {appleRelease?.embed_url ? (
-          <AppleMusicPlayer embedUrl={appleRelease.embed_url} single={appleRelease.kind === "single"} />
+          <View style={{ gap: 12 }}>
+            <AppleMusicPlayer embedUrl={appleRelease.embed_url} single={appleRelease.kind === "single"} />
+            {item.video_id?.startsWith("apple_music:") ? (
+              <AddToAppleMusic albumId={item.video_id.slice("apple_music:".length)} single={appleRelease.kind === "single"} />
+            ) : null}
+          </View>
         ) : podcastAudio && item.video_id ? (
           <PodcastPlayer
             media={podcastAudio}
