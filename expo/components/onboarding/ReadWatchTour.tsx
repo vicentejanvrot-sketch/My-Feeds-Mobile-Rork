@@ -46,8 +46,8 @@ interface Tour {
   outNote?: string;
 }
 
-// One tour per platform (Spotify releases work like Apple Music's, so it has none).
-const TOURS: Record<Exclude<Platform, "spotify">, Tour> = {
+// One tour per platform.
+const TOURS: Record<Platform, Tour> = {
   youtube: {
     author: "Two Minute Markets",
     handle: "YouTube",
@@ -234,6 +234,22 @@ const TOURS: Record<Exclude<Platform, "spotify">, Tour> = {
     outActions: [{ icon: ExternalLink, label: "YouTube Music" }],
     outNote: "Opens YouTube Music",
   },
+  spotify: {
+    author: "Nova Lane",
+    handle: "New single",
+    when: "1d",
+    media: "video",
+    title: "Paper Lanterns",
+    body: "New single by Nova Lane · 1 track · Pop",
+    steps: [
+      { title: "Listen here", body: "Tap it to open Spotify's player and hear a preview right inside My Feeds." },
+      { title: "Heart to save", body: "The heart saves it in My Feeds. Save adds it to Watch later." },
+      { title: "Play it in Spotify", body: "\"Open in Spotify\" plays the full release in the Spotify app, where you can like it or add it to a playlist." },
+    ],
+    saveActions: [{ icon: Heart, label: "Like" }, { icon: Bookmark, label: "Save" }],
+    outActions: [{ icon: ExternalLink, label: "Spotify" }],
+    outNote: "Opens Spotify",
+  },
 };
 
 function Marker({ n, label, active, onPick }: { n: number; label: string; active: boolean; onPick: () => void }) {
@@ -264,7 +280,7 @@ function ActionPill({ action }: { action: TourAction }) {
 export function ReadWatchTour({ defaultPlatform = "youtube" }: { defaultPlatform?: Platform }) {
   const [platform, setPlatform] = useState<Platform>(defaultPlatform);
   const [spot, setSpot] = useState(0);
-  const tour = TOURS[platform as Exclude<Platform, "spotify">];
+  const tour = TOURS[platform];
 
   const pickPlatform = (p: Platform) => {
     setPlatform(p);
@@ -277,7 +293,7 @@ export function ReadWatchTour({ defaultPlatform = "youtube" }: { defaultPlatform
     <View style={styles.root}>
       {/* Platform picker */}
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chips}>
-        {PLATFORMS.filter((p) => p !== "spotify").map((p) => {
+        {PLATFORMS.map((p) => {
           const selected = platform === p;
           return (
             <Pressable
