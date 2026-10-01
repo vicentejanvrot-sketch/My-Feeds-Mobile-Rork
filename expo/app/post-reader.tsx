@@ -339,6 +339,14 @@ function SpotifyLogo({ size = 16 }: { size?: number }) {
   );
 }
 
+// Spotify's player without protected (DRM) playback: with it, the player
+// starts DRM as soon as it loads, which on some devices switches the display
+// mode and blanks the screen for a few seconds when the player opens and
+// closes. Without it Spotify plays its 30-second previews, which need no DRM.
+const SPOTIFY_NO_DRM_JS =
+  "try{Object.defineProperty(navigator,'requestMediaKeySystemAccess',{value:undefined,configurable:true});" +
+  "window.MediaKeys=undefined;window.WebKitMediaKeys=undefined;}catch(e){}true;";
+
 // The same release on Spotify, found by the spotify-link function (Songlink).
 // "Play on Spotify" opens Spotify's own embed player here (on phones it usually
 // plays 30-second previews), "Open in Spotify" goes to the Spotify app.
@@ -388,6 +396,7 @@ function SpotifySection({ sourceUrl }: { sourceUrl: string }) {
             mediaPlaybackRequiresUserAction={false}
             javaScriptEnabled
             scrollEnabled={tall}
+            injectedJavaScriptBeforeContentLoaded={SPOTIFY_NO_DRM_JS}
             accessibilityLabel="Spotify player"
           />
         </View>
@@ -429,6 +438,7 @@ function SpotifyPendingRelease({ sourceUrl, title, artistId, artistName }: {
             mediaPlaybackRequiresUserAction={false}
             javaScriptEnabled
             scrollEnabled={!short}
+            injectedJavaScriptBeforeContentLoaded={SPOTIFY_NO_DRM_JS}
             accessibilityLabel="Spotify player"
           />
         </View>
@@ -458,6 +468,7 @@ function SpotifyPendingRelease({ sourceUrl, title, artistId, artistName }: {
           allowsInlineMediaPlayback
           mediaPlaybackRequiresUserAction={false}
           javaScriptEnabled
+          injectedJavaScriptBeforeContentLoaded={SPOTIFY_NO_DRM_JS}
           accessibilityLabel={`${artistName ?? "Artist"} on Spotify`}
         />
       </View>
@@ -951,7 +962,8 @@ export default function PostReaderScreen() {
                 mediaPlaybackRequiresUserAction={false}
                 javaScriptEnabled
                 scrollEnabled={!spotifyRelease.embed_url.includes("/track/")}
-                accessibilityLabel="Spotify player"
+                injectedJavaScriptBeforeContentLoaded={SPOTIFY_NO_DRM_JS}
+            accessibilityLabel="Spotify player"
               />
             </View>
             {item.url ? (
