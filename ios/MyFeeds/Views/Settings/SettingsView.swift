@@ -34,6 +34,7 @@ struct SettingsView: View {
                     defaultEmailCard
                     videoPlaybackCard
                     youtubeCard
+                    connectionsCard
                     biometricCard
                     aboutCard
                     dangerZoneCard
@@ -155,6 +156,67 @@ struct SettingsView: View {
             }
             .padding(.vertical, 6)
         }
+    }
+
+    /// GitHub and Reddit, connected through the account-connect function, so
+    /// adding a GitHub or Reddit account on People also follows it there.
+    private var connectionsCard: some View {
+        let connections = AccountConnections.shared
+        return settingsCard(icon: "link", iconColor: Theme.accent, title: "GitHub & Reddit",
+                            description: "When you add a GitHub or Reddit account to a collection on People, the app also follows it with your connected account. Instagram, Facebook, LinkedIn, X, TikTok, Spotify and Apple don't let apps follow accounts for you, so those are only added to your feed.") {
+            VStack(spacing: 0) {
+                ForEach(AccountConnections.Provider.allCases, id: \.self) { provider in
+                    connectionRow(provider, connections: connections)
+                }
+            }
+        }
+        .task { await connections.load() }
+    }
+
+    private func connectionRow(_ provider: AccountConnections.Provider, connections: AccountConnections) -> some View {
+        let isConnected = connections.isConnected(provider)
+        let accountName = connections.connected[provider] ?? nil
+        return HStack(spacing: 12) {
+            PlatformBadge(platform: provider.platform, size: 26)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(provider.label)
+                    .font(.system(size: 15, weight: .semibold))
+                    .foregroundStyle(Theme.textPrimary)
+                Text(isConnected ? "Connected" + (accountName.map { " as \($0)" } ?? "") : "Not connected")
+                    .font(.system(size: 12))
+                    .foregroundStyle(Theme.textSecondary)
+                    .lineLimit(1)
+            }
+            Spacer()
+            Button {
+                Task {
+                    do {
+                        if isConnected {
+                            try await connections.disconnect(provider)
+                            toasts.show("\(provider.label) disconnected")
+                        } else {
+                            let name = try await connections.connect(provider)
+                            toasts.show("\(provider.label) connected" + (name.map { " as \($0)" } ?? ""))
+                        }
+                    } catch AccountConnectionError.cancelled {
+                        // closed the sign-in sheet
+                    } catch {
+                        toasts.show(error.localizedDescription, type: .error)
+                    }
+                }
+            } label: {
+                if connections.busy == provider {
+                    ProgressView().tint(Theme.accent)
+                } else {
+                    Text(isConnected ? "Disconnect" : "Connect")
+                        .font(.system(size: 14, weight: .bold))
+                        .foregroundStyle(isConnected ? Theme.destructive : Theme.accent)
+                }
+            }
+            .buttonStyle(.plain)
+            .disabled(connections.busy != nil)
+        }
+        .padding(.vertical, 8)
     }
 
     private var videoPlaybackCard: some View {
