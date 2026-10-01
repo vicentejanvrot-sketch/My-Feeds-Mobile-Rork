@@ -25,6 +25,8 @@ struct FollowingView: View {
         _agentFilter = State(initialValue: initialAgentId)
     }
     @State private var selectedId: String?
+    /// Two cards being combined (or separated) right now.
+    @State private var isCombining = false
     @State private var progress: ScanProgress?
     @State private var busyKeys: Set<String> = []
 
@@ -169,6 +171,7 @@ struct FollowingView: View {
             if let person = selectedPerson {
                 PersonSheet(
                     person: person,
+                    people: people,
                     agents: sortedAgents,
                     agentNames: agentNames,
                     isScanning: isScanning,
@@ -178,6 +181,9 @@ struct FollowingView: View {
                     onDecide: { account, same in decide(account, same: same) },
                     onRemove: { account in remove(account) },
                     onRescan: { Task { await runScan([Self.job(for: person)]) } },
+                    isCombining: isCombining,
+                    onCombine: { other in combine(person, with: other) },
+                    onSeparate: { separate(person) },
                     onClose: { selectedId = nil }
                 )
                 .presentationDetents([.medium, .large])
@@ -654,6 +660,50 @@ struct FollowingView: View {
         }
     }
 
+    /// Keeps the sheet on this person after their cards change: their card id
+    /// can change when cards are combined or separated, so they're found again
+    /// by one of their sources.
+    private func reselect(sourceId: String?) {
+        guard let sourceId,
+              let person = people.first(where: { $0.sources.contains { $0.id == sourceId } }) else { return }
+        selectedId = person.id
+    }
+
+    /// "Combine": joins two cards that are the same person (someone added twice
+    /// under a name the search couldn't tie together). Same as the web and Expo.
+    private func combine(_ person: AlsoOnPerson, with other: AlsoOnPerson) {
+        guard !isCombining else { return }
+        isCombining = true
+        Task {
+            defer { isCombining = false }
+            do {
+                try await SupabaseService.shared.combinePeople(person, with: other)
+                await reloadIdentity()
+                reselect(sourceId: person.sources.first?.id)
+                toasts.show("Combined with \(other.name)")
+            } catch {
+                toasts.show("Couldn't combine them: " + error.localizedDescription, type: .error)
+            }
+        }
+    }
+
+    /// Undoes "Combine": the cards combined into this one become their own again.
+    private func separate(_ person: AlsoOnPerson) {
+        guard !isCombining else { return }
+        isCombining = true
+        Task {
+            defer { isCombining = false }
+            do {
+                try await SupabaseService.shared.separatePerson(person)
+                await reloadIdentity()
+                reselect(sourceId: person.sources.first?.id)
+                toasts.show("Separated into their own cards again")
+            } catch {
+                toasts.show("Couldn't separate them: " + error.localizedDescription, type: .error)
+            }
+        }
+    }
+
     private func decide(_ account: AlsoOnFoundAccount, same: Bool) {
         let busyKey = account.link.id
         guard !busyKeys.contains(busyKey) else { return }
@@ -1035,6 +1085,7 @@ private struct PossibleMatchCard: View {
 
 private struct PersonSheet: View {
     let person: AlsoOnPerson
+    let people: [AlsoOnPerson]
     let agents: [Agent]
     let agentNames: [String: String]
     let isScanning: Bool
@@ -1045,10 +1096,27 @@ private struct PersonSheet: View {
     let onDecide: (AlsoOnFoundAccount, Bool) -> Void
     let onRemove: (AlsoOnFollowedAccount) -> Void
     let onRescan: () -> Void
+    let isCombining: Bool
+    /// Combines this person with another card.
+    let onCombine: (AlsoOnPerson) -> Void
+    let onSeparate: () -> Void
     let onClose: () -> Void
 
     @Environment(\.openURL) private var openURL
     @State private var agentId: String?
+    /// Picking the card to combine with, shown in place of the details.
+    @State private var isPicking = false
+    @State private var pickId: String?
+    @State private var pickQuery = ""
+    @State private var confirmSeparate = false
+
+    private var twins: [AlsoOnPerson] { AlsoOn.sameName(as: person, in: people) }
+
+    private func startCombine() {
+        pickId = twins.count == 1 ? twins.first?.id : nil
+        pickQuery = ""
+        isPicking = true
+    }
     /// The followed account waiting for "Remove?" to be confirmed.
     @State private var toRemove: AlsoOnFollowedAccount?
 
@@ -1064,8 +1132,92 @@ private struct PersonSheet: View {
 
     var body: some View {
         ScrollView {
+            if isPicking {
+                combinePicker
+                    .padding(.horizontal, 16)
+                    .padding(.top, 20)
+                    .padding(.bottom, 14)
+                    .frame(maxWidth: 720)
+                    .frame(maxWidth: .infinity)
+            } else {
+                details
+            }
+        }
+        // Scrolled content stops 16 pt above the sheet's bottom edge, the same
+        // gap as the sides, and is clipped with rounded corners there, so the
+        // phone's own rounded corners never cut through buttons or text.
+        .clipShape(UnevenRoundedRectangle(bottomLeadingRadius: 24, bottomTrailingRadius: 24, style: .continuous))
+        .padding(.bottom, 16)
+        .ignoresSafeArea(.container, edges: .bottom)
+        .background(Theme.background)
+        .overlay { ToastHost() }
+        .onAppear { agentId = person.agentIds.first }
+        .onChange(of: person.id) {
+            agentId = person.agentIds.first
+            isPicking = false
+        }
+        // Combined: the picked card's accounts are now on this one.
+        .onChange(of: person.sources.count) { isPicking = false }
+        .alert("Separate \(person.name)'s cards?", isPresented: $confirmSeparate) {
+            Button("Cancel", role: .cancel) {}
+            Button("Separate") { onSeparate() }
+        } message: {
+            Text("The cards you combined go back to being separate cards. Nothing is removed from your collections.")
+        }
+    }
+
+    private var details: some View {
             VStack(alignment: .leading, spacing: 0) {
                 header
+
+                if people.count > 1 {
+                    Button(action: startCombine) {
+                        HStack(spacing: 6) {
+                            Image(systemName: "arrow.triangle.merge")
+                                .font(.system(size: 12, weight: .bold))
+                            Text("Combine with another card")
+                                .font(.system(size: 13, weight: .bold))
+                        }
+                        .foregroundStyle(Theme.textPrimary)
+                        .padding(.horizontal, 12)
+                        .frame(height: 34)
+                        .background(Theme.card)
+                        .clipShape(.rect(cornerRadius: 9))
+                        .overlay(RoundedRectangle(cornerRadius: 9).stroke(Theme.border, lineWidth: 1))
+                    }
+                    .buttonStyle(.plain)
+                    .padding(.top, 12)
+                    .accessibilityLabel("Combine with another card that's the same person")
+                }
+
+                if !twins.isEmpty {
+                    VStack(alignment: .leading, spacing: 10) {
+                        Text("\(twins.count == 1 ? "Another card is" : "\(twins.count) other cards are") also called \(Text(person.name).bold()). If it's the same person, combine them so all their accounts are on one card.")
+                            .font(.system(size: 14))
+                            .foregroundStyle(Theme.textPrimary)
+                            .fixedSize(horizontal: false, vertical: true)
+                        Button(action: startCombine) {
+                            HStack(spacing: 6) {
+                                Image(systemName: "arrow.triangle.merge")
+                                    .font(.system(size: 13, weight: .bold))
+                                Text(twins.count == 1 ? "Combine with that card" : "Choose which to combine")
+                                    .font(.system(size: 14, weight: .bold))
+                            }
+                            .foregroundStyle(.white)
+                            .padding(.horizontal, 14)
+                            .frame(height: 38)
+                            .background(Theme.accent)
+                            .clipShape(.rect(cornerRadius: 10))
+                        }
+                        .buttonStyle(.plain)
+                    }
+                    .padding(12)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .background(Theme.accent.opacity(0.08))
+                    .clipShape(.rect(cornerRadius: 10))
+                    .overlay(RoundedRectangle(cornerRadius: 10).stroke(Theme.accent.opacity(0.4), lineWidth: 1))
+                    .padding(.top, 14)
+                }
 
                 sectionTitle("You follow")
                 VStack(spacing: 0) {
@@ -1138,6 +1290,23 @@ private struct PersonSheet: View {
                     Text(removeMessage)
                 }
 
+                if !person.merges.isEmpty {
+                    HStack(spacing: 6) {
+                        Image(systemName: "arrow.triangle.merge")
+                            .font(.system(size: 11))
+                        Text("You combined separate cards into this one.")
+                            .font(.system(size: 12))
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                        Button("Separate them") { confirmSeparate = true }
+                            .font(.system(size: 12))
+                            .underline()
+                            .buttonStyle(.plain)
+                            .disabled(isCombining)
+                    }
+                    .foregroundStyle(Theme.textMuted)
+                    .padding(.top, 8)
+                }
+
                 if !person.also.isEmpty { alsoSection }
 
                 if !person.possible.isEmpty {
@@ -1169,17 +1338,156 @@ private struct PersonSheet: View {
             .padding(.bottom, 14)
             .frame(maxWidth: 720)
             .frame(maxWidth: .infinity)
+    }
+
+    /// "Combine with…": picks the card that's the same person. Same-name cards
+    /// come first.
+    private var combinePicker: some View {
+        let twinIds = Set(twins.map(\.id))
+        let q = pickQuery.trimmingCharacters(in: .whitespaces).lowercased()
+        let candidates = people
+            .filter { $0.id != person.id }
+            .filter { p in q.isEmpty || p.name.lowercased().contains(q) || p.following.contains { $0.label.lowercased().contains(q) } }
+            .sorted { a, b in
+                let ta = twinIds.contains(a.id), tb = twinIds.contains(b.id)
+                return ta != tb ? ta : a.name.localizedCaseInsensitiveCompare(b.name) == .orderedAscending
+            }
+        let pick = people.first { $0.id == pickId }
+
+        return VStack(alignment: .leading, spacing: 12) {
+            HStack(alignment: .top) {
+                Text("Combine \(person.name) with…")
+                    .font(.system(size: 19, weight: .heavy))
+                    .foregroundStyle(Theme.textPrimary)
+                    .lineLimit(2)
+                Spacer(minLength: 0)
+                Button(action: onClose) {
+                    Image(systemName: "xmark")
+                        .font(.system(size: 14, weight: .bold))
+                        .foregroundStyle(Theme.textSecondary)
+                        .frame(width: 32, height: 32)
+                        .background(Theme.input)
+                        .clipShape(Circle())
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("Close")
+            }
+            Text("Pick the card that's the same person. Their accounts end up together on one card. You can separate them again later.")
+                .font(.system(size: 13))
+                .foregroundStyle(Theme.textSecondary)
+                .fixedSize(horizontal: false, vertical: true)
+
+            HStack(spacing: 6) {
+                Image(systemName: "magnifyingglass")
+                    .font(.system(size: 13))
+                    .foregroundStyle(Theme.textMuted)
+                TextField("Search people", text: $pickQuery)
+                    .font(.system(size: 14))
+                    .foregroundStyle(Theme.textPrimary)
+                    .textInputAutocapitalization(.never)
+                    .autocorrectionDisabled()
+            }
+            .padding(.horizontal, 10)
+            .frame(height: 36)
+            .background(Theme.input)
+            .clipShape(.rect(cornerRadius: 9))
+
+            VStack(spacing: 0) {
+                if candidates.isEmpty {
+                    Text("Nobody matches that search.")
+                        .font(.system(size: 13))
+                        .foregroundStyle(Theme.textSecondary)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 20)
+                }
+                ForEach(Array(candidates.enumerated()), id: \.element.id) { index, p in
+                    if index > 0 {
+                        Rectangle().fill(Theme.border).frame(height: 0.5)
+                    }
+                    Button {
+                        pickId = p.id
+                    } label: {
+                        HStack(spacing: 12) {
+                            PersonAvatar(name: p.name, url: p.thumbnail)
+                            VStack(alignment: .leading, spacing: 6) {
+                                HStack(spacing: 8) {
+                                    Text(p.name)
+                                        .font(.system(size: 15, weight: .semibold))
+                                        .foregroundStyle(Theme.textPrimary)
+                                        .lineLimit(1)
+                                    if twinIds.contains(p.id) {
+                                        Text("Same name")
+                                            .font(.system(size: 11, weight: .semibold))
+                                            .foregroundStyle(Theme.textSecondary)
+                                            .padding(.horizontal, 8)
+                                            .padding(.vertical, 2)
+                                            .background(Theme.input)
+                                            .clipShape(Capsule())
+                                    }
+                                }
+                                FlowLayout(spacing: 6) {
+                                    ForEach(p.following) { account in
+                                        PlatformChip(platform: account.platform, variant: .following)
+                                    }
+                                }
+                            }
+                            Spacer(minLength: 0)
+                            if pickId == p.id {
+                                Image(systemName: "checkmark")
+                                    .font(.system(size: 15, weight: .bold))
+                                    .foregroundStyle(Theme.accent)
+                            }
+                        }
+                        .padding(12)
+                        .background(pickId == p.id ? Theme.accent.opacity(0.15) : Color.clear)
+                        .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityAddTraits(pickId == p.id ? .isSelected : [])
+                }
+            }
+            .cardStyle(radius: 10)
+
+            HStack(spacing: 8) {
+                Button {
+                    isPicking = false
+                } label: {
+                    Text("Cancel")
+                        .font(.system(size: 14, weight: .bold))
+                        .foregroundStyle(Theme.textPrimary)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 40)
+                        .background(Theme.card)
+                        .clipShape(.rect(cornerRadius: 10))
+                        .overlay(RoundedRectangle(cornerRadius: 10).stroke(Theme.border, lineWidth: 1))
+                }
+                .buttonStyle(.plain)
+
+                Button {
+                    guard let pick else { return }
+                    onCombine(pick)
+                } label: {
+                    HStack(spacing: 6) {
+                        if isCombining {
+                            ProgressView().controlSize(.small).tint(.white)
+                        } else {
+                            Image(systemName: "arrow.triangle.merge")
+                                .font(.system(size: 13, weight: .bold))
+                        }
+                        Text("Combine")
+                            .font(.system(size: 14, weight: .bold))
+                    }
+                    .foregroundStyle(.white)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 40)
+                    .background(Theme.accent)
+                    .clipShape(.rect(cornerRadius: 10))
+                }
+                .buttonStyle(.plain)
+                .disabled(pick == nil || isCombining)
+                .opacity(pick == nil || isCombining ? 0.5 : 1)
+            }
         }
-        // Scrolled content stops 16 pt above the sheet's bottom edge, the same
-        // gap as the sides, and is clipped with rounded corners there, so the
-        // phone's own rounded corners never cut through buttons or text.
-        .clipShape(UnevenRoundedRectangle(bottomLeadingRadius: 24, bottomTrailingRadius: 24, style: .continuous))
-        .padding(.bottom, 16)
-        .ignoresSafeArea(.container, edges: .bottom)
-        .background(Theme.background)
-        .overlay { ToastHost() }
-        .onAppear { agentId = person.agentIds.first }
-        .onChange(of: person.id) { agentId = person.agentIds.first }
     }
 
     private var header: some View {

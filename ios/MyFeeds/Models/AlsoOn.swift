@@ -77,8 +77,28 @@ nonisolated struct AlsoOnPerson: Identifiable, Hashable, Sendable {
     let possible: [AlsoOnFoundAccount]
     let lastScannedAt: String?
     let scanErrors: [String]
+    /// Cards the user combined by hand ("Combine"), kept so they can be
+    /// separated again.
+    let merges: [IdentityLink]
 
     var platformCount: Int { following.count + also.count }
+}
+
+/// Row written to identity_links to combine two cards (keys become snake_case
+/// via the client's encoder).
+nonisolated struct IdentityMergeRow: Encodable, Sendable {
+    var userId: String
+    var channelId: String
+    var platform: String
+    var matchKey: String
+    var handle: String?
+    var url: String
+    var displayName: String?
+    var thumbnail: String?
+    var status: String
+    var method: String
+    var evidence: String
+    var decidedByUser: Bool
 }
 
 nonisolated enum AlsoOn {
@@ -299,6 +319,52 @@ nonisolated enum AlsoOn {
         return String((parts.first.map { String($0) } ?? "?").prefix(2)).uppercased()
     }
 
+    /// A card combined by hand is saved as a confirmed match from one card's
+    /// source to another followed source, keyed by that source's id:
+    /// source:<channel id>. It only ties the two together; it's never shown as
+    /// an account of its own. Same as the web app.
+    static let mergeKeyPrefix = "source:"
+    static func isMergeLink(_ link: IdentityLink) -> Bool { link.matchKey.hasPrefix(mergeKeyPrefix) }
+
+    /// Platforms a match can be saved under (identity_links.platform). A TikTok
+    /// source can't be the target, so the link goes the other way round.
+    private static let linkable: Set<SourcePlatform> = [
+        .youtube, .x, .instagram, .facebook, .linkedin, .reddit, .github,
+        .appleMusic, .applePodcasts, .appleBooks, .youtubeMusic, .spotify,
+    ]
+
+    /// The row that combines two cards: saved on one of `a`'s sources, pointing
+    /// at one of `b`'s (or the other way round when only that works). Nil when
+    /// neither card has a source that can be linked to.
+    static func mergeRow(_ a: AlsoOnPerson, _ b: AlsoOnPerson, userId: String) -> IdentityMergeRow? {
+        func pick(_ from: AlsoOnPerson, _ to: AlsoOnPerson) -> (owner: Channel, target: Channel)? {
+            guard let owner = from.sources.first,
+                  let target = to.sources.first(where: { linkable.contains($0.sourcePlatform) }) else { return nil }
+            return (owner, target)
+        }
+        guard let pair = pick(a, b) ?? pick(b, a) else { return nil }
+        return IdentityMergeRow(
+            userId: userId,
+            channelId: pair.owner.id,
+            platform: pair.target.sourcePlatform.rawValue,
+            matchKey: mergeKeyPrefix + pair.target.id,
+            handle: pair.target.handle,
+            url: pair.target.channelUrl ?? "",
+            displayName: pair.target.channelName,
+            thumbnail: pair.target.channelThumbnail,
+            status: "confirmed",
+            method: "user",
+            evidence: "You combined these cards.",
+            decidedByUser: true
+        )
+    }
+
+    /// Other cards with the same name, most likely the same person added twice.
+    static func sameName(as person: AlsoOnPerson, in people: [AlsoOnPerson]) -> [AlsoOnPerson] {
+        let name = person.name.trimmingCharacters(in: .whitespaces).lowercased()
+        return people.filter { $0.id != person.id && $0.name.trimmingCharacters(in: .whitespaces).lowercased() == name }
+    }
+
     static func buildPeople(channels: [Channel], links: [IdentityLink], scans: [IdentityScan]) -> [AlsoOnPerson] {
         let sources = channels.filter { isPersonSource($0) }
         let sourceIds = Set(sources.map { $0.id })
@@ -306,6 +372,7 @@ nonisolated enum AlsoOn {
         for ch in sources {
             for key in channelKeys(ch) where keyToSource[key] == nil { keyToSource[key] = ch.id }
         }
+        for ch in sources { keyToSource[mergeKeyPrefix + ch.id] = ch.id }
 
         // The same account followed in two agents is one person.
         var parent: [String: String] = [:]
@@ -355,7 +422,8 @@ nonisolated enum AlsoOn {
                 return pa != pb ? pa > pb : a.offset < b.offset
             }.map { $0.element }
             guard let lead = sorted.first else { continue }
-            let groupKeys = Set(group.flatMap { channelKeys($0) })
+            var groupKeys = Set(group.flatMap { channelKeys($0) })
+            for ch in group { groupKeys.insert(mergeKeyPrefix + ch.id) }
 
             var following: [AlsoOnFollowedAccount] = []
             var seenFollow = Set<String>()
@@ -379,6 +447,8 @@ nonisolated enum AlsoOn {
             var possible: [AlsoOnFoundAccount] = []
             var seen = Set<String>()
             for link in ordered {
+                // Cards combined by hand: the link only joins them, it's not an account.
+                if isMergeLink(link) { continue }
                 if link.isRejected || rejected.contains(link.matchKey) { continue }
                 if linkKeys(link).contains(where: { groupKeys.contains($0) }) || seen.contains(link.matchKey) { continue }
                 if !link.isConfirmed && confirmedKeys.contains(link.matchKey) { continue }
@@ -422,7 +492,8 @@ nonisolated enum AlsoOn {
                 also: also,
                 possible: possible,
                 lastScannedAt: groupScans.map { $0.scannedAt }.max(),
-                scanErrors: groupScans.compactMap { $0.error }.filter { !$0.isEmpty }
+                scanErrors: groupScans.compactMap { $0.error }.filter { !$0.isEmpty },
+                merges: groupLinks.filter { isMergeLink($0) && $0.isConfirmed }
             ))
         }
 

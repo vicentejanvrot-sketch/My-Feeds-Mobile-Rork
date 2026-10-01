@@ -48,6 +48,30 @@ extension SupabaseService {
             .execute()
     }
 
+    /// Combines two cards into one person, for when the same person was added
+    /// twice under names the search couldn't tie together. Saved as a match the
+    /// user confirmed, so it also holds after a new search. Same as the web app.
+    func combinePeople(_ person: AlsoOnPerson, with other: AlsoOnPerson) async throws {
+        guard let userId = client.auth.currentUser?.id.uuidString.lowercased() else {
+            throw SourceError(message: "You're signed out. Sign in again and retry.")
+        }
+        guard let row = AlsoOn.mergeRow(person, other, userId: userId) else {
+            throw SourceError(message: "These two can't be combined yet.")
+        }
+        try await client.schema("public").from("identity_links")
+            .upsert(row, onConflict: "channel_id,match_key")
+            .execute()
+    }
+
+    /// Undoes "Combine": every card combined into this one becomes its own card again.
+    func separatePerson(_ person: AlsoOnPerson) async throws {
+        try await client.schema("public").from("identity_links")
+            .delete()
+            .in("channel_id", values: person.sources.map { $0.id })
+            .like("match_key", pattern: AlsoOn.mergeKeyPrefix + "%")
+            .execute()
+    }
+
     /// Adds a found account to an agent the same way the agent screen's Add
     /// Source does: YouTube as a channel row, everything else through add-source.
     func followAccount(platform: SourcePlatform, url: String, agentId: String) async throws {
