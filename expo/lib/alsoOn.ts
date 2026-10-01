@@ -92,6 +92,10 @@ function accountKeyFromUrl(raw: string | null | undefined): string | null {
     return first ? "x:" + first.replace(/^@/, "").toLowerCase() : null;
   }
   if (host === "instagram.com") return first ? "instagram:" + first.toLowerCase() : null;
+  if (host === "facebook.com" || host === "fb.com") {
+    // Same key as find-also-on: facebook:<page name>.
+    return /^[A-Za-z0-9.\-]{2,80}$/.test(first) && !/\.php$/i.test(first) ? "facebook:" + first.toLowerCase() : null;
+  }
   if (host === "open.spotify.com") {
     // Same key as find-also-on: spotify:artist:<id> / spotify:show:<id> (ids are case-sensitive).
     const rest = first.startsWith("intl-") ? parts.slice(1) : parts;
