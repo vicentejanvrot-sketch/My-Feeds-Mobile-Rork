@@ -400,7 +400,12 @@ function SpotifySection({ sourceUrl }: { sourceUrl: string }) {
 // take a few days). Asks spotify-link again from the Apple link and shows
 // Spotify's player as soon as there's a match; until then, the artwork and a
 // note, with "Open in Spotify" below searching Spotify for it.
-function SpotifyPendingRelease({ sourceUrl, image }: { sourceUrl: string; image: string | null }) {
+function SpotifyPendingRelease({ sourceUrl, title, artistId, artistName }: {
+  sourceUrl: string;
+  title: string;
+  artistId: string | null;
+  artistName: string | null;
+}) {
   const { data, isLoading } = useQuery({
     queryKey: ["spotify-link", sourceUrl],
     staleTime: 3600 * 1000,
@@ -440,13 +445,24 @@ function SpotifyPendingRelease({ sourceUrl, image }: { sourceUrl: string; image:
       </View>
     );
   }
+  if (isLoading) return <Text style={[styles.muted, { textAlign: "center" }]}>Looking for it on Spotify…</Text>;
+  if (!artistId) return null;
+  // Until Spotify links the release, the artist's own Spotify player: their
+  // popular songs, as previews, right here.
   return (
     <View style={{ gap: 10 }}>
-      {image ? <ExpandableMedia media={{ type: "photo", url: image } as PostEmbed} /> : null}
+      <View style={[styles.appleEmbed, { height: 352 }]}>
+        <WebView
+          source={{ uri: `https://open.spotify.com/embed/artist/${artistId}` }}
+          style={{ flex: 1, backgroundColor: "transparent" }}
+          allowsInlineMediaPlayback
+          mediaPlaybackRequiresUserAction={false}
+          javaScriptEnabled
+          accessibilityLabel={`${artistName ?? "Artist"} on Spotify`}
+        />
+      </View>
       <Text style={[styles.muted, { textAlign: "center" }]}>
-        {isLoading
-          ? "Looking for it on Spotify…"
-          : "Spotify's player shows here once this release is linked to Spotify, usually within a few days of release. Open in Spotify searches for it now."}
+        {`Spotify hasn't linked "${title}" yet (new releases can take a few days), so this plays ${artistName ?? "the artist"}'s popular songs. Open in Spotify searches for the new release.`}
       </Text>
     </View>
   );
@@ -950,7 +966,12 @@ export default function PostReaderScreen() {
             ) : null}
           </View>
         ) : spotifyPendingSource ? (
-          <SpotifyPendingRelease sourceUrl={spotifyPendingSource} image={image} />
+          <SpotifyPendingRelease
+            sourceUrl={spotifyPendingSource}
+            title={item.title ?? ""}
+            artistId={item.channel_id?.match(/^spotify:artist:([A-Za-z0-9]{22})$/)?.[1] ?? null}
+            artistName={item.channel_name ?? null}
+          />
         ) : ytMusic && ytMusicIds.length > 0 ? (
           <View style={{ gap: 12 }}>
             <YouTubeMusicPlayer videoIds={ytMusicIds} />
