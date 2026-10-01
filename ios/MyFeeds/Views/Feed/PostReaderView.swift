@@ -108,7 +108,14 @@ struct PostReaderView: View {
                     } else if platform == .spotify,
                               let source = item.media?.first(where: { $0.type == "album" && $0.sourceUrl != nil })?.sourceUrl {
                         // Saved before Spotify had it: looked up again here.
-                        SpotifyPendingRelease(sourceURL: source, imageURL: item.postImageURL)
+                        SpotifyPendingRelease(
+                            sourceURL: source,
+                            title: item.title ?? "",
+                            artistId: item.channelId.flatMap { id in
+                                id.hasPrefix("spotify:artist:") ? String(id.dropFirst("spotify:artist:".count)) : nil
+                            },
+                            artistName: item.channelName
+                        )
                     } else if platform == .youtubeMusic,
                        let music = item.media?.first(where: { ($0.type == "album" || $0.type == "video") && $0.embedUrl != nil }),
                        let raw = music.embedUrl, let embedURL = URL(string: raw) {
@@ -1504,12 +1511,15 @@ private struct SpotifyReleasePlayer: View {
 }
 
 /// A Spotify release saved before Songlink could match it (new releases often
-/// take a few days). Asks spotify-link again from the Apple link and shows
-/// Spotify's player as soon as there's a match; until then, the artwork and a
-/// note, with "Open in Spotify" below searching Spotify for it.
+/// take a few days). Asks spotify-link again from the Apple link and plays the
+/// release in Spotify's player as soon as there's a match. Until then the
+/// artist's own Spotify player is shown (their popular songs, as previews), so
+/// there's always something to play here.
 private struct SpotifyPendingRelease: View {
     let sourceURL: String
-    let imageURL: URL?
+    let title: String
+    let artistId: String?
+    let artistName: String?
 
     @State private var link: SpotifyLink?
     @State private var checked = false
@@ -1518,11 +1528,17 @@ private struct SpotifyPendingRelease: View {
         VStack(spacing: 10) {
             if let link, let rawEmbed = link.embedUrl, let embedURL = URL(string: rawEmbed) {
                 SpotifyReleasePlayer(embedURL: embedURL, spotifyURL: link.spotifyUrl.flatMap(URL.init(string:)))
-            } else {
-                if let imageURL { ExpandablePhoto(url: imageURL) }
-                Text(checked
-                     ? "Spotify's player shows here once this release is linked to Spotify, usually within a few days of release. Open in Spotify searches for it now."
-                     : "Looking for it on Spotify…")
+            } else if !checked {
+                Text("Looking for it on Spotify…")
+                    .font(.system(size: 12))
+                    .foregroundStyle(Theme.textSecondary)
+                    .frame(maxWidth: .infinity)
+            } else if let artistId, let artistURL = URL(string: "https://open.spotify.com/embed/artist/\(artistId)") {
+                EmbedWebView(url: artistURL)
+                    .frame(height: 352)
+                    .frame(maxWidth: .infinity)
+                    .clipShape(.rect(cornerRadius: 12))
+                Text("Spotify hasn't linked \"\(title)\" yet (new releases can take a few days), so this plays \(artistName ?? "the artist")'s popular songs. Open in Spotify searches for the new release.")
                     .font(.system(size: 12))
                     .foregroundStyle(Theme.textSecondary)
                     .multilineTextAlignment(.center)
