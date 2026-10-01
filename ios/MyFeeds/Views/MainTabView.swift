@@ -8,6 +8,8 @@ enum AppRoute: Hashable {
     case privacy
     case terms
     case following
+    /// People, showing one collection's people.
+    case followingIn(String)
     case downloads
 }
 
@@ -73,6 +75,8 @@ private struct AppRoutesModifier: ViewModifier {
                     TermsView()
                 case .following:
                     FollowingView()
+                case .followingIn(let agentId):
+                    FollowingView(initialAgentId: agentId)
                 case .downloads:
                     DownloadsView()
                 }

@@ -18,6 +18,12 @@ struct FollowingView: View {
     @State private var query = ""
     /// nil = all agents
     @State private var agentFilter: String?
+
+    /// initialAgentId: opened from a collection or the Feeds tab, showing
+    /// that collection's people.
+    init(initialAgentId: String? = nil) {
+        _agentFilter = State(initialValue: initialAgentId)
+    }
     @State private var selectedId: String?
     @State private var progress: ScanProgress?
     @State private var busyKeys: Set<String> = []

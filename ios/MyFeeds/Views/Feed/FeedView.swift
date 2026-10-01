@@ -266,6 +266,19 @@ struct FeedView: View {
                 .font(.system(size: 26, weight: .heavy))
                 .foregroundStyle(Theme.textPrimary)
             Spacer()
+            // The People screen, showing the selected collection's people.
+            NavigationLink(value: agentFilter.map { AppRoute.followingIn($0) } ?? AppRoute.following) {
+                HStack(spacing: 4) {
+                    Image(systemName: "person.2")
+                        .font(.system(size: 12, weight: .semibold))
+                    Text("People")
+                        .font(.system(size: 14, weight: .bold))
+                }
+                .foregroundStyle(Theme.accent)
+            }
+            .buttonStyle(.plain)
+            .padding(.trailing, 10)
+            .accessibilityLabel(agentFilter == nil ? "See everyone you follow" : "See this collection's people")
             if !isLoading {
                 Text("\(filteredItems.count) \(presentPlatforms.count > 1 ? "items" : "videos")")
                     .font(.system(size: 13, weight: .semibold))

@@ -214,30 +214,6 @@ struct AgentDetailView: View {
                     }
                     .disabled(overlay.pendingId != nil)
 
-                    // This collection's posts in the Feeds tab, already filtered to it.
-                    Button {
-                        // Opened from the Feeds tab: go back to it instead of
-                        // leaving this screen on top of the feed.
-                        if router.selectedTab == .feed { dismiss() }
-                        router.openFeed(agentId: agent.id, status: nil)
-                    } label: {
-                        HStack(spacing: 6) {
-                            Image(systemName: "dot.radiowaves.up.forward")
-                                .font(.system(size: 14))
-                            Text("Feed")
-                                .font(.system(size: 14, weight: .semibold))
-                        }
-                        .foregroundStyle(Theme.textSecondary)
-                        .padding(.horizontal, 14)
-                        .frame(height: 44)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 10)
-                                .stroke(Theme.border, lineWidth: 1.5)
-                        )
-                    }
-                    .buttonStyle(.plain)
-                    .accessibilityLabel("View this collection's feed")
-
                     NavigationLink(value: AppRoute.agentForm(agent.id)) {
                         HStack(spacing: 6) {
                             Image(systemName: "pencil")
@@ -271,11 +247,50 @@ struct AgentDetailView: View {
                     .accessibilityLabel("Delete collection")
                 }
                 .padding(.top, 18)
+
+                // This collection's posts in the Feeds tab, and its people on
+                // the People screen, each already filtered to it.
+                HStack(spacing: 10) {
+                    Button {
+                        // Opened from the Feeds tab: go back to it instead of
+                        // leaving this screen on top of the feed.
+                        if router.selectedTab == .feed { dismiss() }
+                        router.openFeed(agentId: agent.id, status: nil)
+                    } label: {
+                        linkButtonLabel(icon: "dot.radiowaves.up.forward", title: "Feed")
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel("View this collection's feed")
+
+                    NavigationLink(value: AppRoute.followingIn(agent.id)) {
+                        linkButtonLabel(icon: "person.2", title: "People")
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel("See this collection's people")
+                }
+                .padding(.top, 10)
             }
             .padding(16)
         }
         .cardStyle(radius: 12)
         .padding(.bottom, 10)
+    }
+
+    private func linkButtonLabel(icon: String, title: String) -> some View {
+        HStack(spacing: 6) {
+            Image(systemName: icon)
+                .font(.system(size: 14))
+            Text(title)
+                .font(.system(size: 14, weight: .semibold))
+        }
+        .foregroundStyle(Theme.textSecondary)
+        .frame(maxWidth: .infinity)
+        .frame(height: 44)
+        .overlay(
+            RoundedRectangle(cornerRadius: 10)
+                .stroke(Theme.border, lineWidth: 1.5)
+        )
+        .contentShape(Rectangle())
     }
 
     // MARK: - Info cards
