@@ -1401,7 +1401,7 @@ export default function AgentDetailScreen() {
                   <Text style={sourceStyles.privateText}>{privateOffer}</Text>
                 </View>
                 <Text style={sourceStyles.help}>
-                  A private account shows up on People with a button to open it in Instagram. Its posts won&apos;t appear in your feed.
+                  {`A private account shows up on People with a button to open it in ${PLATFORM_META[newPlatform].label}. Its posts won't appear in your feed.`}
                 </Text>
                 <Pressable
                   style={({ pressed }) => [sourceStyles.privateBtn, pressed && styles.pressed]}

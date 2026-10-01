@@ -195,7 +195,7 @@ export function OnboardingWizard({ visible, onClose, hidden, onHiddenChange }: O
       if (fnError) throw new Error(await extractEdgeFunctionErrorMessage(fnError));
       if (!data?.channel) {
         const message: string = data?.error ?? "Couldn't add that source.";
-        if (!asPrivate && (data?.code === "instagram_private" || data?.code === "instagram_unavailable")) {
+        if (!asPrivate && (data?.code === "instagram_private" || data?.code === "instagram_unavailable" || data?.code === "facebook_profile")) {
           setPrivateOffer(message);
           return;
         }
@@ -523,7 +523,7 @@ export function OnboardingWizard({ visible, onClose, hidden, onHiddenChange }: O
                       <Text style={styles.privateText}>{privateOffer}</Text>
                     </View>
                     <Text style={styles.muted}>
-                      A private account shows up on People with a button to open it in Instagram. Its posts won&apos;t appear in your feed.
+                      {`A private account shows up on People with a button to open it in ${meta.label}. Its posts won't appear in your feed.`}
                     </Text>
                     <Pressable
                       onPress={() => void addSource(true)}
