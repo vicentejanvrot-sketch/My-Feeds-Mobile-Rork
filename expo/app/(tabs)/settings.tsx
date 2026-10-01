@@ -43,6 +43,7 @@ import { useUserSettings, useUpdateSettings, useUserSettingsSafe, useDeleteAccou
 import { useToast } from "@/components/Toast";
 import { useVideoQuality, QUALITY_KEYS, QUALITY_LABELS } from "@/lib/useVideoQuality";
 import { useYouTubeConnection } from "@/lib/useYouTubeConnection";
+import { ConnectedAccountsCard } from "@/components/ConnectedAccountsCard";
 import { downloadsSupported, formatBytes, loadDownloads, useDownloadsStore } from "@/lib/downloads";
 // ── Constants ─────────────────────────────────────────────────────
 
@@ -371,6 +372,9 @@ export default function SettingsScreen() {
                 <Text style={[styles.helperText, { color: Colors.destructive }]}>{youtube.error}</Text>
               ) : null}
             </View>
+
+            {/* ═══ GitHub & Reddit connections ═══ */}
+            <ConnectedAccountsCard />
 
             {/* ═══ Card 3: About background playback (accordion) ═══ */}
             <Pressable style={styles.card} onPress={toggleAccordion}>
