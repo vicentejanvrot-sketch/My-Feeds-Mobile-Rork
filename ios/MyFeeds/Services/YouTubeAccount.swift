@@ -114,6 +114,20 @@ final class YouTubeAccount {
         return result.added ?? 0
     }
 
+    // MARK: - Subscribe
+
+    /// Subscribes to the channel at channelURL (People's Add). Returns true
+    /// when the user was already subscribed.
+    func subscribe(channelURL: String) async throws -> Bool {
+        let token = try await accessToken()
+        let result: SubscribeResponse = try await invoke(
+            "youtube-api",
+            body: SubscribePayload(action: "subscribe", accessToken: token, channelUrl: channelURL)
+        )
+        if let error = result.error { throw YouTubeAccountError.message(error) }
+        return result.alreadySubscribed == true
+    }
+
     // MARK: - Tokens
 
     /// A valid access token, refreshed when it's about to expire.
@@ -244,5 +258,8 @@ private nonisolated struct RefreshResponse: Decodable, Sendable { var accessToke
 
 private nonisolated struct AddTracksPayload: Encodable, Sendable { let action: String; let accessToken: String; let videoIds: [String] }
 private nonisolated struct AddTracksResponse: Decodable, Sendable { var added: Int?; var alreadyThere: Int?; var error: String? }
+
+private nonisolated struct SubscribePayload: Encodable, Sendable { let action: String; let accessToken: String; let channelUrl: String }
+private nonisolated struct SubscribeResponse: Decodable, Sendable { var success: Bool?; var alreadySubscribed: Bool?; var error: String? }
 
 private nonisolated struct ErrorResponse: Decodable, Sendable { var error: String? }

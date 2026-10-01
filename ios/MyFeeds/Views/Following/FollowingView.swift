@@ -154,7 +154,10 @@ struct FollowingView: View {
             }
         }
         .refreshable { await load() }
-        .task { await load() }
+        .task {
+            await load()
+            await AccountConnections.shared.load()
+        }
         // A darker background behind the person sheet, so the list doesn't
         // pull the eye.
         .onChange(of: selectedPerson != nil) { _, isOpen in SheetDimmer.shared.set(isOpen) }
@@ -609,28 +612,45 @@ struct FollowingView: View {
         }
     }
 
-    /// Adds the account to an agent, then opens it on its own platform so the
-    /// user can follow there too (LinkedIn and Instagram don't let apps do that).
+    /// "Add": puts the account in the chosen collection, so its posts reach
+    /// the feed. Where the user connected that platform (YouTube, GitHub,
+    /// Reddit), it also follows the account there; the other platforms don't
+    /// let apps follow for their users, and the account's own link (next to
+    /// its name) is there for following by hand. Same as the web and Expo.
     private func follow(_ account: AlsoOnFoundAccount, agentId: String) {
         guard !busyKeys.contains(account.key) else { return }
         busyKeys.insert(account.key)
         Task {
-            defer {
-                if let link = AlsoOn.platformFollowURL(platform: account.platform, url: account.url) {
-                    openURL(link)
-                }
-            }
+            defer { busyKeys.remove(account.key) }
             do {
                 try await SupabaseService.shared.followAccount(platform: account.platform, url: account.url, agentId: agentId)
-                toasts.show("Added. Follow on " + account.platform.label + " to finish")
-                if let loaded = try? await SupabaseService.shared.fetchAllChannels() {
-                    channels = loaded
-                    rebuild()
-                }
             } catch {
                 toasts.show(error.localizedDescription, type: .error)
+                return
             }
-            busyKeys.remove(account.key)
+            if let loaded = try? await SupabaseService.shared.fetchAllChannels() {
+                channels = loaded
+                rebuild()
+            }
+            let label = account.platform.label
+            if account.platform == .youtube, YouTubeAccount.shared.isConnected {
+                do {
+                    let already = try await YouTubeAccount.shared.subscribe(channelURL: account.url)
+                    toasts.show(already ? "Added. You were already subscribed on YouTube" : "Added and subscribed on YouTube")
+                } catch {
+                    toasts.show("Added, but couldn't subscribe on YouTube: " + error.localizedDescription, type: .error)
+                }
+            } else if let provider = AccountConnections.Provider(platform: account.platform),
+                      AccountConnections.shared.isConnected(provider) {
+                do {
+                    let already = try await AccountConnections.shared.follow(provider, url: account.url)
+                    toasts.show(already ? "Added. You already follow them on \(label)" : "Added and following on \(label)")
+                } catch {
+                    toasts.show("Added, but couldn't follow on \(label): " + error.localizedDescription, type: .error)
+                }
+            } else {
+                toasts.show("Added to your collection")
+            }
         }
     }
 
@@ -912,7 +932,7 @@ private struct FollowButton: View {
                 } else {
                     Image(systemName: "person.badge.plus")
                         .font(.system(size: 13))
-                    Text("Follow")
+                    Text("Add")
                         .font(.system(size: 13, weight: .bold))
                 }
             }
