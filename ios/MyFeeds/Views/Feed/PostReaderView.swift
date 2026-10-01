@@ -1470,7 +1470,7 @@ private struct SpotifySection: View {
                     .buttonStyle(.plain)
                 }
                 if playing, let rawEmbed = link.embedUrl, let embedURL = URL(string: rawEmbed) {
-                    EmbedWebView(url: embedURL)
+                    EmbedWebView(url: embedURL, blockProtectedMedia: true)
                         .frame(height: link.kind == "album" || link.kind == "playlist" ? 352 : 152)
                         .frame(maxWidth: .infinity)
                         .clipShape(.rect(cornerRadius: 12))
@@ -1496,7 +1496,7 @@ private struct SpotifyReleasePlayer: View {
 
     var body: some View {
         VStack(spacing: 10) {
-            EmbedWebView(url: embedURL)
+            EmbedWebView(url: embedURL, blockProtectedMedia: true)
                 .frame(height: embedURL.path.contains("/track/") ? 152 : 352)
                 .frame(maxWidth: .infinity)
                 .clipShape(.rect(cornerRadius: 12))
@@ -1534,7 +1534,7 @@ private struct SpotifyPendingRelease: View {
                     .foregroundStyle(Theme.textSecondary)
                     .frame(maxWidth: .infinity)
             } else if let artistId, let artistURL = URL(string: "https://open.spotify.com/embed/artist/\(artistId)") {
-                EmbedWebView(url: artistURL)
+                EmbedWebView(url: artistURL, blockProtectedMedia: true)
                     .frame(height: 352)
                     .frame(maxWidth: .infinity)
                     .clipShape(.rect(cornerRadius: 12))
@@ -1945,11 +1945,23 @@ private struct YouTubeMusicEmbedPlayer: View {
 private struct EmbedWebView: UIViewRepresentable {
     let url: URL
     var referer: String? = nil
+    /// Spotify's player: without protected (DRM) playback. With it the player
+    /// starts DRM as soon as it loads, which on some devices switches the
+    /// display mode and blanks the screen for a few seconds when it opens and
+    /// closes. Without it Spotify plays its 30-second previews (no DRM needed).
+    var blockProtectedMedia = false
 
     func makeUIView(context: Context) -> WKWebView {
         let config = WKWebViewConfiguration()
         config.allowsInlineMediaPlayback = true
         config.mediaTypesRequiringUserActionForPlayback = []
+        if blockProtectedMedia {
+            let source = "try{Object.defineProperty(navigator,'requestMediaKeySystemAccess',{value:undefined,configurable:true});" +
+                "window.MediaKeys=undefined;window.WebKitMediaKeys=undefined;}catch(e){}"
+            config.userContentController.addUserScript(
+                WKUserScript(source: source, injectionTime: .atDocumentStart, forMainFrameOnly: false)
+            )
+        }
         let webView = WKWebView(frame: .zero, configuration: config)
         webView.isOpaque = false
         webView.backgroundColor = .black
