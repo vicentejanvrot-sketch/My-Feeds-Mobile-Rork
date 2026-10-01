@@ -377,7 +377,7 @@ struct OnboardingWizardView: View {
                                 .foregroundStyle(Theme.textPrimary)
                                 .fixedSize(horizontal: false, vertical: true)
                         }
-                        Text("A private account shows up on People with a button to open it in Instagram. Its posts won't appear in your feed.")
+                        Text("A private account shows up on People with a button to open it in \(platform.label). Its posts won't appear in your feed.")
                             .font(.system(size: 12))
                             .foregroundStyle(Theme.textSecondary)
                             .fixedSize(horizontal: false, vertical: true)
