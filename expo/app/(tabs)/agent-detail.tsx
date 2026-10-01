@@ -38,6 +38,7 @@ import {
   Ban,
   Lock,
   Rss,
+  Users,
 } from "lucide-react-native";
 import { useQueryClient } from "@tanstack/react-query";
 import { Colors } from "@/constants/colors";
@@ -932,25 +933,6 @@ export default function AgentDetailScreen() {
                 <Play size={15} color={Colors.white} fill={Colors.white} />
                 <Text style={styles.runNowText}>Run Now</Text>
               </Pressable>
-              {/* This collection's posts in the Feeds tab, already filtered to it. */}
-              <Pressable
-                style={({ pressed }) => [
-                  styles.editBtn,
-                  { borderColor: Colors.border, paddingHorizontal: 14 },
-                  pressed && styles.pressed,
-                ]}
-                onPress={() =>
-                  router.push({
-                    pathname: "/(tabs)/feed",
-                    params: { agentId: agent.id, openedAt: String(Date.now()) },
-                  })
-                }
-                accessibilityRole="button"
-                accessibilityLabel="View this collection's feed"
-              >
-                <Rss size={15} color={Colors.textSecondary} />
-                <Text style={styles.editText}>Feed</Text>
-              </Pressable>
               <Pressable
                 style={({ pressed }) => [
                   styles.editBtn,
@@ -974,6 +956,36 @@ export default function AgentDetailScreen() {
                 accessibilityLabel="Delete collection"
               >
                 <Trash2 size={15} color={Colors.destructive} />
+              </Pressable>
+            </View>
+
+            {/* This collection's posts in the Feeds tab, and its people on the
+                People screen, each already filtered to it. */}
+            <View style={styles.linkRow}>
+              <Pressable
+                style={({ pressed }) => [styles.editBtn, styles.linkBtn, { borderColor: Colors.border }, pressed && styles.pressed]}
+                onPress={() =>
+                  router.push({
+                    pathname: "/(tabs)/feed",
+                    params: { agentId: agent.id, openedAt: String(Date.now()) },
+                  })
+                }
+                accessibilityRole="button"
+                accessibilityLabel="View this collection's feed"
+              >
+                <Rss size={15} color={Colors.textSecondary} />
+                <Text style={styles.editText}>Feed</Text>
+              </Pressable>
+              <Pressable
+                style={({ pressed }) => [styles.editBtn, styles.linkBtn, { borderColor: Colors.border }, pressed && styles.pressed]}
+                onPress={() =>
+                  router.push({ pathname: "/following", params: { agentId: agent.id, openedAt: String(Date.now()) } })
+                }
+                accessibilityRole="button"
+                accessibilityLabel="See this collection's people"
+              >
+                <Users size={15} color={Colors.textSecondary} />
+                <Text style={styles.editText}>People</Text>
               </Pressable>
             </View>
           </View>
@@ -1607,6 +1619,8 @@ const styles = StyleSheet.create({
 
   /* Action buttons */
   actionRow: { flexDirection: "row", gap: 10, marginTop: 18 },
+  linkRow: { flexDirection: "row", gap: 10, marginTop: 10 },
+  linkBtn: { flex: 1 },
   runNowBtn: {
     flex: 1,
     flexDirection: "row",

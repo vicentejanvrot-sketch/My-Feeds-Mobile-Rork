@@ -15,7 +15,7 @@ import {
   useWindowDimensions,
   View,
 } from "react-native";
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Image } from "expo-image";
 import { formatDistanceToNow } from "date-fns";
@@ -538,7 +538,13 @@ export default function FollowingScreen() {
 
   const [tab, setTab] = useState<"all" | "gaps">("all");
   const [query, setQuery] = useState("");
-  const [agentFilter, setAgentFilter] = useState<string>("all");
+  // A collection and the Feeds tab open this screen with agentId to show that
+  // collection's people (openedAt changes on every open, so it applies again).
+  const params = useLocalSearchParams<{ agentId?: string; openedAt?: string }>();
+  const [agentFilter, setAgentFilter] = useState<string>(params.agentId ?? "all");
+  useEffect(() => {
+    setAgentFilter(params.agentId ?? "all");
+  }, [params.agentId, params.openedAt]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
   const agents = useMemo(

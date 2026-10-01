@@ -38,6 +38,7 @@ import {
   MessageCircle,
   Copy,
   FolderOpen,
+  Users,
 } from "lucide-react-native";
 import { Colors } from "@/constants/colors";
 import type { ItemStatus, ItemWithAnalysis, Channel, Agent } from "@/lib/database";
@@ -444,12 +445,30 @@ export default function FeedScreen() {
             <Text style={styles.selectButtonText}>Cancel</Text>
           </Pressable>
         ) : !items.isLoading ? (
-          <Pressable
-            style={styles.selectButton}
-            onPress={() => setSelectionMode(true)}
-          >
-            <Text style={styles.selectButtonText}>Select</Text>
-          </Pressable>
+          <>
+            {/* The People screen, showing the selected collection's people. */}
+            <Pressable
+              style={styles.peopleButton}
+              onPress={() =>
+                router.push({
+                  pathname: "/following",
+                  params: agentFilter !== "all" ? { agentId: agentFilter, openedAt: String(Date.now()) } : { openedAt: String(Date.now()) },
+                })
+              }
+              hitSlop={8}
+              accessibilityRole="button"
+              accessibilityLabel={agentFilter !== "all" ? "See this collection's people" : "See everyone you follow"}
+            >
+              <Users size={14} color={Colors.accent} />
+              <Text style={styles.selectButtonText}>People</Text>
+            </Pressable>
+            <Pressable
+              style={[styles.selectButton, { marginLeft: 0 }]}
+              onPress={() => setSelectionMode(true)}
+            >
+              <Text style={styles.selectButtonText}>Select</Text>
+            </Pressable>
+          </>
         ) : null}
         {!selectionMode && !items.isLoading ? (
           <Text style={styles.countBadge}>{filtered.length} videos</Text>
@@ -1265,6 +1284,14 @@ const styles = StyleSheet.create({
   selectButton: {
     marginLeft: "auto",
     marginRight: 12,
+  },
+  peopleButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    marginLeft: "auto",
+    marginRight: 14,
+    alignSelf: "center",
   },
   selectButtonText: {
     fontSize: 14,
