@@ -26,6 +26,7 @@ import {
   ExternalLink,
   Link2,
   Lock,
+  Merge,
   RefreshCw,
   ScanSearch,
   Search,
@@ -46,6 +47,7 @@ import {
   initials,
   isPersonSource,
   personSummary,
+  sameNameAs,
   type FoundAccount,
   type Person,
 } from "@/lib/alsoOn";
@@ -54,7 +56,9 @@ import {
   useFollowAccount,
   useIdentityLinks,
   useIdentityScans,
+  useMergePeople,
   useScanSources,
+  useSeparatePerson,
   scanStatus,
   type ScanJob,
 } from "@/lib/useAlsoOn";
@@ -238,17 +242,155 @@ function DecisionButtons({ account, channelIds }: { account: FoundAccount; chann
   );
 }
 
-function PersonPanel({ person, agents, scanning, status, onRescan }: {
+// "Combine with…": picks another card that's the same person (someone added
+// twice under a name the search couldn't tie together) and joins the two.
+// Shown in place of the person's details, inside the same sheet.
+function CombinePicker({ person, people, initialPick, onCancel, onCombined }: {
   person: Person;
+  people: Person[];
+  initialPick: string | null;
+  onCancel: () => void;
+  onCombined: () => void;
+}) {
+  const merge = useMergePeople();
+  const showToast = useToast();
+  const [query, setQuery] = useState("");
+  const [pickId, setPickId] = useState<string | null>(initialPick);
+  const twins = new Set(sameNameAs(person, people).map((p) => p.id));
+  const q = query.trim().toLowerCase();
+  const candidates = people
+    .filter((p) => p.id !== person.id)
+    .filter((p) => !q || p.name.toLowerCase().includes(q) || p.following.some((f) => f.label.toLowerCase().includes(q)))
+    .sort((a, b) => Number(twins.has(b.id)) - Number(twins.has(a.id)) || a.name.localeCompare(b.name, undefined, { sensitivity: "base" }));
+  const pick = people.find((p) => p.id === pickId) ?? null;
+
+  return (
+    <View style={styles.panel}>
+      <Text style={styles.panelName} numberOfLines={2}>Combine {person.name} with…</Text>
+      <Text style={[styles.muted, styles.combineIntro]}>
+        Pick the card that&apos;s the same person. Their accounts end up together on one card. You can separate them again later.
+      </Text>
+      <View style={styles.searchBox}>
+        <Search size={15} color={Colors.textMuted} />
+        <TextInput
+          value={query}
+          onChangeText={setQuery}
+          placeholder="Search people"
+          placeholderTextColor={Colors.textMuted}
+          style={styles.searchInput}
+          autoCorrect={false}
+          autoCapitalize="none"
+          accessibilityLabel="Search people"
+        />
+      </View>
+      <View style={[styles.box, styles.combineList]}>
+        {candidates.length === 0 ? (
+          <Text style={[styles.muted, styles.emptyList]}>Nobody matches that search.</Text>
+        ) : (
+          candidates.map((p, i) => {
+            const active = p.id === pickId;
+            return (
+              <Pressable
+                key={p.id}
+                onPress={() => setPickId(p.id)}
+                style={({ pressed }) => [
+                  styles.boxRow,
+                  i > 0 && styles.boxRowBorder,
+                  active && styles.combineRowActive,
+                  pressed && styles.rowPressed,
+                ]}
+                accessibilityRole="radio"
+                accessibilityState={{ selected: active }}
+              >
+                <Avatar name={p.name} uri={p.thumbnail} />
+                <View style={[styles.flex1, styles.gap6]}>
+                  <View style={styles.rowTitle}>
+                    <Text style={styles.rowName} numberOfLines={1}>{p.name}</Text>
+                    {twins.has(p.id) ? <Text style={styles.sameNameTag}>Same name</Text> : null}
+                  </View>
+                  <View style={styles.chipWrap}>
+                    {p.following.map((f) => (
+                      <PlatformChip key={f.channel.id} platform={f.platform} variant="following" />
+                    ))}
+                  </View>
+                </View>
+                {active ? <Check size={18} color={Colors.accent} /> : null}
+              </Pressable>
+            );
+          })
+        )}
+      </View>
+      <View style={[styles.decisionRow, styles.combineActions]}>
+        <Pressable onPress={onCancel} style={({ pressed }) => [styles.notThemBtn, pressed && styles.pressed]}>
+          <Text style={styles.notThemText}>Cancel</Text>
+        </Pressable>
+        <Pressable
+          disabled={!pick || merge.isPending}
+          onPress={() => {
+            if (!pick) return;
+            merge.mutate(
+              { into: person, other: pick },
+              {
+                onSuccess: () => {
+                  showToast("Combined with " + pick.name, "success");
+                  onCombined();
+                },
+                onError: (e) => showToast("Couldn't combine them: " + (e instanceof Error ? e.message : "try again"), "error"),
+              },
+            );
+          }}
+          style={({ pressed }) => [styles.samePersonBtn, (!pick || pressed || merge.isPending) && styles.disabled]}
+        >
+          {merge.isPending ? <ActivityIndicator size="small" color={Colors.white} /> : <Merge size={15} color={Colors.white} />}
+          <Text style={styles.samePersonText}>Combine</Text>
+        </Pressable>
+      </View>
+    </View>
+  );
+}
+
+function PersonPanel({ person, people, agents, scanning, status, onRescan, onCombined }: {
+  person: Person;
+  people: Person[];
   agents: { id: string; name: string }[];
   scanning: boolean;
   // "Checking Taylor Swift…" while a search runs.
   status?: string | null;
   onRescan: () => void;
+  // After a combine: keep this person open (their card id can change).
+  onCombined: (sourceId: string) => void;
 }) {
   const decide = useDecideLink();
   const showToast = useToast();
   const deleteChannel = useDeleteChannel();
+  const separate = useSeparatePerson();
+  // Picking a card to combine with: null when not combining, "" for no
+  // card picked yet.
+  const [combinePick, setCombinePick] = useState<string | null>(null);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => setCombinePick(null), [person.id]);
+  const twins = sameNameAs(person, people);
+  const startCombine = () => setCombinePick(twins.length === 1 ? twins[0].id : "");
+
+  const confirmSeparate = () =>
+    Alert.alert(
+      `Separate ${person.name}'s cards?`,
+      "The cards you combined go back to being separate cards. Nothing is removed from your collections.",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Separate",
+          onPress: () =>
+            separate.mutate(
+              { person },
+              {
+                onSuccess: () => showToast("Separated into their own cards again", "success"),
+                onError: (e) => showToast("Couldn't separate them: " + (e instanceof Error ? e.message : "try again"), "error"),
+              },
+            ),
+        },
+      ],
+    );
   const [agentId, setAgentId] = useState<string | undefined>(person.agentIds[0]);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => setAgentId(person.agentIds[0]), [person.id]);
@@ -278,6 +420,21 @@ function PersonPanel({ person, agents, scanning, status, onRescan }: {
     );
   };
 
+  if (combinePick !== null) {
+    return (
+      <CombinePicker
+        person={person}
+        people={people}
+        initialPick={combinePick || null}
+        onCancel={() => setCombinePick(null)}
+        onCombined={() => {
+          setCombinePick(null);
+          onCombined(person.sources[0].id);
+        }}
+      />
+    );
+  }
+
   return (
     <View style={styles.panel}>
       <View style={styles.panelHeader}>
@@ -287,6 +444,30 @@ function PersonPanel({ person, agents, scanning, status, onRescan }: {
           <Text style={styles.muted}>{personSummary(person, platformLabel)}</Text>
         </View>
       </View>
+      {people.length > 1 ? (
+        <Pressable
+          onPress={startCombine}
+          style={({ pressed }) => [styles.outlineBtn, styles.combineBtn, pressed && styles.pressed]}
+          accessibilityRole="button"
+          accessibilityLabel="Combine with another card that's the same person"
+        >
+          <Merge size={14} color={Colors.textPrimary} />
+          <Text style={styles.outlineBtnText}>Combine with another card</Text>
+        </Pressable>
+      ) : null}
+
+      {twins.length > 0 ? (
+        <View style={styles.twinCard}>
+          <Text style={styles.question}>
+            {twins.length === 1 ? "Another card is" : twins.length + " other cards are"} also called{" "}
+            <Text style={styles.bold}>{person.name}</Text>. If it&apos;s the same person, combine them so all their accounts are on one card.
+          </Text>
+          <Pressable onPress={startCombine} style={({ pressed }) => [styles.samePersonBtn, pressed && styles.pressed]}>
+            <Merge size={15} color={Colors.white} />
+            <Text style={styles.samePersonText}>{twins.length === 1 ? "Combine with that card" : "Choose which to combine"}</Text>
+          </Pressable>
+        </View>
+      ) : null}
 
       <Text style={styles.sectionTitle}>You follow</Text>
       <View style={styles.box}>
@@ -330,6 +511,15 @@ function PersonPanel({ person, agents, scanning, status, onRescan }: {
           </View>
         ))}
       </View>
+      {person.merges.length > 0 ? (
+        <View style={styles.mergedRow}>
+          <Merge size={13} color={Colors.textMuted} />
+          <Text style={[styles.muted, styles.flex1]}>You combined separate cards into this one.</Text>
+          <Pressable onPress={confirmSeparate} disabled={separate.isPending} hitSlop={8}>
+            <Text style={styles.removeLink}>Separate them</Text>
+          </Pressable>
+        </View>
+      ) : null}
 
       {person.also.length > 0 ? (
         <>
@@ -552,6 +742,13 @@ export default function FollowingScreen() {
     setAgentFilter(params.agentId ?? "all");
   }, [params.agentId, params.openedAt]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  // After two cards are combined the person's id can change, so they're found
+  // again by one of their sources and the sheet stays open.
+  const [followSourceId, setFollowSourceId] = useState<string | null>(null);
+  const openPerson = (id: string | null) => {
+    setFollowSourceId(null);
+    setSelectedId(id);
+  };
 
   const agents = useMemo(
     () =>
@@ -588,7 +785,10 @@ export default function FollowingScreen() {
     toScan.reduce((n, job) => n + maxLookupsFor(job.channelIds.length), 0) * AISA_PRICE_PER_CALL
   ).toFixed(2);
   const loading = sources.isLoading || scans.isLoading;
-  const selected = people.find((p) => p.id === selectedId) ?? null;
+  const selected =
+    (followSourceId ? people.find((p) => p.sources.some((c) => c.id === followSourceId)) : undefined) ??
+    people.find((p) => p.id === selectedId) ??
+    null;
 
   const runScan = useCallback(
     async (jobs: ScanJob[]) => {
@@ -763,7 +963,7 @@ export default function FollowingScreen() {
                     key={p.id}
                     person={p}
                     agentNames={p.agentIds.map((id) => agentName.get(id) ?? "").filter(Boolean).join(", ")}
-                    onPress={() => setSelectedId(p.id)}
+                    onPress={() => openPerson(p.id)}
                   />
                 ))
               )}
@@ -775,7 +975,7 @@ export default function FollowingScreen() {
             ) : null}
           </>
         ) : (
-          <GapsView people={filtered} agents={agents} onOpen={(id) => setSelectedId(id)} />
+          <GapsView people={filtered} agents={agents} onOpen={(id) => openPerson(id)} />
         )}
       </ScrollView>
 
@@ -783,17 +983,17 @@ export default function FollowingScreen() {
         visible={!!selected}
         transparent
         animationType="slide"
-        onRequestClose={() => setSelectedId(null)}
+        onRequestClose={() => openPerson(null)}
       >
         <View style={styles.sheetBackdrop}>
-          <Pressable style={styles.flex1} onPress={() => setSelectedId(null)} accessibilityLabel="Close" />
+          <Pressable style={styles.flex1} onPress={() => openPerson(null)} accessibilityLabel="Close" />
           <View style={[styles.sheet, isWide && styles.sheetWide, { paddingBottom: insets.bottom + 16 }]}>
             {/* The content stops above the home indicator with the same gap as
                 the sides and is clipped with rounded corners there, so the
                 phone's rounded corners never cut through buttons or text. */}
             <View style={styles.sheetTop}>
               <View style={styles.grabber} />
-              <Pressable onPress={() => setSelectedId(null)} hitSlop={10} style={styles.sheetClose} accessibilityLabel="Close">
+              <Pressable onPress={() => openPerson(null)} hitSlop={10} style={styles.sheetClose} accessibilityLabel="Close">
                 <X size={20} color={Colors.textSecondary} />
               </Pressable>
             </View>
@@ -801,7 +1001,9 @@ export default function FollowingScreen() {
               {selected ? (
                 <PersonPanel
                   person={selected}
+                  people={people}
                   agents={agents}
+                  onCombined={setFollowSourceId}
                   scanning={isScanning}
                   status={progress ? scanStatus(progress) : null}
                   onRescan={() => void runScan([jobFor(selected)])}
@@ -1101,4 +1303,32 @@ const styles = StyleSheet.create({
   sheetClose: { position: "absolute", right: 14, top: 10, padding: 4 },
   sheetScroll: { overflow: "hidden", borderBottomLeftRadius: 20, borderBottomRightRadius: 20 },
   sheetContent: { paddingHorizontal: 18, paddingTop: 12, paddingBottom: 12 },
+  disabled: { opacity: 0.5 },
+  bold: { fontWeight: "700" as const },
+  combineBtn: { alignSelf: "flex-start", marginTop: 12 },
+  twinCard: {
+    gap: 10,
+    marginTop: 14,
+    padding: 12,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: "hsla(199, 89%, 48%, 0.4)",
+    backgroundColor: "hsla(199, 89%, 48%, 0.08)",
+  },
+  mergedRow: { flexDirection: "row", alignItems: "center", gap: 6, marginTop: 8 },
+  combineIntro: { marginTop: 6, marginBottom: 12 },
+  combineList: { marginTop: 12 },
+  combineRowActive: { backgroundColor: "hsla(199, 89%, 48%, 0.15)" },
+  combineActions: { marginTop: 14 },
+  sameNameTag: {
+    flexShrink: 0,
+    fontSize: 11,
+    fontWeight: "600" as const,
+    color: Colors.textSecondary,
+    backgroundColor: Colors.input,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 8,
+    overflow: "hidden",
+  },
 });

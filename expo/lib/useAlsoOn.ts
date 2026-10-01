@@ -7,7 +7,7 @@ import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/lib/auth-provider";
 import { extractEdgeFunctionErrorMessage } from "@/lib/hooks";
 import type { Platform } from "@/lib/platforms";
-import type { IdentityLink, IdentityScan } from "@/lib/alsoOn";
+import { MERGE_KEY_PREFIX, mergeLinkRow, type IdentityLink, type IdentityScan, type Person } from "@/lib/alsoOn";
 
 export const alsoOnKeys = {
   links: ["also-on", "links"] as const,
@@ -141,6 +141,44 @@ export function useDecideLink() {
         )
         .eq("match_key", link.match_key)
         .in("channel_id", ids);
+      if (error) throw error;
+    },
+    onSettled: () => {
+      void queryClient.invalidateQueries({ queryKey: alsoOnKeys.links });
+    },
+  });
+}
+
+// Combines two cards into one person, for when the same person was added twice
+// under names the search couldn't tie together. Saved as a match the user
+// confirmed, so it also holds after a new search. Same as the web app.
+export function useMergePeople() {
+  const queryClient = useQueryClient();
+  const { user } = useAuth();
+  return useMutation({
+    mutationFn: async ({ into, other }: { into: Person; other: Person }) => {
+      if (!user) throw new Error("You're signed out. Sign in again and retry.");
+      const row = mergeLinkRow(into, other, user.id);
+      if (!row) throw new Error("These two can't be combined yet.");
+      const { error } = await supabase.from("identity_links").upsert(row, { onConflict: "channel_id,match_key" });
+      if (error) throw error;
+    },
+    onSettled: () => {
+      void queryClient.invalidateQueries({ queryKey: alsoOnKeys.links });
+    },
+  });
+}
+
+// Undoes "Combine": every card combined into this one becomes its own card again.
+export function useSeparatePerson() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ person }: { person: Person }) => {
+      const { error } = await supabase
+        .from("identity_links")
+        .delete()
+        .in("channel_id", person.sources.map((c) => c.id))
+        .like("match_key", MERGE_KEY_PREFIX + "%");
       if (error) throw error;
     },
     onSettled: () => {

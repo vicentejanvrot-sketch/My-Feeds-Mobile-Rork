@@ -64,6 +64,56 @@ export interface Person {
   possible: FoundAccount[];
   lastScannedAt: string | null;
   scanErrors: string[];
+  // Cards the user combined by hand ("Combine"), kept so they can be
+  // separated again.
+  merges: IdentityLink[];
+}
+
+// A card combined by hand is saved as a confirmed match from one card's source
+// to another followed source, keyed by that source's id: source:<channel id>.
+// It only ties the two together; it's never shown as an account of its own.
+// Same as the web app.
+export const MERGE_KEY_PREFIX = "source:";
+export const isMergeLink = (link: Pick<IdentityLink, "match_key">) => link.match_key.startsWith(MERGE_KEY_PREFIX);
+
+// Platforms a match can be saved under (identity_links.platform). A TikTok
+// source can't be the target, so the link goes the other way round.
+const LINKABLE: Platform[] = [
+  "youtube", "x", "instagram", "facebook", "linkedin", "reddit", "github",
+  "apple_music", "apple_podcasts", "apple_books", "youtube_music", "spotify",
+];
+
+// The row that combines two cards: saved on one of `a`'s sources, pointing at
+// one of `b`'s (or the other way round when only that works). Null when
+// neither card has a source that can be linked to.
+export function mergeLinkRow(a: Person, b: Person, userId: string) {
+  const pick = (from: Person, to: Person) => {
+    const target = to.sources.find((c) => LINKABLE.includes(platformOf(c.platform)));
+    return target ? { owner: from.sources[0], target } : null;
+  };
+  const pair = pick(a, b) ?? pick(b, a);
+  if (!pair) return null;
+  const { owner, target } = pair;
+  return {
+    user_id: userId,
+    channel_id: owner.id,
+    platform: platformOf(target.platform),
+    match_key: MERGE_KEY_PREFIX + target.id,
+    handle: target.handle ?? null,
+    url: target.channel_url ?? "",
+    display_name: target.channel_name ?? null,
+    thumbnail: target.channel_thumbnail ?? null,
+    status: "confirmed" as const,
+    method: "user",
+    evidence: "You combined these cards.",
+    decided_by_user: true,
+  };
+}
+
+// Other cards with the same name, most likely the same person added twice.
+export function sameNameAs(person: Person, people: Person[]): Person[] {
+  const n = person.name.trim().toLowerCase();
+  return people.filter((p) => p.id !== person.id && p.name.trim().toLowerCase() === n);
 }
 
 // Subreddits and keyword searches aren't people or companies. Reddit users
@@ -191,6 +241,7 @@ export function buildPeople(channels: Channel[], links: IdentityLink[], scans: I
   const byId = new Map(sources.map((c) => [c.id, c]));
   const keyToSource = new Map<string, string>();
   for (const ch of sources) for (const k of channelKeys(ch)) if (!keyToSource.has(k)) keyToSource.set(k, ch.id);
+  for (const ch of sources) keyToSource.set(MERGE_KEY_PREFIX + ch.id, ch.id);
 
   // The same account followed in two agents is one person.
   const parent = new Map<string, string>();
@@ -234,6 +285,7 @@ export function buildPeople(channels: Channel[], links: IdentityLink[], scans: I
     const sorted = [...group].sort((a, b) => (b.priority ?? 3) - (a.priority ?? 3));
     const lead = sorted[0];
     const groupKeys = new Set(group.flatMap(channelKeys));
+    for (const c of group) groupKeys.add(MERGE_KEY_PREFIX + c.id);
     const groupIds = new Set(group.map((c) => c.id));
 
     const following: FollowedAccount[] = [];
@@ -255,6 +307,8 @@ export function buildPeople(channels: Channel[], links: IdentityLink[], scans: I
     // Confirmed first so a key confirmed by one source isn't also shown as possible.
     const ordered = [...groupLinks].sort((a, b) => (a.status === "confirmed" ? 0 : 1) - (b.status === "confirmed" ? 0 : 1));
     for (const link of ordered) {
+      // Cards combined by hand: the link only joins them, it's not an account.
+      if (isMergeLink(link)) continue;
       if (link.status === "rejected" || rejected.has(link.match_key)) continue;
       if (linkKeys(link).some((k) => groupKeys.has(k)) || seen.has(link.match_key)) continue;
       if (link.status === "possible" && confirmedKeys.has(link.match_key)) continue;
@@ -292,6 +346,7 @@ export function buildPeople(channels: Channel[], links: IdentityLink[], scans: I
       possible,
       lastScannedAt,
       scanErrors: groupScans.map((s) => s.error).filter(Boolean) as string[],
+      merges: groupLinks.filter((l) => isMergeLink(l) && l.status === "confirmed"),
     });
   }
 
