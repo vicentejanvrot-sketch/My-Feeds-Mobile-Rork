@@ -137,6 +137,12 @@ nonisolated enum AlsoOn {
         if host == "instagram.com" {
             return first.isEmpty ? nil : "instagram:" + first.lowercased()
         }
+        if host == "facebook.com" || host == "fb.com" {
+            // Same key as find-also-on: facebook:<page name>.
+            let isPage = first.range(of: "^[A-Za-z0-9.\\-]{2,80}$", options: .regularExpression) != nil
+                && !first.lowercased().hasSuffix(".php")
+            return isPage ? "facebook:" + first.lowercased() : nil
+        }
         if host == "youtube.com" {
             if first.hasPrefix("@") { return "youtube:@" + String(first.dropFirst()).lowercased() }
             if first == "channel", let second { return "youtube:" + second }
