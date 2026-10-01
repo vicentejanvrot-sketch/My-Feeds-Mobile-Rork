@@ -39,13 +39,13 @@ import { useToast } from "@/components/Toast";
 import { useAgents, useChannelsAll, useDeleteChannel } from "@/lib/hooks";
 import { openExternalLink } from "@/lib/open-link";
 import { useYouTubeConnection } from "@/lib/useYouTubeConnection";
+import { followOnPlatform, isConnectProvider, useConnections } from "@/lib/useConnections";
 import { PLATFORM_META, isFollowableAccount, type Platform } from "@/lib/platforms";
 import {
   buildPeople,
   initials,
   isPersonSource,
   personSummary,
-  platformFollowUrl,
   type FoundAccount,
   type Person,
 } from "@/lib/alsoOn";
@@ -143,56 +143,62 @@ function FollowButton({ account, agentId }: { account: FoundAccount; agentId: st
   return <FollowSourceButton account={account} agentId={agentId} />;
 }
 
+// "Add": puts the account in the chosen collection, so its posts reach the
+// feed. Where the user connected that platform (YouTube, GitHub, Reddit), it
+// also follows the account there; the other platforms don't let apps follow
+// for their users, and the account's own link (next to its name) is there for
+// following by hand. Same as the web.
 function FollowSourceButton({ account, agentId }: { account: FoundAccount; agentId: string | undefined }) {
   const follow = useFollowAccount();
   const showToast = useToast();
   const youtube = useYouTubeConnection();
-  // With YouTube connected, a YouTube channel is subscribed to directly.
-  const subscribesDirectly = account.platform === "youtube" && youtube.status === "connected";
+  const { data: connections = [] } = useConnections();
+  const platform = account.platform;
+  const label = platformLabel(platform);
+  const connectProvider = isConnectProvider(platform) ? platform : null;
+  const youtubeConnected = platform === "youtube" && youtube.status === "connected";
+  const providerConnected = !!connectProvider && connections.some((c) => c.provider === connectProvider);
   return (
     <Pressable
       disabled={!agentId || follow.isPending}
       onPress={() => {
         if (!agentId) return;
-        if (subscribesDirectly) {
-          follow.mutate(
-            { platform: account.platform, url: account.url, agentId },
-            {
-              onSuccess: () => {
+        follow.mutate(
+          { platform, url: account.url, agentId },
+          {
+            onSuccess: () => {
+              if (youtubeConnected) {
                 youtube
                   .subscribe(account.url)
                   .then((result) =>
                     showToast(result === "already" ? "Added. You were already subscribed on YouTube" : "Added and subscribed on YouTube", "success"),
                   )
-                  .catch(() => {
-                    showToast("Added, but couldn't subscribe on YouTube. Opening the channel", "error");
-                    void openExternalLink(platformFollowUrl(account.platform, account.url));
-                  });
-              },
-              onError: (e) => showToast(e instanceof Error ? e.message : "Couldn't add that account", "error"),
+                  .catch(() => showToast("Added, but couldn't subscribe on YouTube", "error"));
+                return;
+              }
+              if (connectProvider && providerConnected) {
+                followOnPlatform(connectProvider, account.url)
+                  .then(({ already }) =>
+                    showToast(already ? `Added. You already follow them on ${label}` : `Added and following on ${label}`, "success"),
+                  )
+                  .catch((e) => showToast(`Added, but couldn't follow on ${label}: ${e instanceof Error ? e.message : "try again"}`, "error"));
+                return;
+              }
+              showToast("Added to your collection", "success");
             },
-          );
-          return;
-        }
-        // Adds it to the agent, then opens it on its own platform so the user
-        // can follow there too (Instagram, LinkedIn and X don't let apps do that).
-        follow.mutate(
-          { platform: account.platform, url: account.url, agentId },
-          {
-            onSuccess: () => showToast("Added. Follow on " + platformLabel(account.platform) + " to finish", "success"),
             onError: (e) => showToast(e instanceof Error ? e.message : "Couldn't add that account", "error"),
-            onSettled: () => void openExternalLink(platformFollowUrl(account.platform, account.url)),
           },
         );
       }}
       style={({ pressed }) => [styles.followBtn, (pressed || follow.isPending) && styles.pressed]}
+      accessibilityLabel={youtubeConnected || providerConnected ? `Add and follow on ${label}` : "Add to your collection"}
     >
       {follow.isPending ? (
         <ActivityIndicator size="small" color={Colors.white} />
       ) : (
         <>
           <UserPlus size={14} color={Colors.white} />
-          <Text style={styles.followText}>Follow</Text>
+          <Text style={styles.followText}>Add</Text>
         </>
       )}
     </Pressable>
