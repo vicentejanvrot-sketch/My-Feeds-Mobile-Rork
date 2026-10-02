@@ -15,14 +15,64 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "app.rork.je0yu8oeyjzcpim4k10q0"
+      "bundleIdentifier": "app.rork.je0yu8oeyjzcpim4k10q0",
+      "associatedDomains": [
+        "applinks:webapp.myfeeds.ca"
+      ]
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon-foreground.png",
         "backgroundColor": "#000108"
       },
-      "package": "app.rork.je0yu8oeyjzcpim4k10q0"
+      "package": "app.rork.je0yu8oeyjzcpim4k10q0",
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "autoVerify": true,
+          "data": [
+            {
+              "scheme": "https",
+              "host": "webapp.myfeeds.ca",
+              "path": "/"
+            },
+            {
+              "scheme": "https",
+              "host": "webapp.myfeeds.ca",
+              "pathPrefix": "/feed"
+            },
+            {
+              "scheme": "https",
+              "host": "webapp.myfeeds.ca",
+              "pathPrefix": "/agents"
+            },
+            {
+              "scheme": "https",
+              "host": "webapp.myfeeds.ca",
+              "pathPrefix": "/runs"
+            },
+            {
+              "scheme": "https",
+              "host": "webapp.myfeeds.ca",
+              "pathPrefix": "/history"
+            },
+            {
+              "scheme": "https",
+              "host": "webapp.myfeeds.ca",
+              "pathPrefix": "/following"
+            },
+            {
+              "scheme": "https",
+              "host": "webapp.myfeeds.ca",
+              "pathPrefix": "/settings"
+            }
+          ],
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
+        }
+      ]
     },
     "web": {
       "favicon": "./assets/images/adaptive-icon.png",
@@ -30,7 +80,7 @@
       "output": "single",
       "name": "My Feeds",
       "shortName": "My Feeds",
-      "description": "My Feeds — AI agents that scan your channels and surface the new videos worth watching, all in one daily feed.",
+      "description": "My Feeds \u2014 AI agents that scan your channels and surface the new videos worth watching, all in one daily feed.",
       "themeColor": "#0B1220",
       "backgroundColor": "#0B1220",
       "display": "standalone"
