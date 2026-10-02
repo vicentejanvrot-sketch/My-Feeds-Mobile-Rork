@@ -45,7 +45,9 @@ enum AppTab: Hashable {
 /// routes. Keep in sync with expo/app/+native-intent.tsx.
 enum WebLink: Equatable {
     case dashboard
-    case feed(agentId: String?, status: ItemStatus?)
+    /// itemId and videoId (from the digest email) also open that item over
+    /// the feed: a YouTube video in the player, anything else in the reader.
+    case feed(agentId: String?, status: ItemStatus?, itemId: String?, videoId: String?)
     case agents
     case agentDetail(String)
     case agentForm(String?)
@@ -79,7 +81,12 @@ enum WebLink: Equatable {
         case "":
             self = .dashboard
         case "feed":
-            self = .feed(agentId: param("agent"), status: param("status").flatMap(ItemStatus.init(rawValue:)))
+            self = .feed(
+                agentId: param("agent"),
+                status: param("status").flatMap(ItemStatus.init(rawValue:)),
+                itemId: param("item"),
+                videoId: param("video")
+            )
         case "agents":
             if parts.count == 1 {
                 self = .agents
@@ -180,8 +187,15 @@ final class AppRouter {
         switch link {
         case .dashboard:
             selectedTab = .dashboard
-        case .feed(let agentId, let status):
+        case .feed(let agentId, let status, let itemId, let videoId):
             openFeed(agentId: agentId, status: status)
+            if let itemId {
+                if let videoId {
+                    openVideo(videoId: videoId, itemId: itemId)
+                } else {
+                    openPost(itemId: itemId)
+                }
+            }
         case .agents:
             agentsPath = NavigationPath()
             selectedTab = .agents
