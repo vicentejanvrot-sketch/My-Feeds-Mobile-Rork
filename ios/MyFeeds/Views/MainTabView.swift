@@ -26,7 +26,7 @@ struct MainTabView: View {
             .tabItem { Label("Dashboard", image: "TabDashboardIcon") }
             .tag(AppTab.dashboard)
 
-            NavigationStack {
+            NavigationStack(path: $router.agentsPath) {
                 AgentsView()
                     .withAppRoutes()
             }
@@ -55,6 +55,8 @@ struct MainTabView: View {
             .tag(AppTab.settings)
         }
         .tint(Theme.accent)
+        // A web link that arrived while signing in opens once the tabs show.
+        .onAppear { router.openPendingLink() }
     }
 }
 

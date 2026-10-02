@@ -6,6 +6,11 @@ struct ContentView: View {
     @Environment(AppRouter.self) private var router
     @State private var splashDone = false
 
+    private var isSignedIn: Bool {
+        if case .authenticated = auth.status { return true }
+        return false
+    }
+
     var body: some View {
         @Bindable var router = router
         ZStack {
@@ -46,6 +51,16 @@ struct ContentView: View {
         }
         .task {
             auth.start()
+        }
+        // Links to webapp.myfeeds.ca open here instead of the browser
+        // (universal links; see AppRouter.handleIncoming).
+        .onOpenURL { url in
+            router.handleIncoming(url, signedIn: isSignedIn)
+        }
+        .onContinueUserActivity(NSUserActivityTypeBrowsingWeb) { activity in
+            if let url = activity.webpageURL {
+                router.handleIncoming(url, signedIn: isSignedIn)
+            }
         }
     }
 }
