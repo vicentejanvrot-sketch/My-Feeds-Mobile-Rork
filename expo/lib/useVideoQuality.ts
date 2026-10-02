@@ -3,7 +3,10 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // ── Canonical quality keys ──────────────────────────────────────────
 
+// "Highest" plays each video at the best quality it was uploaded in (4K when
+// there is one). Same choice as "Highest available" on the web and iOS.
 export const QUALITY_KEYS = [
+  "Highest",
   "Auto",
   "1080p",
   "720p",
@@ -15,6 +18,7 @@ export const QUALITY_KEYS = [
 export type QualityKey = (typeof QUALITY_KEYS)[number];
 
 export const QUALITY_LABELS: Record<QualityKey, string> = {
+  Highest: "Highest available",
   Auto: "Auto",
   "1080p": "1080p HD",
   "720p": "720p HD",
@@ -25,6 +29,7 @@ export const QUALITY_LABELS: Record<QualityKey, string> = {
 
 /** YouTube IFrame API quality values. */
 export const QUALITY_YOUTUBE: Record<QualityKey, string> = {
+  Highest: "highres",
   Auto: "default",
   "1080p": "hd1080",
   "720p": "hd720",
@@ -60,7 +65,7 @@ const SPEED_KEY = "@settings/video_speed";
  * gear menu both read/write the same values.
  */
 export function useVideoQuality() {
-  const [quality, setQualityState] = useState<QualityKey>("1080p");
+  const [quality, setQualityState] = useState<QualityKey>("Highest");
   const [speed, setSpeedState] = useState<SpeedKey>("2");
   const [ready, setReady] = useState(false);
 
