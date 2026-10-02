@@ -2,8 +2,10 @@ import Foundation
 import UIKit
 import Observation
 
-/// Video quality options matching the companion apps.
+/// Video quality options matching the companion apps. "Highest available"
+/// plays each video at the best quality it was uploaded in (4K when there is one).
 enum VideoQuality: String, CaseIterable {
+    case highest = "Highest"
     case auto = "Auto"
     case q1080 = "1080p"
     case q720 = "720p"
@@ -13,6 +15,7 @@ enum VideoQuality: String, CaseIterable {
 
     var label: String {
         switch self {
+        case .highest: return "Highest available"
         case .auto: return "Auto"
         case .q1080: return "1080p HD"
         case .q720: return "720p HD"
@@ -25,6 +28,7 @@ enum VideoQuality: String, CaseIterable {
     /// YouTube IFrame API quality hint.
     var youtubeValue: String {
         switch self {
+        case .highest: return "highres"
         case .auto: return "default"
         case .q1080: return "hd1080"
         case .q720: return "hd720"
@@ -55,7 +59,7 @@ private enum PrefsKey {
     static let biometricEnabled = "settings.biometric_enabled"
 }
 
-/// Locally persisted playback preferences (quality default 1080p, speed default 2×)
+/// Locally persisted playback preferences (quality default Highest available, speed default 2×)
 /// that sync automatically across the user's devices via iCloud Key-Value Store.
 @Observable
 final class VideoPrefs {
@@ -103,7 +107,7 @@ final class VideoPrefs {
         // Make sure the iCloud KVS has the latest on-disk state before reading.
         cloud.synchronize()
 
-        quality = VideoQuality(rawValue: defaults.string(forKey: PrefsKey.quality) ?? "") ?? .q1080
+        quality = VideoQuality(rawValue: defaults.string(forKey: PrefsKey.quality) ?? "") ?? .highest
         speed = VideoSpeed(rawValue: defaults.string(forKey: PrefsKey.speed) ?? "") ?? .x2
         keepScreenOn = defaults.object(forKey: PrefsKey.keepScreenOn) as? Bool ?? false
         biometricEnabled = defaults.bool(forKey: PrefsKey.biometricEnabled)
