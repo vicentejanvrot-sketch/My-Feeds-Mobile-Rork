@@ -126,7 +126,30 @@ export default function FeedScreen() {
   const listRef = useRef<FlatList>(null);
   // openedAt changes on every "View Feed" from a collection, so the filter is
   // applied again even when the same collection was opened here before.
-  const params = useLocalSearchParams<{ agentId?: string; status?: string; openedAt?: string }>();
+  const params = useLocalSearchParams<{
+    agentId?: string;
+    status?: string;
+    openedAt?: string;
+    itemId?: string;
+    videoId?: string;
+  }>();
+
+  // A link to one item (each item in the digest email) opens it over the
+  // feed, once per link: a YouTube video in the player, a post in the reader.
+  const openedLinkRef = useRef<string | null>(null);
+  useEffect(() => {
+    const itemId = params.itemId?.trim();
+    if (!itemId) return;
+    const linkKey = `${itemId}|${params.openedAt ?? ""}`;
+    if (openedLinkRef.current === linkKey) return;
+    openedLinkRef.current = linkKey;
+    const videoId = params.videoId?.trim();
+    if (videoId && !isPostVideoId(videoId)) {
+      router.push(`/video-player?videoId=${encodeURIComponent(videoId)}&itemId=${encodeURIComponent(itemId)}`);
+    } else {
+      router.push(`/post-reader?itemId=${encodeURIComponent(itemId)}`);
+    }
+  }, [params.itemId, params.videoId, params.openedAt]);
 
   useFocusEffect(
     useCallback(() => {

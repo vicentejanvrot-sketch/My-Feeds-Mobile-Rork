@@ -55,9 +55,13 @@ function webLinkToRoute(raw: string): string | null {
       return "/";
     case "feed": {
       const status = param("status");
+      // item and video (from the digest email) open that item over the feed:
+      // a YouTube video in the player, anything else in the post reader.
       return withParams("/feed", {
         agentId: param("agent"),
         status: status && STATUSES.has(status) ? status : undefined,
+        itemId: param("item"),
+        videoId: param("video"),
         openedAt,
       });
     }
