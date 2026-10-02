@@ -17,7 +17,7 @@
       "supportsTablet": true,
       "bundleIdentifier": "app.rork.je0yu8oeyjzcpim4k10q0",
       "associatedDomains": [
-        "applinks:webapp.myfeeds.ca"
+        "applinks:myfeeds.ca"
       ]
     },
     "android": {
@@ -33,38 +33,8 @@
           "data": [
             {
               "scheme": "https",
-              "host": "webapp.myfeeds.ca",
-              "path": "/"
-            },
-            {
-              "scheme": "https",
-              "host": "webapp.myfeeds.ca",
-              "pathPrefix": "/feed"
-            },
-            {
-              "scheme": "https",
-              "host": "webapp.myfeeds.ca",
-              "pathPrefix": "/agents"
-            },
-            {
-              "scheme": "https",
-              "host": "webapp.myfeeds.ca",
-              "pathPrefix": "/runs"
-            },
-            {
-              "scheme": "https",
-              "host": "webapp.myfeeds.ca",
-              "pathPrefix": "/history"
-            },
-            {
-              "scheme": "https",
-              "host": "webapp.myfeeds.ca",
-              "pathPrefix": "/following"
-            },
-            {
-              "scheme": "https",
-              "host": "webapp.myfeeds.ca",
-              "pathPrefix": "/settings"
+              "host": "myfeeds.ca",
+              "pathPrefix": "/open"
             }
           ],
           "category": [

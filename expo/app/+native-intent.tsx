@@ -1,13 +1,16 @@
 // Translates links the OS hands to the app into app routes.
 //
-// Links to https://webapp.myfeeds.ca/... (the web app) open the matching screen
-// here instead of the browser: Android App Links and iOS Universal Links, set up
-// in app.json and in the web app's public/.well-known files. Same paths as the
-// web app's routes; keep in sync with ios/MyFeeds/Services/AppRouter.swift
-// (WebLink). Anything else (OAuth returns on the rork-app:// scheme, unknown
-// paths) opens the home screen, as before.
+// My Feeds links open the matching screen here instead of the browser. The
+// universal / App Link form is https://myfeeds.ca/open/<web app path> (the
+// association files live on myfeeds.ca, and without the app that URL redirects
+// to the web app); https://webapp.myfeeds.ca/<path> is understood too. Same
+// paths as the web app's routes; keep in sync with
+// ios/MyFeeds/Services/AppRouter.swift (WebLink). Anything else (OAuth returns
+// on the rork-app:// scheme, unknown paths) opens the home screen, as before.
 
-const WEB_HOSTS = new Set(["webapp.myfeeds.ca"]);
+const WEB_APP_HOST = "webapp.myfeeds.ca";
+const SITE_HOSTS = new Set(["myfeeds.ca", "www.myfeeds.ca"]);
+const OPEN_PREFIX = "/open";
 const STATUSES = new Set(["not_watched", "watched", "liked", "watch_later"]);
 
 function withParams(route: string, params: Record<string, string | undefined>): string {
@@ -22,8 +25,15 @@ function withParams(route: string, params: Record<string, string | undefined>): 
 // React Native runtime.
 function webLinkToRoute(raw: string): string | null {
   const match = /^https?:\/\/([^/?#]+)([^?#]*)(?:\?([^#]*))?/i.exec(raw);
-  if (!match || !WEB_HOSTS.has(match[1].toLowerCase())) return null;
-  const pathname = match[2] || "/";
+  if (!match) return null;
+  const host = match[1].toLowerCase();
+  let pathname = match[2] || "/";
+  if (SITE_HOSTS.has(host)) {
+    if (pathname !== OPEN_PREFIX && !pathname.startsWith(OPEN_PREFIX + "/")) return null;
+    pathname = pathname.slice(OPEN_PREFIX.length) || "/";
+  } else if (host !== WEB_APP_HOST) {
+    return null;
+  }
   const search: Record<string, string> = {};
   for (const pair of (match[3] ?? "").split("&")) {
     if (!pair) continue;
