@@ -37,11 +37,12 @@ enum AppTab: Hashable {
     case settings
 }
 
-/// A web app link (https://webapp.myfeeds.ca/...) translated to a screen in the
-/// app. Same paths as the web app's routes, so a link from an email, a message
-/// or the browser lands on the matching screen. Keep in sync with
-/// expo/app/+native-intent.tsx and the web app's
-/// public/.well-known/apple-app-site-association.
+/// A My Feeds link translated to a screen in the app. Two forms:
+/// https://myfeeds.ca/open/<web app path> is the universal link (the
+/// apple-app-site-association file lives on myfeeds.ca, and without the app
+/// that URL redirects to the web app), and https://webapp.myfeeds.ca/<path>
+/// for links that reach the app any other way. Same paths as the web app's
+/// routes. Keep in sync with expo/app/+native-intent.tsx.
 enum WebLink: Equatable {
     case dashboard
     case feed(agentId: String?, status: ItemStatus?)
@@ -52,13 +53,22 @@ enum WebLink: Equatable {
     case following(agentId: String?)
     case settings
 
-    static let hosts: Set<String> = ["webapp.myfeeds.ca"]
+    static let webAppHost = "webapp.myfeeds.ca"
+    static let siteHosts: Set<String> = ["myfeeds.ca", "www.myfeeds.ca"]
+    static let openPrefix = "/open"
 
     /// nil when the URL isn't one of ours, so other links are left alone.
     init?(url: URL) {
         guard let scheme = url.scheme?.lowercased(), scheme == "https" || scheme == "http",
-              let host = url.host?.lowercased(), WebLink.hosts.contains(host) else { return nil }
-        let parts = url.path.split(separator: "/").map(String.init)
+              let host = url.host?.lowercased() else { return nil }
+        var path = url.path
+        if WebLink.siteHosts.contains(host) {
+            guard path == WebLink.openPrefix || path.hasPrefix(WebLink.openPrefix + "/") else { return nil }
+            path = String(path.dropFirst(WebLink.openPrefix.count))
+        } else if host != WebLink.webAppHost {
+            return nil
+        }
+        let parts = path.split(separator: "/").map(String.init)
         let query = URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems ?? []
         func param(_ name: String) -> String? {
             guard let value = query.first(where: { $0.name == name })?.value, !value.isEmpty else { return nil }
@@ -141,7 +151,7 @@ final class AppRouter {
     }
 
     /// Entry point for links opened from outside the app (universal links).
-    /// Returns false for URLs that aren't My Feeds web links.
+    /// Returns false for URLs that aren't My Feeds links.
     @discardableResult
     func handleIncoming(_ url: URL, signedIn: Bool) -> Bool {
         guard let link = WebLink(url: url) else { return false }

@@ -52,7 +52,7 @@ struct ContentView: View {
         .task {
             auth.start()
         }
-        // Links to webapp.myfeeds.ca open here instead of the browser
+        // My Feeds links (myfeeds.ca/open/...) open here instead of the browser
         // (universal links; see AppRouter.handleIncoming).
         .onOpenURL { url in
             router.handleIncoming(url, signedIn: isSignedIn)
