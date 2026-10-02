@@ -23,19 +23,6 @@ nonisolated struct Agent: Codable, Identifiable, Hashable, Sendable {
     var updatedAt: String?
 }
 
-/// Just the description, sent as null when cleared (a plain optional would be
-/// left out of the JSON and not clear it).
-nonisolated struct AgentDescriptionPatch: Encodable, Sendable {
-    var description: String?
-
-    enum CodingKeys: String, CodingKey { case description }
-
-    func encode(to encoder: Encoder) throws {
-        var c = encoder.container(keyedBy: CodingKeys.self)
-        try c.encode(description, forKey: .description)
-    }
-}
-
 /// Payload for creating/updating agents. Encoded via convertToSnakeCase.
 nonisolated struct AgentPayload: Codable, Sendable {
     var name: String
