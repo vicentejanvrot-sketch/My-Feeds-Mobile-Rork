@@ -64,7 +64,16 @@
       ],
       "expo-font",
       "expo-web-browser",
-      "expo-secure-store"
+      "expo-secure-store",
+      [
+        "expo-share-intent",
+        {
+          "disableIOS": true,
+          "androidIntentFilters": [
+            "text/*"
+          ]
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true

@@ -832,6 +832,14 @@ export default function FollowingScreen() {
             <ArrowLeft size={20} color={Colors.textSecondary} />
           </Pressable>
           <Text style={styles.heading}>People</Text>
+          <Pressable
+            onPress={() => router.push("/share")}
+            style={({ pressed }) => [styles.addLinkBtn, pressed && styles.pressed]}
+            accessibilityLabel="Add from link"
+          >
+            <Link2 size={15} color={Colors.textPrimary} />
+            <Text style={styles.addLinkText}>Add from link</Text>
+          </Pressable>
           {isScanning || (!loading && toScan.length > 0) ? (
             <Pressable
               disabled={isScanning}
@@ -1023,6 +1031,18 @@ const styles = StyleSheet.create({
   contentWide: { maxWidth: 720, alignSelf: "center", width: "100%" },
   header: { flexDirection: "row", alignItems: "center", gap: 10 },
   backBtn: { padding: 4 },
+  addLinkBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    height: 36,
+    paddingHorizontal: 12,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    backgroundColor: Colors.input,
+  },
+  addLinkText: { fontSize: 13, fontWeight: "600" as const, color: Colors.textPrimary },
   heading: { flex: 1, fontSize: 22, fontWeight: "800" as const, color: Colors.textPrimary },
   subtitle: { marginTop: 6, marginBottom: 16 },
   scanBtn: {

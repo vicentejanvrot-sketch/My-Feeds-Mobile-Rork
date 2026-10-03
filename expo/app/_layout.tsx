@@ -11,6 +11,7 @@ import { ToastProvider, ToastHost } from "@/components/Toast";
 import { RunningOverlayProvider, RunningOverlay } from "@/lib/running-overlay";
 import { YouTubeConnectionProvider } from "@/lib/useYouTubeConnection";
 import { Colors } from "@/constants/colors";
+import { ShareIntentProvider, useShareIntentContext } from "expo-share-intent";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -73,6 +74,23 @@ function TimedSplash({ onDone }: { onDone: () => void }) {
   );
 }
 
+/**
+ * Share to My Feeds (Android): when another app shares a profile or post
+ * here, open the share card over the app. The native module isn't in every
+ * build (Expo Go, web); there the hook just never reports anything.
+ */
+function ShareIntentRouter() {
+  const { status } = useAuth();
+  const { hasShareIntent, shareIntent, resetShareIntent } = useShareIntentContext();
+  useEffect(() => {
+    if (!hasShareIntent || status === "loading") return;
+    const text = [shareIntent.webUrl, shareIntent.text].filter(Boolean).join(" ").trim();
+    resetShareIntent();
+    if (text) router.push({ pathname: "/share", params: { text, from: "share" } });
+  }, [hasShareIntent, shareIntent, status, resetShareIntent]);
+  return null;
+}
+
 function AuthGate() {
   const { status } = useAuth();
 
@@ -95,6 +113,7 @@ function AuthGate() {
   // Each group layout contains its own redirect guard.
   return (
     <YouTubeConnectionProvider>
+      <ShareIntentRouter />
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="auth" options={{ headerShown: false }} />
@@ -185,6 +204,15 @@ function AuthGate() {
             ),
           }}
         />
+        <Stack.Screen
+          name="share"
+          options={{
+            presentation: "transparentModal",
+            animation: "fade",
+            headerShown: false,
+            contentStyle: { backgroundColor: "transparent" },
+          }}
+        />
         <Stack.Screen name="+not-found" />
       </Stack>
     </YouTubeConnectionProvider>
@@ -192,8 +220,21 @@ function AuthGate() {
 }
 
 export default function RootLayout() {
+  return (
+    <ShareIntentProvider options={{ debug: false, resetOnBackground: true, disabled: Platform.OS === "web" }}>
+      <RootContent />
+    </ShareIntentProvider>
+  );
+}
+
+function RootContent() {
   useWebGlobalStyles();
+  const { hasShareIntent } = useShareIntentContext();
   const [splashDone, setSplashDone] = useState<boolean>(false);
+  // Opened from another app's share sheet: skip the 3-second splash.
+  useEffect(() => {
+    if (hasShareIntent) setSplashDone(true);
+  }, [hasShareIntent]);
 
   return (
     <QueryClientProvider client={queryClient}>

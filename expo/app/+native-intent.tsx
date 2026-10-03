@@ -78,6 +78,9 @@ function webLinkToRoute(raw: string): string | null {
       return withParams("/following", { agentId: param("agent"), openedAt });
     case "settings":
       return "/settings";
+    // myfeeds.ca/open/share?url=<link>: the "Add to My Feeds" card.
+    case "share":
+      return withParams("/share", { text: [param("url"), param("text")].filter(Boolean).join(" ") || undefined });
     default:
       return "/";
   }
