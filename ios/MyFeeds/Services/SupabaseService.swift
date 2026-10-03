@@ -368,6 +368,54 @@ final class SupabaseService {
         try await db.from("channels").delete().eq("id", value: id).execute()
     }
 
+    /// Moves a source to another collection, with the posts it already brought
+    /// in. If that collection already follows the same account, the two are
+    /// merged: this copy is removed and only posts the other doesn't have move
+    /// over. Same steps as moveSource in the web and Expo apps.
+    func moveSource(_ channel: Channel, toAgentId: String) async throws {
+        struct Row: Decodable { let id: String }
+        struct VideoRow: Decodable { let videoId: String? }
+
+        var existingQuery = db.from("channels").select("id").eq("agent_id", value: toAgentId)
+        if let channelId = channel.channelId, !channelId.isEmpty {
+            existingQuery = existingQuery.eq("channel_id", value: channelId)
+        } else {
+            existingQuery = existingQuery.eq("channel_url", value: channel.channelUrl ?? "")
+        }
+        let existing: [Row] = try await existingQuery.limit(1).execute().value
+
+        // Posts first, while the source still says where they came from. Best
+        // effort: if this fails the source still moves and its old posts stay.
+        if let channelId = channel.channelId, !channelId.isEmpty {
+            do {
+                let there: [VideoRow] = try await db.from("items").select("video_id")
+                    .eq("agent_id", value: toAgentId).eq("channel_id", value: channelId)
+                    .execute().value
+                let already = Array(Set(there.compactMap(\.videoId)))
+                var start = 0
+                while start < already.count {
+                    let chunk = Array(already[start..<min(start + 200, already.count)])
+                    try await db.from("items").delete()
+                        .eq("agent_id", value: channel.agentId).eq("channel_id", value: channelId)
+                        .in("video_id", values: chunk)
+                        .execute()
+                    start += 200
+                }
+                try await db.from("items").update(["agent_id": toAgentId])
+                    .eq("agent_id", value: channel.agentId).eq("channel_id", value: channelId)
+                    .execute()
+            } catch {
+                // The source still moves below.
+            }
+        }
+
+        if existing.isEmpty {
+            try await db.from("channels").update(["agent_id": toAgentId]).eq("id", value: channel.id).execute()
+        } else {
+            try await db.from("channels").delete().eq("id", value: channel.id).execute()
+        }
+    }
+
     /// Adds a YouTube channel. add-source looks it up so it has its name,
     /// picture and uploads playlist from the start (the People screen shows
     /// them right away), the same as the web and Expo apps.

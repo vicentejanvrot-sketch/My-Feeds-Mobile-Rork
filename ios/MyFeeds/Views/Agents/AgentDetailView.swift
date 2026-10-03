@@ -35,6 +35,9 @@ struct AgentDetailView: View {
     @State private var isSubmittingModal = false
     @State private var recipientToRemove: AgentRecipient?
     @State private var channelToRemove: Channel?
+    /// The source whose "Move to" list is open, and the collections it can go to.
+    @State private var channelToMove: Channel?
+    @State private var otherAgents: [Agent] = []
     @State private var runToCancel: Run?
     @State private var showDeleteAgent = false
     @State private var isDeletingAgent = false
@@ -119,6 +122,21 @@ struct AgentDetailView: View {
             }
         } message: {
             Text("Remove \"\(channelToRemove?.displayName ?? "")\" from this collection?")
+        }
+        .confirmationDialog(
+            "Move \"\(channelToMove?.displayName ?? "")\" to",
+            isPresented: Binding(
+                get: { channelToMove != nil },
+                set: { if !$0 { channelToMove = nil } }
+            ),
+            titleVisibility: .visible
+        ) {
+            ForEach(otherAgents) { target in
+                Button(target.name) {
+                    if let channel = channelToMove { moveChannel(channel, to: target) }
+                }
+            }
+            Button("Cancel", role: .cancel) { channelToMove = nil }
         }
         .alert("Cancel Run", isPresented: Binding(
             get: { runToCancel != nil },
@@ -557,6 +575,16 @@ struct AgentDetailView: View {
                     }
                     .buttonStyle(.plain)
                     Spacer()
+                    Button {
+                        channelToMove = channel
+                    } label: {
+                        Image(systemName: "folder")
+                            .font(.system(size: 13))
+                            .foregroundStyle(Theme.textSecondary)
+                    }
+                    .accessibilityLabel("Move to another collection")
+                    .disabled(otherAgents.isEmpty)
+                    .padding(.trailing, 10)
                     Button {
                         channelToRemove = channel
                     } label: {
@@ -1117,6 +1145,7 @@ struct AgentDetailView: View {
             if let allAgents = try? await service.fetchAgents() {
                 let sorted = allAgents.sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
                 accentIndex = sorted.firstIndex { $0.id == agentId } ?? 0
+                otherAgents = sorted.filter { $0.id != agentId }
             }
 
             let statuses = try await service.fetchRunItemStatuses(runIds: loadedRuns.map(\.id))
@@ -1159,6 +1188,19 @@ struct AgentDetailView: View {
             } catch {
                 toasts.show("Couldn't update priority", type: .error)
                 await load()
+            }
+        }
+    }
+
+    private func moveChannel(_ channel: Channel, to target: Agent) {
+        channelToMove = nil
+        Task {
+            do {
+                try await SupabaseService.shared.moveSource(channel, toAgentId: target.id)
+                toasts.show("Moved to \(target.name)")
+                await load()
+            } catch {
+                toasts.show("Couldn't move it", type: .error)
             }
         }
     }
