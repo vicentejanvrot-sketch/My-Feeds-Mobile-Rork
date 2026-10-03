@@ -89,7 +89,16 @@ final class ShareModel {
         step = .loading
         error = nil
         do {
-            let p = try await api.preview(shared)
+            let p: SharePreview
+            do {
+                p = try await api.preview(shared)
+            } catch {
+                // Share links (facebook.com/share/..., short links) can need the
+                // phone itself to open them. The link preview already followed
+                // it here, so try once more with the address it ended up at.
+                guard let resolved = await resolvedLink(), resolved != shared else { throw error }
+                p = try await api.preview(resolved)
+            }
             preview = p
             // Nothing is picked for the user: Add stays off until they choose.
             selected = []
@@ -229,12 +238,27 @@ final class ShareModel {
     var quick: QuickAccount?
     @ObservationIgnored private var quickToken = UUID()
     @ObservationIgnored private var metadataProvider: LPMetadataProvider?
+    /// Where the shared link ends up after its redirects, from the link preview.
+    @ObservationIgnored private var resolvedURL: String?
+    @ObservationIgnored private var previewDone = false
+
+    /// The link's final address, waiting up to a few seconds for the preview.
+    private func resolvedLink() async -> String? {
+        for _ in 0..<16 where !previewDone {
+            try? await Task.sleep(for: .milliseconds(250))
+        }
+        guard let resolvedURL, !resolvedURL.contains("/login"), !resolvedURL.contains("/share/") else { return nil }
+        return resolvedURL
+    }
 
     private func showQuick(for text: String) {
         let token = UUID()
         quickToken = token
+        resolvedURL = nil
+        previewDone = false
         guard let parsed = QuickAccount.parse(text) else {
             quick = nil
+            previewDone = true
             return
         }
         let (url, account) = parsed
@@ -244,10 +268,13 @@ final class ShareModel {
         provider.timeout = 8
         provider.startFetchingMetadata(for: url) { [weak self] metadata, _ in
             let title = metadata?.title
+            let finalURL = metadata?.url?.absoluteString
             let imageProvider = metadata?.imageProvider
             Task { @MainActor [weak self] in
                 guard let self, self.quickToken == token else { return }
                 if let title { self.quick?.applyTitle(title) }
+                self.resolvedURL = finalURL
+                self.previewDone = true
             }
             imageProvider?.loadObject(ofClass: UIImage.self) { object, _ in
                 let data = (object as? UIImage)?.jpegData(compressionQuality: 0.85)
