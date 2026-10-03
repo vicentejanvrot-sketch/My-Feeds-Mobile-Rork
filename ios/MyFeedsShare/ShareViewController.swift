@@ -31,20 +31,31 @@ final class ShareViewController: UIViewController {
     }
 
     /// Links first (the server reads the first link it finds), then any text.
+    /// Apps share in different shapes: YouTube, TikTok, Facebook and LinkedIn
+    /// add a preview image or video next to the link, and some send the link
+    /// as text or data. Anything that isn't a link or text is ignored.
     @MainActor
     private static func sharedText(from items: [NSExtensionItem]) async -> String {
         var links: [String] = []
         var texts: [String] = []
+        func string(from loaded: Any?) -> String? {
+            switch loaded {
+            case let url as URL: return url.absoluteString
+            case let text as String: return text
+            case let attributed as NSAttributedString: return attributed.string
+            case let data as Data: return String(data: data, encoding: .utf8)
+            default: return nil
+            }
+        }
         for item in items {
             if let text = item.attributedContentText?.string, !text.isEmpty { texts.append(text) }
             for provider in item.attachments ?? [] {
-                if provider.hasItemConformingToTypeIdentifier(UTType.url.identifier),
-                   let loaded = try? await provider.loadItem(forTypeIdentifier: UTType.url.identifier) {
-                    if let url = loaded as? URL { links.append(url.absoluteString) }
-                    else if let text = loaded as? String { links.append(text) }
-                } else if provider.hasItemConformingToTypeIdentifier(UTType.plainText.identifier),
-                          let loaded = try? await provider.loadItem(forTypeIdentifier: UTType.plainText.identifier) {
-                    if let text = loaded as? String { texts.append(text) }
+                if provider.hasItemConformingToTypeIdentifier(UTType.url.identifier) {
+                    let loaded = try? await provider.loadItem(forTypeIdentifier: UTType.url.identifier)
+                    if let text = string(from: loaded), !text.isEmpty { links.append(text) }
+                } else if provider.hasItemConformingToTypeIdentifier(UTType.text.identifier) {
+                    let loaded = try? await provider.loadItem(forTypeIdentifier: UTType.text.identifier)
+                    if let text = string(from: loaded), !text.isEmpty { texts.append(text) }
                 }
             }
         }
