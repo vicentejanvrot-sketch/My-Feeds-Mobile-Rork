@@ -57,7 +57,8 @@ import { useToast } from "@/components/Toast";
 import { timeAgo, compactNumber, formatDuration } from "@/lib/format";
 import { PlatformBadge } from "@/components/PlatformBadge";
 // Named SourcePlatform here: react-native's Platform (Platform.OS) is imported too.
-import { PLATFORMS, PLATFORM_META, platformOf, isPostVideoId, type Platform as SourcePlatform } from "@/lib/platforms";
+import { PLATFORMS, PLATFORM_META, platformOf, isPostVideoId, isNewPostsCard, type Platform as SourcePlatform } from "@/lib/platforms";
+import { openPrivateProfile } from "@/lib/open-link";
 
 /** Extract YouTube video ID from a watch URL (fallback when video_id is null). */
 function extractYoutubeId(url: string | null): string | null {
@@ -492,6 +493,17 @@ export default function FeedScreen() {
 
   const openVideo = useCallback(
     (item: ItemWithAnalysis) => {
+      // A private account's "new posts" card: its profile, inside the app, and
+      // the card counts as seen.
+      if (isNewPostsCard(item.video_id)) {
+        if (item.user_status !== "watched") void updateStatus.mutateAsync({ id: item.id, status: "watched" }).catch(() => {});
+        openPrivateProfile({
+          url: item.url ?? "",
+          name: (item.channel_name ?? "").replace(/\s*\(@[^)]*\)\s*$/, ""),
+          platformLabel: PLATFORM_META[platformOf(item.platform)].label,
+        });
+        return;
+      }
       // X posts and Reddit threads open in the in-app reader
       if (isPostVideoId(item.video_id)) {
         router.push(`/post-reader?itemId=${encodeURIComponent(item.id)}`);
@@ -500,7 +512,7 @@ export default function FeedScreen() {
       const vid = item.video_id?.trim() || extractYoutubeId(item.url);
       router.push(`/video-player?videoId=${encodeURIComponent(vid ?? "")}&itemId=${encodeURIComponent(item.id)}`);
     },
-    [],
+    [updateStatus],
   );
 
   const renderFeedCard = useCallback(

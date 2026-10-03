@@ -102,6 +102,8 @@ export interface Item {
     // GitHub repos and releases
     stars?: number;
     forks?: number;
+    // A private account's "N new posts" card: how many are new.
+    new_posts?: number;
   } | null;
   media: { type: string; url: string }[] | null;
 }

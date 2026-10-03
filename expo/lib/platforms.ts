@@ -232,6 +232,12 @@ export function isPostVideoId(videoId: string | null | undefined): boolean {
   return !!videoId && /^(x|reddit|instagram|linkedin|github|tiktok|facebook|apple_music|apple_podcasts|apple_books|youtube_music|spotify):/.test(videoId);
 }
 
+// A private account's "N new posts" card (run-agent saves its video_id as
+// "<platform>:newposts:<source id>:<count>"). It opens the profile in the app.
+export function isNewPostsCard(videoId: string | null | undefined): boolean {
+  return !!videoId && /^[a-z_]+:newposts:/.test(videoId);
+}
+
 export function formatCount(num: number | null | undefined): string {
   if (num === null || num === undefined) return "0";
   if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M`;

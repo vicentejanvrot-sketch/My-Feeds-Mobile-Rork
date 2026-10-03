@@ -39,7 +39,7 @@ import { useToast } from "@/components/Toast";
 import { openExternalLink } from "@/lib/open-link";
 import { timeAgo } from "@/lib/format";
 import { PlatformBadge } from "@/components/PlatformBadge";
-import { PLATFORM_META, platformOf, formatCount } from "@/lib/platforms";
+import { PLATFORM_META, platformOf, formatCount, isNewPostsCard } from "@/lib/platforms";
 import {
   POSITION_SAVE_INTERVAL_MS,
   minResumeSeconds,
@@ -851,6 +851,19 @@ export default function PostReaderScreen() {
   }, [itemId, savedOnPhone]);
 
   const item = localItem ?? itemQ.data ?? null;
+  // A private account's "new posts" card (e.g. opened from the email) shows
+  // the profile inside the app instead.
+  useEffect(() => {
+    if (!item || !isNewPostsCard(item.video_id)) return;
+    router.replace({
+      pathname: "/profile-viewer",
+      params: {
+        url: item.url,
+        name: (item.channel_name ?? "").replace(/\s*\(@[^)]*\)\s*$/, ""),
+        platform: PLATFORM_META[platformOf(item.platform)].label,
+      },
+    });
+  }, [item]);
   const [status, setStatus] = useState<ItemStatus>("not_watched");
   useEffect(() => {
     const source = itemQ.data ?? localItem;
