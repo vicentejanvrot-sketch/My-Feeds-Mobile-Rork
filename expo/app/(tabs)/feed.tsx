@@ -504,7 +504,14 @@ export default function FeedScreen() {
   );
 
   const renderFeedCard = useCallback(
-    ({ item }: { item: ItemWithAnalysis }) => (
+    ({ item }: { item: ItemWithAnalysis }) => !details[item.id] ? (
+      // Its full row is still loading: a placeholder, not a half-empty card.
+      <View style={styles.placeholderCard}>
+        <View style={styles.placeholderMedia} />
+        <View style={[styles.placeholderLine, { width: "80%" }]} />
+        <View style={[styles.placeholderLine, { width: "40%" }]} />
+      </View>
+    ) : (
       <FeedCardMemo
         item={item}
         sourceLabel={sourceLabelFor(item)}
@@ -515,7 +522,7 @@ export default function FeedScreen() {
         onToggleSelection={toggleSelection}
       />
     ),
-    [openVideo, setStatus, selectionMode, selectedIds, toggleSelection, sourceLabelFor],
+    [openVideo, setStatus, selectionMode, selectedIds, toggleSelection, sourceLabelFor, details],
   );
 
   const handleAgentChange = useCallback(
@@ -1655,6 +1662,9 @@ const styles = StyleSheet.create({
 
   // List
   loadingBox: { paddingVertical: 60, alignItems: "center", gap: 12 },
+  placeholderCard: { borderRadius: 14, borderWidth: 1, borderColor: Colors.border, backgroundColor: Colors.card, padding: 12, gap: 10, marginBottom: 14 },
+  placeholderMedia: { aspectRatio: 16 / 9, borderRadius: 10, backgroundColor: Colors.input },
+  placeholderLine: { height: 12, borderRadius: 6, backgroundColor: Colors.input },
   loadingText: { fontSize: 13, fontWeight: "600", color: Colors.textSecondary },
   moreFooter: { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 10, paddingVertical: 18 },
   listContent: { padding: 16, gap: 14, paddingBottom: 32, maxWidth: 720, width: "100%" },
