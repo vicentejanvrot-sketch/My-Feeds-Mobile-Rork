@@ -103,14 +103,18 @@ final class SupabaseService {
         return all
     }
 
-    /// One item with its analysis, for the post reader.
+    /// One item with its analysis, for the post reader. Instagram's video and
+    /// photo links expire a few days after the post was saved; expired ones are
+    /// renewed before the post shows (see ExpiredMedia).
     func fetchItem(id: String) async throws -> FeedItem {
+        let item: FeedItem
         do {
-            return try await db.from("items").select("*, item_analysis(*)")
+            item = try await db.from("items").select("*, item_analysis(*)")
                 .eq("id", value: id).single().execute().value
         } catch {
-            return try await db.from("items").select().eq("id", value: id).single().execute().value
+            item = try await db.from("items").select().eq("id", value: id).single().execute().value
         }
+        return await withFreshMedia(item)
     }
 
     /// Summary and transcript key moments for one video, for the player.
