@@ -85,10 +85,10 @@ const STATUS_ICONS: Record<
   ItemStatus,
   { icon: typeof Check; color: string; label: string }
 > = {
-  not_watched: { icon: Circle, color: Colors.textMuted, label: "Not Watched" },
-  watched: { icon: Check, color: Colors.success, label: "Watched" },
+  not_watched: { icon: Circle, color: Colors.textMuted, label: "New" },
+  watched: { icon: Check, color: Colors.success, label: "Seen" },
   liked: { icon: Heart, color: Colors.destructive, label: "Liked" },
-  watch_later: { icon: Clock, color: Colors.warning, label: "Watch Later" },
+  watch_later: { icon: Clock, color: Colors.warning, label: "Later" },
 };
 
 const STATUS_ENTRIES = Object.entries(STATUS_ICONS) as [
@@ -1738,9 +1738,9 @@ export default function VideoPlayerScreen() {
           pointerEvents="none"
         >
           <View style={styles.watchedBox}>
-            <Text style={styles.watchedTitle}>Marked as Watched</Text>
+            <Text style={styles.watchedTitle}>Marked as Seen</Text>
             <Text style={styles.watchedSubtitle}>
-              Video has been marked as watched in your library.
+              Video has been marked as seen in your library.
             </Text>
           </View>
         </Animated.View>

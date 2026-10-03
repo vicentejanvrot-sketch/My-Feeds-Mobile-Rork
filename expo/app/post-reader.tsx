@@ -1147,7 +1147,7 @@ export default function PostReaderScreen() {
             <View style={styles.barGroup}>
               {downloadButton}
               <BarButton
-                label={bookmarked ? "Remove from Watch Later" : "Save (Watch Later)"}
+                label={bookmarked ? "Remove from Later" : "Save for Later"}
                 selected={bookmarked}
                 onPress={() => changeStatus(bookmarked ? "not_watched" : "watch_later")}
                 icon={<Bookmark size={22} color={Colors.textPrimary} fill={bookmarked ? Colors.textPrimary : "transparent"} />}

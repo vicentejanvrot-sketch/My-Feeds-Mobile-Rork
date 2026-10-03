@@ -3,10 +3,10 @@ import { Colors } from "@/constants/colors";
 import type { ChannelStatus } from "@/lib/database";
 
 const CONFIG: Record<ChannelStatus, { label: string; color: string }> = {
-  not_watched: { label: "Not Watched", color: Colors.textMuted },
-  watched: { label: "Watched", color: Colors.success },
+  not_watched: { label: "New", color: Colors.textMuted },
+  watched: { label: "Seen", color: Colors.success },
   liked: { label: "Liked", color: Colors.destructive },
-  watch_later: { label: "Watch Later", color: Colors.warning },
+  watch_later: { label: "Later", color: Colors.warning },
 };
 
 /** Convert an HSL color string to HSLA with a given alpha. */
@@ -16,10 +16,10 @@ function hsla(hsl: string, alpha: number): string {
 
 export const CHANNEL_STATUS_FILTERS = [
   { key: "all", label: "All Channels" },
-  { key: "not_watched", label: "Not Watched" },
-  { key: "watched", label: "Watched" },
+  { key: "not_watched", label: "New" },
+  { key: "watched", label: "Seen" },
   { key: "liked", label: "Liked/Saved" },
-  { key: "watch_later", label: "Watch Later" },
+  { key: "watch_later", label: "Later" },
 ] as const;
 
 export type ChannelFilterKey = (typeof CHANNEL_STATUS_FILTERS)[number]["key"];

@@ -57,7 +57,7 @@ const TOURS: Record<Platform, Tour> = {
     steps: [
       { title: "Play it here", body: "Tap the video to watch it inside My Feeds. It remembers where you stopped." },
       { title: "Jump to the good parts", body: "Under the player, the summary lists the key moments. Tap a time to jump straight there." },
-      { title: "Keep track", body: "Mark it Watched, Watch later or Liked from the card so your feed stays tidy." },
+      { title: "Keep track", body: "Mark it Seen, Later or Liked from the card so your feed stays tidy." },
     ],
     saveActions: [],
     outActions: [],
@@ -179,7 +179,7 @@ const TOURS: Record<Platform, Tour> = {
     body: "New single by Nova Lane · 1 track · Pop",
     steps: [
       { title: "Listen here", body: "Tap it to open Apple Music's player. You hear a preview, or the full songs if you're signed in to Apple Music." },
-      { title: "Heart to save", body: "The heart saves it in My Feeds. Save adds it to Watch later." },
+      { title: "Heart to save", body: "The heart saves it in My Feeds. Save adds it to Later." },
       { title: "Add it to Apple Music", body: "\"Add album to Apple Music\" puts the songs in your My Feeds playlist there, ready to download for offline." },
     ],
     saveActions: [{ icon: Heart, label: "Like" }, { icon: Bookmark, label: "Save" }],
@@ -195,7 +195,7 @@ const TOURS: Record<Platform, Tour> = {
     body: "Full episode, played inside My Feeds.",
     steps: [
       { title: "Listen to the whole episode", body: "Tap it to play the full episode here. It remembers where you stopped, on every device." },
-      { title: "Heart to save", body: "The heart saves it in My Feeds. Save adds it to Watch later." },
+      { title: "Heart to save", body: "The heart saves it in My Feeds. Save adds it to Later." },
       { title: "Follow the show on Apple Podcasts", body: "Following or rating the show opens Apple Podcasts." },
     ],
     saveActions: [{ icon: Heart, label: "Like" }, { icon: Bookmark, label: "Save" }],
@@ -211,7 +211,7 @@ const TOURS: Record<Platform, Tour> = {
     body: "New audiobook by Maya Ortiz · Fiction",
     steps: [
       { title: "Hear a sample", body: "Tap it to see the cover and description, and play Apple's sample right here." },
-      { title: "Heart to save", body: "The heart saves it in My Feeds. Save adds it to Watch later." },
+      { title: "Heart to save", body: "The heart saves it in My Feeds. Save adds it to Later." },
       { title: "Listen in Apple Books", body: "Buying and listening to the whole book opens Apple Books." },
     ],
     saveActions: [{ icon: Heart, label: "Like" }, { icon: Bookmark, label: "Save" }],
@@ -227,7 +227,7 @@ const TOURS: Record<Platform, Tour> = {
     body: "New album by Nova Lane · 10 tracks",
     steps: [
       { title: "Listen here", body: "Tap it to play the songs, or the music video, right inside My Feeds." },
-      { title: "Heart to save", body: "The heart saves it in My Feeds. Save adds it to Watch later." },
+      { title: "Heart to save", body: "The heart saves it in My Feeds. Save adds it to Later." },
       { title: "Add it to YouTube Music", body: "\"Add to YouTube Music\" puts the songs in your My Feeds playlist there, using your connected YouTube account." },
     ],
     saveActions: [{ icon: Heart, label: "Like" }, { icon: Bookmark, label: "Save" }],
@@ -243,7 +243,7 @@ const TOURS: Record<Platform, Tour> = {
     body: "New single by Nova Lane · 1 track · Pop",
     steps: [
       { title: "Listen here", body: "Tap it to open Spotify's player and hear a preview right inside My Feeds." },
-      { title: "Heart to save", body: "The heart saves it in My Feeds. Save adds it to Watch later." },
+      { title: "Heart to save", body: "The heart saves it in My Feeds. Save adds it to Later." },
       { title: "Play it in Spotify", body: "\"Open in Spotify\" plays the full release in the Spotify app, where you can like it or add it to a playlist." },
     ],
     saveActions: [{ icon: Heart, label: "Like" }, { icon: Bookmark, label: "Save" }],
@@ -378,8 +378,8 @@ export function ReadWatchTour({ defaultPlatform = "youtube" }: { defaultPlatform
         <View style={[zoneStyle(2), styles.zoneWithMarker]}>
           {platform === "youtube" ? (
             <View style={styles.pillRow}>
-              <ActionPill action={{ icon: CheckCircle2, label: "Watched" }} />
-              <ActionPill action={{ icon: Clock, label: "Watch later" }} />
+              <ActionPill action={{ icon: CheckCircle2, label: "Seen" }} />
+              <ActionPill action={{ icon: Clock, label: "Later" }} />
               <ActionPill action={{ icon: Heart, label: "Liked" }} />
             </View>
           ) : (

@@ -78,10 +78,10 @@ type SortMode = "account" | "priority" | "recent" | "views";
 
 const STATUS_OPTIONS: { key: StatusFilter; label: string; icon?: React.ReactNode }[] = [
   { key: "all", label: "All Statuses" },
-  { key: "not_watched", label: "Not Watched", icon: <Circle size={16} color={Colors.textMuted} /> },
-  { key: "watched", label: "Watched", icon: <Check size={16} color={Colors.success} /> },
+  { key: "not_watched", label: "New", icon: <Circle size={16} color={Colors.textMuted} /> },
+  { key: "watched", label: "Seen", icon: <Check size={16} color={Colors.success} /> },
   { key: "liked", label: "Liked/Saved", icon: <Heart size={16} color={Colors.destructive} /> },
-  { key: "watch_later", label: "Watch Later", icon: <Clock size={16} color={Colors.warning} /> },
+  { key: "watch_later", label: "Later", icon: <Clock size={16} color={Colors.warning} /> },
 ];
 
 // Feed cards load 10 at a time; the next 10 when the list reaches the end.
@@ -98,17 +98,17 @@ const ITEM_STATUS_ICONS: Record<
   ItemStatus,
   { icon: typeof Check; color: string; label: string }
 > = {
-  not_watched: { icon: Circle, color: Colors.textMuted, label: "Not Watched" },
-  watched: { icon: Check, color: Colors.success, label: "Watched" },
+  not_watched: { icon: Circle, color: Colors.textMuted, label: "New" },
+  watched: { icon: Check, color: Colors.success, label: "Seen" },
   liked: { icon: Heart, color: Colors.destructive, label: "Liked/Saved" },
-  watch_later: { icon: Clock, color: Colors.warning, label: "Watch Later" },
+  watch_later: { icon: Clock, color: Colors.warning, label: "Later" },
 };
 
 const STATUS_OPTIONS_COMPACT: { key: ItemStatus; label: string }[] = [
-  { key: "not_watched", label: "Not Watched" },
-  { key: "watched", label: "Watched" },
+  { key: "not_watched", label: "New" },
+  { key: "watched", label: "Seen" },
   { key: "liked", label: "Liked/Saved" },
-  { key: "watch_later", label: "Watch Later" },
+  { key: "watch_later", label: "Later" },
 ];
 
 // ── Helpers ───────────────────────────────────────────────────────

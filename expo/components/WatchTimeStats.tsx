@@ -150,7 +150,7 @@ export default function WatchTimeStats() {
             <View style={styles.statRow}>
               <View style={styles.statItem}>
                 <Eye size={14} color={Colors.success} />
-                <Text style={styles.statLabel}>Watched</Text>
+                <Text style={styles.statLabel}>Seen</Text>
                 <Text style={[styles.statValue, { color: Colors.success }]}>
                   {formatDuration(data.totalWatchedSeconds)} ({data.totalWatchedCount} videos)
                 </Text>
@@ -159,7 +159,7 @@ export default function WatchTimeStats() {
             <View style={styles.statRow}>
               <View style={styles.statItem}>
                 <EyeOff size={14} color={Colors.textMuted} />
-                <Text style={styles.statLabel}>Not Watched</Text>
+                <Text style={styles.statLabel}>New</Text>
                 <Text style={[styles.statValue, { color: Colors.textMuted }]}>
                   {formatDuration(data.totalUnwatchedSeconds)} ({data.totalCount - data.totalWatchedCount} videos)
                 </Text>
@@ -200,11 +200,11 @@ export default function WatchTimeStats() {
             <View style={styles.legendRow}>
               <View style={styles.legendItem}>
                 <View style={[styles.legendDot, { backgroundColor: chartWatched }]} />
-                <Text style={styles.legendText}>Watched</Text>
+                <Text style={styles.legendText}>Seen</Text>
               </View>
               <View style={styles.legendItem}>
                 <View style={[styles.legendDot, { backgroundColor: chartUnwatched }]} />
-                <Text style={styles.legendText}>Not Watched</Text>
+                <Text style={styles.legendText}>New</Text>
               </View>
             </View>
             {data.dailyTrend.length > 0 ? (

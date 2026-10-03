@@ -468,8 +468,8 @@ function RunItemBars({
   const c = counts?.[runId];
   if (!c) return null;
   const entries = [
-    { key: "watched", label: "Watched", color: Colors.success },
-    { key: "not_watched", label: "Not watched", color: Colors.textMuted },
+    { key: "watched", label: "Seen", color: Colors.success },
+    { key: "not_watched", label: "New", color: Colors.textMuted },
     { key: "liked", label: "Liked", color: Colors.destructive },
     { key: "watch_later", label: "Later", color: Colors.warning },
   ] as const;
