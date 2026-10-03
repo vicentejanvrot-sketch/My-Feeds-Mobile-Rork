@@ -19,9 +19,11 @@ nonisolated struct SharedAuthStorage: AuthLocalStorage {
 
     func store(key: String, value: Data) throws {
         do {
+            // The shared copy is the one read from now on. The old copy in the
+            // app's own keychain is left alone: deleting it without a group
+            // would delete the shared copy too (a keychain delete with no
+            // group matches every group), which signed the app out of its data.
             try shared.store(key: key, value: value)
-            // The shared copy is the one read from now on.
-            try? own.remove(key: key)
         } catch {
             try own.store(key: key, value: value)
         }
