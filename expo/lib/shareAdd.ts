@@ -56,7 +56,14 @@ export async function addShared(args: {
   const results = await Promise.all(
     targets.map(async (t, i) => {
       const { data, error } = await supabase.functions.invoke("add-source", {
-        body: { agentIds: args.agentIds, platform: t.platform, value: t.value, priority: args.priority },
+        body: {
+          agentIds: args.agentIds,
+          platform: t.platform,
+          value: t.value,
+          priority: args.priority,
+          // A private account is kept as one: it shows on People, its posts are never fetched.
+          ...(i === 0 && args.preview.account.isPrivate ? { privateAccount: true } : {}),
+        },
       });
       const added: AddedChannel[] = data?.channels ?? (data?.channel ? [data.channel] : []);
       // The main account has to go in; their other accounts are best effort.

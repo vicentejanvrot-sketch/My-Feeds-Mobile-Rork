@@ -1237,9 +1237,10 @@ export function useDeleteApiKey() {
 export { useFocusEffect } from "expo-router";
 
 /**
- * add-source refused the account. code "instagram_private" or
- * "instagram_unavailable" (or "facebook_profile", a personal Facebook profile)
- * means Add Source can offer "Add as private account".
+ * add-source refused the account. code "instagram_private",
+ * "instagram_unavailable", "facebook_profile" (a personal Facebook profile),
+ * "tiktok_private" or "x_private" (a protected X account) means Add Source can
+ * offer "Add as private account".
  */
 export class AddSourceError extends Error {
   constructor(message: string, public code?: string) {
@@ -1250,7 +1251,7 @@ export class AddSourceError extends Error {
 /** True when an add-source error can be retried as a private account. */
 export function canAddAsPrivate(error: unknown): boolean {
   return error instanceof AddSourceError &&
-    (error.code === "instagram_private" || error.code === "instagram_unavailable" || error.code === "facebook_profile");
+    ["instagram_private", "instagram_unavailable", "facebook_profile", "tiktok_private", "x_private"].includes(error.code ?? "");
 }
 
 /** Add an X account, subreddit, Instagram account, LinkedIn profile, GitHub user, TikTok account, Facebook Page, Apple Music artist, Apple Podcasts show, Apple Books author or YouTube Music artist through the add-source edge function (same flow as the web app). privateAccount keeps a private Instagram account as a private source. */

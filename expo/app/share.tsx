@@ -23,7 +23,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Image } from "expo-image";
 import * as Clipboard from "expo-clipboard";
 import { useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, Check, Plus, Rss, Sparkles, X } from "lucide-react-native";
+import { ArrowLeft, Check, Lock, Plus, Rss, Sparkles, X } from "lucide-react-native";
 import { Colors } from "@/constants/colors";
 import { PlatformLogo } from "@/components/PlatformBadge";
 import { useToast } from "@/components/Toast";
@@ -300,6 +300,18 @@ export default function ShareScreen() {
                 </Text>
                 <Text style={styles.small}>
                   {preview.kind === "post" ? "From a post you shared. This is who posted it." : "From the profile you shared."}
+                </Text>
+              </View>
+            </View>
+          ) : null}
+
+          {preview?.account.isPrivate && (step === "card" || step === "adding") ? (
+            <View style={styles.alsoBox}>
+              <Lock size={16} color={Colors.textMuted} />
+              <View style={{ flex: 1, gap: 2 }}>
+                <Text style={styles.bodyStrong}>Private account</Text>
+                <Text style={styles.muted}>
+                  {`It's added as a private account: it shows on People with a button to open it in ${preview.platformLabel}. Its posts won't appear in your feed.`}
                 </Text>
               </View>
             </View>
