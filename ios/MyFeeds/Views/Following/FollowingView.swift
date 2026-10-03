@@ -462,11 +462,9 @@ struct FollowingView: View {
                                 Text(person.name)
                                     .font(.system(size: 15, weight: .bold))
                                     .foregroundStyle(Theme.textPrimary)
-                                    .lineLimit(1)
                                 Text(gapSubtitle(person))
                                     .font(.system(size: 12))
                                     .foregroundStyle(Theme.textSecondary)
-                                    .lineLimit(1)
                             }
                             Spacer(minLength: 0)
                         }
@@ -477,7 +475,7 @@ struct FollowingView: View {
 
                     ForEach(person.also) { account in
                         Rectangle().fill(Theme.border).frame(height: 0.5)
-                        HStack(alignment: .center, spacing: 10) {
+                        VStack(alignment: .leading, spacing: 10) {
                             VStack(alignment: .leading, spacing: 4) {
                                 AccountLine(platform: account.platform, label: account.label, url: account.url)
                                 if let evidence = account.link.evidence, !evidence.isEmpty {
@@ -487,18 +485,20 @@ struct FollowingView: View {
                                         .fixedSize(horizontal: false, vertical: true)
                                 }
                             }
-                            Spacer(minLength: 0)
-                            FollowButton(
-                                isBusy: busyKeys.contains(account.key),
-                                isEnabled: person.agentIds.first != nil,
-                                openInstead: SourcePlatform.isFollowableAccount(account.platform, url: account.url)
-                                    ? nil
-                                    : URL(string: account.url).map { (label: account.platform.openLabel, url: $0) }
-                            ) {
-                                if let agentId = person.agentIds.first { follow(account, agentId: agentId) }
-                            }
-                            DeleteSuggestionButton(isBusy: busyKeys.contains(account.link.id)) {
-                                decide(account, same: false)
+                            HStack(spacing: 8) {
+                                FollowButton(
+                                    isBusy: busyKeys.contains(account.key),
+                                    isEnabled: person.agentIds.first != nil,
+                                    openInstead: SourcePlatform.isFollowableAccount(account.platform, url: account.url)
+                                        ? nil
+                                        : URL(string: account.url).map { (label: account.platform.openLabel, url: $0) }
+                                ) {
+                                    if let agentId = person.agentIds.first { follow(account, agentId: agentId) }
+                                }
+                                DeleteSuggestionButton(isBusy: busyKeys.contains(account.link.id)) {
+                                    decide(account, same: false)
+                                }
+                                Spacer(minLength: 0)
                             }
                         }
                         .padding(12)
@@ -833,12 +833,10 @@ private struct PersonRow: View {
                         Text(person.name)
                             .font(.system(size: 15, weight: .semibold))
                             .foregroundStyle(Theme.textPrimary)
-                            .lineLimit(1)
                         if !agentNames.isEmpty {
                             Text(agentNames)
                                 .font(.system(size: 11))
                                 .foregroundStyle(Theme.textMuted)
-                                .lineLimit(1)
                         }
                     }
                     FlowLayout(spacing: 6) {
@@ -942,8 +940,6 @@ private struct AccountLine: View {
                 Text(label)
                     .font(.system(size: 13))
                     .foregroundStyle(Theme.textSecondary)
-                    .lineLimit(1)
-                    .truncationMode(.tail)
                     .layoutPriority(-1)
                 Image(systemName: "arrow.up.right.square")
                     .font(.system(size: 11))
@@ -1250,7 +1246,6 @@ private struct PersonSheet: View {
                                 Text(agentNames[account.channel.agentId] ?? "Collection")
                                     .font(.system(size: 11, weight: .semibold))
                                     .foregroundStyle(Theme.textSecondary)
-                                    .lineLimit(1)
                                     .padding(.horizontal, 8)
                                     .padding(.vertical, 3)
                                     .background(Theme.input)
@@ -1376,7 +1371,6 @@ private struct PersonSheet: View {
                 Text("Combine \(person.name) with…")
                     .font(.system(size: 19, weight: .heavy))
                     .foregroundStyle(Theme.textPrimary)
-                    .lineLimit(2)
                 Spacer(minLength: 0)
                 Button(action: onClose) {
                     Image(systemName: "xmark")
@@ -1431,7 +1425,6 @@ private struct PersonSheet: View {
                                     Text(p.name)
                                         .font(.system(size: 15, weight: .semibold))
                                         .foregroundStyle(Theme.textPrimary)
-                                        .lineLimit(1)
                                     if twinIds.contains(p.id) {
                                         Text("Same name")
                                             .font(.system(size: 11, weight: .semibold))
@@ -1514,7 +1507,6 @@ private struct PersonSheet: View {
                 Text(person.name)
                     .font(.system(size: 19, weight: .heavy))
                     .foregroundStyle(Theme.textPrimary)
-                    .lineLimit(2)
                 Text(person.summary)
                     .font(.system(size: 12))
                     .foregroundStyle(Theme.textSecondary)
@@ -1576,7 +1568,7 @@ private struct PersonSheet: View {
                     if index > 0 {
                         Rectangle().fill(Theme.border).frame(height: 0.5)
                     }
-                    HStack(alignment: .center, spacing: 10) {
+                    VStack(alignment: .leading, spacing: 10) {
                         VStack(alignment: .leading, spacing: 4) {
                             AccountLine(platform: account.platform, label: account.label, url: account.url)
                             if let evidence = account.link.evidence, !evidence.isEmpty {
@@ -1600,18 +1592,20 @@ private struct PersonSheet: View {
                             .buttonStyle(.plain)
                             .disabled(busyKeys.contains(account.link.id))
                         }
-                        Spacer(minLength: 0)
-                        FollowButton(
-                            isBusy: busyKeys.contains(account.key),
-                            isEnabled: agentId != nil,
-                            openInstead: SourcePlatform.isFollowableAccount(account.platform, url: account.url)
-                                ? nil
-                                : URL(string: account.url).map { (label: account.platform.openLabel, url: $0) }
-                        ) {
-                            if let agentId { onFollow(account, agentId) }
-                        }
-                        DeleteSuggestionButton(isBusy: busyKeys.contains(account.link.id)) {
-                            onDecide(account, false)
+                        HStack(spacing: 8) {
+                            FollowButton(
+                                isBusy: busyKeys.contains(account.key),
+                                isEnabled: agentId != nil,
+                                openInstead: SourcePlatform.isFollowableAccount(account.platform, url: account.url)
+                                    ? nil
+                                    : URL(string: account.url).map { (label: account.platform.openLabel, url: $0) }
+                            ) {
+                                if let agentId { onFollow(account, agentId) }
+                            }
+                            DeleteSuggestionButton(isBusy: busyKeys.contains(account.link.id)) {
+                                onDecide(account, false)
+                            }
+                            Spacer(minLength: 0)
                         }
                     }
                     .padding(12)
