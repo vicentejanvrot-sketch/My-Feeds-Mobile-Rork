@@ -10,6 +10,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Image } from "expo-image";
 import * as Haptics from "expo-haptics";
 import { useQuery } from "@tanstack/react-query";
+import { withFreshMedia } from "@/lib/expired-media";
 import {
   X,
   ExternalLink,
@@ -824,7 +825,9 @@ export default function PostReaderScreen() {
         .eq("id", itemId!)
         .single();
       if (error) throw error;
-      return data as ItemWithAnalysis;
+      // Instagram's video and photo links expire a few days after the post was
+      // saved; expired ones are renewed before the post shows.
+      return (await withFreshMedia(data as ItemWithAnalysis)) as ItemWithAnalysis;
     },
   });
 
