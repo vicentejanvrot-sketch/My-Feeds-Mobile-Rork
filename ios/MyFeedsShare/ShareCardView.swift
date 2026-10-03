@@ -664,11 +664,8 @@ struct ShareCardView: View {
                     .font(.system(size: 13))
                     .foregroundStyle(Palette.textMuted)
             }
-            HStack(spacing: 10) {
-                secondaryButton("Undo") { Task { await model.undo() } }
-                primaryButton("Done") { model.onClose() }
-            }
-            .padding(.top, 12)
+            primaryButton("Close") { model.onClose() }
+                .padding(.top, 12)
         }
         .frame(maxWidth: .infinity)
     }
