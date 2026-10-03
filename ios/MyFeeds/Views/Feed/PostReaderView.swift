@@ -38,7 +38,15 @@ struct PostReaderView: View {
     var body: some View {
         ZStack {
             Theme.background.ignoresSafeArea()
-            if let item {
+            if let item, item.isNewPostsCard, let link = URL(string: item.url ?? "") {
+                // A private account's "new posts" card: its profile, inside the app.
+                ProfileWebScreen(
+                    url: link,
+                    name: (item.channelName ?? "").replacingOccurrences(of: #"\s*\(@[^)]*\)\s*$"#, with: "", options: .regularExpression),
+                    platformLabel: item.sourcePlatform.label
+                ) { dismiss() }
+                .task { if status != .watched { changeStatus(.watched, item: item) } }
+            } else if let item {
                 content(item)
             } else if loadFailed {
                 VStack(spacing: 12) {

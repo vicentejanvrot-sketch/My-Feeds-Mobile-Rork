@@ -1122,6 +1122,8 @@ private struct PersonSheet: View {
     @State private var pickId: String?
     @State private var pickQuery = ""
     @State private var confirmSeparate = false
+    /// A private account opened inside the app.
+    @State private var profileTarget: ProfileTarget?
 
     private var twins: [AlsoOnPerson] { AlsoOn.sameName(as: person, in: people) }
 
@@ -1144,6 +1146,11 @@ private struct PersonSheet: View {
     }
 
     var body: some View {
+        sheetContent
+            .profileViewer($profileTarget)
+    }
+
+    private var sheetContent: some View {
         ScrollView {
             if isPicking {
                 combinePicker
@@ -1257,9 +1264,11 @@ private struct PersonSheet: View {
                                         .lineLimit(2)
                                         .fixedSize(horizontal: false, vertical: true)
                                     Button {
-                                        if let link = URL(string: account.url) { openURL(link) }
+                                        if let link = URL(string: account.url) {
+                                            profileTarget = ProfileTarget(url: link, name: account.label, platformLabel: account.platform.label)
+                                        }
                                     } label: {
-                                        Text(account.platform.openLabel)
+                                        Text("See their posts")
                                             .font(.system(size: 12, weight: .semibold))
                                             .foregroundStyle(Theme.textPrimary)
                                             .lineLimit(1)

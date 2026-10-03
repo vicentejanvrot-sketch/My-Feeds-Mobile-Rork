@@ -40,6 +40,8 @@ struct AgentDetailView: View {
     /// Sources ticked for "Move to…" in one go.
     @State private var picked: Set<String> = []
     @State private var showBulkMove = false
+    /// A private account opened inside the app.
+    @State private var profileTarget: ProfileTarget?
     @State private var isMovingMany = false
     @State private var otherAgents: [Agent] = []
     @State private var runToCancel: Run?
@@ -142,6 +144,7 @@ struct AgentDetailView: View {
             }
             Button("Cancel", role: .cancel) { channelToMove = nil }
         }
+        .profileViewer($profileTarget)
         .confirmationDialog(
             "Move \(pickedChannels.count) \(pickedChannels.count == 1 ? "account" : "accounts") to",
             isPresented: $showBulkMove,
@@ -643,7 +646,12 @@ struct AgentDetailView: View {
                 HStack(spacing: 6) {
                     Button {
                         if let urlString = channel.channelUrl, let url = URL(string: urlString) {
-                            openURL(url)
+                            // A private account's posts can't be fetched: read them inside the app.
+                            if channel.isPrivateAccount {
+                                profileTarget = ProfileTarget(url: url, name: channel.displayName, platformLabel: channel.sourcePlatform.label)
+                            } else {
+                                openURL(url)
+                            }
                         }
                     } label: {
                         HStack(spacing: 4) {

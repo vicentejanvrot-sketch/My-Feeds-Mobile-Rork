@@ -80,6 +80,10 @@ nonisolated struct FeedItem: Codable, Identifiable, Hashable, Sendable {
     var resolvedDurationSeconds: Int?
 
     var analysis: ItemAnalysis? { itemAnalysis?.rows.first }
+
+    /// A private account's "N new posts" card (run-agent saves its video_id as
+    /// "<platform>:newposts:<source id>:<count>"). It opens the profile in the app.
+    var isNewPostsCard: Bool { videoId?.contains(":newposts:") == true }
     var status: ItemStatus { userStatus ?? .notWatched }
 
     var sourcePlatform: SourcePlatform {
