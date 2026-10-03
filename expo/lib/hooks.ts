@@ -810,6 +810,27 @@ export function useMoveChannel() {
   });
 }
 
+/** Moves several sources at once (ticked on a collection). */
+export function useMoveChannels() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ channels, toAgentId }: { channels: Channel[]; toAgentId: string }) => {
+      const failed: string[] = [];
+      for (const channel of channels) {
+        try {
+          await moveSource(channel, toAgentId);
+        } catch {
+          failed.push(channel.channel_name || channel.channel_url || "a source");
+        }
+      }
+      return { moved: channels.length - failed.length, failed };
+    },
+    onSettled: () => {
+      void queryClient.invalidateQueries();
+    },
+  });
+}
+
 /** Add a channel to an agent. */
 export function useAddChannel(agentId: string) {
   const queryClient = useQueryClient();

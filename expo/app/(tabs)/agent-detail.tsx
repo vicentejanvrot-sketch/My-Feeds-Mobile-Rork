@@ -1,6 +1,6 @@
 import type { Channel } from "@/lib/database";
 import { CONTENT_TYPE_GROUPS, isContentTypeOn } from "@/lib/contentTypes";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -54,7 +54,7 @@ import {
   useStartRun,
   useToggleChannel,
   useDeleteChannel,
-  useMoveChannel,
+  useMoveChannels,
   useAddChannel,
   useAddSource,
   canAddAsPrivate,
@@ -551,9 +551,12 @@ export default function AgentDetailScreen() {
   const startRun = useStartRun();
   const toggleChannel = useToggleChannel();
   const deleteChannel = useDeleteChannel();
-  const moveChannel = useMoveChannel();
-  // The source whose "Move to" list is open.
-  const [moving, setMoving] = useState<Channel | null>(null);
+  const moveChannels = useMoveChannels();
+  // The sources whose "Move to" list is open (one, or the ticked ones).
+  const [moving, setMoving] = useState<Channel[] | null>(null);
+  // Sources ticked for "Move to…" in one go.
+  const [picked, setPicked] = useState<Set<string>>(new Set());
+  useEffect(() => setPicked(new Set()), [agentId]);
   const addChannel = useAddChannel(agentId ?? "");
   const addRecipient = useAddRecipient(agentId ?? "");
   const deleteRecipient = useDeleteRecipient();
@@ -1148,6 +1151,44 @@ export default function AgentDetailScreen() {
           </Pressable>
         </Modal>
 
+        {filteredChannels.length > 0 ? (() => {
+          const pickedChannels = filteredChannels.filter((c) => picked.has(c.id)) as Channel[];
+          const allPicked = pickedChannels.length === filteredChannels.length;
+          return (
+            <View style={moveStyles.bar}>
+              <Pressable
+                style={moveStyles.barCheck}
+                onPress={() => setPicked(allPicked ? new Set() : new Set(filteredChannels.map((c) => c.id)))}
+                accessibilityRole="checkbox"
+                accessibilityState={{ checked: allPicked }}
+                accessibilityLabel="Select all sources"
+              >
+                <View style={[moveStyles.box, pickedChannels.length > 0 && moveStyles.boxOn]}>
+                  {allPicked ? <Check size={13} color={Colors.white} strokeWidth={3} /> : pickedChannels.length > 0 ? <View style={moveStyles.dash} /> : null}
+                </View>
+                <Text style={moveStyles.barText}>{pickedChannels.length > 0 ? `${pickedChannels.length} selected` : "Select all"}</Text>
+              </Pressable>
+              {pickedChannels.length > 0 ? (
+                <View style={moveStyles.barActions}>
+                  <Pressable
+                    style={[moveStyles.moveBtn, moveChannels.isPending && { opacity: 0.5 }]}
+                    disabled={moveChannels.isPending}
+                    onPress={() => setMoving(pickedChannels)}
+                  >
+                    {moveChannels.isPending ? <ActivityIndicator size="small" color={Colors.white} /> : <FolderInput size={15} color={Colors.white} />}
+                    <Text style={moveStyles.moveBtnText}>Move to…</Text>
+                  </Pressable>
+                  <Pressable onPress={() => setPicked(new Set())} hitSlop={8}>
+                    <Text style={moveStyles.clearText}>Clear</Text>
+                  </Pressable>
+                </View>
+              ) : (
+                <Text style={moveStyles.hint}>Tick accounts to move them</Text>
+              )}
+            </View>
+          );
+        })() : null}
+
         {channelsQ.isLoading ? (
           <View style={styles.sectionLoading}>
             <ActivityIndicator color={Colors.accent} />
@@ -1169,7 +1210,16 @@ export default function AgentDetailScreen() {
               onToggle={(isEnabled) =>
                 toggleChannel.mutate({ id: ch.id, isEnabled })
               }
-              onMove={() => setMoving(ch as Channel)}
+              onMove={() => setMoving([ch as Channel])}
+              selected={picked.has(ch.id)}
+              onSelect={() =>
+                setPicked((cur) => {
+                  const next = new Set(cur);
+                  if (next.has(ch.id)) next.delete(ch.id);
+                  else next.add(ch.id);
+                  return next;
+                })
+              }
               onDelete={() =>
                 handleDeleteChannel(
                   ch.id,
@@ -1188,8 +1238,8 @@ export default function AgentDetailScreen() {
         <Modal visible={!!moving} transparent animationType="fade" onRequestClose={() => setMoving(null)}>
           <Pressable style={moveStyles.backdrop} onPress={() => setMoving(null)}>
             <Pressable style={moveStyles.sheet} onPress={() => {}}>
-              <Text style={moveStyles.title} numberOfLines={2}>
-                Move {moving?.channel_name ?? "this source"} to
+              <Text style={moveStyles.title}>
+                {moving && moving.length > 1 ? `Move ${moving.length} accounts to` : `Move ${moving?.[0]?.channel_name ?? "this source"} to`}
               </Text>
               <ScrollView style={{ maxHeight: 420 }}>
                 {[...(allAgentsQ.data ?? [])]
@@ -1200,14 +1250,18 @@ export default function AgentDetailScreen() {
                       key={a.id}
                       style={({ pressed }) => [moveStyles.row, pressed && { backgroundColor: Colors.input }]}
                       onPress={() => {
-                        const channel = moving;
+                        const channels = moving;
                         setMoving(null);
-                        if (!channel) return;
-                        moveChannel.mutate(
-                          { channel, toAgentId: a.id },
+                        if (!channels || channels.length === 0) return;
+                        moveChannels.mutate(
+                          { channels, toAgentId: a.id },
                           {
-                            onSuccess: () => showToast(`Moved to ${a.name}`, "success"),
-                            onError: (e) => showToast("Couldn't move it: " + (e instanceof Error ? e.message : ""), "error"),
+                            onSuccess: ({ moved, failed }) => {
+                              setPicked(new Set());
+                              if (failed.length > 0) showToast(`Couldn't move ${failed.join(", ")}`, "error");
+                              else showToast(moved === 1 ? `Moved to ${a.name}` : `Moved ${moved} accounts to ${a.name}`, "success");
+                            },
+                            onError: (e) => showToast("Couldn't move them: " + (e instanceof Error ? e.message : ""), "error"),
                           },
                         );
                       }}
@@ -1515,6 +1569,8 @@ function ChannelCard({
   onMove,
   onOpenUrl,
   onPriorityChange,
+  selected = false,
+  onSelect,
 }: {
   channel: {
     id: string;
@@ -1534,9 +1590,25 @@ function ChannelCard({
   onMove: () => void;
   onOpenUrl: () => void;
   onPriorityChange: (priority: number) => void;
+  selected?: boolean;
+  onSelect?: () => void;
 }) {
   return (
     <View style={styles.channelCard}>
+      {onSelect ? (
+        <Pressable
+          onPress={onSelect}
+          hitSlop={8}
+          style={moveStyles.cardCheck}
+          accessibilityRole="checkbox"
+          accessibilityState={{ checked: selected }}
+          accessibilityLabel={`Select ${channel.channel_name ?? "source"}`}
+        >
+          <View style={[moveStyles.box, selected && moveStyles.boxOn]}>
+            {selected ? <Check size={13} color={Colors.white} strokeWidth={3} /> : null}
+          </View>
+        </Pressable>
+      ) : null}
       {/* Thumbnail */}
       <View style={styles.channelThumb}>
         {channel.channel_thumbnail ? (
@@ -2080,4 +2152,16 @@ const moveStyles = StyleSheet.create({
   rowText: { fontSize: 15, color: Colors.textPrimary },
   cancel: { marginTop: 10, minHeight: 44, alignItems: "center", justifyContent: "center", borderRadius: 10, borderWidth: 1, borderColor: Colors.border },
   cancelText: { fontSize: 15, fontWeight: "600", color: Colors.textPrimary },
+  bar: { flexDirection: "row", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: 10, paddingHorizontal: 12, paddingVertical: 8, marginBottom: 10, borderRadius: 12, borderWidth: 1, borderColor: Colors.border, backgroundColor: Colors.card },
+  barCheck: { flexDirection: "row", alignItems: "center", gap: 10, minHeight: 36 },
+  barText: { fontSize: 14, fontWeight: "600", color: Colors.textPrimary },
+  barActions: { flexDirection: "row", alignItems: "center", gap: 14 },
+  hint: { fontSize: 12, color: Colors.textMuted },
+  box: { width: 22, height: 22, borderRadius: 6, borderWidth: 1.5, borderColor: Colors.textMuted, alignItems: "center", justifyContent: "center" },
+  boxOn: { backgroundColor: Colors.accent, borderColor: Colors.accent },
+  dash: { width: 10, height: 2, borderRadius: 1, backgroundColor: Colors.white },
+  cardCheck: { alignSelf: "center", paddingLeft: 12, paddingRight: 10 },
+  moveBtn: { flexDirection: "row", alignItems: "center", gap: 6, minHeight: 36, paddingHorizontal: 12, borderRadius: 10, backgroundColor: Colors.accent },
+  moveBtnText: { fontSize: 14, fontWeight: "700", color: Colors.white },
+  clearText: { fontSize: 14, fontWeight: "600", color: Colors.textSecondary },
 });
