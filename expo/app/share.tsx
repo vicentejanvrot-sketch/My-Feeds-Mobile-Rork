@@ -31,9 +31,11 @@ import { useAuth } from "@/lib/auth-provider";
 import { PLATFORM_META, type Platform } from "@/lib/platforms";
 import {
   addShared,
+  createCollection,
   joinNames,
   previewShare,
   PRIORITY_NAMES,
+  sortCollections,
   undoShared,
   UNSORTED_ID,
   type AddedChannel,
@@ -65,6 +67,10 @@ export default function ShareScreen() {
   const [includeAlsoOn, setIncludeAlsoOn] = useState(true);
   const [priority, setPriority] = useState(3);
   const [added, setAdded] = useState<AddedChannel[]>([]);
+  // "New collection" in the picker.
+  const [newOpen, setNewOpen] = useState(false);
+  const [newName, setNewName] = useState("");
+  const [creating, setCreating] = useState(false);
 
   // Leaving: from another app's share sheet, go back to that app (Android).
   const close = useCallback(() => {
@@ -148,6 +154,23 @@ export default function ShareScreen() {
     }
   };
 
+  const createNew = async () => {
+    if (!preview || !newName.trim() || creating) return;
+    setCreating(true);
+    try {
+      const made = await createCollection(newName, preview.collections);
+      setPreview((p) => (p && !p.collections.some((c) => c.id === made.id) ? { ...p, collections: [...p.collections, made] } : p));
+      setSelected((cur) => (cur.includes(made.id) ? cur : cur.filter((c) => c !== UNSORTED_ID).concat(made.id)));
+      setNewName("");
+      setNewOpen(false);
+      void queryClient.invalidateQueries({ queryKey: ["agents"] });
+    } catch (e) {
+      showToast(e instanceof Error ? e.message : "Couldn't create that collection.", "error");
+    } finally {
+      setCreating(false);
+    }
+  };
+
   const undo = async () => {
     try {
       await undoShared(added);
@@ -161,8 +184,10 @@ export default function ShareScreen() {
   };
 
   const pickerRows = preview
-    ? [...preview.collections, { id: UNSORTED_ID, name: "Unsorted" }].filter(
-        (c, _i, all) => !(c.id === UNSORTED_ID && all.some((o) => o.id !== UNSORTED_ID && o.name === "Unsorted")),
+    ? sortCollections(
+        [...preview.collections, { id: UNSORTED_ID, name: "Unsorted" }].filter(
+          (c, _i, all) => !(c.id === UNSORTED_ID && all.some((o) => o.id !== UNSORTED_ID && o.name === "Unsorted")),
+        ),
       )
     : [];
 
@@ -391,6 +416,43 @@ export default function ShareScreen() {
 
           {preview && step === "picker" ? (
             <View style={styles.block}>
+              {newOpen ? (
+                <View style={styles.newRow}>
+                  <TextInput
+                    autoFocus
+                    value={newName}
+                    onChangeText={setNewName}
+                    placeholder="New collection name"
+                    placeholderTextColor={Colors.textMuted}
+                    returnKeyType="done"
+                    onSubmitEditing={() => void createNew()}
+                    style={[styles.input, { flex: 1 }]}
+                    accessibilityLabel="New collection name"
+                  />
+                  <Pressable
+                    style={[styles.primaryBtn, (!newName.trim() || creating) && styles.disabled]}
+                    disabled={!newName.trim() || creating}
+                    onPress={() => void createNew()}
+                  >
+                    {creating ? <ActivityIndicator color={Colors.white} /> : <Text style={styles.primaryText}>Create</Text>}
+                  </Pressable>
+                  <Pressable
+                    style={styles.roundBtn}
+                    onPress={() => {
+                      setNewOpen(false);
+                      setNewName("");
+                    }}
+                    accessibilityLabel="Cancel new collection"
+                  >
+                    <X size={18} color={Colors.textPrimary} />
+                  </Pressable>
+                </View>
+              ) : (
+                <Pressable style={styles.newBtn} onPress={() => setNewOpen(true)}>
+                  <Plus size={18} color={Colors.accent} />
+                  <Text style={styles.link}>New collection</Text>
+                </Pressable>
+              )}
               <View style={styles.list}>
                 {pickerRows.map((c, i) => {
                   const locked = alreadyIds.has(c.id);
@@ -413,7 +475,11 @@ export default function ShareScreen() {
                   );
                 })}
               </View>
-              <Pressable style={[styles.primaryBtn, styles.bigBtn]} onPress={() => setStep("card")}>
+              <Pressable
+                style={[styles.primaryBtn, styles.bigBtn, selected.length === 0 && styles.disabled]}
+                disabled={selected.length === 0}
+                onPress={() => setStep("card")}
+              >
                 <Text style={styles.primaryText}>Done</Text>
               </Pressable>
             </View>
@@ -517,6 +583,8 @@ const styles = StyleSheet.create({
   secondaryText: { color: Colors.textPrimary, fontSize: 15, fontWeight: "600" },
   twoBtns: { flexDirection: "row", gap: 10 },
   disabled: { opacity: 0.45 },
+  newRow: { flexDirection: "row", alignItems: "center", gap: 8 },
+  newBtn: { minHeight: 48, borderRadius: 12, borderWidth: 1, borderColor: Colors.border, backgroundColor: Colors.input, flexDirection: "row", alignItems: "center", gap: 8, paddingHorizontal: 14 },
   input: { height: 48, borderRadius: 12, borderWidth: 1, borderColor: Colors.border, backgroundColor: Colors.input, color: Colors.textPrimary, paddingHorizontal: 14, fontSize: 15 },
   errorBox: { padding: 12, borderRadius: 12, borderWidth: 1, borderColor: Colors.destructive, backgroundColor: Colors.destructiveBg },
   successBox: { flexDirection: "row", gap: 12, padding: 14, borderRadius: 12, borderWidth: 1, borderColor: "hsla(142, 71%, 45%, 0.35)", backgroundColor: "hsla(142, 71%, 45%, 0.1)" },

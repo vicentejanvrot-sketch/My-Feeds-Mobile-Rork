@@ -76,6 +76,30 @@ export async function undoShared(channels: AddedChannel[]): Promise<void> {
   if (error) throw error;
 }
 
+// A new, empty collection made from the picker while adding an account.
+// Reuses one with the same name instead of making a duplicate.
+export async function createCollection(name: string, existing: { id: string; name: string }[]): Promise<{ id: string; name: string }> {
+  const clean = name.trim();
+  if (!clean) throw new Error("Give the collection a name.");
+  const same = existing.find((c) => c.name.trim().toLowerCase() === clean.toLowerCase());
+  if (same) return same;
+  const { data: auth } = await supabase.auth.getUser();
+  if (!auth.user) throw new Error("Please sign in again.");
+  const { data, error } = await supabase.from("agents").insert({ name: clean, user_id: auth.user.id }).select("id, name").single();
+  if (error) throw error;
+  return { id: data.id as string, name: data.name as string };
+}
+
+// Collections A to Z, with Unsorted kept at the bottom.
+export function sortCollections<T extends { id: string; name: string }>(list: T[]): T[] {
+  return [...list].sort((a, b) => {
+    const au = a.id === UNSORTED_ID || a.name === "Unsorted";
+    const bu = b.id === UNSORTED_ID || b.name === "Unsorted";
+    if (au !== bu) return au ? 1 : -1;
+    return a.name.localeCompare(b.name, undefined, { sensitivity: "base" });
+  });
+}
+
 export function joinNames(names: string[]): string {
   if (names.length <= 1) return names.join("");
   if (names.length === 2) return `${names[0]} and ${names[1]}`;
