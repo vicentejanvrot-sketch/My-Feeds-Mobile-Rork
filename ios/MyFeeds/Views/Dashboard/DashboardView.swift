@@ -464,7 +464,7 @@ private struct FeedCardView: View {
                     }
 
                     HStack(spacing: 16) {
-                        countChip(icon: "video", iconColor: Theme.textSecondary, value: counts.total, valueColor: Theme.textPrimary)
+                        countChip(icon: "square.stack", iconColor: Theme.textSecondary, value: counts.total, valueColor: Theme.textPrimary)
                         countChip(icon: "checkmark.circle.fill", iconColor: Theme.success, value: counts.watched, valueColor: Theme.success)
                         countChip(icon: "circle", iconColor: Theme.textMuted, value: counts.unwatched, valueColor: Theme.textMuted)
                         countChip(icon: "clock", iconColor: Theme.warning, value: counts.watchLater, valueColor: Theme.warning)
