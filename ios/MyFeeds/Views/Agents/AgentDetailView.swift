@@ -37,6 +37,10 @@ struct AgentDetailView: View {
     @State private var channelToRemove: Channel?
     /// The source whose "Move to" list is open, and the collections it can go to.
     @State private var channelToMove: Channel?
+    /// Sources ticked for "Move to…" in one go.
+    @State private var picked: Set<String> = []
+    @State private var showBulkMove = false
+    @State private var isMovingMany = false
     @State private var otherAgents: [Agent] = []
     @State private var runToCancel: Run?
     @State private var showDeleteAgent = false
@@ -137,6 +141,16 @@ struct AgentDetailView: View {
                 }
             }
             Button("Cancel", role: .cancel) { channelToMove = nil }
+        }
+        .confirmationDialog(
+            "Move \(pickedChannels.count) \(pickedChannels.count == 1 ? "account" : "accounts") to",
+            isPresented: $showBulkMove,
+            titleVisibility: .visible
+        ) {
+            ForEach(otherAgents) { target in
+                Button(target.name) { moveChannels(pickedChannels, to: target) }
+            }
+            Button("Cancel", role: .cancel) {}
         }
         .alert("Cancel Run", isPresented: Binding(
             get: { runToCancel != nil },
@@ -501,6 +515,7 @@ struct AgentDetailView: View {
                     .padding(20)
                     .cardStyle(radius: 12)
             } else {
+                selectionBar
                 ForEach(filteredChannels) { channel in
                     channelCard(channel)
                 }
@@ -508,8 +523,91 @@ struct AgentDetailView: View {
         }
     }
 
+    private var pickedChannels: [Channel] {
+        filteredChannels.filter { picked.contains($0.id) }
+    }
+
+    /// "Select all" / "N selected" with Move to… and Clear.
+    private var selectionBar: some View {
+        let count = pickedChannels.count
+        let allPicked = count > 0 && count == filteredChannels.count
+        return HStack(spacing: 12) {
+            Button {
+                picked = allPicked ? [] : Set(filteredChannels.map(\.id))
+            } label: {
+                HStack(spacing: 10) {
+                    checkBox(on: count > 0, partial: count > 0 && !allPicked)
+                    Text(count > 0 ? "\(count) selected" : "Select all")
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundStyle(Theme.textPrimary)
+                }
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel("Select all sources")
+            Spacer(minLength: 0)
+            if count > 0 {
+                Button {
+                    showBulkMove = true
+                } label: {
+                    HStack(spacing: 6) {
+                        if isMovingMany {
+                            ProgressView().controlSize(.small).tint(.white)
+                        } else {
+                            Image(systemName: "folder")
+                        }
+                        Text("Move to…")
+                    }
+                    .font(.system(size: 13, weight: .bold))
+                    .foregroundStyle(.white)
+                    .padding(.horizontal, 12)
+                    .frame(height: 34)
+                    .background(Theme.accent, in: RoundedRectangle(cornerRadius: 9))
+                }
+                .buttonStyle(.plain)
+                .disabled(isMovingMany || otherAgents.isEmpty)
+                Button("Clear") { picked = [] }
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundStyle(Theme.textSecondary)
+            } else {
+                Text("Tick accounts to move them")
+                    .font(.system(size: 12))
+                    .foregroundStyle(Theme.textMuted)
+            }
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 8)
+        .cardStyle(radius: 12)
+    }
+
+    private func checkBox(on: Bool, partial: Bool = false) -> some View {
+        ZStack {
+            RoundedRectangle(cornerRadius: 6)
+                .fill(on ? Theme.accent : .clear)
+            RoundedRectangle(cornerRadius: 6)
+                .stroke(on ? .clear : Theme.textMuted, lineWidth: 1.5)
+            if on {
+                Image(systemName: partial ? "minus" : "checkmark")
+                    .font(.system(size: 11, weight: .heavy))
+                    .foregroundStyle(.white)
+            }
+        }
+        .frame(width: 22, height: 22)
+    }
+
     private func channelCard(_ channel: Channel) -> some View {
         HStack(alignment: .top, spacing: 0) {
+            Button {
+                if picked.contains(channel.id) { picked.remove(channel.id) } else { picked.insert(channel.id) }
+            } label: {
+                checkBox(on: picked.contains(channel.id))
+                    .padding(.leading, 12)
+                    .padding(.trailing, 10)
+                    .frame(height: 72)
+                    .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel("Select \(channel.displayName)")
+            .accessibilityAddTraits(picked.contains(channel.id) ? .isSelected : [])
             Color(Theme.input)
                 .frame(width: 72, height: 72)
                 .overlay {
@@ -1202,6 +1300,30 @@ struct AgentDetailView: View {
             } catch {
                 toasts.show("Couldn't move it", type: .error)
             }
+        }
+    }
+
+    private func moveChannels(_ list: [Channel], to target: Agent) {
+        guard !list.isEmpty else { return }
+        isMovingMany = true
+        Task {
+            var failed: [String] = []
+            for channel in list {
+                do {
+                    try await SupabaseService.shared.moveSource(channel, toAgentId: target.id)
+                } catch {
+                    failed.append(channel.displayName)
+                }
+            }
+            let moved = list.count - failed.count
+            isMovingMany = false
+            picked = []
+            if failed.isEmpty {
+                toasts.show(moved == 1 ? "Moved to \(target.name)" : "Moved \(moved) accounts to \(target.name)")
+            } else {
+                toasts.show("Couldn't move \(failed.joined(separator: ", "))", type: .error)
+            }
+            await load()
         }
     }
 
