@@ -567,7 +567,7 @@ export default function FeedScreen() {
   return (
     <View style={[styles.root, isWide && styles.rootWide, { paddingTop: insets.top }]}>
       <View style={styles.headerRow}>
-        <Text style={styles.heading}>Research Feed</Text>
+        <Text style={styles.heading}>Feeds</Text>
         {selectionMode ? (
           <Pressable onPress={exitSelectionMode} hitSlop={8}>
             <Text style={styles.selectButtonText}>Cancel</Text>
