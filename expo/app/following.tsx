@@ -123,7 +123,7 @@ function AccountLine({ platform, label, url }: { platform: Platform; label: stri
     >
       <PlatformBadge platform={platform} />
       <Text style={styles.accountPlatform} numberOfLines={1}>{platformLabel(platform)}</Text>
-      <Text style={styles.accountLabel} numberOfLines={1}>{label}</Text>
+      <Text style={styles.accountLabel}>{label}</Text>
       <ExternalLink size={12} color={Colors.textMuted} style={styles.noShrink} />
     </Pressable>
   );
@@ -266,7 +266,7 @@ function CombinePicker({ person, people, initialPick, onCancel, onCombined }: {
 
   return (
     <View style={styles.panel}>
-      <Text style={styles.panelName} numberOfLines={2}>Combine {person.name} with…</Text>
+      <Text style={styles.panelName}>Combine {person.name} with…</Text>
       <Text style={[styles.muted, styles.combineIntro]}>
         Pick the card that&apos;s the same person. Their accounts end up together on one card. You can separate them again later.
       </Text>
@@ -305,7 +305,7 @@ function CombinePicker({ person, people, initialPick, onCancel, onCombined }: {
                 <Avatar name={p.name} uri={p.thumbnail} />
                 <View style={[styles.flex1, styles.gap6]}>
                   <View style={styles.rowTitle}>
-                    <Text style={styles.rowName} numberOfLines={1}>{p.name}</Text>
+                    <Text style={styles.rowName}>{p.name}</Text>
                     {twins.has(p.id) ? <Text style={styles.sameNameTag}>Same name</Text> : null}
                   </View>
                   <View style={styles.chipWrap}>
@@ -440,7 +440,7 @@ function PersonPanel({ person, people, agents, scanning, status, onRescan, onCom
       <View style={styles.panelHeader}>
         <Avatar name={person.name} uri={person.thumbnail} size={56} />
         <View style={styles.flex1}>
-          <Text style={styles.panelName} numberOfLines={2}>{person.name}</Text>
+          <Text style={styles.panelName}>{person.name}</Text>
           <Text style={styles.muted}>{personSummary(person, platformLabel)}</Text>
         </View>
       </View>
@@ -477,7 +477,7 @@ function PersonPanel({ person, people, agents, scanning, status, onRescan, onCom
                 has to squeeze onto one line on a narrow phone. */}
             <View style={[styles.flex1, styles.gap4]}>
               <AccountLine platform={a.platform} label={a.label} url={a.url} />
-              <Text style={styles.agentTag} numberOfLines={1}>
+              <Text style={styles.agentTag}>
                 {"In " + (agentName.get(a.channel.agent_id) ?? "a collection")}
               </Text>
               {a.channel.is_private ? (
@@ -545,8 +545,8 @@ function PersonPanel({ person, people, agents, scanning, status, onRescan, onCom
           ) : null}
           <View style={styles.box}>
             {person.also.map((a, i) => (
-              <View key={a.key} style={[styles.boxRow, i > 0 && styles.boxRowBorder]}>
-                <View style={[styles.flex1, styles.gap4]}>
+              <View key={a.key} style={[styles.boxRow, styles.boxRowStacked, i > 0 && styles.boxRowBorder]}>
+                <View style={styles.gap4}>
                   <AccountLine platform={a.platform} label={a.label} url={a.url} />
                   <View style={styles.evidenceRow}>
                     <Link2 size={12} color={Colors.success} />
@@ -644,8 +644,8 @@ function PersonRow({ person, agentNames, onPress }: { person: Person; agentNames
       <Avatar name={person.name} uri={person.thumbnail} />
       <View style={[styles.flex1, styles.gap6]}>
         <View style={styles.rowTitle}>
-          <Text style={styles.rowName} numberOfLines={1}>{person.name}</Text>
-          {agentNames ? <Text style={styles.rowAgents} numberOfLines={1}>{agentNames}</Text> : null}
+          <Text style={styles.rowName}>{person.name}</Text>
+          {agentNames ? <Text style={styles.rowAgents}>{agentNames}</Text> : null}
         </View>
         <View style={styles.chipWrap}>
           {person.following.map((a) => (
@@ -711,16 +711,16 @@ function GapsView({ people, agents, onOpen }: {
           <Pressable onPress={() => onOpen(p.id)} style={styles.gapHeader}>
             <Avatar name={p.name} uri={p.thumbnail} size={36} />
             <View style={styles.flex1}>
-              <Text style={styles.rowName} numberOfLines={1}>{p.name}</Text>
-              <Text style={styles.muted} numberOfLines={1}>
+              <Text style={styles.rowName}>{p.name}</Text>
+              <Text style={styles.muted}>
                 {"You follow on " + p.following.map((f) => platformLabel(f.platform)).join(" and ") +
                   " · adds to " + (agentName.get(p.agentIds[0]) ?? "agent")}
               </Text>
             </View>
           </Pressable>
           {p.also.map((a) => (
-            <View key={a.key} style={[styles.boxRow, styles.boxRowBorder]}>
-              <View style={[styles.flex1, styles.gap4]}>
+            <View key={a.key} style={[styles.boxRow, styles.boxRowStacked, styles.boxRowBorder]}>
+              <View style={styles.gap4}>
                 <AccountLine platform={a.platform} label={a.label} url={a.url} />
                 <Text style={styles.muted}>{a.link.evidence}</Text>
               </View>
@@ -1078,7 +1078,7 @@ const styles = StyleSheet.create({
   contentWide: { maxWidth: 720, alignSelf: "center", width: "100%" },
   header: { flexDirection: "row", alignItems: "center", gap: 10 },
   backBtn: { padding: 4 },
-  suggestionActions: { flexDirection: "row", alignItems: "center", gap: 8 },
+  suggestionActions: { flexDirection: "row", flexWrap: "wrap", alignItems: "center", gap: 8 },
   deleteSuggestionBtn: {
     flexDirection: "row",
     alignItems: "center",
@@ -1201,7 +1201,7 @@ const styles = StyleSheet.create({
   },
   rowPressed: { backgroundColor: Colors.input },
   rowChevron: { marginTop: 2 },
-  rowTitle: { flexDirection: "row", alignItems: "baseline", gap: 8 },
+  rowTitle: { flexDirection: "row", flexWrap: "wrap", alignItems: "baseline", columnGap: 8, rowGap: 2 },
   rowName: { flexShrink: 1, fontSize: 15, fontWeight: "600" as const, color: Colors.textPrimary },
   rowAgents: { flexShrink: 1, fontSize: 11, color: Colors.textMuted },
   chipWrap: { flexDirection: "row", flexWrap: "wrap", gap: 6 },
@@ -1253,9 +1253,11 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.background,
   },
   boxRow: { flexDirection: "row", alignItems: "center", gap: 10, paddingHorizontal: 12, paddingVertical: 10 },
+  // Account and its evidence on top, buttons underneath, so nothing is squeezed.
+  boxRowStacked: { flexDirection: "column", alignItems: "stretch" },
   boxRowBorder: { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: Colors.border },
   // The platform name never wraps ("YouTub/e"); the handle gives way instead.
-  accountLine: { flexDirection: "row", alignItems: "center", gap: 6, flexShrink: 1, minWidth: 0 },
+  accountLine: { flexDirection: "row", flexWrap: "wrap", alignItems: "center", gap: 6, flexShrink: 1, minWidth: 0 },
   accountPlatform: { flexShrink: 0, fontSize: 14, fontWeight: "700" as const, color: Colors.textPrimary },
   accountLabel: { flexShrink: 1, minWidth: 0, fontSize: 14, color: Colors.textSecondary },
   noShrink: { flexShrink: 0 },
