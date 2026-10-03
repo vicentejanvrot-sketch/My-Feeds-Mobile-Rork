@@ -36,9 +36,7 @@ import {
   previewShare,
   PRIORITY_NAMES,
   sortCollections,
-  undoShared,
   UNSORTED_ID,
-  type AddedChannel,
   type SharePreview,
 } from "@/lib/shareAdd";
 
@@ -66,7 +64,6 @@ export default function ShareScreen() {
   const [addingMore, setAddingMore] = useState(false);
   const [includeAlsoOn, setIncludeAlsoOn] = useState(true);
   const [priority, setPriority] = useState(3);
-  const [added, setAdded] = useState<AddedChannel[]>([]);
   // "New collection" in the picker.
   const [newOpen, setNewOpen] = useState(false);
   const [newName, setNewName] = useState("");
@@ -144,8 +141,7 @@ export default function ShareScreen() {
     if (!preview || selected.length === 0) return;
     setStep("adding");
     try {
-      const rows = await addShared({ preview, agentIds: selected, priority, includeAlsoOn: includeAlsoOn && preview.alsoOn.length > 0 });
-      setAdded(rows);
+      await addShared({ preview, agentIds: selected, priority, includeAlsoOn: includeAlsoOn && preview.alsoOn.length > 0 });
       void queryClient.invalidateQueries();
       setStep("done");
     } catch (e) {
@@ -168,18 +164,6 @@ export default function ShareScreen() {
       showToast(e instanceof Error ? e.message : "Couldn't create that collection.", "error");
     } finally {
       setCreating(false);
-    }
-  };
-
-  const undo = async () => {
-    try {
-      await undoShared(added);
-      void queryClient.invalidateQueries();
-      setAdded([]);
-      setStep("card");
-      showToast("Removed", "success");
-    } catch (e) {
-      showToast(e instanceof Error ? e.message : "Couldn't undo that.", "error");
     }
   };
 
@@ -507,14 +491,9 @@ export default function ShareScreen() {
               {includeAlsoOn && preview.alsoOn.length > 0 ? (
                 <Text style={styles.small}>Their {alsoNames} accounts were added too.</Text>
               ) : null}
-              <View style={[styles.twoBtns, { alignSelf: "stretch", marginTop: 12 }]}>
-                <Pressable style={[styles.secondaryBtn, { flex: 1 }]} onPress={() => void undo()}>
-                  <Text style={styles.secondaryText}>Undo</Text>
-                </Pressable>
-                <Pressable style={[styles.primaryBtn, { flex: 1.4 }]} onPress={close}>
-                  <Text style={styles.primaryText}>{fromShareSheet ? `Back to ${preview.platformLabel}` : "Done"}</Text>
-                </Pressable>
-              </View>
+              <Pressable style={[styles.primaryBtn, { alignSelf: "stretch", marginTop: 12 }]} onPress={close}>
+                <Text style={styles.primaryText}>Close</Text>
+              </Pressable>
             </View>
           ) : null}
         </ScrollView>
