@@ -47,6 +47,10 @@ final class ShareModel {
     var onClose: () -> Void = {}
     /// The link box, for "Add from link".
     var inputText = ""
+    /// "New collection" in the picker.
+    var newOpen = false
+    var newName = ""
+    var creating = false
 
     private let api = ShareAPI()
     private var shared = ""
@@ -112,10 +116,40 @@ final class ShareModel {
         id == ShareAPI.unsortedId ? "Unsorted" : preview?.collections.first { $0.id == id }?.name ?? ""
     }
 
+    /// Collections A to Z, with Unsorted kept at the bottom.
     var pickerRows: [SharePreview.Collection] {
-        let list = preview?.collections ?? []
-        if list.contains(where: { $0.name == "Unsorted" }) { return list }
-        return list + [SharePreview.Collection(id: ShareAPI.unsortedId, name: "Unsorted")]
+        var list = preview?.collections ?? []
+        if !list.contains(where: { $0.name == "Unsorted" }) {
+            list.append(SharePreview.Collection(id: ShareAPI.unsortedId, name: "Unsorted"))
+        }
+        return list.sorted { a, b in
+            let au = a.id == ShareAPI.unsortedId || a.name == "Unsorted"
+            let bu = b.id == ShareAPI.unsortedId || b.name == "Unsorted"
+            if au != bu { return bu }
+            return a.name.localizedCaseInsensitiveCompare(b.name) == .orderedAscending
+        }
+    }
+
+    func createNew() async {
+        let name = newName.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard let current = preview, !name.isEmpty, !creating else { return }
+        creating = true
+        defer { creating = false }
+        do {
+            let made = try await api.createCollection(name: name, existing: current.collections)
+            if !current.collections.contains(where: { $0.id == made.id }) {
+                preview?.collections.append(made)
+            }
+            if !selected.contains(made.id) {
+                selected.removeAll { $0 == ShareAPI.unsortedId }
+                selected.append(made.id)
+            }
+            newName = ""
+            newOpen = false
+            error = nil
+        } catch {
+            self.error = error.localizedDescription
+        }
     }
 
     func toggle(_ id: String) {
@@ -488,6 +522,55 @@ struct ShareCardView: View {
 
     private func picker(_ preview: SharePreview) -> some View {
         VStack(spacing: 14) {
+            if model.newOpen {
+                HStack(spacing: 8) {
+                    TextField("", text: $model.newName, prompt: Text("New collection name").foregroundStyle(Palette.textMuted))
+                        .submitLabel(.done)
+                        .onSubmit { Task { await model.createNew() } }
+                        .font(.system(size: 15))
+                        .foregroundStyle(Palette.textPrimary)
+                        .padding(.horizontal, 14)
+                        .frame(height: 48)
+                        .background(Palette.input, in: RoundedRectangle(cornerRadius: 12))
+                        .overlay(RoundedRectangle(cornerRadius: 12).stroke(Palette.border))
+                        .accessibilityLabel("New collection name")
+                    let canCreate = !model.newName.trimmingCharacters(in: .whitespaces).isEmpty && !model.creating
+                    Button {
+                        Task { await model.createNew() }
+                    } label: {
+                        Group {
+                            if model.creating { ProgressView().tint(.white) } else { Text("Create") }
+                        }
+                        .font(.system(size: 15, weight: .bold))
+                        .foregroundStyle(.white)
+                        .padding(.horizontal, 16)
+                        .frame(minHeight: 48)
+                        .background(Palette.accent.opacity(canCreate ? 1 : 0.4), in: RoundedRectangle(cornerRadius: 12))
+                    }
+                    .disabled(!canCreate)
+                    roundButton(systemImage: "xmark", label: "Cancel new collection") {
+                        model.newOpen = false
+                        model.newName = ""
+                    }
+                }
+            } else {
+                Button { model.newOpen = true } label: {
+                    HStack(spacing: 8) {
+                        Image(systemName: "plus")
+                        Text("New collection")
+                        Spacer()
+                    }
+                    .font(.system(size: 15, weight: .semibold))
+                    .foregroundStyle(Palette.accent)
+                    .padding(.horizontal, 14)
+                    .frame(minHeight: 48)
+                    .background(Palette.input, in: RoundedRectangle(cornerRadius: 12))
+                    .overlay(RoundedRectangle(cornerRadius: 12).stroke(Palette.border))
+                }
+            }
+            if let error = model.error {
+                Text(error).font(.system(size: 13)).foregroundStyle(Palette.destructive)
+            }
             ScrollView {
             VStack(spacing: 0) {
                 ForEach(Array(model.pickerRows.enumerated()), id: \.element.id) { index, row in
@@ -526,6 +609,8 @@ struct ShareCardView: View {
             .fixedSize(horizontal: false, vertical: model.pickerRows.count <= 7)
             .overlay(RoundedRectangle(cornerRadius: 12).stroke(Palette.border))
             primaryButton("Done") { model.step = .card }
+                .opacity(model.selected.isEmpty ? 0.45 : 1)
+                .disabled(model.selected.isEmpty)
         }
     }
 

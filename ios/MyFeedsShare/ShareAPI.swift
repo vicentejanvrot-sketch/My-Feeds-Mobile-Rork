@@ -40,7 +40,12 @@ nonisolated struct SharePreview: Decodable, Sendable {
     let inCollections: [Placement]
     let suggestion: Suggestion?
     let alsoOn: [OtherAccount]
-    let collections: [Collection]
+    var collections: [Collection]
+}
+
+nonisolated struct NewCollection: Encodable, Sendable {
+    let name: String
+    let user_id: String
 }
 
 nonisolated struct AddedChannel: Decodable, Sendable {
@@ -131,6 +136,29 @@ nonisolated final class ShareAPI: @unchecked Sendable {
             added += rows
         }
         return added
+    }
+
+    /// A new, empty collection made from the picker while adding an account.
+    /// Reuses one with the same name instead of making a duplicate.
+    func createCollection(name: String, existing: [SharePreview.Collection]) async throws -> SharePreview.Collection {
+        let clean = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !clean.isEmpty else { throw ShareAPIError.message("Give the collection a name.") }
+        if let same = existing.first(where: { $0.name.trimmingCharacters(in: .whitespaces).lowercased() == clean.lowercased() }) {
+            return same
+        }
+        let userId: String
+        do {
+            userId = try await client.auth.session.user.id.uuidString.lowercased()
+        } catch {
+            throw ShareAPIError.notSignedIn
+        }
+        let made: SharePreview.Collection = try await client.from("agents")
+            .insert(NewCollection(name: clean, user_id: userId))
+            .select("id, name")
+            .single()
+            .execute()
+            .value
+        return made
     }
 
     func undo(_ channels: [AddedChannel]) async throws {
