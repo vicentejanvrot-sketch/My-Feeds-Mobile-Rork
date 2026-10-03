@@ -41,6 +41,8 @@ import {
   Users,
 } from "lucide-react-native";
 import { Colors } from "@/constants/colors";
+import { buildPeople } from "@/lib/alsoOn";
+import { useIdentityLinks } from "@/lib/useAlsoOn";
 import type { ItemStatus, ItemWithAnalysis, Channel, Agent } from "@/lib/database";
 import {
   useFeedItems,
@@ -71,7 +73,7 @@ function extractYoutubeId(url: string | null): string | null {
 // ── Filter types ──────────────────────────────────────────────────
 
 type StatusFilter = "all" | ItemStatus;
-type SortMode = "priority" | "recent" | "views";
+type SortMode = "account" | "priority" | "recent" | "views";
 
 const STATUS_OPTIONS: { key: StatusFilter; label: string; icon?: React.ReactNode }[] = [
   { key: "all", label: "All Statuses" },
@@ -82,6 +84,7 @@ const STATUS_OPTIONS: { key: StatusFilter; label: string; icon?: React.ReactNode
 ];
 
 const SORT_OPTIONS: { key: SortMode; label: string }[] = [
+  { key: "account", label: "Account" },
   { key: "priority", label: "Priority" },
   { key: "recent", label: "Recent" },
   { key: "views", label: "Views" },
@@ -201,7 +204,7 @@ export default function FeedScreen() {
   const [statusFilter, setStatusFilter] = useState<StatusFilter>(
     (params.status as StatusFilter) || "not_watched",
   );
-  const [sortMode, setSortMode] = useState<SortMode>("priority");
+  const [sortMode, setSortMode] = useState<SortMode>("account");
   const [platformFilter, setPlatformFilter] = useState<SourcePlatform | "all">("all");
 
   const listUnsorted = agents.data ?? [];
@@ -301,6 +304,18 @@ export default function FeedScreen() {
     return map;
   }, [channelList]);
 
+  // "Account" sort: everything one person or company posted, on every
+  // platform, sits together (same grouping as People), so repeats are easy to
+  // spot and mark Watched. Same as the web app and iOS.
+  const identityLinks = useIdentityLinks();
+  const personOfChannel = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const person of buildPeople(channels.data ?? [], identityLinks.data ?? [], [])) {
+      for (const source of person.sources) if (source.channel_id) map.set(source.channel_id, person.id);
+    }
+    return map;
+  }, [channels.data, identityLinks.data]);
+
   // Platform chip, then sort
   const filtered = useMemo(() => {
     let result = baseFilteredItems;
@@ -311,7 +326,25 @@ export default function FeedScreen() {
     }
 
     // Sort
-    if (sortMode === "views") {
+    const newestFirst = (a: (typeof result)[number], b: (typeof result)[number]) =>
+      new Date(b.published_at ?? 0).getTime() - new Date(a.published_at ?? 0).getTime();
+    if (sortMode === "account") {
+      const plain = (name: string | null | undefined) =>
+        (name ?? "").replace(/\s*\(@[^)]*\)\s*$/, "").toLowerCase().replace(/[^\p{L}\p{N}]+/gu, "");
+      const accountOf = (it: (typeof result)[number]) =>
+        (it.channel_id && personOfChannel.get(it.channel_id)) ||
+        (plain(it.channel_name) ? "name:" + plain(it.channel_name) : "id:" + (it.channel_id ?? it.id));
+      const groups = new Map<string, typeof result>();
+      for (const it of result) {
+        const key = accountOf(it);
+        groups.set(key, [...(groups.get(key) ?? []), it]);
+      }
+      // Accounts with the newest post first; each account's posts newest first.
+      result = [...groups.values()]
+        .map((group) => [...group].sort(newestFirst))
+        .sort((a, b) => newestFirst(a[0], b[0]))
+        .flat();
+    } else if (sortMode === "views") {
       result = [...result].sort(
         (a, b) => (b.item_analysis?.[0]?.views_at_analysis ?? 0) - (a.item_analysis?.[0]?.views_at_analysis ?? 0),
       );
@@ -328,7 +361,7 @@ export default function FeedScreen() {
     // "recent" uses server order (by published_at desc)
 
     return result;
-  }, [baseFilteredItems, sortMode, platformFilter, sourcePriority]);
+  }, [baseFilteredItems, sortMode, platformFilter, sourcePriority, personOfChannel]);
 
   // Items per platform under the current filters; the chips only show when
   // there is more than one platform, and a platform at 0 has no chip.
