@@ -497,6 +497,9 @@ struct FollowingView: View {
                             ) {
                                 if let agentId = person.agentIds.first { follow(account, agentId: agentId) }
                             }
+                            DeleteSuggestionButton(isBusy: busyKeys.contains(account.link.id)) {
+                                decide(account, same: false)
+                            }
                         }
                         .padding(12)
                     }
@@ -1607,6 +1610,9 @@ private struct PersonSheet: View {
                         ) {
                             if let agentId { onFollow(account, agentId) }
                         }
+                        DeleteSuggestionButton(isBusy: busyKeys.contains(account.link.id)) {
+                            onDecide(account, false)
+                        }
                     }
                     .padding(12)
                 }
@@ -1715,5 +1721,31 @@ private struct FlowLayout: Layout {
             x += size.width + spacing
             rowHeight = max(rowHeight, size.height)
         }
+    }
+}
+
+/// Removes a suggested account: same as "Not them", so a later search won't
+/// suggest it again. Same as the web and Expo apps.
+private struct DeleteSuggestionButton: View {
+    let isBusy: Bool
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 5) {
+                Image(systemName: "trash")
+                    .font(.system(size: 12, weight: .semibold))
+                Text("Delete")
+                    .font(.system(size: 13, weight: .bold))
+            }
+            .foregroundStyle(.white)
+            .padding(.horizontal, 12)
+            .frame(height: 34)
+            .background(Theme.destructive, in: RoundedRectangle(cornerRadius: 10))
+        }
+        .buttonStyle(.plain)
+        .disabled(isBusy)
+        .opacity(isBusy ? 0.5 : 1)
+        .accessibilityLabel("Delete this suggestion")
     }
 }
