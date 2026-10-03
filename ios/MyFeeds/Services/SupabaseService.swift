@@ -84,6 +84,61 @@ final class SupabaseService {
         }
     }
 
+    /// Light rows for every feed item: only what the feed's filters, sorts and
+    /// counts use, so the feed can show its first cards quickly. The full rows
+    /// (pictures, post text, summaries) load 10 at a time with
+    /// fetchFeedItems(ids:). Pages are read in parallel.
+    func fetchFeedIndex() async throws -> [FeedItem] {
+        let columns = "id, agent_id, video_id, title, channel_name, channel_id, published_at, user_status, platform, author_handle, item_analysis(id, views_at_analysis, duration_seconds, tags)"
+        let total = try await db.from("items").select("id", head: true, count: .exact).execute().count ?? 0
+        let pageSize = 1000
+        // One extra page in case items arrive while this runs.
+        let pageCount = total / pageSize + 1
+        var pages: [Int: [FeedItem]] = [:]
+        try await withThrowingTaskGroup(of: (Int, [FeedItem]).self) { group in
+            for page in 0..<pageCount {
+                group.addTask {
+                    let svc = SupabaseService.shared
+                    let rows = try await svc.fetchIndexPage(columns: columns, from: page * pageSize, to: page * pageSize + pageSize - 1)
+                    return (page, rows)
+                }
+            }
+            for try await (page, rows) in group { pages[page] = rows }
+        }
+        var seen = Set<String>()
+        var all: [FeedItem] = []
+        all.reserveCapacity(total)
+        for page in pages.keys.sorted() {
+            for row in pages[page] ?? [] where seen.insert(row.id).inserted { all.append(row) }
+        }
+        return all
+    }
+
+    private func fetchIndexPage(columns: String, from: Int, to: Int) async throws -> [FeedItem] {
+        try await db.from("items").select(columns)
+            .order("published_at", ascending: false, nullsFirst: false)
+            .order("id", ascending: true)
+            .range(from: from, to: to)
+            .execute().value
+    }
+
+    /// The full rows for these items (the cards on screen).
+    func fetchFeedItems(ids: [String]) async throws -> [FeedItem] {
+        guard !ids.isEmpty else { return [] }
+        do {
+            return try await db.from("items").select("*, item_analysis(*)")
+                .in("id", values: ids).execute().value
+        } catch let error where error.isCancellation {
+            throw error
+        } catch {
+            // A malformed analysis row must not hide the cards; load them without it.
+            var rows: [FeedItem] = try await db.from("items").select().in("id", values: ids).execute().value
+            let durations = (try? await fetchDurations(itemIds: rows.map(\.id))) ?? [:]
+            for index in rows.indices { rows[index].resolvedDurationSeconds = durations[rows[index].id] }
+            return rows
+        }
+    }
+
     /// The API returns at most 1,000 rows per request, so read page by page
     /// (in a stable order) until a short page comes back.
     private func fetchItemPages(columns: String, limit: Int?) async throws -> [FeedItem] {

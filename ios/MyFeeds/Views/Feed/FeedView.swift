@@ -8,6 +8,13 @@ struct FeedView: View {
     @State private var items: [FeedItem] = []
     @State private var agents: [Agent] = []
     @State private var channels: [Channel] = []
+    /// Full rows (pictures, post text, summaries) for the cards loaded so far.
+    /// `items` holds light rows for everything, so filters, sorts and counts
+    /// cover the whole feed while cards load 10 at a time.
+    @State private var details: [String: FeedItem] = [:]
+    @State private var visibleCount = FeedView.pageSize
+    @State private var isLoadingMore = false
+    static let pageSize = 10
     /// Followed channel id -> person id (same grouping as People), for the Account sort.
     @State private var personOfChannel: [String: String] = [:]
     @State private var isLoading = true
@@ -50,8 +57,9 @@ struct FeedView: View {
         var result = items
         let query = search.trimmingCharacters(in: .whitespaces).lowercased()
         if !query.isEmpty {
-            result = result.filter { item in
-                (item.title?.lowercased().contains(query) ?? false)
+            result = result.filter { light in
+                let item = details[light.id] ?? light
+                return (item.title?.lowercased().contains(query) ?? false)
                 || (item.channelName?.lowercased().contains(query) ?? false)
                 || (item.body?.lowercased().contains(query) ?? false)
                 || (item.analysis?.shortSummary?.lowercased().contains(query) ?? false)
@@ -275,6 +283,13 @@ struct FeedView: View {
             withAnimation(.easeOut(duration: 0.2)) {
                 items[index].userStatus = change.status
             }
+        }
+        // A new filter or sort starts from the first 10 cards.
+        .onChange(of: filterKey) { _, _ in visibleCount = Self.pageSize }
+        // Cards that just came on screen (a filter, the next 10, or marking
+        // one watched) get their full rows.
+        .onChange(of: visibleItems.map(\.id)) { _, _ in
+            Task { await loadVisibleDetails() }
         }
         .onChange(of: router.postRequest == nil) { wasClosed, isClosed in
             if !wasClosed && isClosed {
@@ -531,14 +546,23 @@ struct FeedView: View {
         ScrollView {
             LazyVStack(spacing: 14) {
                 if isLoading {
-                    ProgressView()
-                        .controlSize(.large)
-                        .tint(Theme.accent)
-                        .padding(.vertical, 60)
+                    VStack(spacing: 14) {
+                        ProgressView()
+                            .controlSize(.large)
+                            .tint(Theme.accent)
+                        Text(loadingMessage)
+                            .font(.system(size: 14, weight: .semibold))
+                            .foregroundStyle(Theme.textSecondary)
+                    }
+                    .padding(.vertical, 60)
                 } else if filteredItems.isEmpty {
                     emptyState
                 } else {
-                    ForEach(filteredItems) { item in
+                    // Computed once per update: sorting the whole feed isn't free.
+                    let shown = visibleItems
+                    let total = filteredItems.count
+                    ForEach(shown) { light in
+                        let item = full(light)
                         FeedItemCard(
                             item: item,
                             sourceLabel: sourceLabel(for: item),
@@ -551,6 +575,22 @@ struct FeedView: View {
                             onSelectionTap: { toggleSelection(item) },
                             onStatusTap: { statusModalItem = item }
                         )
+                        .onAppear {
+                            if light.id == shown.last?.id { showMore() }
+                        }
+                    }
+                    if shown.count < total || isLoadingMore {
+                        HStack(spacing: 10) {
+                            if isLoadingMore { ProgressView().tint(Theme.accent) }
+                            Text(isLoadingMore
+                                 ? loadingMessage
+                                 : "Showing \(shown.count.formatted()) of \(total.formatted()) feeds")
+                                .font(.system(size: 13, weight: .semibold))
+                                .foregroundStyle(Theme.textSecondary)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 18)
+                        .onAppear { showMore() }
                     }
                 }
             }
@@ -680,11 +720,17 @@ struct FeedView: View {
         let service = SupabaseService.shared
         isLoading = items.isEmpty
 
+        // Collections, sources and "Also on" links load alongside the feed:
+        // the Account and Priority sorts need them to pick the first cards.
+        async let loadedAgents = try? service.fetchAgents()
+        async let loadedChannels = try? service.fetchAllChannels()
+        async let loadedLinks = try? service.fetchIdentityLinks()
+
         // Feed items are the primary content on this screen. Load them
         // independently so a failure in optional agent/channel metadata never
         // leaves the iOS feed blank.
         do {
-            var fetched = try await service.fetchFeedItems()
+            var fetched = try await service.fetchFeedIndex()
             // Keep statuses that are still being saved, so the reload can't
             // bring a just-watched video back for a moment.
             if !router.pendingStatuses.isEmpty {
@@ -703,9 +749,6 @@ struct FeedView: View {
 
         // These values only enhance filter labels and channel choices. Keep
         // rendering videos even if either request fails or contains bad data.
-        async let loadedAgents = try? service.fetchAgents()
-        async let loadedChannels = try? service.fetchAllChannels()
-        async let loadedLinks = try? service.fetchIdentityLinks()
         let (agentResult, channelResult, linkResult) = await (loadedAgents, loadedChannels, loadedLinks)
         if let agentResult { agents = agentResult }
         if let channelResult { channels = channelResult }
@@ -717,7 +760,50 @@ struct FeedView: View {
         }
         personOfChannel = map
 
+        await loadVisibleDetails()
         isLoading = false
+    }
+
+    /// The cards on screen: the first `visibleCount` of the filtered, sorted feed.
+    private var visibleItems: [FeedItem] {
+        Array(filteredItems.prefix(visibleCount))
+    }
+
+    /// A card's full row, with the status from the feed (the latest one).
+    private func full(_ item: FeedItem) -> FeedItem {
+        guard var row = details[item.id] else { return item }
+        row.userStatus = item.userStatus
+        return row
+    }
+
+    /// Loads the full rows for cards on screen that don't have them yet.
+    private func loadVisibleDetails() async {
+        let wanted = visibleItems.map(\.id).filter { details[$0] == nil }
+        guard !wanted.isEmpty else { return }
+        isLoadingMore = true
+        defer { isLoadingMore = false }
+        if let rows = try? await SupabaseService.shared.fetchFeedItems(ids: wanted) {
+            for row in rows { details[row.id] = row }
+        }
+    }
+
+    /// Reached the last card: show the next 10.
+    private func showMore() {
+        guard visibleCount < filteredItems.count, !isLoadingMore else { return }
+        visibleCount += Self.pageSize
+        Task { await loadVisibleDetails() }
+    }
+
+    private var loadingMessage: String {
+        let total = filteredItems.count
+        guard !items.isEmpty, total > 0 else { return "Loading feeds…" }
+        return "Loading \(min(visibleCount, total).formatted()) of \(total.formatted()) feeds"
+    }
+
+    /// Changing a filter or the sort starts again from the first 10.
+    private var filterKey: String {
+        [search, agentFilter ?? "", channelFilter ?? "", statusFilter?.rawValue ?? "",
+         sortMode.rawValue, platformFilter.map { "\($0)" } ?? ""].joined(separator: "|")
     }
 
     /// Card header text: the post's @handle, or for YouTube the channel's @handle
