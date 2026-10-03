@@ -47,6 +47,9 @@ final class ShareModel {
     var onClose: () -> Void = {}
     /// The link box, for "Add from link".
     var inputText = ""
+    /// True when iOS shows the extension in its own sheet (not see-through):
+    /// the card then fills the sheet.
+    var inSheet = false
     /// "New collection" in the picker.
     var newOpen = false
     var newName = ""
@@ -221,12 +224,13 @@ struct ShareCardView: View {
     private let priorityNames = [1: "Lowest", 2: "Low", 3: "Normal", 4: "High", 5: "Highest"]
 
     var body: some View {
-        ZStack(alignment: .bottom) {
+        ZStack(alignment: model.inSheet ? .top : .bottom) {
             // See-through: the app behind stays visible. Tapping it closes the card.
-            Color.clear
+            // Inside an iOS sheet there's nothing to see through, so it's the card's colour.
+            (model.inSheet ? Palette.card : Color.clear)
                 .contentShape(Rectangle())
                 .ignoresSafeArea()
-                .onTapGesture { model.onClose() }
+                .onTapGesture { if !model.inSheet { model.onClose() } }
                 .accessibilityLabel("Close")
 
             VStack(spacing: 0) {

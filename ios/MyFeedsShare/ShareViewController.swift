@@ -42,6 +42,15 @@ final class ShareViewController: UIViewController {
         }
     }
 
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        // If iOS still presents a sheet instead of the see-through full screen,
+        // the card fills that sheet so there's no empty white block above it.
+        let screen = view.window?.windowScene?.screen.bounds ?? UIScreen.main.bounds
+        let frame = view.convert(view.bounds, to: nil)
+        model.inSheet = frame.minY > 1 || frame.height < screen.height - 1
+    }
+
     /// Links first (the server reads the first link it finds), then any text.
     /// Apps share in different shapes: YouTube, TikTok, Facebook and LinkedIn
     /// add a preview image or video next to the link, and some send the link

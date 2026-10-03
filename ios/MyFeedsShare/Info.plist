@@ -2,6 +2,11 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+    <!-- iOS 26 shows share extensions in an opaque white sheet and ignores the
+         see-through, full-screen presentation. This keeps the earlier behaviour,
+         so the app the user shared from stays visible behind the card. -->
+    <key>UIDesignRequiresCompatibility</key>
+    <true/>
     <key>NSExtension</key>
     <dict>
         <key>NSExtensionAttributes</key>
