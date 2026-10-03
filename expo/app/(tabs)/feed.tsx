@@ -80,7 +80,7 @@ const STATUS_OPTIONS: { key: StatusFilter; label: string; icon?: React.ReactNode
   { key: "all", label: "All Statuses" },
   { key: "not_watched", label: "New", icon: <Circle size={16} color={Colors.textMuted} /> },
   { key: "watched", label: "Seen", icon: <Check size={16} color={Colors.success} /> },
-  { key: "liked", label: "Liked/Saved", icon: <Heart size={16} color={Colors.destructive} /> },
+  { key: "liked", label: "Liked", icon: <Heart size={16} color={Colors.destructive} /> },
   { key: "watch_later", label: "Later", icon: <Clock size={16} color={Colors.warning} /> },
 ];
 
@@ -100,14 +100,14 @@ const ITEM_STATUS_ICONS: Record<
 > = {
   not_watched: { icon: Circle, color: Colors.textMuted, label: "New" },
   watched: { icon: Check, color: Colors.success, label: "Seen" },
-  liked: { icon: Heart, color: Colors.destructive, label: "Liked/Saved" },
+  liked: { icon: Heart, color: Colors.destructive, label: "Liked" },
   watch_later: { icon: Clock, color: Colors.warning, label: "Later" },
 };
 
 const STATUS_OPTIONS_COMPACT: { key: ItemStatus; label: string }[] = [
   { key: "not_watched", label: "New" },
   { key: "watched", label: "Seen" },
-  { key: "liked", label: "Liked/Saved" },
+  { key: "liked", label: "Liked" },
   { key: "watch_later", label: "Later" },
 ];
 

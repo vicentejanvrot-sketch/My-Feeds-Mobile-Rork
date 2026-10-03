@@ -18,7 +18,7 @@ export const CHANNEL_STATUS_FILTERS = [
   { key: "all", label: "All Channels" },
   { key: "not_watched", label: "New" },
   { key: "watched", label: "Seen" },
-  { key: "liked", label: "Liked/Saved" },
+  { key: "liked", label: "Liked" },
   { key: "watch_later", label: "Later" },
 ] as const;
 
