@@ -38,7 +38,7 @@ import { Colors } from "@/constants/colors";
 import { PlatformBadge } from "@/components/PlatformBadge";
 import { useToast } from "@/components/Toast";
 import { useAgents, useChannelsAll, useDeleteChannel } from "@/lib/hooks";
-import { openExternalLink } from "@/lib/open-link";
+import { openExternalLink, openPrivateProfile } from "@/lib/open-link";
 import { useYouTubeConnection } from "@/lib/useYouTubeConnection";
 import { followOnPlatform, isConnectProvider, useConnections } from "@/lib/useConnections";
 import { PLATFORM_META, isFollowableAccount, type Platform } from "@/lib/platforms";
@@ -487,13 +487,13 @@ function PersonPanel({ person, people, agents, scanning, status, onRescan, onCom
                     <Text style={styles.privateNoteText}>Private account. Its posts aren&apos;t in your feed.</Text>
                   </View>
                   <Pressable
-                    onPress={() => void openExternalLink(a.url)}
+                    onPress={() => openPrivateProfile({ url: a.url, name: a.label, platformLabel: PLATFORM_META[a.platform].label })}
                     style={({ pressed }) => [styles.openBtn, pressed && styles.pressed]}
                     accessibilityRole="link"
-                    accessibilityLabel={PLATFORM_META[a.platform].openLabel}
+                    accessibilityLabel="See their posts"
                   >
                     <ExternalLink size={13} color={Colors.textPrimary} />
-                    <Text style={styles.openBtnText} numberOfLines={1}>{PLATFORM_META[a.platform].openLabel}</Text>
+                    <Text style={styles.openBtnText} numberOfLines={1}>See their posts</Text>
                   </Pressable>
                 </>
               ) : null}

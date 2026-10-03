@@ -205,6 +205,10 @@ function AuthGate() {
           }}
         />
         <Stack.Screen
+          name="profile-viewer"
+          options={{ headerShown: false, presentation: "fullScreenModal", animation: "slide_from_bottom" }}
+        />
+        <Stack.Screen
           name="share"
           options={{
             presentation: "transparentModal",

@@ -78,7 +78,7 @@ import {
   type ChannelFilterKey,
 } from "@/components/ChannelStatusPill";
 import { timeAgo } from "@/lib/format";
-import { openExternalLink } from "@/lib/open-link";
+import { openExternalLink, openPrivateProfile } from "@/lib/open-link";
 import { PlatformBadge } from "@/components/PlatformBadge";
 import { PLATFORMS, PLATFORM_META, platformOf, detectPlatform, type Platform } from "@/lib/platforms";
 
@@ -1226,7 +1226,15 @@ export default function AgentDetailScreen() {
                   ch.channel_name ?? ch.channel_url ?? "channel",
                 )
               }
-              onOpenUrl={() => handleOpenUrl(ch.channel_url)}
+              onOpenUrl={() =>
+                ch.is_private && ch.channel_url
+                  ? openPrivateProfile({
+                      url: ch.channel_url,
+                      name: ch.channel_name,
+                      platformLabel: PLATFORM_META[platformOf(ch.platform)].label,
+                    })
+                  : handleOpenUrl(ch.channel_url)
+              }
               onPriorityChange={(priority) =>
                 updateChannelPriority.mutate({ id: ch.id, priority })
               }
