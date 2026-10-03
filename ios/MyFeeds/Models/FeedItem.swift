@@ -27,6 +27,33 @@ nonisolated struct ItemAnalysis: Codable, Identifiable, Hashable, Sendable {
     var isFromTranscript: Bool { summarySource == "transcript" }
 }
 
+/// The embedded `item_analysis` join. It's one row per item, so the database
+/// sends a single object (older queries got a list). Either shape decodes, and
+/// an analysis that can't be read counts as none instead of failing the feed.
+nonisolated struct AnalysisList: Codable, Hashable, Sendable {
+    var rows: [ItemAnalysis]
+
+    init(rows: [ItemAnalysis]) { self.rows = rows }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.singleValueContainer()
+        if container.decodeNil() {
+            rows = []
+        } else if let list = try? container.decode([ItemAnalysis].self) {
+            rows = list
+        } else if let one = try? container.decode(ItemAnalysis.self) {
+            rows = [one]
+        } else {
+            rows = []
+        }
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.singleValueContainer()
+        try container.encode(rows)
+    }
+}
+
 /// Row in `items` with the embedded `item_analysis` join used in the feed.
 nonisolated struct FeedItem: Codable, Identifiable, Hashable, Sendable {
     let id: String
@@ -40,7 +67,7 @@ nonisolated struct FeedItem: Codable, Identifiable, Hashable, Sendable {
     var channelId: String?
     var publishedAt: String?
     var userStatus: ItemStatus?
-    var itemAnalysis: [ItemAnalysis]?
+    var itemAnalysis: AnalysisList?
     /// "youtube" | "x" | "reddit" | "instagram" | "linkedin". Missing on rows created before multi-platform sources.
     var platform: String?
     /// Post text (X, Instagram caption, LinkedIn) or self-text (Reddit).
@@ -52,7 +79,7 @@ nonisolated struct FeedItem: Codable, Identifiable, Hashable, Sendable {
     /// be decoded. This is runtime-only and is absent from normal API rows.
     var resolvedDurationSeconds: Int?
 
-    var analysis: ItemAnalysis? { itemAnalysis?.first }
+    var analysis: ItemAnalysis? { itemAnalysis?.rows.first }
     var status: ItemStatus { userStatus ?? .notWatched }
 
     var sourcePlatform: SourcePlatform {

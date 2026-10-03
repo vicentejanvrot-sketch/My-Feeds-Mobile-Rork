@@ -115,11 +115,24 @@ final class SupabaseService {
     }
 
     private func fetchIndexPage(columns: String, from: Int, to: Int) async throws -> [FeedItem] {
-        try await db.from("items").select(columns)
-            .order("published_at", ascending: false, nullsFirst: false)
-            .order("id", ascending: true)
-            .range(from: from, to: to)
-            .execute().value
+        do {
+            return try await db.from("items").select(columns)
+                .order("published_at", ascending: false, nullsFirst: false)
+                .order("id", ascending: true)
+                .range(from: from, to: to)
+                .execute().value
+        } catch let error where error.isCancellation {
+            throw error
+        } catch {
+            // A row that can't be read must not empty the feed: load the page
+            // without the analysis (views, length, tags) instead.
+            let plain = "id, agent_id, video_id, title, channel_name, channel_id, published_at, user_status, platform, author_handle"
+            return try await db.from("items").select(plain)
+                .order("published_at", ascending: false, nullsFirst: false)
+                .order("id", ascending: true)
+                .range(from: from, to: to)
+                .execute().value
+        }
     }
 
     /// The full rows for these items (the cards on screen).
