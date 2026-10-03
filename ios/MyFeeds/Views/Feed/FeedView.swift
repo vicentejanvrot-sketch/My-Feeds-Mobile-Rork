@@ -307,7 +307,7 @@ struct FeedView: View {
 
     private var header: some View {
         HStack(alignment: .firstTextBaseline) {
-            Text("Research Feed")
+            Text("Feeds")
                 .font(.system(size: 26, weight: .heavy))
                 .foregroundStyle(Theme.textPrimary)
             Spacer()
