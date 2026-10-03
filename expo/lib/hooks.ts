@@ -252,6 +252,20 @@ export function useItems(filter: "all" | ItemStatus) {
  * its filters match. The API returns at most 1,000 rows per request, so count
  * first and read the pages in parallel, in a stable order.
  */
+// Light rows: only what the feed's filters, sorts and counts use, so the feed
+// shows its first cards quickly. The full rows (pictures, post text,
+// summaries) load 10 at a time with fetchFeedDetails. Same as the iOS feed.
+const FEED_INDEX_COLUMNS =
+  "id, agent_id, video_id, title, channel_name, channel_id, published_at, user_status, platform, author_handle, item_analysis(id, views_at_analysis, duration_seconds, tags)";
+
+/** The full rows for these items (the cards on screen). */
+export async function fetchFeedDetails(ids: string[]): Promise<ItemWithAnalysis[]> {
+  if (ids.length === 0) return [];
+  const { data, error } = await supabase.from("items").select("*, item_analysis(*)").in("id", ids);
+  if (error) throw error;
+  return (data ?? []) as ItemWithAnalysis[];
+}
+
 export function useFeedItems(limit?: number) {
   const { user } = useAuth();
   return useQuery({
@@ -272,7 +286,7 @@ export function useFeedItems(limit?: number) {
           const to = Math.min((page + 1) * PAGE_SIZE, Math.max(total, 1)) - 1;
           return supabase
             .from("items")
-            .select("*, item_analysis(*)")
+            .select(FEED_INDEX_COLUMNS)
             .order("published_at", { ascending: false, nullsFirst: false })
             .order("id", { ascending: true })
             .range(from, to);

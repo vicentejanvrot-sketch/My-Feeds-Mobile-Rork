@@ -46,6 +46,7 @@ import { useIdentityLinks } from "@/lib/useAlsoOn";
 import type { ItemStatus, ItemWithAnalysis, Channel, Agent } from "@/lib/database";
 import {
   useFeedItems,
+  fetchFeedDetails,
   useUpdateItemStatus,
   useBulkUpdateItemStatus,
   useAgents,
@@ -82,6 +83,9 @@ const STATUS_OPTIONS: { key: StatusFilter; label: string; icon?: React.ReactNode
   { key: "liked", label: "Liked/Saved", icon: <Heart size={16} color={Colors.destructive} /> },
   { key: "watch_later", label: "Watch Later", icon: <Clock size={16} color={Colors.warning} /> },
 ];
+
+// Feed cards load 10 at a time; the next 10 when the list reaches the end.
+const PAGE_SIZE = 10;
 
 const SORT_OPTIONS: { key: SortMode; label: string }[] = [
   { key: "account", label: "Account" },
@@ -236,8 +240,14 @@ export default function FeedScreen() {
     }
   }, [visibleChannels, channelFilter, channels.isLoading]);
 
-  // Items
+  // Items: light rows for the whole feed (filters, sorts and counts use
+  // these). Full rows for the cards on screen load 10 at a time.
   const allItems = items.data ?? [];
+  const [details, setDetails] = useState<Record<string, ItemWithAnalysis>>({});
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [firstPageReady, setFirstPageReady] = useState(false);
+  const inFlight = useRef(new Set<string>());
 
   // Counts work like the web feed: each number matches what the feed shows
   // after picking that option, under the other filters currently applied.
@@ -249,7 +259,9 @@ export default function FeedScreen() {
     // Search: title, channel_name, short_summary, tags
     const q = normalizeText(search);
     if (q) {
-      result = result.filter((it) => {
+      result = result.filter((light) => {
+        // Post text and summaries are only on cards loaded so far.
+        const it = details[light.id] ?? light;
         const analysis = it.item_analysis?.[0] ?? null;
         if (normalizeText(it.title).includes(q)) return true;
         if (normalizeText(it.body).includes(q)) return true;
@@ -274,7 +286,7 @@ export default function FeedScreen() {
     }
 
     return result;
-  }, [allItems, search, agentFilter, statusFilter]);
+  }, [allItems, details, search, agentFilter, statusFilter]);
 
   // Every filter except the platform chips. The chip counts come from this list.
   const baseFilteredItems = useMemo(() => {
@@ -362,6 +374,59 @@ export default function FeedScreen() {
 
     return result;
   }, [baseFilteredItems, sortMode, platformFilter, sourcePriority, personOfChannel]);
+
+  // A new filter or sort starts again from the first 10 cards.
+  useEffect(() => {
+    setVisibleCount(PAGE_SIZE);
+  }, [search, agentFilter, channelFilter, statusFilter, sortMode, platformFilter]);
+
+  // The cards on screen, with their full rows once loaded (status from the
+  // feed rows, which status changes update first).
+  const shown = useMemo(
+    () =>
+      filtered.slice(0, visibleCount).map((it) => {
+        const full = details[it.id];
+        return full ? { ...full, user_status: it.user_status } : it;
+      }),
+    [filtered, visibleCount, details],
+  );
+
+  // Load the full rows for cards on screen that don't have them yet.
+  useEffect(() => {
+    const wanted = filtered
+      .slice(0, visibleCount)
+      .map((it) => it.id)
+      .filter((id) => !details[id] && !inFlight.current.has(id));
+    if (wanted.length === 0) {
+      if (!items.isLoading) setFirstPageReady(true);
+      return;
+    }
+    wanted.forEach((id) => inFlight.current.add(id));
+    setLoadingMore(true);
+    fetchFeedDetails(wanted)
+      .then((rows) =>
+        setDetails((cur) => {
+          const next = { ...cur };
+          for (const row of rows) next[row.id] = row;
+          return next;
+        }),
+      )
+      .catch(() => {})
+      .finally(() => {
+        wanted.forEach((id) => inFlight.current.delete(id));
+        setLoadingMore(inFlight.current.size > 0);
+        setFirstPageReady(true);
+      });
+  }, [filtered, visibleCount, details, items.isLoading]);
+
+  const totalShown = filtered.length;
+  const loadingMessage =
+    items.isLoading || totalShown === 0
+      ? "Loading feeds…"
+      : `Loading ${Math.min(visibleCount, totalShown).toLocaleString()} of ${totalShown.toLocaleString()} feeds`;
+  const showMore = useCallback(() => {
+    setVisibleCount((count) => (count < filtered.length ? count + PAGE_SIZE : count));
+  }, [filtered.length]);
 
   // Items per platform under the current filters; the chips only show when
   // there is more than one platform, and a platform at 0 has no chip.
@@ -651,14 +716,29 @@ export default function FeedScreen() {
       ) : null}
 
       {/* ── List ───────────────────────────────────────────────── */}
-      {items.isLoading ? (
+      {items.isLoading || !firstPageReady ? (
         <View style={styles.loadingBox}>
           <ActivityIndicator color={Colors.accent} />
+          <Text style={styles.loadingText}>{loadingMessage}</Text>
         </View>
       ) : (
         <FlatList
           ref={listRef}
-          data={filtered}
+          data={shown}
+          onEndReached={showMore}
+          onEndReachedThreshold={0.6}
+          ListFooterComponent={
+            shown.length < totalShown || loadingMore ? (
+              <View style={styles.moreFooter}>
+                {loadingMore ? <ActivityIndicator size="small" color={Colors.accent} /> : null}
+                <Text style={styles.loadingText}>
+                  {loadingMore
+                    ? loadingMessage
+                    : `Showing ${shown.length.toLocaleString()} of ${totalShown.toLocaleString()} feeds`}
+                </Text>
+              </View>
+            ) : null
+          }
           keyExtractor={(it) => it.id}
           contentContainerStyle={styles.listContent}
           showsVerticalScrollIndicator={false}
@@ -1574,7 +1654,9 @@ const styles = StyleSheet.create({
   },
 
   // List
-  loadingBox: { paddingVertical: 60, alignItems: "center" },
+  loadingBox: { paddingVertical: 60, alignItems: "center", gap: 12 },
+  loadingText: { fontSize: 13, fontWeight: "600", color: Colors.textSecondary },
+  moreFooter: { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 10, paddingVertical: 18 },
   listContent: { padding: 16, gap: 14, paddingBottom: 32, maxWidth: 720, width: "100%" },
   emptyCard: {
     backgroundColor: Colors.card,
