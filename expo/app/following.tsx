@@ -567,7 +567,21 @@ function PersonPanel({ person, people, agents, scanning, status, onRescan, onCom
                     <Text style={styles.removeMatchLink}>Not them? Remove this match</Text>
                   </Pressable>
                 </View>
-                <FollowButton account={a} agentId={agentId} />
+                <View style={styles.suggestionActions}>
+                  <FollowButton account={a} agentId={agentId} />
+                  <DeleteSuggestionButton
+                    disabled={decide.isPending}
+                    onPress={() =>
+                      decide.mutate(
+                        { link: a.link, same: false, channelIds: person.sources.map((c) => c.id) },
+                        {
+                          onSuccess: () => showToast("Suggestion deleted", "success"),
+                          onError: (e) => showToast(e instanceof Error ? e.message : "Couldn't delete it", "error"),
+                        },
+                      )
+                    }
+                  />
+                </View>
               </View>
             ))}
           </View>
@@ -651,11 +665,30 @@ function PersonRow({ person, agentNames, onPress }: { person: Person; agentNames
   );
 }
 
+// Removes a suggested account: same as "Not them", so a later search won't
+// suggest it again.
+function DeleteSuggestionButton({ onPress, disabled }: { onPress: () => void; disabled?: boolean }) {
+  return (
+    <Pressable
+      onPress={onPress}
+      disabled={disabled}
+      style={({ pressed }) => [styles.deleteSuggestionBtn, (pressed || disabled) && styles.pressed]}
+      accessibilityRole="button"
+      accessibilityLabel="Delete this suggestion"
+    >
+      <Trash2 size={14} color={Colors.white} />
+      <Text style={styles.deleteSuggestionText}>Delete</Text>
+    </Pressable>
+  );
+}
+
 function GapsView({ people, agents, onOpen }: {
   people: Person[];
   agents: { id: string; name: string }[];
   onOpen: (id: string) => void;
 }) {
+  const decide = useDecideLink();
+  const showToast = useToast();
   const agentName = new Map(agents.map((a) => [a.id, a.name]));
   const withGaps = people.filter((p) => p.also.length > 0);
   const checks = people.flatMap((p) => p.possible.map((a) => ({ person: p, account: a })));
@@ -691,7 +724,21 @@ function GapsView({ people, agents, onOpen }: {
                 <AccountLine platform={a.platform} label={a.label} url={a.url} />
                 <Text style={styles.muted}>{a.link.evidence}</Text>
               </View>
-              <FollowButton account={a} agentId={p.agentIds[0]} />
+              <View style={styles.suggestionActions}>
+                <FollowButton account={a} agentId={p.agentIds[0]} />
+                <DeleteSuggestionButton
+                  disabled={decide.isPending}
+                  onPress={() =>
+                    decide.mutate(
+                      { link: a.link, same: false, channelIds: p.sources.map((c) => c.id) },
+                      {
+                        onSuccess: () => showToast("Suggestion deleted", "success"),
+                        onError: (e) => showToast(e instanceof Error ? e.message : "Couldn't delete it", "error"),
+                      },
+                    )
+                  }
+                />
+              </View>
             </View>
           ))}
         </View>
@@ -1031,6 +1078,17 @@ const styles = StyleSheet.create({
   contentWide: { maxWidth: 720, alignSelf: "center", width: "100%" },
   header: { flexDirection: "row", alignItems: "center", gap: 10 },
   backBtn: { padding: 4 },
+  suggestionActions: { flexDirection: "row", alignItems: "center", gap: 8 },
+  deleteSuggestionBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    height: 36,
+    paddingHorizontal: 12,
+    borderRadius: 10,
+    backgroundColor: Colors.destructive,
+  },
+  deleteSuggestionText: { fontSize: 13, fontWeight: "700" as const, color: Colors.white },
   addLinkBtn: {
     flexDirection: "row",
     alignItems: "center",
