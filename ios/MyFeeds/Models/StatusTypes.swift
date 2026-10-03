@@ -13,7 +13,7 @@ extension ItemStatus {
         switch self {
         case .notWatched: return "New"
         case .watched: return "Seen"
-        case .liked: return "Liked/Saved"
+        case .liked: return "Liked"
         case .watchLater: return "Later"
         }
     }
