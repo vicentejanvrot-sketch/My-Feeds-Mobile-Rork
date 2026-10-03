@@ -83,7 +83,8 @@ export default function ShareScreen() {
     try {
       const p = await previewShare(value);
       setPreview(p);
-      setSelected(p.inCollections.length === 0 && p.suggestion ? [p.suggestion.agentId] : []);
+      // Nothing is picked for the user: Add stays off until they choose.
+      setSelected([]);
       setAddingMore(false);
       setIncludeAlsoOn(true);
       setPriority(3);
