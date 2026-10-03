@@ -1,4 +1,6 @@
+import LinkPresentation
 import SwiftUI
+import UIKit
 
 // The Add to My Feeds card, used by the share extension and, in the app, by
 // "Add from link" on People and myfeeds.ca/open/share links (this file is in
@@ -62,6 +64,7 @@ final class ShareModel {
     func start(shared: String, allowTyping: Bool = false) {
         self.shared = shared
         inputText = shared
+        showQuick(for: shared)
         guard !shared.isEmpty else {
             if allowTyping {
                 step = .input
@@ -78,6 +81,7 @@ final class ShareModel {
         let text = inputText.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !text.isEmpty else { return }
         shared = text
+        showQuick(for: text)
         Task { await lookUp() }
     }
 
@@ -216,6 +220,123 @@ final class ShareModel {
     static func plainName(_ name: String) -> String {
         name.replacingOccurrences(of: #"\s*\(@[^)]*\)\s*$"#, with: "", options: .regularExpression)
     }
+
+    // MARK: Quick look
+
+    /// Who the link is about, shown while the full lookup runs: the handle and
+    /// platform from the link itself right away, then the name and picture from
+    /// the page's own preview a moment later.
+    var quick: QuickAccount?
+    @ObservationIgnored private var quickToken = UUID()
+    @ObservationIgnored private var metadataProvider: LPMetadataProvider?
+
+    private func showQuick(for text: String) {
+        let token = UUID()
+        quickToken = token
+        guard let parsed = QuickAccount.parse(text) else {
+            quick = nil
+            return
+        }
+        let (url, account) = parsed
+        quick = account
+        let provider = LPMetadataProvider()
+        metadataProvider = provider
+        provider.timeout = 8
+        provider.startFetchingMetadata(for: url) { [weak self] metadata, _ in
+            let title = metadata?.title
+            let imageProvider = metadata?.imageProvider
+            Task { @MainActor [weak self] in
+                guard let self, self.quickToken == token else { return }
+                if let title { self.quick?.applyTitle(title) }
+            }
+            imageProvider?.loadObject(ofClass: UIImage.self) { object, _ in
+                let data = (object as? UIImage)?.jpegData(compressionQuality: 0.85)
+                Task { @MainActor [weak self] in
+                    guard let self, self.quickToken == token, let data else { return }
+                    self.quick?.imageData = data
+                }
+            }
+        }
+    }
+}
+
+/// The account a shared link points to, as far as the link and its page preview tell.
+struct QuickAccount {
+    var platformLabel: String
+    var handle: String?
+    var name: String?
+    var imageData: Data?
+
+    var displayName: String {
+        if let name, !name.isEmpty { return name }
+        if let handle { return "@" + handle }
+        return platformLabel
+    }
+
+    var subtitle: String {
+        if let handle, name != nil, !(name ?? "").isEmpty { return "@\(handle) · \(platformLabel)" }
+        return platformLabel
+    }
+
+    /// Page titles like "Joana Andreiolo (@joanaandreiolo) • Instagram photos and videos",
+    /// "Name (@handle) / X", "Name (@handle) | TikTok" or "Name - YouTube".
+    mutating func applyTitle(_ title: String) {
+        var text = title
+        if let range = text.range(of: #"\(@([A-Za-z0-9._]+)\)"#, options: .regularExpression) {
+            let inside = text[range].dropFirst(2).dropLast()
+            if handle == nil { handle = String(inside) }
+            text = String(text[..<range.lowerBound])
+        }
+        for separator in [" • ", " | ", " / ", " - YouTube", " on Instagram", " on TikTok", " on X"] {
+            if let range = text.range(of: separator) { text = String(text[..<range.lowerBound]) }
+        }
+        let clean = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        // A generic page title ("Instagram", "Log in") isn't a name.
+        if !clean.isEmpty, !["instagram", "tiktok", "x", "facebook", "linkedin", "youtube", "reddit", "log in", "login"].contains(clean.lowercased()) {
+            name = clean
+        }
+    }
+
+    static func parse(_ text: String) -> (URL, QuickAccount)? {
+        guard let detector = try? NSDataDetector(types: NSTextCheckingResult.CheckingType.link.rawValue),
+              let match = detector.firstMatch(in: text, range: NSRange(text.startIndex..., in: text)),
+              let url = match.url,
+              let host = url.host?.lowercased()
+        else { return nil }
+        let parts = url.path.split(separator: "/").map(String.init)
+        func first(_ skip: Set<String>) -> String? {
+            guard let p = parts.first, !skip.contains(p.lowercased()) else { return nil }
+            return p
+        }
+        let is_ = { (domain: String) in host == domain || host.hasSuffix("." + domain) }
+        if is_("instagram.com") {
+            if parts.first?.lowercased() == "stories", parts.count > 1 { return (url, QuickAccount(platformLabel: "Instagram", handle: parts[1])) }
+            return (url, QuickAccount(platformLabel: "Instagram", handle: first(["p", "reel", "reels", "tv", "explore", "share", "accounts"])))
+        }
+        if is_("tiktok.com") {
+            let h = parts.first(where: { $0.hasPrefix("@") }).map { String($0.dropFirst()) }
+            return (url, QuickAccount(platformLabel: "TikTok", handle: h))
+        }
+        if is_("x.com") || is_("twitter.com") {
+            return (url, QuickAccount(platformLabel: "X", handle: first(["i", "home", "search", "intent", "share", "hashtag", "explore"])))
+        }
+        if is_("youtube.com") || host == "youtu.be" {
+            let h = parts.first(where: { $0.hasPrefix("@") }).map { String($0.dropFirst()) }
+            return (url, QuickAccount(platformLabel: "YouTube", handle: h))
+        }
+        if is_("facebook.com") || is_("fb.com") {
+            return (url, QuickAccount(platformLabel: "Facebook", handle: first(["share", "profile.php", "watch", "groups", "events", "reel", "photo", "story.php", "permalink.php"])))
+        }
+        if is_("linkedin.com") {
+            let h = parts.count > 1 && ["in", "company"].contains(parts[0].lowercased()) ? parts[1] : nil
+            return (url, QuickAccount(platformLabel: "LinkedIn", handle: h))
+        }
+        if is_("reddit.com") {
+            let h = parts.count > 1 && ["r", "u", "user"].contains(parts[0].lowercased()) ? parts[1] : nil
+            return (url, QuickAccount(platformLabel: "Reddit", handle: h))
+        }
+        return nil
+    }
 }
 
 struct ShareCardView: View {
@@ -347,11 +468,41 @@ struct ShareCardView: View {
 
     private var loading: some View {
         VStack(alignment: .leading, spacing: 18) {
-            HStack(spacing: 14) {
-                Circle().fill(Palette.input).frame(width: 54, height: 54)
-                VStack(alignment: .leading, spacing: 8) {
-                    RoundedRectangle(cornerRadius: 6).fill(Palette.input).frame(width: 160, height: 14)
-                    RoundedRectangle(cornerRadius: 6).fill(Palette.input).frame(width: 100, height: 11)
+            if let quick = model.quick {
+                // What the link already tells: shown while the rest loads.
+                HStack(spacing: 14) {
+                    Group {
+                        if let data = quick.imageData, let image = UIImage(data: data) {
+                            Image(uiImage: image).resizable().scaledToFill()
+                        } else {
+                            Text(String(quick.displayName.replacingOccurrences(of: "@", with: "").prefix(1)).uppercased())
+                                .font(.system(size: 20, weight: .bold))
+                                .foregroundStyle(Palette.textPrimary)
+                                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                                .background(Palette.input)
+                        }
+                    }
+                    .frame(width: 54, height: 54)
+                    .clipShape(Circle())
+                    VStack(alignment: .leading, spacing: 3) {
+                        Text(quick.displayName)
+                            .font(.system(size: 17, weight: .bold))
+                            .foregroundStyle(Palette.textPrimary)
+                            .lineLimit(1)
+                        Text(quick.subtitle)
+                            .font(.system(size: 14))
+                            .foregroundStyle(Palette.textSecondary)
+                            .lineLimit(1)
+                    }
+                }
+                .animation(.easeOut(duration: 0.2), value: quick.imageData)
+            } else {
+                HStack(spacing: 14) {
+                    Circle().fill(Palette.input).frame(width: 54, height: 54)
+                    VStack(alignment: .leading, spacing: 8) {
+                        RoundedRectangle(cornerRadius: 6).fill(Palette.input).frame(width: 160, height: 14)
+                        RoundedRectangle(cornerRadius: 6).fill(Palette.input).frame(width: 100, height: 11)
+                    }
                 }
             }
             HStack(spacing: 10) {
