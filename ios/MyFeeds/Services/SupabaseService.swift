@@ -605,7 +605,9 @@ nonisolated struct SourceError: LocalizedError, Sendable {
     var errorDescription: String? { message }
 
     /// Add Source can offer "Add as private account" for this error.
-    var canAddAsPrivate: Bool { code == "instagram_private" || code == "instagram_unavailable" || code == "facebook_profile" }
+    var canAddAsPrivate: Bool {
+        ["instagram_private", "instagram_unavailable", "facebook_profile", "tiktok_private", "x_private"].contains(code ?? "")
+    }
 }
 
 /// A resume position, in seconds. The same rules apply on web, iOS and Android:

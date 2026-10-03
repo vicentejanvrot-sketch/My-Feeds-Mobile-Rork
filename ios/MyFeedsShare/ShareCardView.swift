@@ -286,6 +286,7 @@ struct ShareCardView: View {
         case .card, .adding:
             if let preview = model.preview {
                 accountRow(preview)
+                if preview.account.isPrivate == true { privateNote(preview) }
                 if model.showAlreadyBox { alreadyBox } else { form(preview) }
             }
         case .picker:
@@ -394,6 +395,28 @@ struct ShareCardView: View {
                     .foregroundStyle(Palette.textMuted)
             }
         }
+    }
+
+    /// A private account is added as one: it shows on People, its posts never come in.
+    private func privateNote(_ preview: SharePreview) -> some View {
+        HStack(alignment: .top, spacing: 10) {
+            Image(systemName: "lock.fill")
+                .font(.system(size: 13))
+                .foregroundStyle(Palette.textMuted)
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Private account")
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundStyle(Palette.textPrimary)
+                Text("It's added as a private account: it shows on People with a button to open it in \(preview.platformLabel). Its posts won't appear in your feed.")
+                    .font(.system(size: 13))
+                    .foregroundStyle(Palette.textSecondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            Spacer(minLength: 0)
+        }
+        .padding(13)
+        .background(Palette.input, in: RoundedRectangle(cornerRadius: 12))
+        .overlay(RoundedRectangle(cornerRadius: 12).stroke(Palette.border))
     }
 
     private func handleLine(_ preview: SharePreview) -> String {

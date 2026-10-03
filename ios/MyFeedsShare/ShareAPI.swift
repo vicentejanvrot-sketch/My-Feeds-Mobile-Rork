@@ -119,12 +119,15 @@ nonisolated final class ShareAPI: @unchecked Sendable {
         if includeAlsoOn { targets += preview.alsoOn.map { ($0.platform, $0.url) } }
         var added: [AddedChannel] = []
         for (index, target) in targets.enumerated() {
-            let json = try await callAddSource([
+            var body: [String: Any] = [
                 "agentIds": agentIds,
                 "platform": target.0,
                 "value": target.1,
                 "priority": priority,
-            ])
+            ]
+            // A private account is kept as one: it shows on People, its posts are never fetched.
+            if index == 0 && preview.account.isPrivate == true { body["privateAccount"] = true }
+            let json = try await callAddSource(body)
             var rows: [AddedChannel] = []
             if let raw = json["channels"], let data = try? JSONSerialization.data(withJSONObject: raw) {
                 rows = (try? JSONDecoder().decode([AddedChannel].self, from: data)) ?? []
