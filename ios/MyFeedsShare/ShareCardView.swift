@@ -80,7 +80,8 @@ final class ShareModel {
         do {
             let p = try await api.preview(shared)
             preview = p
-            selected = p.inCollections.isEmpty ? (p.suggestion.map { [$0.agentId] } ?? []) : []
+            // Nothing is picked for the user: Add stays off until they choose.
+            selected = []
             addingMore = false
             includeAlsoOn = true
             priority = 3
