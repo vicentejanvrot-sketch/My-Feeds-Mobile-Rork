@@ -57,6 +57,10 @@ struct MainTabView: View {
         .tint(Theme.accent)
         // A web link that arrived while signing in opens once the tabs show.
         .onAppear { router.openPendingLink() }
+        .fullScreenCover(item: $router.shareRequest) { request in
+            AddFromLinkSheet(text: request.text) { router.shareRequest = nil }
+                .presentationBackground(.clear)
+        }
     }
 }
 

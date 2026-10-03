@@ -5,6 +5,7 @@ import SwiftUI
 /// Same screen as /following on the web and expo/app/following.tsx.
 struct FollowingView: View {
     @Environment(ToastCenter.self) private var toasts
+    @Environment(AppRouter.self) private var router
     @Environment(\.openURL) private var openURL
 
     @State private var channels: [Channel] = []
@@ -151,9 +152,22 @@ struct FollowingView: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbarBackground(Theme.background, for: .navigationBar)
         .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button {
+                    router.shareRequest = ShareRequest(text: "")
+                } label: {
+                    Image(systemName: "link.badge.plus")
+                        .font(.system(size: 15, weight: .semibold))
+                }
+                .accessibilityLabel("Add from link")
+            }
             if showScanButton {
                 ToolbarItem(placement: .topBarTrailing) { scanButton }
             }
+        }
+        // Someone added from a link: show them.
+        .onChange(of: router.shareRequest == nil) { _, closed in
+            if closed { Task { await load() } }
         }
         .refreshable { await load() }
         .task {

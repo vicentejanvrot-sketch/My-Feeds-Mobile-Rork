@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		A1F00000000000000000000A /* Supabase in Frameworks */ = {isa = PBXBuildFile; productRef = A1F00000000000000000000B /* Supabase */; };
+		A1F00000000000000000000C /* MyFeedsShare.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = A1F000000000000000000000 /* MyFeedsShare.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		XXCB0C833A4E7DDE353CE0XX /* Supabase in Frameworks */ = {isa = PBXBuildFile; productRef = XX17F496E7391AF4178246XX /* Supabase */; };
 /* End PBXBuildFile section */
 
@@ -25,13 +27,55 @@
 			remoteGlobalIDString = 105FC5792E9EAD3100EA8BCF;
 			remoteInfo = MyFeeds;
 		};
+		A1F00000000000000000000E /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 105FC5722E9EAD3100EA8BCF /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = A1F000000000000000000006;
+			remoteInfo = MyFeedsShare;
+		};
 /* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		A1F00000000000000000000D /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				A1F00000000000000000000C /* MyFeedsShare.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		105FC57A2E9EAD3100EA8BCF /* MyFeeds.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MyFeeds.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		105FC5892E9EAD3200EA8BCF /* MyFeedsTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MyFeedsTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		105FC5932E9EAD3200EA8BCF /* MyFeedsUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MyFeedsUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		A1F000000000000000000000 /* MyFeedsShare.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = MyFeedsShare.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		A1F000000000000000000002 /* Exceptions for "MyFeedsShare" folder in "MyFeedsShare" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = A1F000000000000000000006 /* MyFeedsShare */;
+		};
+		A1F000000000000000000010 /* Exceptions for "MyFeedsShare" folder in "MyFeeds" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+				MyFeedsShare.entitlements,
+				ShareViewController.swift,
+				SharedAuthStorage.swift,
+			);
+			target = 105FC5792E9EAD3100EA8BCF /* MyFeeds */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		105FC57C2E9EAD3100EA8BCF /* MyFeeds */ = {
@@ -47,6 +91,15 @@
 		105FC5962E9EAD3200EA8BCF /* MyFeedsUITests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = MyFeedsUITests;
+			sourceTree = "<group>";
+		};
+		A1F000000000000000000001 /* MyFeedsShare */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				A1F000000000000000000002 /* Exceptions for "MyFeedsShare" folder in "MyFeedsShare" target */,
+				A1F000000000000000000010 /* Exceptions for "MyFeedsShare" folder in "MyFeeds" target */,
+			);
+			path = MyFeedsShare;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -74,6 +127,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		A1F000000000000000000003 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A1F00000000000000000000A /* Supabase in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -83,6 +144,7 @@
 				105FC57C2E9EAD3100EA8BCF /* MyFeeds */,
 				105FC58C2E9EAD3200EA8BCF /* MyFeedsTests */,
 				105FC5962E9EAD3200EA8BCF /* MyFeedsUITests */,
+				A1F000000000000000000001 /* MyFeedsShare */,
 				105FC57B2E9EAD3100EA8BCF /* Products */,
 			);
 			sourceTree = "<group>";
@@ -93,6 +155,7 @@
 				105FC57A2E9EAD3100EA8BCF /* MyFeeds.app */,
 				105FC5892E9EAD3200EA8BCF /* MyFeedsTests.xctest */,
 				105FC5932E9EAD3200EA8BCF /* MyFeedsUITests.xctest */,
+				A1F000000000000000000000 /* MyFeedsShare.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -108,13 +171,16 @@
 				105FC5762E9EAD3100EA8BCF /* Sources */,
 				105FC5772E9EAD3100EA8BCF /* Frameworks */,
 				105FC5782E9EAD3100EA8BCF /* Resources */,
+				A1F00000000000000000000D /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				A1F00000000000000000000F /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				105FC57C2E9EAD3100EA8BCF /* MyFeeds */,
+				A1F000000000000000000001 /* MyFeedsShare */,
 			);
 			name = MyFeeds;
 			packageProductDependencies = (
@@ -170,6 +236,29 @@
 			productReference = 105FC5932E9EAD3200EA8BCF /* MyFeedsUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
+		A1F000000000000000000006 /* MyFeedsShare */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A1F000000000000000000007 /* Build configuration list for PBXNativeTarget "MyFeedsShare" */;
+			buildPhases = (
+				A1F000000000000000000004 /* Sources */,
+				A1F000000000000000000003 /* Frameworks */,
+				A1F000000000000000000005 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				A1F000000000000000000001 /* MyFeedsShare */,
+			);
+			name = MyFeedsShare;
+			packageProductDependencies = (
+				A1F00000000000000000000B /* Supabase */,
+			);
+			productName = MyFeedsShare;
+			productReference = A1F000000000000000000000 /* MyFeedsShare.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -191,6 +280,9 @@
 						CreatedOnToolsVersion = 26.0;
 						TestTargetID = 105FC5792E9EAD3100EA8BCF;
 					};
+					A1F000000000000000000006 = {
+						CreatedOnToolsVersion = 26.0;
+					};
 				};
 			};
 			buildConfigurationList = 105FC5752E9EAD3100EA8BCF /* Build configuration list for PBXProject "MyFeeds" */;
@@ -210,6 +302,7 @@
 				105FC5792E9EAD3100EA8BCF /* MyFeeds */,
 				105FC5882E9EAD3200EA8BCF /* MyFeedsTests */,
 				105FC5922E9EAD3200EA8BCF /* MyFeedsUITests */,
+				A1F000000000000000000006 /* MyFeedsShare */,
 			);
 			packageReferences = (
 				XXA26CCC1C14E04A80BED3XX /* XCRemoteSwiftPackageReference "supabase-swift" */,
@@ -233,6 +326,13 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		105FC5912E9EAD3200EA8BCF /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A1F000000000000000000005 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -286,6 +386,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		A1F000000000000000000004 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -298,6 +405,11 @@
 			isa = PBXTargetDependency;
 			target = 105FC5792E9EAD3100EA8BCF /* MyFeeds */;
 			targetProxy = 105FC5942E9EAD3200EA8BCF /* PBXContainerItemProxy */;
+		};
+		A1F00000000000000000000F /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = A1F000000000000000000006 /* MyFeedsShare */;
+			targetProxy = A1F00000000000000000000E /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -583,6 +695,64 @@
 			};
 			name = Release;
 		};
+		A1F000000000000000000008 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = MyFeedsShare/MyFeedsShare.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = MyFeedsShare/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "My Feeds";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = app.rork.je0yu8oeyjzcpim4k10q0.share;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		A1F000000000000000000009 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = MyFeedsShare/MyFeedsShare.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = MyFeedsShare/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "My Feeds";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = app.rork.je0yu8oeyjzcpim4k10q0.share;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -622,6 +792,15 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
+		A1F000000000000000000007 /* Build configuration list for PBXNativeTarget "MyFeedsShare" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A1F000000000000000000008 /* Debug */,
+				A1F000000000000000000009 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
@@ -637,6 +816,11 @@
 
 /* Begin XCSwiftPackageProductDependency section */
 		XX17F496E7391AF4178246XX /* Supabase */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = XXA26CCC1C14E04A80BED3XX /* XCRemoteSwiftPackageReference "supabase-swift" */;
+			productName = Supabase;
+		};
+		A1F00000000000000000000B /* Supabase */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = XXA26CCC1C14E04A80BED3XX /* XCRemoteSwiftPackageReference "supabase-swift" */;
 			productName = Supabase;

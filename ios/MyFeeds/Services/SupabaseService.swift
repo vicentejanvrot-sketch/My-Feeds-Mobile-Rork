@@ -18,7 +18,9 @@ final class SupabaseService {
             supabaseURL: URL(string: StaticConfig.supabaseURL)!,
             supabaseKey: StaticConfig.supabaseAnonKey,
             options: SupabaseClientOptions(
-                db: .init(encoder: encoder, decoder: decoder)
+                db: .init(encoder: encoder, decoder: decoder),
+                // Shared with the share extension (see SharedAuthStorage).
+                auth: .init(storage: SharedAuthStorage())
             )
         )
     }

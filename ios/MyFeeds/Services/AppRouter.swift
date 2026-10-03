@@ -23,6 +23,13 @@ struct ItemStatusChange: Equatable {
     let status: ItemStatus
 }
 
+/// The Add to My Feeds card ("Add from link", myfeeds.ca/open/share links).
+/// text: the shared link or text; empty shows the link box.
+struct ShareRequest: Identifiable, Equatable {
+    let id = UUID()
+    let text: String
+}
+
 /// Cross-tab feed deep-link (from Dashboard feed cards).
 struct FeedRequest: Equatable {
     let agentId: String?
@@ -54,6 +61,8 @@ enum WebLink: Equatable {
     case history
     case following(agentId: String?)
     case settings
+    /// myfeeds.ca/open/share?url=<link>: the Add to My Feeds card.
+    case share(String)
 
     static let webAppHost = "webapp.myfeeds.ca"
     static let siteHosts: Set<String> = ["myfeeds.ca", "www.myfeeds.ca"]
@@ -104,6 +113,8 @@ enum WebLink: Equatable {
             self = .following(agentId: param("agent"))
         case "settings":
             self = .settings
+        case "share":
+            self = .share([param("url"), param("text")].compactMap { $0 }.joined(separator: " "))
         default:
             self = .dashboard
         }
@@ -117,6 +128,7 @@ final class AppRouter {
     var feedRequest: FeedRequest?
     var playerRequest: PlayerRequest?
     var postRequest: PostRequest?
+    var shareRequest: ShareRequest?
     var lastStatusChange: ItemStatusChange?
     /// Status writes still in flight. A feed reload applies these so it can't
     /// briefly bring back the old status before Supabase has saved the new one.
@@ -209,6 +221,8 @@ final class AppRouter {
             pushOnAgents(agentId.map { .followingIn($0) } ?? .following)
         case .settings:
             selectedTab = .settings
+        case .share(let text):
+            shareRequest = ShareRequest(text: text)
         }
     }
 
