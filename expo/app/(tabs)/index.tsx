@@ -18,6 +18,7 @@ import * as Haptics from "expo-haptics";
 import {
   Bot,
   Video,
+  Layers,
   Activity,
   TrendingUp,
   Rss,
@@ -673,7 +674,7 @@ function FeedCard({
 
         {/* stat counts */}
         <View style={feedStyles.countRow}>
-          <CountChip icon={<Video size={12} color={Colors.textSecondary} />} value={stats.total} />
+          <CountChip icon={<Layers size={12} color={Colors.textSecondary} />} value={stats.total} />
           <CountChip icon={<CheckCircle2 size={12} color={Colors.success} />} value={stats.watched} tint={Colors.success} />
           <CountChip icon={<Circle size={12} color={Colors.textMuted} />} value={stats.unwatched} tint={Colors.textMuted} />
           <CountChip icon={<Clock4 size={12} color={Colors.warning} />} value={stats.watchLater} tint={Colors.warning} />
