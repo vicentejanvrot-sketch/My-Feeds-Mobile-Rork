@@ -671,7 +671,7 @@ struct PostReaderView: View {
                 icon: bookmarked ? "bookmark.fill" : "bookmark",
                 value: nil,
                 color: Theme.textPrimary,
-                label: bookmarked ? "Remove from Watch Later" : "Save (Watch Later)"
+                label: bookmarked ? "Remove from Later" : "Save for Later"
             ) {
                 changeStatus(bookmarked ? .notWatched : .watchLater, item: item)
             }

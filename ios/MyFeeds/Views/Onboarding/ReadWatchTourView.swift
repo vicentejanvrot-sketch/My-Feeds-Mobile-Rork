@@ -190,8 +190,8 @@ struct ReadWatchTourView: View {
     private var spotThree: some View {
         if platform == .youtube {
             pillGrid([
-                TourAction(icon: "checkmark.circle", label: "Watched"),
-                TourAction(icon: "clock", label: "Watch later"),
+                TourAction(icon: "checkmark.circle", label: "Seen"),
+                TourAction(icon: "clock", label: "Later"),
                 TourAction(icon: "heart", label: "Liked"),
             ], note: nil)
         } else {
@@ -326,7 +326,7 @@ private struct TourContent {
                 text: "New single by Nova Lane · 1 track · Pop",
                 steps: [
                     TourStep(title: "Listen here", body: "Tap it to open Spotify's player and hear a preview right inside My Feeds."),
-                    TourStep(title: "Heart to save", body: "The heart saves it in My Feeds. Save adds it to Watch later."),
+                    TourStep(title: "Heart to save", body: "The heart saves it in My Feeds. Save adds it to Later."),
                     TourStep(title: "Play it in Spotify", body: "\"Open in Spotify\" plays the full release in the Spotify app, where you can like it or add it to a playlist."),
                 ],
                 saveActions: [TourAction(icon: "heart", label: "Like"), TourAction(icon: "bookmark", label: "Save")],
@@ -340,7 +340,7 @@ private struct TourContent {
                 steps: [
                     TourStep(title: "Play it here", body: "Tap the video to watch it inside My Feeds. It remembers where you stopped."),
                     TourStep(title: "Jump to the good parts", body: "Under the player, the summary lists the key moments. Tap a time to jump straight there."),
-                    TourStep(title: "Keep track", body: "Mark it Watched, Watch later or Liked from the card so your feed stays tidy."),
+                    TourStep(title: "Keep track", body: "Mark it Seen, Later or Liked from the card so your feed stays tidy."),
                 ]
             )
         case .x:
@@ -448,7 +448,7 @@ private struct TourContent {
                 text: "New single by Nova Lane · 1 track · Pop",
                 steps: [
                     TourStep(title: "Listen here", body: "Tap it to open Apple Music's player. You hear a preview, or the full songs if you're signed in to Apple Music."),
-                    TourStep(title: "Heart to save", body: "The heart saves it in My Feeds. Save adds it to Watch later."),
+                    TourStep(title: "Heart to save", body: "The heart saves it in My Feeds. Save adds it to Later."),
                     TourStep(title: "Add it to Apple Music", body: "\"Add album to Apple Music\" puts the songs in your My Feeds playlist there, ready to download for offline."),
                 ],
                 saveActions: [TourAction(icon: "heart", label: "Like"), TourAction(icon: "bookmark", label: "Save")],
@@ -462,7 +462,7 @@ private struct TourContent {
                 text: "Full episode, played inside My Feeds.",
                 steps: [
                     TourStep(title: "Listen to the whole episode", body: "Tap it to play the full episode here. It remembers where you stopped, on every device."),
-                    TourStep(title: "Heart to save", body: "The heart saves it in My Feeds. Save adds it to Watch later."),
+                    TourStep(title: "Heart to save", body: "The heart saves it in My Feeds. Save adds it to Later."),
                     TourStep(title: "Follow the show on Apple Podcasts", body: "Following or rating the show opens Apple Podcasts."),
                 ],
                 saveActions: [TourAction(icon: "heart", label: "Like"), TourAction(icon: "bookmark", label: "Save")],
@@ -476,7 +476,7 @@ private struct TourContent {
                 text: "New audiobook by Maya Ortiz · Fiction",
                 steps: [
                     TourStep(title: "Hear a sample", body: "Tap it to see the cover and description, and play Apple's sample right here."),
-                    TourStep(title: "Heart to save", body: "The heart saves it in My Feeds. Save adds it to Watch later."),
+                    TourStep(title: "Heart to save", body: "The heart saves it in My Feeds. Save adds it to Later."),
                     TourStep(title: "Listen in Apple Books", body: "Buying and listening to the whole book opens Apple Books."),
                 ],
                 saveActions: [TourAction(icon: "heart", label: "Like"), TourAction(icon: "bookmark", label: "Save")],
@@ -490,7 +490,7 @@ private struct TourContent {
                 text: "New album by Nova Lane · 10 tracks",
                 steps: [
                     TourStep(title: "Listen here", body: "Tap it to play the songs, or the music video, right inside My Feeds."),
-                    TourStep(title: "Heart to save", body: "The heart saves it in My Feeds. Save adds it to Watch later."),
+                    TourStep(title: "Heart to save", body: "The heart saves it in My Feeds. Save adds it to Later."),
                     TourStep(title: "Add it to YouTube Music", body: "\"Add to YouTube Music\" puts the songs in your My Feeds playlist there, using your connected YouTube account."),
                 ],
                 saveActions: [TourAction(icon: "heart", label: "Like"), TourAction(icon: "bookmark", label: "Save")],

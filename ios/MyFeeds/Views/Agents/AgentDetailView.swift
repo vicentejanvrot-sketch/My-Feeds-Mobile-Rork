@@ -793,8 +793,8 @@ struct AgentDetailView: View {
 
     private func shortStatusLabel(_ status: ItemStatus) -> String {
         switch status {
-        case .watched: return "Watched"
-        case .notWatched: return "Not watched"
+        case .watched: return "Seen"
+        case .notWatched: return "New"
         case .liked: return "Liked"
         case .watchLater: return "Later"
         }

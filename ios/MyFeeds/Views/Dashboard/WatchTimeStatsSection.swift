@@ -116,7 +116,7 @@ struct WatchTimeStatsSection: View {
             HStack(spacing: 6) {
                 Image(systemName: "eye")
                     .font(.system(size: 12))
-                Text("Watched \(Format.watchDuration(stats.totalWatchedSeconds)) (\(stats.totalWatchedCount) videos)")
+                Text("Seen \(Format.watchDuration(stats.totalWatchedSeconds)) (\(stats.totalWatchedCount) videos)")
                     .font(.system(size: 12))
             }
             .foregroundStyle(Theme.success)
@@ -124,7 +124,7 @@ struct WatchTimeStatsSection: View {
             HStack(spacing: 6) {
                 Image(systemName: "eye.slash")
                     .font(.system(size: 12))
-                Text("Not Watched \(Format.watchDuration(stats.totalUnwatchedSeconds)) (\(stats.totalCount - stats.totalWatchedCount) videos)")
+                Text("New \(Format.watchDuration(stats.totalUnwatchedSeconds)) (\(stats.totalCount - stats.totalWatchedCount) videos)")
                     .font(.system(size: 12))
             }
             .foregroundStyle(Theme.textMuted)
@@ -235,8 +235,8 @@ struct WatchTimeStatsSection: View {
             }
 
             HStack(spacing: 14) {
-                legendDot(color: Theme.success, label: "Watched")
-                legendDot(color: Theme.warning, label: "Not Watched")
+                legendDot(color: Theme.success, label: "Seen")
+                legendDot(color: Theme.warning, label: "New")
             }
 
             chart(stats)
@@ -272,13 +272,13 @@ struct WatchTimeStatsSection: View {
                     AreaMark(
                         x: .value("Day", bucket.date, unit: .day),
                         y: .value("Hours", Double(bucket.watchedSeconds) / 3600),
-                        series: .value("Series", "Watched")
+                        series: .value("Series", "Seen")
                     )
                     .foregroundStyle(Theme.success.opacity(0.5))
                     LineMark(
                         x: .value("Day", bucket.date, unit: .day),
                         y: .value("Hours", Double(bucket.watchedSeconds) / 3600),
-                        series: .value("Series", "Watched")
+                        series: .value("Series", "Seen")
                     )
                     .foregroundStyle(Theme.success)
                     .lineStyle(StrokeStyle(lineWidth: 2))

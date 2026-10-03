@@ -425,10 +425,10 @@ struct VideoPlayerScreen: View {
 
     private var statusActionsRow: some View {
         HStack(spacing: 0) {
-            statusAction(icon: "circle", color: Theme.textMuted, label: "Not Watched", status: .notWatched)
-            statusAction(icon: "checkmark", color: Theme.success, label: "Watched", status: .watched)
+            statusAction(icon: "circle", color: Theme.textMuted, label: "New", status: .notWatched)
+            statusAction(icon: "checkmark", color: Theme.success, label: "Seen", status: .watched)
             statusAction(icon: "heart.fill", color: Theme.destructive, label: "Liked", status: .liked)
-            statusAction(icon: "clock", color: Theme.warning, label: "Watch Later", status: .watchLater)
+            statusAction(icon: "clock", color: Theme.warning, label: "Later", status: .watchLater)
         }
         .padding(.horizontal, 8)
     }
@@ -865,10 +865,10 @@ struct VideoPlayerScreen: View {
 
     private var watchedOverlay: some View {
         VStack(spacing: 8) {
-            Text("Marked as Watched")
+            Text("Marked as Seen")
                 .font(.system(size: 17, weight: .bold))
                 .foregroundStyle(.white)
-            Text("Video has been marked as watched in your library.")
+            Text("Video has been marked as seen in your library.")
                 .font(.system(size: 14))
                 .foregroundStyle(Color(red: 0x94 / 255, green: 0xA3 / 255, blue: 0xB8 / 255))
                 .multilineTextAlignment(.center)

@@ -11,19 +11,19 @@ nonisolated enum ItemStatus: String, Codable, CaseIterable, Sendable {
 extension ItemStatus {
     var label: String {
         switch self {
-        case .notWatched: return "Not Watched"
-        case .watched: return "Watched"
+        case .notWatched: return "New"
+        case .watched: return "Seen"
         case .liked: return "Liked/Saved"
-        case .watchLater: return "Watch Later"
+        case .watchLater: return "Later"
         }
     }
 
     var actionLabel: String {
         switch self {
-        case .notWatched: return "Not Watched"
-        case .watched: return "Watched"
+        case .notWatched: return "New"
+        case .watched: return "Seen"
         case .liked: return "Liked"
-        case .watchLater: return "Watch Later"
+        case .watchLater: return "Later"
         }
     }
 
