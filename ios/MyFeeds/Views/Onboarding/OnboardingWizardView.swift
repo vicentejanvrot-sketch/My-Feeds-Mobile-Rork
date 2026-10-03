@@ -719,6 +719,7 @@ struct OnboardingWizardView: View {
             aiProvider: "lovable",
             includeShorts: true,
             includeLive: true,
+            contentTypes: [:],
             minDurationMinutes: 0,
             freshnessWeight: 1.0,
             priorityWeight: 1.0,

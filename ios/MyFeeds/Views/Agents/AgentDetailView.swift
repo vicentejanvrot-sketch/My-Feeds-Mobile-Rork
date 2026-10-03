@@ -317,6 +317,14 @@ struct AgentDetailView: View {
             VStack(alignment: .leading, spacing: 6) {
                 booleanRow(label: "Shorts", isOn: agent.includeShorts == true)
                 booleanRow(label: "Live/Upcoming", isOn: agent.includeLive == true)
+                ForEach(ContentTypes.groups) { group in
+                    ForEach(group.options) { option in
+                        booleanRow(
+                            label: "\(group.platform.label) \(option.label.lowercased())",
+                            isOn: ContentTypes.isOn(agent.contentTypes, option.key)
+                        )
+                    }
+                }
             }
             .padding(.top, 6)
         }

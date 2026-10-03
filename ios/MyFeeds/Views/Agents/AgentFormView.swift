@@ -34,6 +34,8 @@ struct AgentFormView: View {
     // New collections include Shorts and live videos; the user can turn them off.
     @State private var includeShorts = true
     @State private var includeLive = true
+    /// Kinds of posts switched off (ContentTypes); only false values are kept.
+    @State private var contentTypes: [String: Bool] = [:]
     @State private var minDurationMinutes: Double = 3
     @State private var freshnessWeight: Double = 1.0
     @State private var priorityWeight: Double = 1.0
@@ -189,9 +191,30 @@ struct AgentFormView: View {
     }
 
     private var videoFiltersSection: some View {
-        formSection(title: "Video Filters — \"What types of videos should be included?\"") {
+        formSection(title: "Content Filters — \"What kinds of posts should be included?\"") {
+            contentGroupLabel("YouTube")
             toggleRow(title: "Include Shorts", subtitle: "Include YouTube Shorts in results", isOn: $includeShorts)
             toggleRow(title: "Include Live/Upcoming", subtitle: "Include live streams and premieres", isOn: $includeLive)
+            ForEach(ContentTypes.groups) { group in
+                contentGroupLabel(group.platform.label)
+                ForEach(group.options) { option in
+                    toggleRow(
+                        title: "Include " + option.label,
+                        subtitle: option.help,
+                        isOn: Binding(
+                            get: { contentTypes[option.key] != false },
+                            set: { on in
+                                if on { contentTypes.removeValue(forKey: option.key) } else { contentTypes[option.key] = false }
+                            }
+                        )
+                    )
+                }
+            }
+            Text(ContentTypes.liveNote)
+                .font(.system(size: 11))
+                .foregroundStyle(Theme.textMuted)
+                .fixedSize(horizontal: false, vertical: true)
+                .padding(.top, 6)
                 .padding(.top, 12)
         }
     }
@@ -316,6 +339,14 @@ struct AgentFormView: View {
             .padding(.bottom, 6)
     }
 
+    private func contentGroupLabel(_ text: String) -> some View {
+        Text(text.uppercased())
+            .font(.system(size: 11, weight: .bold))
+            .tracking(0.6)
+            .foregroundStyle(Theme.textSecondary)
+            .padding(.top, 8)
+    }
+
     private func toggleRow(title: String, subtitle: String, isOn: Binding<Bool>) -> some View {
         HStack {
             VStack(alignment: .leading, spacing: 2) {
@@ -402,6 +433,7 @@ struct AgentFormView: View {
                 lookbackHours = String(agent.lookbackHours ?? 36)
                 includeShorts = agent.includeShorts ?? false
                 includeLive = agent.includeLive ?? false
+                contentTypes = ContentTypes.normalized(agent.contentTypes)
                 minDurationMinutes = Double(agent.minDurationMinutes ?? 3)
                 freshnessWeight = agent.freshnessWeight ?? 1.0
                 priorityWeight = agent.priorityWeight ?? 1.0
@@ -457,6 +489,7 @@ struct AgentFormView: View {
             aiProvider: "lovable",
             includeShorts: includeShorts,
             includeLive: includeLive,
+            contentTypes: contentTypes,
             // Minimum Duration was removed: agents keep every video length.
             minDurationMinutes: 0,
             freshnessWeight: freshnessWeight,

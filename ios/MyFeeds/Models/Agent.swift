@@ -12,6 +12,9 @@ nonisolated struct Agent: Codable, Identifiable, Hashable, Sendable {
     var lookbackHours: Int?
     var includeShorts: Bool?
     var includeLive: Bool?
+    /// Kinds of posts left out, per platform (ContentTypes). Keys come back
+    /// camelCased by the decoder; read them through ContentTypes.normalized.
+    var contentTypes: [String: Bool]?
     var minDurationMinutes: Int?
     var aiProvider: String?
     var freshnessWeight: Double?
@@ -34,6 +37,7 @@ nonisolated struct AgentPayload: Codable, Sendable {
     var aiProvider: String
     var includeShorts: Bool
     var includeLive: Bool
+    var contentTypes: [String: Bool]
     var minDurationMinutes: Int
     var freshnessWeight: Double
     var priorityWeight: Double
