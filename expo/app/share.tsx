@@ -34,6 +34,7 @@ import {
   createCollection,
   joinNames,
   previewShare,
+  quickAccountFrom,
   PRIORITY_NAMES,
   sortCollections,
   UNSORTED_ID,
@@ -167,6 +168,9 @@ export default function ShareScreen() {
     }
   };
 
+  // The handle and platform from the link itself, while the lookup runs.
+  const quick = useMemo(() => quickAccountFrom(input || shared), [input, shared]);
+
   const pickerRows = preview
     ? sortCollections(
         [...preview.collections, { id: UNSORTED_ID, name: "Unsorted" }].filter(
@@ -230,13 +234,26 @@ export default function ShareScreen() {
 
           {step === "loading" || (status === "loading" && shared.trim()) ? (
             <View style={styles.block}>
-              <View style={styles.accountRow}>
-                <View style={[styles.avatar, styles.skeleton]} />
-                <View style={{ flex: 1, gap: 8 }}>
-                  <View style={[styles.skeleton, { width: "60%", height: 14, borderRadius: 6 }]} />
-                  <View style={[styles.skeleton, { width: "40%", height: 11, borderRadius: 6 }]} />
+              {quick ? (
+                // What the link already tells: shown while the rest loads.
+                <View style={styles.accountRow}>
+                  <View style={[styles.avatar, styles.avatarFallback]}>
+                    <Text style={styles.avatarInitial}>{(quick.handle ?? quick.platformLabel).charAt(0).toUpperCase()}</Text>
+                  </View>
+                  <View style={{ flex: 1, gap: 2 }}>
+                    <Text style={styles.accountName} numberOfLines={1}>{quick.handle ? `@${quick.handle}` : quick.platformLabel}</Text>
+                    <Text style={styles.muted} numberOfLines={1}>{quick.platformLabel}</Text>
+                  </View>
                 </View>
-              </View>
+              ) : (
+                <View style={styles.accountRow}>
+                  <View style={[styles.avatar, styles.skeleton]} />
+                  <View style={{ flex: 1, gap: 8 }}>
+                    <View style={[styles.skeleton, { width: "60%", height: 14, borderRadius: 6 }]} />
+                    <View style={[styles.skeleton, { width: "40%", height: 11, borderRadius: 6 }]} />
+                  </View>
+                </View>
+              )}
               <View style={styles.inline}>
                 <ActivityIndicator size="small" color={Colors.accent} />
                 <Text style={styles.muted}>Looking up the account…</Text>

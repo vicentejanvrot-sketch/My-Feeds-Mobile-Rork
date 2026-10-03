@@ -114,3 +114,34 @@ export function joinNames(names: string[]): string {
 }
 
 export const PRIORITY_NAMES: Record<number, string> = { 1: "Lowest", 2: "Low", 3: "Normal", 4: "High", 5: "Highest" };
+
+// Who a shared link points to, from the link alone (no network): shown while
+// the full lookup runs. Same rules as QuickAccount in the iOS share card.
+export function quickAccountFrom(text: string): { handle: string | null; platformLabel: string } | null {
+  const m = text.match(/https?:\/\/[^\s]+/i);
+  if (!m) return null;
+  let url: URL;
+  try {
+    url = new URL(m[0]);
+  } catch {
+    return null;
+  }
+  const host = url.hostname.toLowerCase();
+  const is = (d: string) => host === d || host.endsWith("." + d);
+  const parts = url.pathname.split("/").filter(Boolean);
+  const first = (skip: string[]) => (parts[0] && !skip.includes(parts[0].toLowerCase()) ? parts[0] : null);
+  const at = () => parts.find((p) => p.startsWith("@"))?.slice(1) ?? null;
+  if (is("instagram.com")) {
+    if (parts[0]?.toLowerCase() === "stories" && parts[1]) return { handle: parts[1], platformLabel: "Instagram" };
+    return { handle: first(["p", "reel", "reels", "tv", "explore", "share", "accounts"]), platformLabel: "Instagram" };
+  }
+  if (is("tiktok.com")) return { handle: at(), platformLabel: "TikTok" };
+  if (is("x.com") || is("twitter.com")) return { handle: first(["i", "home", "search", "intent", "share", "hashtag", "explore"]), platformLabel: "X" };
+  if (is("youtube.com") || host === "youtu.be") return { handle: at(), platformLabel: "YouTube" };
+  if (is("facebook.com") || is("fb.com")) {
+    return { handle: first(["share", "profile.php", "watch", "groups", "events", "reel", "photo", "story.php", "permalink.php"]), platformLabel: "Facebook" };
+  }
+  if (is("linkedin.com")) return { handle: ["in", "company"].includes(parts[0]?.toLowerCase() ?? "") ? parts[1] ?? null : null, platformLabel: "LinkedIn" };
+  if (is("reddit.com")) return { handle: ["r", "u", "user"].includes(parts[0]?.toLowerCase() ?? "") ? parts[1] ?? null : null, platformLabel: "Reddit" };
+  return null;
+}
