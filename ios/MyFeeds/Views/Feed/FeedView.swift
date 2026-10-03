@@ -8,6 +8,8 @@ struct FeedView: View {
     @State private var items: [FeedItem] = []
     @State private var agents: [Agent] = []
     @State private var channels: [Channel] = []
+    /// Followed channel id -> person id (same grouping as People), for the Account sort.
+    @State private var personOfChannel: [String: String] = [:]
     @State private var isLoading = true
 
     // Filters
@@ -16,7 +18,7 @@ struct FeedView: View {
     @State private var channelFilter: String? = nil
     @State private var statusFilter: ItemStatus? = .notWatched
     @State private var platformFilter: SourcePlatform? = nil
-    @State private var sortMode: SortMode = .priority
+    @State private var sortMode: SortMode = .account
 
     // Selection
     @State private var selectedIds: Set<String> = []
@@ -28,6 +30,7 @@ struct FeedView: View {
     @State private var showBulkStatusModal = false
 
     enum SortMode: String, CaseIterable {
+        case account = "Account"
         case priority = "Priority"
         case recent = "Recent"
         case views = "Views"
@@ -119,6 +122,33 @@ struct FeedView: View {
             result = result.filter { $0.sourcePlatform == platformFilter }
         }
         switch sortMode {
+        case .account:
+            // Everything one person or company posted, on every platform, sits
+            // together so repeats are easy to spot and mark Watched. Accounts
+            // with the newest post first; each account's posts newest first.
+            // Same as the web app and Expo.
+            let people = personOfChannel
+            func plain(_ name: String?) -> String {
+                var n = name ?? ""
+                if let r = n.range(of: #"\s*\(@[^)]*\)\s*$"#, options: .regularExpression) { n.removeSubrange(r) }
+                return String(n.lowercased().unicodeScalars.filter { CharacterSet.alphanumerics.contains($0) }.map(Character.init))
+            }
+            func accountKey(_ item: FeedItem) -> String {
+                if let channelId = item.channelId, let person = people[channelId] { return person }
+                let name = plain(item.channelName)
+                return name.isEmpty ? "id:" + (item.channelId ?? item.id) : "name:" + name
+            }
+            var order: [String] = []
+            var groups: [String: [FeedItem]] = [:]
+            for item in result {
+                let key = accountKey(item)
+                if groups[key] == nil { order.append(key) }
+                groups[key, default: []].append(item)
+            }
+            let sortedGroups = order.compactMap { groups[$0] }
+                .map { $0.sorted { ($0.publishedAt ?? "") > ($1.publishedAt ?? "") } }
+                .sorted { ($0.first?.publishedAt ?? "") > ($1.first?.publishedAt ?? "") }
+            result = sortedGroups.flatMap { $0 }
         case .recent:
             break
         case .views:
@@ -675,9 +705,17 @@ struct FeedView: View {
         // rendering videos even if either request fails or contains bad data.
         async let loadedAgents = try? service.fetchAgents()
         async let loadedChannels = try? service.fetchAllChannels()
-        let (agentResult, channelResult) = await (loadedAgents, loadedChannels)
+        async let loadedLinks = try? service.fetchIdentityLinks()
+        let (agentResult, channelResult, linkResult) = await (loadedAgents, loadedChannels, loadedLinks)
         if let agentResult { agents = agentResult }
         if let channelResult { channels = channelResult }
+        var map: [String: String] = [:]
+        for person in AlsoOn.buildPeople(channels: channels, links: linkResult ?? [], scans: []) {
+            for source in person.sources {
+                if let channelId = source.channelId, !channelId.isEmpty { map[channelId] = person.id }
+            }
+        }
+        personOfChannel = map
 
         isLoading = false
     }
