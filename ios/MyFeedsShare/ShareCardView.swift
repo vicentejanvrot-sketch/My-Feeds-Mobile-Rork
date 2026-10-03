@@ -222,7 +222,9 @@ struct ShareCardView: View {
 
     var body: some View {
         ZStack(alignment: .bottom) {
-            Color.black.opacity(0.45)
+            // See-through: the app behind stays visible. Tapping it closes the card.
+            Color.clear
+                .contentShape(Rectangle())
                 .ignoresSafeArea()
                 .onTapGesture { model.onClose() }
                 .accessibilityLabel("Close")

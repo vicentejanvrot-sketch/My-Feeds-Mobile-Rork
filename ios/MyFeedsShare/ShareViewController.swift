@@ -8,6 +8,18 @@ import UniformTypeIdentifiers
 final class ShareViewController: UIViewController {
     private let model = ShareModel()
 
+    // Full screen and see-through, so only the card covers the app the user
+    // shared from (not the grey sheet iOS puts behind an extension by default).
+    override init(nibName nibNameOrNil: String?, bundle nibBundleOrNil: Bundle?) {
+        super.init(nibName: nibNameOrNil, bundle: nibBundleOrNil)
+        modalPresentationStyle = .overFullScreen
+    }
+
+    required init?(coder: NSCoder) {
+        super.init(coder: coder)
+        modalPresentationStyle = .overFullScreen
+    }
+
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .clear
