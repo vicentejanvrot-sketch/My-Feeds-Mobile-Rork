@@ -247,8 +247,12 @@ struct ShareCardView: View {
                 UnevenRoundedRectangle(topLeadingRadius: 22, topTrailingRadius: 22)
                     .fill(Palette.card)
                     .overlay {
-                        UnevenRoundedRectangle(topLeadingRadius: 22, topTrailingRadius: 22)
-                            .stroke(Palette.border, lineWidth: 1)
+                        // The outline only shows on the floating card. Inside an
+                        // iOS sheet it would draw a line where the card ends.
+                        if !model.inSheet {
+                            UnevenRoundedRectangle(topLeadingRadius: 22, topTrailingRadius: 22)
+                                .stroke(Palette.border, lineWidth: 1)
+                        }
                     }
                     .ignoresSafeArea(edges: .bottom)
             }
