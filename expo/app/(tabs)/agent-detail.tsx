@@ -1,3 +1,4 @@
+import { CONTENT_TYPE_GROUPS, isContentTypeOn } from "@/lib/contentTypes";
 import { useCallback, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
@@ -1014,6 +1015,15 @@ export default function AgentDetailScreen() {
             <Text style={icStyles.title}>Filters</Text>
             <FilterBoolRow label="Shorts" active={agent.include_shorts === true} />
             <FilterBoolRow label="Live/Upcoming" active={agent.include_live === true} />
+            {CONTENT_TYPE_GROUPS.flatMap((group) =>
+              group.options.map((option) => (
+                <FilterBoolRow
+                  key={option.key}
+                  label={`${PLATFORM_META[group.platform].label} ${option.label.toLowerCase()}`}
+                  active={isContentTypeOn(agent.content_types, option.key)}
+                />
+              )),
+            )}
           </View>
         </View>
 

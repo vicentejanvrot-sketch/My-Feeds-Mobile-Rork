@@ -25,6 +25,8 @@ import {
   Plus,
   X,
 } from "lucide-react-native";
+import { PLATFORM_META } from "@/lib/platforms";
+import { CONTENT_TYPE_GROUPS, isContentTypeOn, withContentType, LIVE_NOTE, type ContentTypes } from "@/lib/contentTypes";
 import { Colors } from "@/constants/colors";
 import {
   useAgent,
@@ -115,6 +117,7 @@ export default function AgentFormScreen() {
   // New collections include Shorts and live videos; the user can turn them off.
   const [includeShorts, setIncludeShorts] = useState(true);
   const [includeLive, setIncludeLive] = useState(true);
+  const [contentTypes, setContentTypes] = useState<ContentTypes>({});
   const [recipients, setRecipients] = useState<string[]>([]);
 
   const [recipientInput, setRecipientInput] = useState("");
@@ -169,6 +172,7 @@ export default function AgentFormScreen() {
     setLookbackHours(String(agent.lookback_hours ?? 36));
     setIncludeShorts(agent.include_shorts ?? false);
     setIncludeLive(agent.include_live ?? false);
+    setContentTypes(agent.content_types ?? {});
 
     const existingEmails = existingRecipients.map((r) => r.email);
     setRecipients(existingEmails);
@@ -213,6 +217,7 @@ export default function AgentFormScreen() {
         ai_provider: "lovable" as const,
         include_shorts: includeShorts,
         include_live: includeLive,
+        content_types: contentTypes,
       };
 
       let savedAgent: Agent;
@@ -274,7 +279,7 @@ export default function AgentFormScreen() {
     }
   }, [
     name, description, runTime, timezone, lookbackHours,
-    includeShorts, includeLive, recipients, isEdit, agentId,
+    includeShorts, includeLive, contentTypes, recipients, isEdit, agentId,
     createAgent, updateAgent, deleteRecipient, showToast, router,
   ]);
 
@@ -443,7 +448,8 @@ export default function AgentFormScreen() {
         </FormSection>
 
         {/* ── Video Filters ────────────────────────────────────────── */}
-        <FormSection title='Video Filters — "What types of videos should be included?"'>
+        <FormSection title='Content Filters — "What kinds of posts should be included?"'>
+          <Text style={styles.contentGroup}>YouTube</Text>
           <ToggleRow
             label="Include Shorts"
             subtitle="Include YouTube Shorts in results"
@@ -456,6 +462,21 @@ export default function AgentFormScreen() {
             value={includeLive}
             onToggle={setIncludeLive}
           />
+          {CONTENT_TYPE_GROUPS.map((group) => (
+            <View key={group.platform}>
+              <Text style={styles.contentGroup}>{PLATFORM_META[group.platform].label}</Text>
+              {group.options.map((option) => (
+                <ToggleRow
+                  key={option.key}
+                  label={"Include " + option.label}
+                  subtitle={option.help}
+                  value={isContentTypeOn(contentTypes, option.key)}
+                  onToggle={(on) => setContentTypes((cur) => withContentType(cur, option.key, on))}
+                />
+              ))}
+            </View>
+          ))}
+          <Text style={styles.contentNote}>{LIVE_NOTE}</Text>
         </FormSection>
 
         {/* ── Email Recipients ─────────────────────────────────────── */}
@@ -1118,6 +1139,8 @@ const chipStyles = StyleSheet.create({
 // ─── Main styles ─────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
+  contentGroup: { fontSize: 12, fontWeight: "700", letterSpacing: 0.6, textTransform: "uppercase", color: Colors.textSecondary, marginTop: 14, marginBottom: 4 },
+  contentNote: { fontSize: 12, color: Colors.textSecondary, marginTop: 14, lineHeight: 17 },
   root: { flex: 1, backgroundColor: Colors.background },
   scroll: { flex: 1 },
   content: { paddingHorizontal: 16 },

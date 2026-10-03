@@ -17,6 +17,8 @@ export interface Agent {
   lookback_hours: number | null;
   include_shorts: boolean | null;
   include_live: boolean | null;
+  // Kinds of posts left out, per platform (lib/contentTypes.ts).
+  content_types?: Record<string, boolean> | null;
   min_duration_minutes: number | null;
   ai_provider: AiProvider | null;
   freshness_weight: number | null;
