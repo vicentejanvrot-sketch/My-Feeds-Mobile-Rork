@@ -1,3 +1,4 @@
+import type { Channel } from "@/lib/database";
 import { CONTENT_TYPE_GROUPS, isContentTypeOn } from "@/lib/contentTypes";
 import { useCallback, useMemo, useRef, useState } from "react";
 import {
@@ -40,6 +41,7 @@ import {
   Lock,
   Rss,
   Users,
+  FolderInput,
 } from "lucide-react-native";
 import { useQueryClient } from "@tanstack/react-query";
 import { Colors } from "@/constants/colors";
@@ -52,6 +54,7 @@ import {
   useStartRun,
   useToggleChannel,
   useDeleteChannel,
+  useMoveChannel,
   useAddChannel,
   useAddSource,
   canAddAsPrivate,
@@ -548,6 +551,9 @@ export default function AgentDetailScreen() {
   const startRun = useStartRun();
   const toggleChannel = useToggleChannel();
   const deleteChannel = useDeleteChannel();
+  const moveChannel = useMoveChannel();
+  // The source whose "Move to" list is open.
+  const [moving, setMoving] = useState<Channel | null>(null);
   const addChannel = useAddChannel(agentId ?? "");
   const addRecipient = useAddRecipient(agentId ?? "");
   const deleteRecipient = useDeleteRecipient();
@@ -1163,6 +1169,7 @@ export default function AgentDetailScreen() {
               onToggle={(isEnabled) =>
                 toggleChannel.mutate({ id: ch.id, isEnabled })
               }
+              onMove={() => setMoving(ch as Channel)}
               onDelete={() =>
                 handleDeleteChannel(
                   ch.id,
@@ -1176,6 +1183,45 @@ export default function AgentDetailScreen() {
             />
           ))
         )}
+
+        {/* "Move to": another collection for one source */}
+        <Modal visible={!!moving} transparent animationType="fade" onRequestClose={() => setMoving(null)}>
+          <Pressable style={moveStyles.backdrop} onPress={() => setMoving(null)}>
+            <Pressable style={moveStyles.sheet} onPress={() => {}}>
+              <Text style={moveStyles.title} numberOfLines={2}>
+                Move {moving?.channel_name ?? "this source"} to
+              </Text>
+              <ScrollView style={{ maxHeight: 420 }}>
+                {[...(allAgentsQ.data ?? [])]
+                  .filter((a) => a.id !== agentId)
+                  .sort((a, b) => a.name.localeCompare(b.name))
+                  .map((a) => (
+                    <Pressable
+                      key={a.id}
+                      style={({ pressed }) => [moveStyles.row, pressed && { backgroundColor: Colors.input }]}
+                      onPress={() => {
+                        const channel = moving;
+                        setMoving(null);
+                        if (!channel) return;
+                        moveChannel.mutate(
+                          { channel, toAgentId: a.id },
+                          {
+                            onSuccess: () => showToast(`Moved to ${a.name}`, "success"),
+                            onError: (e) => showToast("Couldn't move it: " + (e instanceof Error ? e.message : ""), "error"),
+                          },
+                        );
+                      }}
+                    >
+                      <Text style={moveStyles.rowText}>{a.name}</Text>
+                    </Pressable>
+                  ))}
+              </ScrollView>
+              <Pressable style={moveStyles.cancel} onPress={() => setMoving(null)}>
+                <Text style={moveStyles.cancelText}>Cancel</Text>
+              </Pressable>
+            </Pressable>
+          </Pressable>
+        </Modal>
 
         {/* ── RUN HISTORY SECTION ── */}
         <SectionHeader title={`Run History (${runs.length})`} />
@@ -1466,6 +1512,7 @@ function ChannelCard({
   accent,
   onToggle,
   onDelete,
+  onMove,
   onOpenUrl,
   onPriorityChange,
 }: {
@@ -1484,6 +1531,7 @@ function ChannelCard({
   accent: string;
   onToggle: (isEnabled: boolean) => void;
   onDelete: () => void;
+  onMove: () => void;
   onOpenUrl: () => void;
   onPriorityChange: (priority: number) => void;
 }) {
@@ -1523,6 +1571,15 @@ function ChannelCard({
                 <Text style={sourceStyles.privateBadgeText}>Private</Text>
               </View>
             ) : null}
+          </Pressable>
+          <Pressable
+            style={({ pressed }) => [styles.iconBtn, pressed && styles.pressed]}
+            onPress={onMove}
+            hitSlop={8}
+            accessibilityRole="button"
+            accessibilityLabel="Move to another collection"
+          >
+            <FolderInput size={14} color={Colors.textSecondary} />
           </Pressable>
           <Pressable
             style={({ pressed }) => [styles.iconBtn, pressed && styles.pressed]}
@@ -2013,4 +2070,14 @@ const sourceStyles = StyleSheet.create({
     borderColor: Colors.border,
   },
   privateBadgeText: { color: Colors.textMuted, fontSize: 10, fontWeight: "600" },
+});
+
+const moveStyles = StyleSheet.create({
+  backdrop: { flex: 1, backgroundColor: "rgba(0,0,0,0.55)", justifyContent: "center", padding: 24 },
+  sheet: { backgroundColor: Colors.card, borderRadius: 16, borderWidth: 1, borderColor: Colors.border, padding: 16, maxWidth: 480, width: "100%", alignSelf: "center" },
+  title: { fontSize: 16, fontWeight: "700", color: Colors.textPrimary, marginBottom: 10 },
+  row: { minHeight: 48, justifyContent: "center", paddingHorizontal: 12, borderRadius: 10 },
+  rowText: { fontSize: 15, color: Colors.textPrimary },
+  cancel: { marginTop: 10, minHeight: 44, alignItems: "center", justifyContent: "center", borderRadius: 10, borderWidth: 1, borderColor: Colors.border },
+  cancelText: { fontSize: 15, fontWeight: "600", color: Colors.textPrimary },
 });

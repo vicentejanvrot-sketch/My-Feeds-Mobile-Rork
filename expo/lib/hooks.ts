@@ -754,6 +754,62 @@ export function useDeleteChannel() {
   });
 }
 
+/**
+ * Moves a source to another collection, with the posts it already brought in.
+ * If that collection already follows the same account, the two are merged:
+ * this copy is removed and only posts the other doesn't have move over.
+ * Same steps as moveSource in the web app and iOS.
+ */
+export async function moveSource(channel: Channel, toAgentId: string): Promise<void> {
+  let existingQuery = supabase.from("channels").select("id").eq("agent_id", toAgentId);
+  existingQuery = channel.channel_id
+    ? existingQuery.eq("channel_id", channel.channel_id)
+    : existingQuery.eq("channel_url", channel.channel_url ?? "");
+  const { data: existing } = await existingQuery.limit(1).maybeSingle();
+
+  // Posts first, while the source still says where they came from.
+  if (channel.channel_id) {
+    try {
+      const { data: there } = await supabase
+        .from("items")
+        .select("video_id")
+        .eq("agent_id", toAgentId)
+        .eq("channel_id", channel.channel_id);
+      const already = [...new Set(((there ?? []) as { video_id: string | null }[]).map((r) => r.video_id).filter(Boolean) as string[])];
+      for (let i = 0; i < already.length; i += 200) {
+        await supabase
+          .from("items")
+          .delete()
+          .eq("agent_id", channel.agent_id)
+          .eq("channel_id", channel.channel_id)
+          .in("video_id", already.slice(i, i + 200));
+      }
+      await supabase
+        .from("items")
+        .update({ agent_id: toAgentId })
+        .eq("agent_id", channel.agent_id)
+        .eq("channel_id", channel.channel_id);
+    } catch {
+      // The source still moves; its old posts stay where they were.
+    }
+  }
+
+  const { error } = existing
+    ? await supabase.from("channels").delete().eq("id", channel.id)
+    : await supabase.from("channels").update({ agent_id: toAgentId }).eq("id", channel.id);
+  if (error) throw error;
+}
+
+export function useMoveChannel() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ channel, toAgentId }: { channel: Channel; toAgentId: string }) => moveSource(channel, toAgentId),
+    onSettled: () => {
+      void queryClient.invalidateQueries();
+    },
+  });
+}
+
 /** Add a channel to an agent. */
 export function useAddChannel(agentId: string) {
   const queryClient = useQueryClient();
