@@ -524,7 +524,8 @@ export default function ShareScreen() {
 }
 
 const styles = StyleSheet.create({
-  backdrop: { flex: 1, justifyContent: "flex-end", backgroundColor: "rgba(0,0,0,0.55)" },
+  // See-through, like the iOS share card: what's behind stays visible.
+  backdrop: { flex: 1, justifyContent: "flex-end", backgroundColor: "transparent" },
   sheet: {
     maxHeight: "92%",
     backgroundColor: Colors.card,
