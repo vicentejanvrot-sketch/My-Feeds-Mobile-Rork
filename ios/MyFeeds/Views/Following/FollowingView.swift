@@ -1578,7 +1578,7 @@ private struct PersonSheet: View {
                                 Text("Not them? Remove this match")
                                     .font(.system(size: 12))
                                     .underline()
-                                    .foregroundStyle(Theme.textMuted)
+                                    .foregroundStyle(Theme.destructive)
                             }
                             .buttonStyle(.plain)
                             .disabled(busyKeys.contains(account.link.id))
