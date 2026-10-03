@@ -564,7 +564,7 @@ function PersonPanel({ person, people, agents, scanning, status, onRescan, onCom
                     }
                     hitSlop={6}
                   >
-                    <Text style={styles.removeLink}>Not them? Remove this match</Text>
+                    <Text style={styles.removeMatchLink}>Not them? Remove this match</Text>
                   </Pressable>
                 </View>
                 <FollowButton account={a} agentId={agentId} />
@@ -1201,6 +1201,7 @@ const styles = StyleSheet.create({
   evidenceRow: { flexDirection: "row", alignItems: "flex-start", gap: 5 },
   evidence: { flex: 1, fontSize: 12, color: Colors.success, lineHeight: 16 },
   removeLink: { fontSize: 12, color: Colors.textMuted, textDecorationLine: "underline" },
+  removeMatchLink: { fontSize: 12, color: Colors.destructive, textDecorationLine: "underline" },
   followBtn: {
     flexDirection: "row",
     alignItems: "center",
