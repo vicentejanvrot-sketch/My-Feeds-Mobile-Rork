@@ -38,6 +38,11 @@ struct ContentView: View {
             ToastHost()
             RunningOverlayView()
 
+            // "New version available", or blocked below the minimum version.
+            if isSignedIn, let userId = auth.userId {
+                AppUpdateGate(userId: userId)
+            }
+
             if !splashDone {
                 TimedSplashView { splashDone = true }
             }
