@@ -1060,7 +1060,8 @@ export default function PostReaderScreen() {
               <Text style={styles.openText}>Find on Spotify</Text>
             </Pressable>
           </View>
-        ) : platform === "tiktok" && tiktokVideoId && photos.length === 0 ? (
+        ) : platform === "tiktok" && tiktokVideoId && photos.length === 0 && !video?.local_player ? (
+          // A downloaded TikTok video plays from the phone (below), so it works offline.
           <TikTokPlayer videoId={tiktokVideoId} />
         ) : platform === "facebook" && video && !video.local_player && facebookEmbed(item.url) ? (
           <FacebookVideo media={video} postUrl={item.url} progressId={item.video_id} />

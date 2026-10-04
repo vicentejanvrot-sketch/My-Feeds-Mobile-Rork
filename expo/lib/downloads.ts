@@ -15,6 +15,7 @@ import * as FileSystem from "expo-file-system/legacy";
 import { Platform } from "react-native";
 import { create } from "zustand";
 import { supabase } from "@/lib/supabase";
+import { withFreshMedia } from "@/lib/expired-media";
 import type { ItemWithAnalysis } from "@/lib/database";
 
 export interface DownloadEntry {
@@ -204,7 +205,9 @@ export async function downloadItem(itemId: string): Promise<DownloadEntry> {
       .eq("id", itemId)
       .single();
     if (error || !data) throw new Error("Couldn't load this item. Check your connection.");
-    const item = data as ItemWithAnalysis;
+    // Instagram's links expire a few days after the post was saved: renewed
+    // first, so the photos and video actually download.
+    const item = (await withFreshMedia(data as ItemWithAnalysis)) as ItemWithAnalysis;
 
     await FileSystem.deleteAsync(folder, { idempotent: true });
     await FileSystem.makeDirectoryAsync(folder, { intermediates: true });
