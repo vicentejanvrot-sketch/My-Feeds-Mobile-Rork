@@ -166,8 +166,7 @@ struct PostReaderView: View {
                     } else if platform == .facebook, let video = item.postVideo,
                               video.playableURL?.isFileURL != true,
                               let embed = FacebookEmbedPlayer.embed(for: item.url) {
-                        // Facebook's own player: its MP4 links expire, the post link doesn't.
-                        FacebookEmbedPlayer(url: embed.url, portrait: embed.portrait)
+                        FacebookVideoView(fileURL: video.playableURL, embed: embed, progressId: item.videoId)
                     } else if slides.count > 1 {
                         MediaCarousel(slides: slides, progressId: item.videoId)
                     } else if let video = item.postVideo, let url = video.playableURL {
@@ -1917,8 +1916,52 @@ private struct PodcastPlayerView: View {
     }
 }
 
+/// A Facebook video. Facebook won't embed some videos (licensed music and the
+/// like), so the saved video file plays first. Once that file has expired
+/// (Facebook's links last a few days), Facebook's own player instead.
+private struct FacebookVideoView: View {
+    let fileURL: URL?
+    let embed: (url: URL, portrait: Bool)
+    var progressId: String? = nil
+
+    private enum Mode { case checking, file, embed }
+    @State private var mode: Mode = .checking
+
+    var body: some View {
+        Group {
+            switch mode {
+            case .file:
+                if let fileURL { PostVideoPlayer(url: fileURL, progressId: progressId) }
+            case .embed:
+                FacebookEmbedPlayer(url: embed.url, portrait: embed.portrait)
+            case .checking:
+                ZStack {
+                    Color.black
+                    ProgressView().tint(.white)
+                }
+                .aspectRatio(16 / 9, contentMode: .fit)
+                .frame(maxWidth: .infinity)
+                .clipShape(.rect(cornerRadius: 12))
+            }
+        }
+        .task(id: fileURL) { mode = await Self.check(fileURL) }
+    }
+
+    /// Asks for the file's first two bytes: any answer but a 2xx means it's gone.
+    private static func check(_ url: URL?) async -> Mode {
+        guard let url else { return .embed }
+        if url.isFileURL { return .file }
+        var request = URLRequest(url: url)
+        request.setValue("bytes=0-1", forHTTPHeaderField: "Range")
+        request.timeoutInterval = 8
+        guard let result = try? await URLSession.shared.data(for: request),
+              let http = result.1 as? HTTPURLResponse else { return .embed }
+        return (200..<300).contains(http.statusCode) ? .file : .embed
+    }
+}
+
 /// Facebook's official video embed player. Reels are 9:16, other videos 16:9.
-/// Plays through Facebook's own player, since Facebook's direct MP4 links expire.
+/// Used when a Facebook video's saved file has expired.
 private struct FacebookEmbedPlayer: View {
     let url: URL
     let portrait: Bool
