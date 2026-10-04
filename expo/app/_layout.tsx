@@ -8,6 +8,7 @@ import { ChevronLeft } from "lucide-react-native";
 import { AuthProvider, useAuth } from "@/lib/auth-provider";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { ToastProvider, ToastHost } from "@/components/Toast";
+import { AppUpdateGate } from "@/components/AppUpdateGate";
 import { RunningOverlayProvider, RunningOverlay } from "@/lib/running-overlay";
 import { YouTubeConnectionProvider } from "@/lib/useYouTubeConnection";
 import { Colors } from "@/constants/colors";
@@ -250,6 +251,7 @@ function RootContent() {
                 <AuthGate />
                 <ToastHost />
                 <RunningOverlay />
+                <AppUpdateGate />
                 {!splashDone ? (
                   <TimedSplash onDone={() => setSplashDone(true)} />
                 ) : null}
