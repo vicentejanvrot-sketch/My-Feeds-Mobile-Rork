@@ -8,7 +8,7 @@ import { router } from "expo-router";
  * security) so the user never loses the running SPA. Other schemes (mailto:,
  * tel:, app deep links) and all native platforms fall through to Linking.
  */
-export async function openExternalLink(url: string): Promise<void> {
+export async function openExternalLink(url: string | null | undefined): Promise<void> {
   if (!url) return;
   if (
     Platform.OS === "web" &&

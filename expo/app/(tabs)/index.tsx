@@ -611,7 +611,7 @@ const statStyles = StyleSheet.create({
     width: "22%",
   },
   topRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start" },
-  label: { fontSize: 12, fontWeight: "600" as const, color: Colors.textSecondary, flexShrink: 1, numberOfLines: 2, marginRight: 6 },
+  label: { fontSize: 12, fontWeight: "600" as const, color: Colors.textSecondary, flexShrink: 1, marginRight: 6 },
   iconBox: { width: 34, height: 34, borderRadius: 8, alignItems: "center", justifyContent: "center", flexShrink: 0, backgroundColor: statIconBg },
   value: { fontSize: 28, fontWeight: "800" as const, color: Colors.textPrimary, marginTop: 4 },
 });

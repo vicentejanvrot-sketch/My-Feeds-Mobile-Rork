@@ -322,7 +322,7 @@ const VideoPlayerContent = forwardRef<VideoPlayerHandle, VideoPlayerContentProps
     const iframeStyle: ViewStyle = {
       width: "100%",
       height: "100%",
-      border: "none",
+      borderWidth: 0,
     };
 
     return (
