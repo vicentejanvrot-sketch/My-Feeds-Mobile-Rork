@@ -232,14 +232,49 @@ export default function FeedScreen() {
     );
   }, [channelList, agentFilter, platformFilter]);
 
-  // A chip whose platform doesn't include the selected channel: back to All
-  // Channels, since that channel is no longer in the dropdown.
+  // People: one person or company's accounts on every platform belong
+  // together (same grouping as People). Used by the Channel dropdown (one row
+  // per person) and the "Account" sort. Same as the web app and iOS.
+  const identityLinks = useIdentityLinks();
+  const { personOfChannel, personById } = useMemo(() => {
+    const personOfChannel = new Map<string, string>();
+    const personById = new Map<string, { name: string; thumbnail: string | null }>();
+    for (const person of buildPeople(channels.data ?? [], identityLinks.data ?? [], [])) {
+      personById.set(person.id, { name: person.name, thumbnail: person.thumbnail ?? null });
+      for (const source of person.sources) if (source.channel_id) personOfChannel.set(source.channel_id, person.id);
+    }
+    return { personOfChannel, personById };
+  }, [channels.data, identityLinks.data]);
+
+  // The Channel dropdown lists people, not accounts: April Dunnam's YouTube,
+  // LinkedIn, X and GitHub are one row, and picking it shows all of their posts.
+  const people = useMemo(() => {
+    const map = new Map<string, { key: string; name: string; thumbnail: string | null; channelIds: string[] }>();
+    for (const ch of visibleChannels) {
+      const cid = (ch.channel_id ?? ch.id) as string;
+      const personId = ch.channel_id ? personOfChannel.get(ch.channel_id) : undefined;
+      const key = personId ?? "channel:" + cid;
+      let row = map.get(key);
+      if (!row) {
+        const person = personId ? personById.get(personId) : undefined;
+        row = { key, name: person?.name || channelDisplayName(ch), thumbnail: person?.thumbnail || ch.channel_thumbnail || null, channelIds: [] };
+        map.set(key, row);
+      }
+      if (ch.channel_id && !row.channelIds.includes(ch.channel_id)) row.channelIds.push(ch.channel_id);
+      if (!row.thumbnail) row.thumbnail = ch.channel_thumbnail || null;
+    }
+    return [...map.values()].sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: "base" }));
+  }, [visibleChannels, personOfChannel, personById]);
+  const selectedPerson = channelFilter === "all" ? null : people.find((p) => p.key === channelFilter) ?? null;
+
+  // A chip whose platform doesn't include the selected person: back to All
+  // Channels, since they're no longer in the dropdown.
   useEffect(() => {
     if (channelFilter === "all" || channels.isLoading) return;
-    if (!visibleChannels.some((ch) => (ch.channel_id ?? ch.id) === channelFilter)) {
+    if (!people.some((p) => p.key === channelFilter)) {
       setChannelFilter("all");
     }
-  }, [visibleChannels, channelFilter, channels.isLoading]);
+  }, [people, channelFilter, channels.isLoading]);
 
   // Items: light rows for the whole feed (filters, sorts and counts use
   // these). Full rows for the cards on screen load 10 at a time.
@@ -291,9 +326,11 @@ export default function FeedScreen() {
 
   // Every filter except the platform chips. The chip counts come from this list.
   const baseFilteredItems = useMemo(() => {
-    if (channelFilter === "all") return statusSearchItems;
-    return statusSearchItems.filter((it) => it.channel_id === channelFilter);
-  }, [statusSearchItems, channelFilter]);
+    if (!selectedPerson) return statusSearchItems;
+    // The picked person: their posts from every account
+    const ids = new Set(selectedPerson.channelIds);
+    return statusSearchItems.filter((it) => !!it.channel_id && ids.has(it.channel_id));
+  }, [statusSearchItems, selectedPerson]);
 
   // Channel → item count under the search, agent and status filters
   const channelCounts = useMemo(() => {
@@ -316,18 +353,6 @@ export default function FeedScreen() {
     }
     return map;
   }, [channelList]);
-
-  // "Account" sort: everything one person or company posted, on every
-  // platform, sits together (same grouping as People), so repeats are easy to
-  // spot and mark Watched. Same as the web app and iOS.
-  const identityLinks = useIdentityLinks();
-  const personOfChannel = useMemo(() => {
-    const map = new Map<string, string>();
-    for (const person of buildPeople(channels.data ?? [], identityLinks.data ?? [], [])) {
-      for (const source of person.sources) if (source.channel_id) map.set(source.channel_id, person.id);
-    }
-    return map;
-  }, [channels.data, identityLinks.data]);
 
   // Platform chip, then sort
   const filtered = useMemo(() => {
@@ -545,34 +570,28 @@ export default function FeedScreen() {
     [],
   );
 
-  // ── Channel dropdown options (deduped by channel_id, with badge counts + thumbnails) ───
+  // ── Channel dropdown options: one row per person, with post counts + pictures ───
   const channelOptions = useMemo(() => {
-    const seen = new Set<string>();
-    const deduped = visibleChannels.filter((ch) => {
-      const cid = (ch.channel_id ?? ch.id) as string;
-      if (seen.has(cid)) return false;
-      // With All Collections, only channels that have something to show under
-      // the current filters (no rows with 0). The selected one always stays.
-      if (agentFilter === "all" && cid !== channelFilter && !(channelCounts[ch.channel_id ?? ""] > 0)) return false;
-      seen.add(cid);
-      return true;
-    });
+    const countOf = (ids: string[]) => ids.reduce((sum, id) => sum + (channelCounts[id] ?? 0), 0);
+    // With All Collections, only people who have something to show under the
+    // current filters (no rows with 0). The selected one always stays.
+    const rows = people.filter((p) => agentFilter !== "all" || p.key === channelFilter || countOf(p.channelIds) > 0);
     return [
       {
         key: "all" as const,
         label: "All Channels",
-        // How many channels are listed below (each row shows its post count)
-        badge: deduped.length,
+        // How many people are listed below (each row shows its post count)
+        badge: rows.length,
       },
-      ...deduped.map((ch) => ({
-        key: (ch.channel_id ?? ch.id) as string,
-        label: channelDisplayName(ch),
-        badge: channelCounts[ch.channel_id ?? ""] ?? 0,
-        thumbnail: ch.channel_thumbnail ?? undefined,
-        thumbnailText: (ch.channel_name ?? "?")[0].toUpperCase(),
+      ...rows.map((p) => ({
+        key: p.key,
+        label: p.name,
+        badge: countOf(p.channelIds),
+        thumbnail: p.thumbnail ?? undefined,
+        thumbnailText: (p.name || "?")[0].toUpperCase(),
       })),
     ];
-  }, [visibleChannels, channelCounts, agentFilter, channelFilter]);
+  }, [people, channelCounts, agentFilter, channelFilter]);
 
   // ── Render ──────────────────────────────────────────────────────
 
