@@ -303,7 +303,7 @@ function facebookEmbed(postUrl: string | null | undefined): { uri: string; portr
   const reel = postUrl.match(/facebook\.com\/reel\/(\d+)/i);
   const href = reel ? `https://www.facebook.com/watch/?v=${reel[1]}` : postUrl;
   return {
-    uri: `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(href)}&show_text=false&autoplay=false`,
+    uri: `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(href)}&show_text=false&autoplay=false&allowfullscreen=true`,
     portrait: !!reel,
   };
 }
@@ -1360,7 +1360,11 @@ export default function PostReaderScreen() {
 
         <View style={styles.bottomRow}>
           <Pressable
-            onPress={() => changeStatus(read ? "not_watched" : "watched")}
+            onPress={() => {
+              // Marks it read and closes the post, back to the feed.
+              if (!read) changeStatus("watched");
+              router.back();
+            }}
             style={({ pressed }) => [styles.openBtn, styles.bottomBtn, read && { borderColor: Colors.success }, pressed && { opacity: 0.7 }]}
             accessibilityRole="button"
             accessibilityState={{ selected: read }}
