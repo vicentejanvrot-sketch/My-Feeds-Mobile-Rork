@@ -31,7 +31,9 @@ import {
   Sparkles,
   Users,
   ChevronRight,
+  ChevronDown,
 } from "lucide-react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Colors } from "@/constants/colors";
 
 const statIconBlue = "hsl(199, 89%, 55%)" as const;
@@ -69,7 +71,36 @@ import {
 
 const IPAD_BREAKPOINT = 768;
 
+// The Feeds and My Collections sections open and close. They start closed,
+// and how the user left them is kept on the phone, so the dashboard looks the
+// same when they come back from a feed. Same on the web app and iOS.
+const SECTIONS_KEY = "dashboard.sections";
+type Sections = { feeds: boolean; collections: boolean };
+
+function useDashboardSections() {
+  const [sections, setSections] = useState<Sections>({ feeds: false, collections: false });
+  useEffect(() => {
+    void AsyncStorage.getItem(SECTIONS_KEY)
+      .then((raw) => {
+        if (!raw) return;
+        const saved = JSON.parse(raw);
+        setSections({ feeds: saved?.feeds === true, collections: saved?.collections === true });
+      })
+      .catch(() => undefined);
+  }, []);
+  const toggle = useCallback((key: keyof Sections) => {
+    void Haptics.selectionAsync().catch(() => undefined);
+    setSections((prev) => {
+      const next = { ...prev, [key]: !prev[key] };
+      void AsyncStorage.setItem(SECTIONS_KEY, JSON.stringify(next)).catch(() => undefined);
+      return next;
+    });
+  }, []);
+  return { sections, toggle };
+}
+
 export default function DashboardScreen() {
+  const { sections, toggle: toggleSection } = useDashboardSections();
   const insets = useSafeAreaInsets();
   const { width: windowWidth } = useWindowDimensions();
   const isWide = windowWidth >= IPAD_BREAKPOINT;
@@ -478,10 +509,13 @@ export default function DashboardScreen() {
           {/* ── Feeds ─────────────────────────────────────────────── */}
           <SectionHeader
             title="Feeds"
+            count={list.length}
+            open={sections.feeds}
+            onToggle={() => toggleSection("feeds")}
             action={list.length > 0 ? "View All" : undefined}
             onAction={() => router.push("/(tabs)/feed")}
           />
-          {list.length === 0 ? (
+          {!sections.feeds ? null : list.length === 0 ? (
             <EmptyCard text="No collections yet. Create one on the web app." />
           ) : (
             list.map((agent, i) => {
@@ -521,8 +555,13 @@ export default function DashboardScreen() {
 
           {/* ── My Agents ────────────────────────────────────────── */}
           <View style={styles.sectionSpacer} />
-          <SectionHeader title="My Collections" />
-          {list.length === 0 ? (
+          <SectionHeader
+            title="My Collections"
+            count={list.length}
+            open={sections.collections}
+            onToggle={() => toggleSection("collections")}
+          />
+          {!sections.collections ? null : list.length === 0 ? (
             <EmptyCard text="No collections yet. Create one on the web app." />
           ) : (
             list.map((agent, i) => {
@@ -936,16 +975,38 @@ const agentStyles = StyleSheet.create({
 
 function SectionHeader({
   title,
+  count,
+  open,
+  onToggle,
   action,
   onAction,
 }: {
   title: string;
+  count?: number;
+  /** With onToggle: the section opens and closes from its title. */
+  open?: boolean;
+  onToggle?: () => void;
   action?: string;
   onAction?: () => void;
 }) {
   return (
     <View style={sectStyles.row}>
-      <Text style={sectStyles.title}>{title}</Text>
+      {onToggle ? (
+        <Pressable
+          onPress={onToggle}
+          hitSlop={8}
+          style={sectStyles.toggle}
+          accessibilityRole="button"
+          accessibilityState={{ expanded: !!open }}
+          accessibilityLabel={`${title}, ${open ? "collapse" : "expand"}`}
+        >
+          {open ? <ChevronDown size={16} color={Colors.textSecondary} /> : <ChevronRight size={16} color={Colors.textSecondary} />}
+          <Text style={sectStyles.title}>{title}</Text>
+          {count !== undefined ? <Text style={sectStyles.count}>({count})</Text> : null}
+        </Pressable>
+      ) : (
+        <Text style={sectStyles.title}>{title}</Text>
+      )}
       {action ? (
         <Pressable onPress={onAction} hitSlop={8}>
           <Text style={sectStyles.action}>{action}</Text>
@@ -971,6 +1032,8 @@ const sectStyles = StyleSheet.create({
     letterSpacing: 0.6,
   },
   action: { fontSize: 14, fontWeight: "600" as const, color: Colors.accent },
+  toggle: { flexDirection: "row", alignItems: "center", gap: 6, flexShrink: 1 },
+  count: { fontSize: 13, color: Colors.textMuted },
 });
 
 function EmptyCard({ text }: { text: string }) {
