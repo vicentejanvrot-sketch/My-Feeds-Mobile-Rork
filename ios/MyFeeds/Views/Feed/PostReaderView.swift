@@ -160,7 +160,10 @@ struct PostReaderView: View {
                             if status == .notWatched { changeStatus(.watched, item: item) }
                         }
                         FindOnSpotifyButton(title: item.title ?? "", show: item.channelName)
-                    } else if platform == .tiktok, photos.isEmpty, let videoId = tikTokVideoId(item) {
+                    } else if platform == .tiktok, photos.isEmpty,
+                              item.postVideo?.playableURL?.isFileURL != true,
+                              let videoId = tikTokVideoId(item) {
+                        // A downloaded TikTok video plays from the phone (below), so it works offline.
                         // TikTok's own player: its CDN links expire, the embed doesn't.
                         TikTokEmbedPlayer(videoId: videoId)
                     } else if platform == .facebook, let video = item.postVideo,
