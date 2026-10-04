@@ -447,7 +447,9 @@ struct PostReaderView: View {
             HStack(spacing: 8) {
                 let read = status == .watched
                 Button {
-                    changeStatus(read ? .notWatched : .watched, item: item)
+                    // Marks it read and closes the post, back to the feed.
+                    if !read { changeStatus(.watched, item: item) }
+                    dismiss()
                 } label: {
                     HStack(spacing: 8) {
                         Image(systemName: "checkmark")
@@ -1261,13 +1263,45 @@ private struct ZoomablePhoto: View {
     }
 }
 
+/// Whether an inline video is in full screen right now.
+final class PlayerFullscreenState {
+    var isFullscreen = false
+}
+
 /// AVKit's own player view, inline. Unlike SwiftUI's VideoPlayer it has the
 /// full screen button (and turns to landscape there), like the YouTube player.
 private struct InlinePlayerView: UIViewControllerRepresentable {
     let player: AVPlayer
+    /// Set while the video is in full screen, so leaving the post's layout for
+    /// full screen doesn't pause it.
+    var fullscreen: PlayerFullscreenState? = nil
+
+    func makeCoordinator() -> Coordinator { Coordinator(state: fullscreen) }
+
+    final class Coordinator: NSObject, AVPlayerViewControllerDelegate {
+        let state: PlayerFullscreenState?
+        init(state: PlayerFullscreenState?) { self.state = state }
+
+        func playerViewController(
+            _ playerViewController: AVPlayerViewController,
+            willBeginFullScreenPresentationWithAnimationCoordinator coordinator: UIViewControllerTransitionCoordinator
+        ) {
+            state?.isFullscreen = true
+        }
+
+        func playerViewController(
+            _ playerViewController: AVPlayerViewController,
+            willEndFullScreenPresentationWithAnimationCoordinator coordinator: UIViewControllerTransitionCoordinator
+        ) {
+            coordinator.animate(alongsideTransition: nil) { [state] context in
+                if !context.isCancelled { state?.isFullscreen = false }
+            }
+        }
+    }
 
     func makeUIViewController(context: Context) -> AVPlayerViewController {
         let controller = AVPlayerViewController()
+        controller.delegate = context.coordinator
         controller.player = player
         controller.showsPlaybackControls = true
         controller.entersFullScreenWhenPlaybackBegins = false
@@ -1910,6 +1944,7 @@ private struct FacebookEmbedPlayer: View {
             URLQueryItem(name: "href", value: href),
             URLQueryItem(name: "show_text", value: "false"),
             URLQueryItem(name: "autoplay", value: "false"),
+            URLQueryItem(name: "allowfullscreen", value: "true"),
         ]
         guard let url = components.url else { return nil }
         return (url, portrait)
@@ -1963,6 +1998,8 @@ private struct EmbedWebView: UIViewRepresentable {
         let config = WKWebViewConfiguration()
         config.allowsInlineMediaPlayback = true
         config.mediaTypesRequiringUserActionForPlayback = []
+        // The player's own full-screen button (Facebook, YouTube Music).
+        if #available(iOS 16.4, *) { config.preferences.isElementFullscreenEnabled = true }
         if blockProtectedMedia {
             let source = "try{Object.defineProperty(navigator,'requestMediaKeySystemAccess',{value:undefined,configurable:true});" +
                 "window.MediaKeys=undefined;window.WebKitMediaKeys=undefined;}catch(e){}"
@@ -2057,12 +2094,13 @@ private struct PostVideoPlayer: View {
     @State private var player: AVPlayer?
     @State private var trackTask: Task<Void, Never>?
     @State private var clearedAtEnd = false
+    @State private var fullscreen = PlayerFullscreenState()
 
     var body: some View {
         ZStack {
             Color.black
             if let player {
-                InlinePlayerView(player: player)
+                InlinePlayerView(player: player, fullscreen: fullscreen)
             }
         }
         .aspectRatio(16 / 9, contentMode: .fit)
@@ -2077,6 +2115,9 @@ private struct PostVideoPlayer: View {
             if trackTask == nil, let player { trackTask = track(player) }
         }
         .onDisappear {
+            // Going full screen takes the player out of the post for a moment:
+            // it keeps playing.
+            if fullscreen.isFullscreen { return }
             player?.pause()
             trackTask?.cancel()
             trackTask = nil
