@@ -16,6 +16,11 @@ struct DashboardView: View {
     // "Don't show this again"; the ? button next to the title opens it any time.
     @State private var wizardOpen = false
     @State private var wizardKey = 0
+    // The Feeds and My Collections sections open and close. They start closed,
+    // and how the user left them is kept on the phone, so the dashboard looks
+    // the same when they come back from a feed. Same on the web app and Android.
+    @AppStorage("dashboard.feedsOpen") private var feedsOpen = false
+    @AppStorage("dashboard.collectionsOpen") private var collectionsOpen = false
 
     private var sortedAgents: [Agent] {
         agents.sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
@@ -43,10 +48,17 @@ struct DashboardView: View {
                     statGrid
                     followingCard
 
-                    SectionHeader(title: "Feeds", actionLabel: agents.isEmpty ? nil : "View All") {
+                    CollapsibleSectionHeader(
+                        title: "Feeds",
+                        count: sortedAgents.count,
+                        isOpen: $feedsOpen,
+                        actionLabel: agents.isEmpty ? nil : "View All"
+                    ) {
                         router.openFeed(agentId: nil, status: nil)
                     }
-                    if sortedAgents.isEmpty {
+                    if !feedsOpen {
+                        EmptyView()
+                    } else if sortedAgents.isEmpty {
                         emptyCard(text: "No collections yet. Create one to get started.")
                     } else {
                         ForEach(Array(sortedAgents.enumerated()), id: \.element.id) { index, agent in
@@ -68,8 +80,14 @@ struct DashboardView: View {
 
                     WatchTimeStatsSection()
 
-                    SectionHeader(title: "My Collections")
-                    if sortedAgents.isEmpty {
+                    CollapsibleSectionHeader(
+                        title: "My Collections",
+                        count: sortedAgents.count,
+                        isOpen: $collectionsOpen
+                    )
+                    if !collectionsOpen {
+                        EmptyView()
+                    } else if sortedAgents.isEmpty {
                         emptyCard(text: "No collections yet. Create one to get started.")
                     } else {
                         ForEach(Array(sortedAgents.enumerated()), id: \.element.id) { index, agent in
@@ -611,5 +629,55 @@ private struct DashboardAgentCard: View {
             .padding(.bottom, 12)
         }
         .buttonStyle(.plain)
+    }
+}
+
+
+/// A dashboard section title that opens and closes the section below it, with
+/// an optional action on the right ("View All").
+private struct CollapsibleSectionHeader: View {
+    let title: String
+    var count: Int? = nil
+    @Binding var isOpen: Bool
+    var actionLabel: String? = nil
+    var action: (() -> Void)? = nil
+
+    var body: some View {
+        HStack {
+            Button {
+                UISelectionFeedbackGenerator().selectionChanged()
+                withAnimation(.easeInOut(duration: 0.2)) { isOpen.toggle() }
+            } label: {
+                HStack(spacing: 6) {
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: 12, weight: .bold))
+                        .rotationEffect(.degrees(isOpen ? 90 : 0))
+                    Text(title.uppercased())
+                        .font(.system(size: 13, weight: .bold))
+                        .kerning(0.6)
+                    if let count {
+                        Text("(\(count))")
+                            .font(.system(size: 13))
+                            .foregroundStyle(Theme.textMuted)
+                    }
+                }
+                .foregroundStyle(Theme.textSecondary)
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel(title)
+            .accessibilityValue(isOpen ? "Expanded" : "Collapsed")
+            .accessibilityHint(isOpen ? "Collapses the section" : "Expands the section")
+            Spacer()
+            if let actionLabel, let action {
+                Button(action: action) {
+                    Text(actionLabel)
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundStyle(Theme.accent)
+                }
+            }
+        }
+        .padding(.top, 26)
+        .padding(.bottom, 12)
     }
 }
