@@ -15,13 +15,17 @@ struct FeedView: View {
     @State private var visibleCount = FeedView.pageSize
     @State private var isLoadingMore = false
     static let pageSize = 10
-    /// Followed channel id -> person id (same grouping as People), for the Account sort.
+    /// Followed channel id -> person id (same grouping as People), for the
+    /// Channel filter (one row per person) and the Account sort.
     @State private var personOfChannel: [String: String] = [:]
+    /// Person id -> the name People shows for them.
+    @State private var personNames: [String: String] = [:]
     @State private var isLoading = true
 
     // Filters
     @State private var search = ""
     @State private var agentFilter: String? = nil
+    /// The picked person's key (see ChannelPerson), nil for All Channels.
     @State private var channelFilter: String? = nil
     @State private var statusFilter: ItemStatus? = .notWatched
     @State private var platformFilter: SourcePlatform? = nil
@@ -109,8 +113,10 @@ struct FeedView: View {
 
     /// Every filter except the platform chips. The chip counts come from this list.
     private var baseFilteredItems: [FeedItem] {
-        guard let channelFilter else { return statusSearchItems }
-        return statusSearchItems.filter { $0.channelId == channelFilter }
+        guard let person = selectedPerson else { return statusSearchItems }
+        // The picked person: their posts from every account
+        let ids = Set(person.channelIds)
+        return statusSearchItems.filter { item in item.channelId.map { ids.contains($0) } ?? false }
     }
 
     /// Each enabled source's Priority (1-5) keyed by agent and channel. An item
@@ -191,20 +197,49 @@ struct FeedView: View {
         return SourcePlatform.allCases.filter { (counts[$0] ?? 0) > 0 }
     }
 
-    /// Channels for the selected agent (deduped by channel_id), limited to the
-    /// selected platform chip so the dropdown only lists channels under that chip.
-    private var agentChannels: [Channel] {
-        var seen = Set<String>()
-        // With All Collections, only channels that have something to show under
-        // the current filters (no rows with 0). The selected one always stays.
-        let counts = agentFilter == nil ? channelCounts : [:]
-        return channels.filter { agentFilter == nil || $0.agentId == agentFilter }
-            .filter { platformFilter == nil || $0.sourcePlatform == platformFilter }
-            .filter { channel in
-                guard let cid = channel.channelId else { return false }
-                if agentFilter == nil, cid != channelFilter, (counts[cid] ?? 0) == 0 { return false }
-                return seen.insert(cid).inserted
+    /// One row in the Channel filter: a person and the accounts they post from.
+    /// April Dunnam's YouTube, LinkedIn, X and GitHub are one row, and picking
+    /// it shows all of their posts. Same grouping as People, the web app and Expo.
+    struct ChannelPerson: Identifiable, Hashable {
+        let id: String
+        var name: String
+        var channelIds: [String]
+    }
+
+    /// Everyone with a channel in the selected collection, limited to the
+    /// selected platform chip so the list only has people under that chip.
+    private var allChannelPeople: [ChannelPerson] {
+        var rows: [String: ChannelPerson] = [:]
+        for channel in channels
+        where (agentFilter == nil || channel.agentId == agentFilter)
+            && (platformFilter == nil || channel.sourcePlatform == platformFilter) {
+            guard let cid = channel.channelId, !cid.isEmpty else { continue }
+            let personId = personOfChannel[cid]
+            let key = personId ?? "channel:" + cid
+            if rows[key] == nil {
+                let name = personId.flatMap { personNames[$0] }.flatMap { $0.isEmpty ? nil : $0 } ?? channel.displayName
+                rows[key] = ChannelPerson(id: key, name: name, channelIds: [])
             }
+            if !rows[key]!.channelIds.contains(cid) { rows[key]!.channelIds.append(cid) }
+        }
+        return rows.values.sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
+    }
+
+    /// The people listed in the Channel filter. With All Collections, only
+    /// people who have something to show under the current filters (no rows
+    /// with 0). The selected one always stays.
+    private var channelPeople: [ChannelPerson] {
+        let all = allChannelPeople
+        guard agentFilter == nil else { return all }
+        let counts = channelCounts
+        return all.filter { person in
+            person.id == channelFilter || person.channelIds.contains { (counts[$0] ?? 0) > 0 }
+        }
+    }
+
+    private var selectedPerson: ChannelPerson? {
+        guard let channelFilter else { return nil }
+        return allChannelPeople.first { $0.id == channelFilter }
     }
 
     /// Posts per channel under the current search, agent and status filters.
@@ -216,16 +251,16 @@ struct FeedView: View {
         return counts
     }
 
-    /// Posts for one channel under the current search, agent and status filters.
-    private func channelItemCount(_ channelId: String) -> Int {
-        statusSearchItems.filter { $0.channelId == channelId }.count
+    /// Posts for one person (all their accounts) under the current search, agent and status filters.
+    private func personItemCount(_ person: ChannelPerson, counts: [String: Int]) -> Int {
+        person.channelIds.reduce(0) { $0 + (counts[$1] ?? 0) }
     }
 
-    /// Badge on the Channel filter: how many channels are listed when it's on
-    /// All Channels, or the selected channel's post count.
+    /// Badge on the Channel filter: how many people are listed when it's on
+    /// All Channels, or the selected person's post count.
     private var channelTriggerBadge: String {
-        guard let channelFilter else { return "\(agentChannels.count)" }
-        return "\(channelItemCount(channelFilter))"
+        guard let person = selectedPerson else { return "\(channelPeople.count)" }
+        return "\(personItemCount(person, counts: channelCounts))"
     }
 
     var body: some View {
@@ -256,7 +291,7 @@ struct FeedView: View {
             }
         }
         .onChange(of: platformFilter) { _, _ in
-            if let channelFilter, !agentChannels.contains(where: { $0.channelId == channelFilter }) {
+            if let channelFilter, !allChannelPeople.contains(where: { $0.id == channelFilter }) {
                 self.channelFilter = nil
             }
         }
@@ -477,10 +512,10 @@ struct FeedView: View {
                 }
             }
 
-            if !agentChannels.isEmpty {
+            if !allChannelPeople.isEmpty {
                 filterTrigger(
                     icon: "dot.radiowaves.left.and.right",
-                    label: channelFilter.flatMap { id in agentChannels.first { $0.channelId == id }?.displayName } ?? "All Channels",
+                    label: selectedPerson?.name ?? "All Channels",
                     badge: channelTriggerBadge
                 ) { activeFilterModal = .channel }
             }
@@ -639,18 +674,20 @@ struct FeedView: View {
                 }
             case .channel:
                 PickerModal(title: "Channel", onDismiss: { activeFilterModal = nil }) {
-                    // How many channels are listed below (each row shows its post count)
-                    PickerRow(label: "All Channels", isActive: channelFilter == nil, badge: "\(agentChannels.count)") {
+                    // How many people are listed below (each row shows its post count)
+                    let people = channelPeople
+                    let counts = channelCounts
+                    PickerRow(label: "All Channels", isActive: channelFilter == nil, badge: "\(people.count)") {
                         channelFilter = nil
                         activeFilterModal = nil
                     }
-                    ForEach(agentChannels) { channel in
+                    ForEach(people) { person in
                         PickerRow(
-                            label: channel.displayName,
-                            isActive: channelFilter == channel.channelId,
-                            badge: "\(channelItemCount(channel.channelId ?? ""))"
+                            label: person.name,
+                            isActive: channelFilter == person.id,
+                            badge: "\(personItemCount(person, counts: counts))"
                         ) {
-                            channelFilter = channel.channelId
+                            channelFilter = person.id
                             activeFilterModal = nil
                         }
                     }
@@ -753,12 +790,15 @@ struct FeedView: View {
         if let agentResult { agents = agentResult }
         if let channelResult { channels = channelResult }
         var map: [String: String] = [:]
+        var names: [String: String] = [:]
         for person in AlsoOn.buildPeople(channels: channels, links: linkResult ?? [], scans: []) {
+            names[person.id] = person.name
             for source in person.sources {
                 if let channelId = source.channelId, !channelId.isEmpty { map[channelId] = person.id }
             }
         }
         personOfChannel = map
+        personNames = names
 
         await loadVisibleDetails()
         isLoading = false
