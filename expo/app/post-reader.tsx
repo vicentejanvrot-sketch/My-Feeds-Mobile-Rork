@@ -295,9 +295,37 @@ function TikTokPlayer({ videoId }: { videoId: string }) {
   );
 }
 
-// Facebook videos and reels play in Facebook's own embed player: the MP4 links
-// expire after a few days, while the post link always works. Reels are
-// portrait, other videos landscape.
+// A Facebook video. Facebook won't embed some videos (licensed music and the
+// like), so the saved video file plays first. Once that file has expired
+// (Facebook's links last a few days), Facebook's own player instead.
+function FacebookVideo({ media, postUrl, progressId }: { media: PostEmbed; postUrl: string | null | undefined; progressId?: string | null }) {
+  const embed = facebookEmbed(postUrl);
+  const src = media.video_url || media.hls_url || "";
+  const [mode, setMode] = useState<"checking" | "file" | "embed">(src ? "checking" : "embed");
+  useEffect(() => {
+    if (!src) {
+      setMode("embed");
+      return;
+    }
+    let cancelled = false;
+    setMode("checking");
+    // Asks for the file's first two bytes: any answer but a 2xx means it's gone.
+    fetch(src, { headers: { Range: "bytes=0-1" } })
+      .then((r) => { if (!cancelled) setMode(r.ok ? "file" : "embed"); })
+      .catch(() => { if (!cancelled) setMode("embed"); });
+    return () => { cancelled = true; };
+  }, [src]);
+  if (mode === "file" || !embed) return <ExpandableMedia media={media} progressId={progressId} />;
+  if (mode === "embed") return <FacebookPlayer {...embed} />;
+  return (
+    <View style={[styles.video, { alignItems: "center", justifyContent: "center" }]}>
+      <ActivityIndicator color="#ffffff" />
+    </View>
+  );
+}
+
+// Facebook's embed player, used when the saved video file has expired. Reels
+// are portrait, other videos landscape.
 function facebookEmbed(postUrl: string | null | undefined): { uri: string; portrait: boolean } | null {
   if (!postUrl || !/facebook\.com\//i.test(postUrl)) return null;
   const reel = postUrl.match(/facebook\.com\/reel\/(\d+)/i);
@@ -1035,7 +1063,7 @@ export default function PostReaderScreen() {
         ) : platform === "tiktok" && tiktokVideoId && photos.length === 0 ? (
           <TikTokPlayer videoId={tiktokVideoId} />
         ) : platform === "facebook" && video && !video.local_player && facebookEmbed(item.url) ? (
-          <FacebookPlayer {...facebookEmbed(item.url)!} />
+          <FacebookVideo media={video} postUrl={item.url} progressId={item.video_id} />
         ) : slides.length > 1 ? (
           <MediaCarousel slides={slides} progressId={item.video_id} />
         ) : video ? (
