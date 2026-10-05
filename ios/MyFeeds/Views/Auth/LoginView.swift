@@ -39,9 +39,9 @@ fileprivate enum LBColor {
 
 // MARK: - Background platform cards
 //
-// Faded platform-style cards. On iPhone they sit in a band above and a band below
-// the sign-in column; on iPad in a rail on each side. Bands and rails clip them, so
-// they never cover the logo, the app name or the sign-in box.
+// Faded platform-style cards, iPad only (iPhone shows none). They sit in a rail on
+// each side of the sign-in column, and the rails clip them, so they never cover the
+// logo, the app name or the sign-in box.
 
 fileprivate struct LBBar: View {
     let width: CGFloat
@@ -398,8 +398,6 @@ fileprivate struct LBSpot {
 }
 
 fileprivate enum LBSpots {
-    static let phoneTop = [LBSpot(x: -6, y: -55, r: -5), LBSpot(x: 30, y: -30, r: 4), LBSpot(x: 62, y: -22, r: -4), LBSpot(x: 82, y: -8, r: 6)]
-    static let phoneBottom = [LBSpot(x: -6, y: 22, r: 5), LBSpot(x: 26, y: 14, r: -6), LBSpot(x: 56, y: 26, r: 4), LBSpot(x: 82, y: 16, r: -5)]
     static let wideLeft = [LBSpot(x: -6, y: 5, r: -8), LBSpot(x: 55, y: 26, r: 5), LBSpot(x: 6, y: 46, r: 6), LBSpot(x: 26, y: 74, r: -4)]
     static let wideRight = [LBSpot(x: 10, y: 9, r: -6), LBSpot(x: 56, y: 3, r: 7), LBSpot(x: 42, y: 50, r: -5), LBSpot(x: 8, y: 70, r: 4)]
 }
@@ -567,19 +565,14 @@ struct LoginView: View {
 
     // MARK: - Layouts
 
+    /// iPhone: no background cards (too busy on a small screen), just the glow,
+    /// with the logo and form centred.
     private func phoneLayout(_ size: CGSize) -> some View {
-        let bandHeight = max(60, min(120, size.height * 0.095))
-        let scale: CGFloat = size.width < 400 ? 0.42 : (size.width >= 600 ? 0.72 : 0.5)
-
-        return VStack(spacing: 0) {
-            LBCardField(cards: .first, spots: LBSpots.phoneTop, scale: scale, opacity: 0.38, fadeToward: .bottom)
-                .frame(height: bandHeight)
-            Spacer(minLength: 8)
+        VStack(spacing: 0) {
+            Spacer(minLength: 24)
             centerColumn
                 .padding(.horizontal, 20)
-            Spacer(minLength: 8)
-            LBCardField(cards: .second, spots: LBSpots.phoneBottom, scale: scale, opacity: 0.38, fadeToward: .top)
-                .frame(height: bandHeight)
+            Spacer(minLength: 24)
         }
         .frame(minHeight: size.height)
     }
