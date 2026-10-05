@@ -23,13 +23,12 @@ import { useAuth } from "@/lib/auth-provider";
 
 const IPAD_BREAKPOINT = 768;
 const BG = "#050B1A";
-const CARD_OPACITY_PHONE = 0.38;
 const CARD_OPACITY_WIDE = 0.3;
 
 // ---------------------------------------------------------------------------
-// Faded platform-style cards. On phones they sit in a band above and a band
-// below the sign-in column; on iPad in a rail on each side. Bands and rails
-// clip them, so they never cover the logo, the app name or the sign-in box.
+// Faded platform-style cards, iPad only (phones show none). They sit in a rail
+// on each side of the sign-in column, and the rails clip them, so they never
+// cover the logo, the app name or the sign-in box.
 // ---------------------------------------------------------------------------
 
 const CHAT = "M21 12a8 8 0 0 1-11.6 7.1L4 20l1.1-4.4A8 8 0 1 1 21 12z";
@@ -316,19 +315,7 @@ function Placed({ spot, scale, opacity, children }: { spot: Spot; scale: number;
   );
 }
 
-// Positions, in percent of the band or rail the card sits in.
-const PHONE_TOP: Spot[] = [
-  { x: -6, y: -55, r: -5 },
-  { x: 30, y: -30, r: 4 },
-  { x: 62, y: -22, r: -4 },
-  { x: 82, y: -8, r: 6 },
-];
-const PHONE_BOTTOM: Spot[] = [
-  { x: -6, y: 22, r: 5 },
-  { x: 26, y: 14, r: -6 },
-  { x: 56, y: 26, r: 4 },
-  { x: 82, y: 16, r: -5 },
-];
+// Positions, in percent of the rail the card sits in.
 const WIDE_LEFT: Spot[] = [
   { x: -6, y: 5, r: -8 },
   { x: 55, y: 26, r: 5 },
@@ -438,8 +425,6 @@ export default function LoginScreen() {
   };
 
   // Card sizing for the background illustrations
-  const bandHeight = Math.max(80, Math.min(150, windowHeight * 0.13));
-  const phoneScale = windowWidth < 400 ? 0.42 : windowWidth >= 600 ? 0.72 : 0.5;
   const railWidth = Math.max(0, (windowWidth - 440) / 2);
   const wideScale = Math.max(0.5, Math.min(1, railWidth / 480)) * (windowHeight < 760 ? 0.85 : 1);
 
@@ -581,20 +566,16 @@ export default function LoginScreen() {
         </ScrollView>
       ) : (
         <ScrollView
-          contentContainerStyle={[styles.phoneScroll, { minHeight: windowHeight }]}
+          contentContainerStyle={[
+            styles.phoneScroll,
+            { minHeight: windowHeight, paddingTop: insets.top + 24, paddingBottom: insets.bottom + 24 },
+          ]}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
+          {/* Phones: no background cards (too busy on a small screen), just the glow. */}
           <Glow />
-          <View style={[styles.band, { height: bandHeight + insets.top }]} pointerEvents="none">
-            <FirstSet spots={PHONE_TOP} scale={phoneScale} opacity={CARD_OPACITY_PHONE} />
-            <LinearGradient colors={[FADE, BG]} start={{ x: 0, y: 0.55 }} end={{ x: 0, y: 1 }} style={StyleSheet.absoluteFill} />
-          </View>
           {center}
-          <View style={[styles.band, { height: bandHeight + insets.bottom }]} pointerEvents="none">
-            <SecondSet spots={PHONE_BOTTOM} scale={phoneScale} opacity={CARD_OPACITY_PHONE} />
-            <LinearGradient colors={[BG, FADE]} start={{ x: 0, y: 0 }} end={{ x: 0, y: 0.45 }} style={StyleSheet.absoluteFill} />
-          </View>
         </ScrollView>
       )}
 
@@ -677,14 +658,11 @@ const styles = StyleSheet.create({
   },
   phoneScroll: {
     flexGrow: 1,
-    justifyContent: "space-between",
+    justifyContent: "center",
   },
   wideScroll: {
     flexGrow: 1,
     flexDirection: "row",
-  },
-  band: {
-    overflow: "hidden",
   },
   rail: {
     flex: 1,
