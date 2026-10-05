@@ -478,9 +478,15 @@ struct LoginView: View {
     @State private var isLoading = false
     @State private var isBiometricLoading = false
     @State private var toast: AuthToast?
+    @State private var legalPage: LegalPage?
     @FocusState private var focusedField: Field?
 
     private enum Field { case email, password }
+
+    private enum LegalPage: String, Identifiable {
+        case privacy, terms
+        var id: String { rawValue }
+    }
 
     /// The display name for the available biometric ("Face ID", "Touch ID", etc.), if any.
     private var biometryName: String? { BiometricAuthService.biometryName }
@@ -525,6 +531,22 @@ struct LoginView: View {
         }
         .navigationBarBackButtonHidden()
         .toolbar(.hidden, for: .navigationBar)
+        .sheet(item: $legalPage) { page in
+            NavigationStack {
+                Group {
+                    switch page {
+                    case .privacy: PrivacyPolicyView()
+                    case .terms: TermsView()
+                    }
+                }
+                .toolbar {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button("Done") { legalPage = nil }
+                            .foregroundStyle(Theme.accent)
+                    }
+                }
+            }
+        }
         .task {
             // Pre-fill the email from any saved biometric credentials.
             if email.isEmpty, let saved = auth.biometricSavedEmail {
@@ -595,6 +617,16 @@ struct LoginView: View {
             }
 
             formCard
+
+            // Legal links, same as the web login
+            HStack(spacing: 20) {
+                Button("Privacy Policy") { legalPage = .privacy }
+                Button("Terms of Service") { legalPage = .terms }
+            }
+            .font(.system(size: 13))
+            .foregroundStyle(mfLoginColor(0x8EA0C2))
+            .tint(mfLoginColor(0x8EA0C2))
+            .frame(minHeight: 32)
         }
         .frame(maxWidth: 420)
     }
