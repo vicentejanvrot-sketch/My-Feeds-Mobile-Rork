@@ -433,7 +433,7 @@ fileprivate struct LBCardField: View {
             }
             .frame(width: geo.size.width, height: geo.size.height, alignment: .topLeading)
             .clipped()
-            .overlay(fade)
+            .mask(fade)
         }
         .allowsHitTesting(false)
         .accessibilityHidden(true)
@@ -449,18 +449,20 @@ fileprivate struct LBCardField: View {
             .offset(x: size.width * spot.x / 100, y: size.height * spot.y / 100)
     }
 
+    /// Mask that fades the cards out toward the sign-in column (like the web's CSS mask),
+    /// so the background and glow show through instead of a painted colour.
     private var fade: LinearGradient {
-        let clear = LBColor.background.opacity(0)
-        let solid = LBColor.background
+        let shown = Color.black
+        let hidden = Color.clear
         switch fadeToward {
         case .bottom:
-            return LinearGradient(colors: [clear, solid], startPoint: UnitPoint(x: 0.5, y: 0.55), endPoint: .bottom)
+            return LinearGradient(colors: [shown, hidden], startPoint: UnitPoint(x: 0.5, y: 0.55), endPoint: .bottom)
         case .top:
-            return LinearGradient(colors: [solid, clear], startPoint: .top, endPoint: UnitPoint(x: 0.5, y: 0.45))
+            return LinearGradient(colors: [hidden, shown], startPoint: .top, endPoint: UnitPoint(x: 0.5, y: 0.45))
         case .trailing:
-            return LinearGradient(colors: [clear, solid], startPoint: UnitPoint(x: 0.5, y: 0.5), endPoint: .trailing)
+            return LinearGradient(colors: [shown, hidden], startPoint: UnitPoint(x: 0.5, y: 0.5), endPoint: .trailing)
         case .leading:
-            return LinearGradient(colors: [solid, clear], startPoint: .leading, endPoint: UnitPoint(x: 0.5, y: 0.5))
+            return LinearGradient(colors: [hidden, shown], startPoint: .leading, endPoint: UnitPoint(x: 0.5, y: 0.5))
         }
     }
 }
@@ -502,9 +504,17 @@ struct LoginView: View {
 
             ZStack(alignment: .top) {
                 LBColor.background.ignoresSafeArea()
-                LinearGradient(colors: [LBColor.glow, LBColor.glow.opacity(0)], startPoint: .top, endPoint: .center)
-                    .ignoresSafeArea()
-                    .allowsHitTesting(false)
+                // Same glow as the web: an oval 110% of the width by 84% of the height,
+                // centred at 22% from the top, fading out at 70% of its radius.
+                EllipticalGradient(
+                    colors: [LBColor.glow, LBColor.glow.opacity(0)],
+                    center: .center,
+                    startRadiusFraction: 0,
+                    endRadiusFraction: 0.7
+                )
+                .frame(width: geo.size.width * 1.1, height: geo.size.height * 0.84)
+                .position(x: geo.size.width * 0.5, y: geo.size.height * 0.22)
+                .allowsHitTesting(false)
 
                 ScrollView {
                     if isWide {
