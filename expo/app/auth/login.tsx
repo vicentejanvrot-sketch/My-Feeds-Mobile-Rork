@@ -515,6 +515,24 @@ export default function LoginScreen() {
           </Text>
         </Pressable>
       </View>
+
+      {/* Legal links, same as the web login */}
+      <View style={styles.legal}>
+        <Pressable
+          hitSlop={8}
+          style={({ pressed }) => [styles.legalLink, pressed && { opacity: 0.6 }]}
+          onPress={() => router.push("/support/privacy")}
+        >
+          <Text style={styles.legalText}>Privacy Policy</Text>
+        </Pressable>
+        <Pressable
+          hitSlop={8}
+          style={({ pressed }) => [styles.legalLink, pressed && { opacity: 0.6 }]}
+          onPress={() => router.push("/support/terms")}
+        >
+          <Text style={styles.legalText}>Terms of Service</Text>
+        </Pressable>
+      </View>
     </View>
   );
 
@@ -822,6 +840,19 @@ const styles = StyleSheet.create({
   signupLink: {
     color: "#7DD3FC",
     fontWeight: "700" as const,
+  },
+  legal: {
+    flexDirection: "row",
+    justifyContent: "center",
+    gap: 20,
+  },
+  legalLink: {
+    minHeight: 32,
+    justifyContent: "center",
+  },
+  legalText: {
+    color: "#8EA0C2",
+    fontSize: 13,
   },
   // Toast
   toast: {
