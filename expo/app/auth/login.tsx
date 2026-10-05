@@ -17,7 +17,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
 import * as Haptics from "expo-haptics";
-import Svg, { Circle, Path } from "react-native-svg";
+import Svg, { Circle, Defs, Path, RadialGradient, Rect, Stop } from "react-native-svg";
 import { Colors } from "@/constants/colors";
 import { useAuth } from "@/lib/auth-provider";
 
@@ -367,6 +367,26 @@ function SecondSet({ spots, scale, opacity }: { spots: Spot[]; scale: number; op
 
 const FADE = "rgba(5,11,26,0)";
 
+// Same glow as the web: an oval 110% of the width by 84% of the height, centred at
+// 22% from the top, fading out at 70% of its radius. It sits above the card bands
+// and below the sign-in column, so the bands' fades never cut it into a rectangle.
+function Glow() {
+  return (
+    <View pointerEvents="none" style={[StyleSheet.absoluteFill, styles.glow]}>
+      <Svg width="100%" height="100%">
+        <Defs>
+          <RadialGradient id="mflLoginGlow" cx="50%" cy="22%" rx="55%" ry="42%" fx="50%" fy="22%">
+            <Stop offset="0" stopColor="#0E8CE6" stopOpacity={0.2} />
+            <Stop offset="0.7" stopColor="#0E8CE6" stopOpacity={0} />
+            <Stop offset="1" stopColor="#0E8CE6" stopOpacity={0} />
+          </RadialGradient>
+        </Defs>
+        <Rect x="0" y="0" width="100%" height="100%" fill="url(#mflLoginGlow)" />
+      </Svg>
+    </View>
+  );
+}
+
 // ---------------------------------------------------------------------------
 
 export default function LoginScreen() {
@@ -542,20 +562,13 @@ export default function LoginScreen() {
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       keyboardVerticalOffset={-insets.bottom}
     >
-      <LinearGradient
-        colors={["rgba(14,140,230,0.20)", FADE]}
-        start={{ x: 0.5, y: 0 }}
-        end={{ x: 0.5, y: 0.5 }}
-        style={StyleSheet.absoluteFill}
-        pointerEvents="none"
-      />
-
       {isWide ? (
         <ScrollView
           contentContainerStyle={[styles.wideScroll, { minHeight: windowHeight }]}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
+          <Glow />
           <View style={styles.rail} pointerEvents="none">
             <FirstSet spots={WIDE_LEFT} scale={wideScale} opacity={CARD_OPACITY_WIDE} />
             <LinearGradient colors={[FADE, BG]} start={{ x: 0.5, y: 0 }} end={{ x: 1, y: 0 }} style={StyleSheet.absoluteFill} />
@@ -572,6 +585,7 @@ export default function LoginScreen() {
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
+          <Glow />
           <View style={[styles.band, { height: bandHeight + insets.top }]} pointerEvents="none">
             <FirstSet spots={PHONE_TOP} scale={phoneScale} opacity={CARD_OPACITY_PHONE} />
             <LinearGradient colors={[FADE, BG]} start={{ x: 0, y: 0.55 }} end={{ x: 0, y: 1 }} style={StyleSheet.absoluteFill} />
@@ -679,11 +693,16 @@ const styles = StyleSheet.create({
   wideCenter: {
     width: 440,
     justifyContent: "center",
+    zIndex: 2,
   },
   center: {
     paddingHorizontal: 20,
     paddingVertical: 8,
     gap: 24,
+    zIndex: 2,
+  },
+  glow: {
+    zIndex: 1,
   },
   centerWide: {
     paddingHorizontal: 0,
