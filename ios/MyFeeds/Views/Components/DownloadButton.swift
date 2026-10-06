@@ -3,13 +3,18 @@ import SwiftUI
 /// Download icon for the post reader and the video player: saves the item on the
 /// phone for offline use (see DownloadStore). Shows the progress while saving and
 /// a check once it's saved; tapping the check offers to remove it.
+/// For a YouTube video it first explains that the video itself can't be saved.
 struct DownloadButton: View {
     let itemId: String
     var hasAudio = false
+    /// Set for YouTube videos: the video can't be downloaded, only its summary.
+    var youtubeVideoId: String? = nil
     var iconSize: CGFloat = 17
 
     @Environment(ToastCenter.self) private var toasts
+    @Environment(\.openURL) private var openURL
     @State private var confirmRemove = false
+    @State private var explainYouTube = false
 
     private var store: DownloadStore { DownloadStore.shared }
 
@@ -35,7 +40,11 @@ struct DownloadButton: View {
                 .accessibilityLabel("Downloaded. Remove download")
             } else {
                 Button {
-                    start()
+                    if youtubeVideoId != nil {
+                        explainYouTube = true
+                    } else {
+                        start()
+                    }
                 } label: {
                     Image(systemName: "arrow.down.circle")
                         .font(.system(size: iconSize + 2, weight: .semibold))
@@ -44,6 +53,19 @@ struct DownloadButton: View {
                 }
                 .buttonStyle(.plain)
                 .accessibilityLabel("Download for offline")
+                // YouTube only lets its videos play in its own player, so the video can't be kept
+                // on the phone. Say so before saving, and point to YouTube's own Download instead.
+                .alert("This video can't be downloaded", isPresented: $explainYouTube) {
+                    Button("Cancel", role: .cancel) {}
+                    Button("Open YouTube") {
+                        if let id = youtubeVideoId, let url = URL(string: "https://www.youtube.com/watch?v=\(id)") {
+                            openURL(url)
+                        }
+                    }
+                    Button("Save summary") { start() }
+                } message: {
+                    Text("YouTube only lets its videos play in its own player, so My Feeds can't save this video to your phone.\n\nSave summary keeps the summary and key moments for offline reading. To watch the video offline, open it in the YouTube app and use Download there (needs YouTube Premium).")
+                }
             }
         }
         .onAppear { store.load() }
@@ -66,7 +88,9 @@ struct DownloadButton: View {
                 // Downloads stay inside My Feeds (not Photos or Files), so say where to find them.
                 toasts.show(hasAudio
                     ? "Episode saved inside My Feeds for offline listening. See it in this app's Settings tab > Downloads."
-                    : "Saved inside My Feeds for offline reading. See it in this app's Settings tab > Downloads.")
+                    : youtubeVideoId != nil
+                        ? "Summary saved inside My Feeds for offline reading. The video still needs a connection. See it in this app's Settings tab > Downloads."
+                        : "Saved inside My Feeds for offline reading. See it in this app's Settings tab > Downloads.")
             } catch {
                 toasts.show(error.localizedDescription, type: .error)
             }
