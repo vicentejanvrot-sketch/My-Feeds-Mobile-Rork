@@ -995,7 +995,7 @@ export default function VideoPlayerScreen() {
             </Animated.View>
             <Text style={styles.headerTitle}>Video Player</Text>
             {/* Offline copy: the summary and key moments (the video itself needs a connection) */}
-            {itemIdStr ? <DownloadButton itemId={itemIdStr} size={20} /> : null}
+            {itemIdStr ? <DownloadButton itemId={itemIdStr} youtubeVideoId={videoIdStr} size={20} /> : null}
             {/* Pocket Lock */}
             <Pressable
               onPress={enablePocketLock}
