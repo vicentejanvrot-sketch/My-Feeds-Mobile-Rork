@@ -905,17 +905,15 @@ function AgentCard({
           </View>
         ) : null}
 
-        {/* new videos */}
-        {newVideos > 0 ? (
-          <Text style={agentStyles.foundText}>
-            <Trans
-              i18nKey="dashboard.foundNew"
-              count={newVideos}
-              values={{ shown: compactNumber(newVideos) }}
-              components={{ b: <Text style={agentStyles.foundHighlight} /> }}
-            />
-          </Text>
-        ) : null}
+        {/* New feeds from the last run: always shown (0 when none), so every card has the same line */}
+        <Text style={agentStyles.foundText}>
+          <Trans
+            i18nKey="dashboard.foundNew"
+            count={newVideos}
+            values={{ shown: compactNumber(newVideos) }}
+            components={{ b: <Text style={agentStyles.foundHighlight} /> }}
+          />
+        </Text>
       </View>
     </Pressable>
   );

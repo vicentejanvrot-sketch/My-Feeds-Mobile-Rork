@@ -612,15 +612,16 @@ private struct DashboardAgentCard: View {
                         .background(Color(hsl: 152, 69, 50, alpha: 0.15))
                         .clipShape(Capsule())
                         .padding(.top, 10)
-
-                        if let newCount = lastRun.videosNewCount, newCount > 0 {
-                            let number = Text(Format.compactNumber(newCount)).fontWeight(.bold)
-                            (newCount == 1 ? Text("Found \(number) new video") : Text("Found \(number) new videos"))
-                                .font(.system(size: 13))
-                                .foregroundStyle(Theme.textSecondary)
-                                .padding(.top, 8)
-                        }
                     }
+
+                    // New feeds from the last run: always shown (0 when none),
+                    // so every card has the same line.
+                    let newCount = lastSuccessRun?.videosNewCount ?? 0
+                    let number = Text(Format.compactNumber(newCount)).fontWeight(.bold)
+                    (newCount == 1 ? Text("Found \(number) new video") : Text("Found \(number) new videos"))
+                        .font(.system(size: 13))
+                        .foregroundStyle(Theme.textSecondary)
+                        .padding(.top, 8)
                 }
                 .padding(14)
             }
