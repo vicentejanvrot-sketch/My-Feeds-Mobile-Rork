@@ -1,6 +1,16 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "%@ %@" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@: %2$@"
+          }
+        }
+      }
+    },
     "%@ connected" : {
       "localizations" : {
         "pt-BR" : {
@@ -97,6 +107,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%@ · conectado só neste celular"
+          }
+        }
+      }
+    },
+    "%@ • %lldh lookback" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ • busca de %2$lld h"
           }
         }
       }
@@ -227,6 +247,16 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "%lld of %lld" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld de %2$lld"
           }
         }
       }
@@ -431,6 +461,46 @@
         }
       }
     },
+    "%lld selected" : {
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld selected"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld selected"
+                }
+              }
+            }
+          }
+        },
+        "pt-BR" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld selecionada"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld selecionadas"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "%lldd ago" : {
       "localizations" : {
         "pt-BR" : {
@@ -615,6 +685,16 @@
         }
       }
     },
+    "+ Add Source" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "+ Adicionar fonte"
+          }
+        }
+      }
+    },
     "+ New Collection" : {
       "localizations" : {
         "pt-BR" : {
@@ -685,6 +765,16 @@
         }
       }
     },
+    "A private account shows up on People with a button to open it in %@. Its posts won't appear in your feed." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uma conta privada aparece em Pessoas com um botão para abri-la no %@. Os posts dela não vão aparecer no seu feed."
+          }
+        }
+      }
+    },
     "API keys (YouTube, OpenAI, Anthropic, Gemini) are optional and let the app fetch video data and run AI analysis on your behalf. Keys are stored securely and are never displayed back to you after saving." : {
       "localizations" : {
         "pt-BR" : {
@@ -745,12 +835,42 @@
         }
       }
     },
+    "Add %@" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Adicionar %@"
+          }
+        }
+      }
+    },
     "Add EP to YouTube Music" : {
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Adicionar EP ao YouTube Music"
+          }
+        }
+      }
+    },
+    "Add Recipient" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Adicionar destinatário"
+          }
+        }
+      }
+    },
+    "Add Source" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Adicionar fonte"
           }
         }
       }
@@ -771,6 +891,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Adicionar álbum ao YouTube Music"
+          }
+        }
+      }
+    },
+    "Add as private account" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Adicionar como conta privada"
           }
         }
       }
@@ -881,6 +1011,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%@ adicionado"
+          }
+        }
+      }
+    },
+    "Added %@ as a private account" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ adicionado como conta privada"
           }
         }
       }
@@ -1031,6 +1171,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Para adicionar músicas à sua biblioteca, é preciso ter uma assinatura do Apple Music."
+          }
+        }
+      }
+    },
+    "All Channels" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Todos os canais"
           }
         }
       }
@@ -1255,6 +1405,16 @@
         }
       }
     },
+    "BETA" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "BETA"
+          }
+        }
+      }
+    },
     "Back" : {
       "localizations" : {
         "pt-BR" : {
@@ -1425,6 +1585,46 @@
         }
       }
     },
+    "Channel URL" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "URL do canal"
+          }
+        }
+      }
+    },
+    "Channel added" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Canal adicionado"
+          }
+        }
+      }
+    },
+    "Channel removed" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Canal removido"
+          }
+        }
+      }
+    },
+    "Channels" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Canais"
+          }
+        }
+      }
+    },
     "Channels (%lld)" : {
       "localizations" : {
         "pt-BR" : {
@@ -1491,6 +1691,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Escolha as coleções"
+          }
+        }
+      }
+    },
+    "Clear" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Limpar"
           }
         }
       }
@@ -1571,6 +1781,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "O nome da coleção é obrigatório"
+          }
+        }
+      }
+    },
+    "Collection not found" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Coleção não encontrada"
           }
         }
       }
@@ -1755,6 +1975,26 @@
         }
       }
     },
+    "Couldn't add %@" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Não foi possível adicionar: %@"
+          }
+        }
+      }
+    },
+    "Couldn't add recipient" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Não foi possível adicionar o destinatário"
+          }
+        }
+      }
+    },
     "Couldn't add that account." : {
       "localizations" : {
         "pt-BR" : {
@@ -1825,6 +2065,26 @@
         }
       }
     },
+    "Couldn't move %@" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Não foi possível mover: %@"
+          }
+        }
+      }
+    },
+    "Couldn't move it" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Não foi possível mover"
+          }
+        }
+      }
+    },
     "Couldn't open %@ sign-in." : {
       "localizations" : {
         "pt-BR" : {
@@ -1865,6 +2125,26 @@
         }
       }
     },
+    "Couldn't remove channel" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Não foi possível remover o canal"
+          }
+        }
+      }
+    },
+    "Couldn't remove recipient" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Não foi possível remover o destinatário"
+          }
+        }
+      }
+    },
     "Couldn't save that setting: %@" : {
       "localizations" : {
         "pt-BR" : {
@@ -1881,6 +2161,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Não foi possível iniciar a entrada no YouTube."
+          }
+        }
+      }
+    },
+    "Couldn't update channel" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Não foi possível atualizar o canal"
+          }
+        }
+      }
+    },
+    "Couldn't update priority" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Não foi possível atualizar a prioridade"
           }
         }
       }
@@ -2035,6 +2335,16 @@
         }
       }
     },
+    "Delete %@?" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Excluir %@?"
+          }
+        }
+      }
+    },
     "Delete Account" : {
       "localizations" : {
         "pt-BR" : {
@@ -2101,6 +2411,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Excluir todos os downloads?"
+          }
+        }
+      }
+    },
+    "Delete collection" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Excluir coleção"
           }
         }
       }
@@ -2325,6 +2645,16 @@
         }
       }
     },
+    "Enriched" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Analisados"
+          }
+        }
+      }
+    },
     "Enriched:" : {
       "localizations" : {
         "pt-BR" : {
@@ -2455,12 +2785,52 @@
         }
       }
     },
+    "Feed" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Feed"
+          }
+        }
+      }
+    },
     "Feeds" : {
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Feeds"
+          }
+        }
+      }
+    },
+    "Filter by status" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Filtrar por status"
+          }
+        }
+      }
+    },
+    "Filter by status:" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Filtrar por status:"
+          }
+        }
+      }
+    },
+    "Filters" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Filtros"
           }
         }
       }
@@ -2481,6 +2851,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Esqueceu a senha?"
+          }
+        }
+      }
+    },
+    "Found" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Encontrados"
           }
         }
       }
@@ -2925,6 +3305,16 @@
         }
       }
     },
+    "Keep Running" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Continuar"
+          }
+        }
+      }
+    },
     "Keep screen on while playing" : {
       "localizations" : {
         "pt-BR" : {
@@ -2995,6 +3385,16 @@
         }
       }
     },
+    "Live/Upcoming" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lives e estreias"
+          }
+        }
+      }
+    },
     "Loading runs…" : {
       "localizations" : {
         "pt-BR" : {
@@ -3055,6 +3455,126 @@
         }
       }
     },
+    "Move \"%@\" to" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mover \"%@\" para"
+          }
+        }
+      }
+    },
+    "Move %lld accounts to" : {
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Move %lld account to"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Move %lld accounts to"
+                }
+              }
+            }
+          }
+        },
+        "pt-BR" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Mover %lld conta para"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Mover %lld contas para"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "Move to another collection" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mover para outra coleção"
+          }
+        }
+      }
+    },
+    "Move to…" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mover para…"
+          }
+        }
+      }
+    },
+    "Moved %lld accounts to %@" : {
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Moved %lld account to %@"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Moved %lld accounts to %@"
+                }
+              }
+            }
+          }
+        },
+        "pt-BR" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld conta movida para %@"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld contas movidas para %@"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "Moved to %@" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Movido para %@"
+          }
+        }
+      }
+    },
     "My Collections" : {
       "localizations" : {
         "pt-BR" : {
@@ -3101,6 +3621,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Nunca"
+          }
+        }
+      }
+    },
+    "Never scanned" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nunca verificado"
           }
         }
       }
@@ -3315,6 +3845,26 @@
         }
       }
     },
+    "No channels added yet." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nenhum canal adicionado ainda."
+          }
+        }
+      }
+    },
+    "No channels match this filter." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nenhum canal corresponde a esse filtro."
+          }
+        }
+      }
+    },
     "No collections yet" : {
       "localizations" : {
         "pt-BR" : {
@@ -3365,12 +3915,32 @@
         }
       }
     },
+    "No runs yet. Tap \"Run Now\" to start one." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nenhuma atualização ainda. Toque em \"Atualizar agora\" para começar."
+          }
+        }
+      }
+    },
     "No saved credentials. Please sign in with your password first." : {
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Nenhum login salvo. Entre com sua senha primeiro."
+          }
+        }
+      }
+    },
+    "No schedule set" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sem agendamento"
           }
         }
       }
@@ -3415,6 +3985,16 @@
         }
       }
     },
+    "Not scanned (private)" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Não verificado (privado)"
+          }
+        }
+      }
+    },
     "Nothing downloaded yet" : {
       "localizations" : {
         "pt-BR" : {
@@ -3431,6 +4011,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "OK"
+          }
+        }
+      }
+    },
+    "Off" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Desligado"
+          }
+        }
+      }
+    },
+    "Offline — couldn't load latest collection data." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Offline — não foi possível carregar os dados mais recentes da coleção."
           }
         }
       }
@@ -3461,6 +4061,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Offline — não foi possível carregar o histórico de atualizações mais recente."
+          }
+        }
+      }
+    },
+    "On" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ligado"
           }
         }
       }
@@ -3825,6 +4435,16 @@
         }
       }
     },
+    "Platform" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plataforma"
+          }
+        }
+      }
+    },
     "Please enter a valid email address." : {
       "localizations" : {
         "pt-BR" : {
@@ -3921,6 +4541,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Política de privacidade"
+          }
+        }
+      }
+    },
+    "Private" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Privada"
           }
         }
       }
@@ -4045,12 +4675,42 @@
         }
       }
     },
+    "Recipient added" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Destinatário adicionado"
+          }
+        }
+      }
+    },
     "Recipient already added" : {
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Destinatário já adicionado"
+          }
+        }
+      }
+    },
+    "Recipient removed" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Destinatário removido"
+          }
+        }
+      }
+    },
+    "Recipients (%lld)" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Destinatários (%lld)"
           }
         }
       }
@@ -4091,6 +4751,46 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Remover"
+          }
+        }
+      }
+    },
+    "Remove \"%@\" from this collection?" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remover \"%@\" desta coleção?"
+          }
+        }
+      }
+    },
+    "Remove %@?" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remover %@?"
+          }
+        }
+      }
+    },
+    "Remove Channel" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remover canal"
+          }
+        }
+      }
+    },
+    "Remove Recipient" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remover destinatário"
           }
         }
       }
@@ -4165,6 +4865,16 @@
         }
       }
     },
+    "Run History (%lld)" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Histórico de atualizações (%lld)"
+          }
+        }
+      }
+    },
     "Run Now" : {
       "localizations" : {
         "pt-BR" : {
@@ -4231,6 +4941,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "CONECTADO COMO"
+          }
+        }
+      }
+    },
+    "SOURCES (%lld)" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "FONTES (%lld)"
           }
         }
       }
@@ -4325,6 +5045,16 @@
         }
       }
     },
+    "Scanned %@" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verificado %@"
+          }
+        }
+      }
+    },
     "Scanning channels" : {
       "localizations" : {
         "pt-BR" : {
@@ -4341,6 +5071,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Agenda — \"Quando esta coleção deve ser atualizada?\""
+          }
+        }
+      }
+    },
+    "See this collection's people" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ver as pessoas desta coleção"
           }
         }
       }
@@ -4411,6 +5151,36 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "Select %@" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Selecionar %@"
+          }
+        }
+      }
+    },
+    "Select all" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Selecionar tudo"
+          }
+        }
+      }
+    },
+    "Select all sources" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Selecionar todas as fontes"
           }
         }
       }
@@ -4635,6 +5405,16 @@
         }
       }
     },
+    "Stop this run in progress?" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Parar esta atualização em andamento?"
+          }
+        }
+      }
+    },
     "Subreddit or user" : {
       "localizations" : {
         "pt-BR" : {
@@ -4741,6 +5521,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Termos de serviço"
+          }
+        }
+      }
+    },
+    "That's a %@ link, so %@ is now selected." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Esse é um link do %1$@, então %2$@ foi selecionado."
+          }
+        }
+      }
+    },
+    "That's a %@ link. Select %@ or paste a %@ link." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Esse é um link do %1$@. Escolha %2$@ ou cole um link do %3$@."
           }
         }
       }
@@ -4865,6 +5665,46 @@
         }
       }
     },
+    "This deletes the collection, its %lld sources, its email recipients, its run history and every video and post it found, including ones you saved. It can't be undone. Your accounts on YouTube, X and the other platforms aren't touched." : {
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "This deletes the collection, its %lld source, its email recipients, its run history and every video and post it found, including ones you saved. It can't be undone. Your accounts on YouTube, X and the other platforms aren't touched."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "This deletes the collection, its %lld sources, its email recipients, its run history and every video and post it found, including ones you saved. It can't be undone. Your accounts on YouTube, X and the other platforms aren't touched."
+                }
+              }
+            }
+          }
+        },
+        "pt-BR" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Isso exclui a coleção, a %lld fonte dela, os destinatários de e-mail, o histórico de atualizações e todos os vídeos e posts que ela encontrou, inclusive os que você salvou. Não dá para desfazer. Suas contas no YouTube, X e nas outras plataformas não são afetadas."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Isso exclui a coleção, as %lld fontes dela, os destinatários de e-mail, o histórico de atualizações e todos os vídeos e posts que ela encontrou, inclusive os que você salvou. Não dá para desfazer. Suas contas no YouTube, X e nas outras plataformas não são afetadas."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "This item" : {
       "localizations" : {
         "pt-BR" : {
@@ -4911,6 +5751,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Isso vai excluir permanentemente sua conta e todos os seus dados, incluindo suas coleções, feeds, histórico e configurações salvas. Não dá para desfazer."
+          }
+        }
+      }
+    },
+    "Tick accounts to move them" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Marque contas para movê-las"
           }
         }
       }
@@ -5211,6 +6061,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ver tudo"
+          }
+        }
+      }
+    },
+    "View this collection's feed" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ver o feed desta coleção"
           }
         }
       }
@@ -5781,6 +6641,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "biometria"
+          }
+        }
+      }
+    },
+    "collection" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "coleção"
           }
         }
       }

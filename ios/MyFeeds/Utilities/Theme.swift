@@ -92,13 +92,14 @@ extension View {
 
 /// Uppercase section header used on Dashboard / Agent Detail.
 struct SectionHeader: View {
-    let title: String
-    var actionLabel: String?
+    let title: LocalizedStringKey
+    var actionLabel: LocalizedStringKey?
     var action: (() -> Void)?
 
     var body: some View {
         HStack {
-            Text(title.uppercased())
+            Text(title)
+                .textCase(.uppercase)
                 .font(.system(size: 13, weight: .bold))
                 .kerning(0.6)
                 .foregroundStyle(Theme.textSecondary)
