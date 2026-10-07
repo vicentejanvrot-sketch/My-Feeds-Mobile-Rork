@@ -2587,10 +2587,16 @@
     },
     "Channels Tracked" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Monitored Channels"
+          }
+        },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Canais acompanhados"
+            "value" : "Canais monitorados"
           }
         }
       }

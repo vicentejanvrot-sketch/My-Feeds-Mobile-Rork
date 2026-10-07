@@ -175,7 +175,7 @@
     "runAll": "Run All",
     "stats": {
       "collections": "Active Collections",
-      "channels": "Channels Tracked",
+      "channels": "Monitored Channels",
       "runs": "Recent Runs",
       "successRate": "Success Rate"
     },
