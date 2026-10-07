@@ -21,6 +21,8 @@ import { useAuth } from "@/lib/auth-provider";
 import { extractEdgeFunctionErrorMessage, qk } from "@/lib/hooks";
 import { PlatformBadge } from "@/components/PlatformBadge";
 import { ReadWatchTour } from "@/components/onboarding/ReadWatchTour";
+import { useTranslation } from "react-i18next";
+import { formatTime } from "@/lib/i18n";
 import { Platform, PLATFORMS, PLATFORM_META, platformText, detectPlatform } from "@/lib/platforms";
 
 // Onboarding wizard, same flow as the web OnboardingWizard: create an agent
@@ -53,7 +55,7 @@ interface AddedSource {
   isPrivate?: boolean;
 }
 
-const STEP_LABELS = ["Your collection", "Sources", "Read & watch"];
+const STEP_KEYS = ["collection", "sources", "readWatch"] as const;
 const LAST_STEP = 4;
 
 function deviceTimezone(): string {
@@ -68,6 +70,7 @@ export function OnboardingWizard({ visible, onClose, hidden, onHiddenChange }: O
   const insets = useSafeAreaInsets();
   const { user } = useAuth();
   const queryClient = useQueryClient();
+  const { t } = useTranslation();
 
   const [step, setStep] = useState(0);
   const [name, setName] = useState("");
@@ -164,7 +167,7 @@ export function OnboardingWizard({ visible, onClose, hidden, onHiddenChange }: O
       void queryClient.invalidateQueries({ queryKey: qk.agents });
       goTo(2);
     } catch (e) {
-      setError("Couldn't save the collection: " + (e instanceof Error ? e.message : "please try again."));
+      setError(e instanceof Error ? t("onboarding.errors.saveWith", { message: e.message }) : t("onboarding.errors.save"));
     } finally {
       setSaving(false);
     }
@@ -179,11 +182,11 @@ export function OnboardingWizard({ visible, onClose, hidden, onHiddenChange }: O
     setPrivateOffer(null);
     const detected = detectPlatform(value);
     if (detected && detected !== platform) {
-      setError(`That's a ${PLATFORM_META[detected].label} link. Select ${PLATFORM_META[detected].label} or paste a ${PLATFORM_META[platform].label} link.`);
+      setError(t("agentDetail.wrongPlatform", { detected: PLATFORM_META[detected].label, selected: PLATFORM_META[platform].label }));
       return;
     }
     if (platform === "youtube" && !/youtube\.com|youtu\.be|^@/i.test(value)) {
-      setError("Paste the channel link, like youtube.com/@ChannelName.");
+      setError(t("onboarding.youtubeLinkNeeded"));
       return;
     }
     setAdding(true);
@@ -195,7 +198,7 @@ export function OnboardingWizard({ visible, onClose, hidden, onHiddenChange }: O
       });
       if (fnError) throw new Error(await extractEdgeFunctionErrorMessage(fnError));
       if (!data?.channel) {
-        const message: string = data?.error ?? "Couldn't add that source.";
+        const message: string = data?.error ?? t("errors.addSourceFailed");
         if (!asPrivate && (data?.code === "instagram_private" || data?.code === "instagram_unavailable" || data?.code === "facebook_profile")) {
           setPrivateOffer(message);
           return;
@@ -209,7 +212,7 @@ export function OnboardingWizard({ visible, onClose, hidden, onHiddenChange }: O
       void queryClient.invalidateQueries({ queryKey: qk.channelsAll });
       void queryClient.invalidateQueries({ queryKey: qk.agents });
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Couldn't add that source.");
+      setError(e instanceof Error ? e.message : t("errors.addSourceFailed"));
     } finally {
       setAdding(false);
     }
@@ -221,7 +224,7 @@ export function OnboardingWizard({ visible, onClose, hidden, onHiddenChange }: O
     const { error: deleteError } = await supabase.from("channels").delete().eq("id", source.id);
     setRemovingId(null);
     if (deleteError) {
-      setError("Couldn't remove it: " + deleteError.message);
+      setError(t("people.toast.removeFailed", { message: deleteError.message }));
       return;
     }
     setSources((prev) => prev.filter((s) => s.id !== source.id));
@@ -236,7 +239,7 @@ export function OnboardingWizard({ visible, onClose, hidden, onHiddenChange }: O
     const { data, error: readError } = await supabase.from("agents").select("id, name").eq("id", agentId).maybeSingle();
     setFinishing(false);
     if (readError || !data) {
-      setError("Something went wrong saving your collection. Check it on the Dashboard and try again.");
+      setError(t("onboarding.errors.finish"));
       return;
     }
     setSavedName(data.name as string);
@@ -289,8 +292,8 @@ export function OnboardingWizard({ visible, onClose, hidden, onHiddenChange }: O
     (step === 1 && (!trimmedName || trimmedName.length > 100 || saving)) ||
     (step === 2 && sources.length === 0);
   const hint =
-    step === 1 && !trimmedName ? "Give your collection a name." :
-    step === 2 && sources.length === 0 ? "Add at least one source, or skip for now." : "";
+    step === 1 && !trimmedName ? t("onboarding.hints.name") :
+    step === 2 && sources.length === 0 ? t("onboarding.hints.sources") : "";
   const showFooter = step >= 1 && step < LAST_STEP;
 
   const dontShowBox = (
@@ -304,7 +307,7 @@ export function OnboardingWizard({ visible, onClose, hidden, onHiddenChange }: O
       <View style={[styles.checkBox, dontShow && styles.checkBoxOn]}>
         {dontShow ? <Check size={14} color={Colors.white} strokeWidth={3} /> : null}
       </View>
-      <Text style={styles.checkText}>Don't show this again</Text>
+      <Text style={styles.checkText}>{t("onboarding.dontShow")}</Text>
     </Pressable>
   );
 
@@ -318,16 +321,20 @@ export function OnboardingWizard({ visible, onClose, hidden, onHiddenChange }: O
         <View style={styles.header}>
           <View style={{ flex: 1 }}>
             {showFooter && tourOnly ? (
-              <Text style={styles.stepLabel}>HOW IT WORKS</Text>
+              <Text style={styles.stepLabel}>{t("dashboard.howItWorks").toUpperCase()}</Text>
             ) : showFooter ? (
               <View style={{ gap: 8 }}>
                 <View style={styles.segments}>
-                  {STEP_LABELS.map((label, i) => (
-                    <View key={label} style={[styles.segment, step >= i + 1 && styles.segmentOn]} />
+                  {STEP_KEYS.map((key, i) => (
+                    <View key={key} style={[styles.segment, step >= i + 1 && styles.segmentOn]} />
                   ))}
                 </View>
                 <Text style={styles.stepLabel}>
-                  STEP {step} OF {STEP_LABELS.length} · {STEP_LABELS[step - 1].toUpperCase()}
+                  {t("onboarding.stepOf", {
+                    step,
+                    total: STEP_KEYS.length,
+                    label: t(`onboarding.steps.${STEP_KEYS[step - 1]}` as const),
+                  }).toUpperCase()}
                 </Text>
               </View>
             ) : (
@@ -337,7 +344,7 @@ export function OnboardingWizard({ visible, onClose, hidden, onHiddenChange }: O
               </View>
             )}
           </View>
-          <Pressable onPress={() => close()} hitSlop={10} accessibilityLabel="Close" style={styles.closeBtn}>
+          <Pressable onPress={() => close()} hitSlop={10} accessibilityLabel={t("common.close")} style={styles.closeBtn}>
             <XIcon size={20} color={Colors.textSecondary} />
           </Pressable>
         </View>
@@ -350,11 +357,8 @@ export function OnboardingWizard({ visible, onClose, hidden, onHiddenChange }: O
         >
           {step === 0 && (
             <View style={{ gap: 22, paddingTop: 12 }}>
-              <Text style={styles.heroTitle}>Everything you follow, in one feed.</Text>
-              <Text style={styles.lead}>
-                My Feeds watches the topics you care about across YouTube, X, Reddit and more, sums up what's new, and
-                lets you watch and read it all right here.
-              </Text>
+              <Text style={styles.heroTitle}>{t("onboarding.intro.title")}</Text>
+              <Text style={styles.lead}>{t("onboarding.intro.body")}</Text>
               <View style={styles.platformWrap}>
                 {PLATFORMS.map((p) => (
                   <View key={p} style={styles.platformTag}>
@@ -365,22 +369,22 @@ export function OnboardingWizard({ visible, onClose, hidden, onHiddenChange }: O
               </View>
               <View style={{ gap: 10 }}>
                 <Pressable style={({ pressed }) => [styles.primaryBtn, pressed && styles.pressed]} onPress={() => goTo(1)}>
-                  <Text style={styles.primaryText}>Get started</Text>
+                  <Text style={styles.primaryText}>{t("onboarding.intro.getStarted")}</Text>
                 </Pressable>
                 <Pressable style={({ pressed }) => [styles.outlineBtn, pressed && styles.pressed]} onPress={startTour}>
-                  <Text style={styles.outlineText}>See how it works</Text>
+                  <Text style={styles.outlineText}>{t("onboarding.intro.seeHow")}</Text>
                 </Pressable>
                 <Pressable style={({ pressed }) => [styles.skipBtn, pressed && styles.pressed]} onPress={() => close()}>
-                  <Text style={styles.skipText}>Skip for now</Text>
+                  <Text style={styles.skipText}>{t("onboarding.skipForNow")}</Text>
                 </Pressable>
               </View>
               <Text style={styles.muted}>
-                Get started builds a new collection in three quick steps. See how it works only shows how to read and watch.
+                {t("onboarding.intro.explain")}
               </Text>
               <View style={styles.checkSection}>
                 {dontShowBox}
                 <Text style={[styles.muted, { paddingLeft: 32 }]}>
-                  You can open this again any time with the ? button on the Dashboard.
+                  {t("onboarding.intro.reopen")}
                 </Text>
               </View>
             </View>
@@ -389,38 +393,35 @@ export function OnboardingWizard({ visible, onClose, hidden, onHiddenChange }: O
           {step === 1 && (
             <View style={{ gap: 20 }}>
               <View style={{ gap: 8 }}>
-                <Text style={styles.title}>Build your first collection</Text>
-                <Text style={styles.lead}>
-                  A collection follows one topic and pulls the best posts from its sources into one stream. Its name is the
-                  topic, so name it after what you want to follow.
-                </Text>
+                <Text style={styles.title}>{t("onboarding.name.title")}</Text>
+                <Text style={styles.lead}>{t("onboarding.name.body")}</Text>
               </View>
               <View style={{ gap: 8 }}>
-                <Text style={styles.label}>Collection name and topic</Text>
+                <Text style={styles.label}>{t("onboarding.name.label")}</Text>
                 <TextInput
                   value={name}
                   onChangeText={setName}
-                  placeholder="e.g. Crypto, AI, Power Apps"
+                  placeholder={t("agentForm.namePlaceholder")}
                   placeholderTextColor={Colors.textMuted}
                   maxLength={100}
                   autoFocus
                   returnKeyType="next"
                   onSubmitEditing={() => { if (!nextDisabled) next(); }}
                   style={styles.input}
-                  accessibilityLabel="Collection name and topic"
+                  accessibilityLabel={t("onboarding.name.label")}
                 />
               </View>
               <View style={styles.switchRow}>
                 <View style={{ flex: 1, gap: 2 }}>
-                  <Text style={styles.label}>Email me a digest after each run</Text>
-                  <Text style={styles.muted}>Sent to your account email. You can change it on the collection later.</Text>
+                  <Text style={styles.label}>{t("onboarding.name.email")}</Text>
+                  <Text style={styles.muted}>{t("onboarding.name.emailHint")}</Text>
                 </View>
                 <Switch
                   value={emailMe}
                   onValueChange={setEmailMe}
                   trackColor={{ true: Colors.accent, false: Colors.border }}
                   thumbColor={Colors.white}
-                  accessibilityLabel="Email me a digest after each run"
+                  accessibilityLabel={t("onboarding.name.email")}
                 />
               </View>
               {trimmedName ? (
@@ -430,7 +431,9 @@ export function OnboardingWizard({ visible, onClose, hidden, onHiddenChange }: O
                   </View>
                   <View style={{ flex: 1 }}>
                     <Text style={styles.previewName} numberOfLines={1}>{trimmedName}</Text>
-                    <Text style={styles.muted}>Runs daily at 7:00 AM · looks back 36 hours</Text>
+                    <Text style={styles.muted}>
+                      {t("onboarding.name.schedule", { time: formatTime(new Date(2000, 0, 1, 7, 0)), hours: 36 })}
+                    </Text>
                   </View>
                 </View>
               ) : null}
@@ -440,15 +443,14 @@ export function OnboardingWizard({ visible, onClose, hidden, onHiddenChange }: O
           {step === 2 && (
             <View style={{ gap: 20 }}>
               <View style={{ gap: 8 }}>
-                <Text style={styles.title}>Add sources to {savedName || "your collection"}</Text>
-                <Text style={styles.lead}>
-                  Add the channels, accounts and communities this collection should watch. You can add more later from the
-                  collection page.
+                <Text style={styles.title}>
+                  {savedName ? t("onboarding.sources.titleNamed", { name: savedName }) : t("onboarding.sources.title")}
                 </Text>
+                <Text style={styles.lead}>{t("onboarding.sources.body")}</Text>
               </View>
 
               <View style={{ gap: 10 }}>
-                <Text style={styles.label}>Platform</Text>
+                <Text style={styles.label}>{t("agentDetail.platform")}</Text>
                 <View style={styles.platformGrid}>
                   {PLATFORMS.map((p) => {
                     const selected = platform === p;
@@ -463,7 +465,7 @@ export function OnboardingWizard({ visible, onClose, hidden, onHiddenChange }: O
                         <PlatformBadge platform={p} size="md" />
                         <Text style={styles.platformCellText}>
                           {PLATFORM_META[p].label}
-                          {PLATFORM_META[p].beta ? <Text style={styles.beta}>  BETA</Text> : null}
+                          {PLATFORM_META[p].beta ? <Text style={styles.beta}>{"  " + t("agentDetail.beta").toUpperCase()}</Text> : null}
                         </Text>
                       </Pressable>
                     );
@@ -500,7 +502,7 @@ export function OnboardingWizard({ visible, onClose, hidden, onHiddenChange }: O
                   <Pressable
                     onPress={() => void addSource()}
                     disabled={!sourceValue.trim() || adding}
-                    accessibilityLabel="Add source"
+                    accessibilityLabel={t("agentDetail.addSource")}
                     style={({ pressed }) => [
                       styles.addBtn,
                       (!sourceValue.trim() || adding) && styles.disabled,
@@ -512,7 +514,7 @@ export function OnboardingWizard({ visible, onClose, hidden, onHiddenChange }: O
                 </View>
                 {autoPlatform === platform ? (
                   <Text style={[styles.muted, { color: Colors.accent }]}>
-                    That&apos;s a {meta.label} link, so {meta.label} is now selected.
+                    {t("agentDetail.autoSelected", { platform: meta.label })}
                   </Text>
                 ) : (
                   <Text style={styles.muted}>{metaText.addHelp}</Text>
@@ -524,7 +526,7 @@ export function OnboardingWizard({ visible, onClose, hidden, onHiddenChange }: O
                       <Text style={styles.privateText}>{privateOffer}</Text>
                     </View>
                     <Text style={styles.muted}>
-                      {`A private account shows up on People with a button to open it in ${meta.label}. Its posts won't appear in your feed.`}
+                      {t("agentDetail.privateExplain", { platform: meta.label })}
                     </Text>
                     <Pressable
                       onPress={() => void addSource(true)}
@@ -536,7 +538,7 @@ export function OnboardingWizard({ visible, onClose, hidden, onHiddenChange }: O
                       ) : (
                         <>
                           <Lock size={14} color={Colors.textPrimary} />
-                          <Text style={styles.privateBtnText}>Add as private account</Text>
+                          <Text style={styles.privateBtnText}>{t("agentDetail.addPrivate")}</Text>
                         </>
                       )}
                     </Pressable>
@@ -545,11 +547,11 @@ export function OnboardingWizard({ visible, onClose, hidden, onHiddenChange }: O
               </View>
 
               <View style={{ gap: 8 }}>
-                <Text style={styles.label}>Added{sources.length > 0 ? ` (${sources.length})` : ""}</Text>
+                <Text style={styles.label}>{t("onboarding.sources.added")}{sources.length > 0 ? ` (${sources.length})` : ""}</Text>
                 {sources.length === 0 ? (
                   <View style={styles.emptyBox}>
                     <Text style={[styles.muted, { textAlign: "center" }]}>
-                      Nothing yet. Add at least one source so the collection has something to watch.
+                      {t("onboarding.sources.empty")}
                     </Text>
                   </View>
                 ) : (
@@ -560,14 +562,14 @@ export function OnboardingWizard({ visible, onClose, hidden, onHiddenChange }: O
                       {s.isPrivate ? (
                         <View style={styles.privateRow}>
                           <Lock size={12} color={Colors.textSecondary} />
-                          <Text style={styles.muted}>Private</Text>
+                          <Text style={styles.muted}>{t("agentDetail.private")}</Text>
                         </View>
                       ) : null}
                       <Pressable
                         onPress={() => void removeSource(s)}
                         disabled={removingId === s.id}
                         hitSlop={8}
-                        accessibilityLabel={`Remove ${s.name}`}
+                        accessibilityLabel={t("agentDetail.removeNamed", { name: s.name })}
                         style={styles.iconBtn}
                       >
                         {removingId === s.id
@@ -584,8 +586,8 @@ export function OnboardingWizard({ visible, onClose, hidden, onHiddenChange }: O
           {step === 3 && (
             <View style={{ gap: 18 }}>
               <View style={{ gap: 8 }}>
-                <Text style={styles.title}>Watch and read without leaving</Text>
-                <Text style={styles.lead}>Pick a platform to see how its posts work in My Feeds, then tap the numbers.</Text>
+                <Text style={styles.title}>{t("onboarding.tour.title")}</Text>
+                <Text style={styles.lead}>{t("onboarding.tour.body")}</Text>
               </View>
               <ReadWatchTour defaultPlatform={sources[0]?.platform ?? "youtube"} />
             </View>
@@ -597,23 +599,23 @@ export function OnboardingWizard({ visible, onClose, hidden, onHiddenChange }: O
                 <Check size={28} color={Colors.white} />
               </View>
               <View style={{ gap: 8 }}>
-                <Text style={styles.heroTitle}>Your feed is ready</Text>
-                <Text style={styles.lead}>
-                  Run the collection now to fill your feed straight away, or let it run on its own every morning.
-                </Text>
+                <Text style={styles.heroTitle}>{t("onboarding.done.title")}</Text>
+                <Text style={styles.lead}>{t("onboarding.done.body")}</Text>
               </View>
               <View style={styles.recap}>
                 <View style={styles.recapRow}>
-                  <Text style={styles.muted}>Collection</Text>
+                  <Text style={styles.muted}>{t("onboarding.done.collection")}</Text>
                   <Text style={styles.recapValue} numberOfLines={1}>{savedName}</Text>
                 </View>
                 <View style={[styles.recapRow, styles.recapDivider]}>
-                  <Text style={styles.muted}>Sources</Text>
-                  <Text style={styles.recapValue}>{sources.length === 0 ? "None yet" : `${sources.length} added`}</Text>
+                  <Text style={styles.muted}>{t("onboarding.done.sources")}</Text>
+                  <Text style={styles.recapValue}>
+                    {sources.length === 0 ? t("onboarding.done.noneYet") : t("onboarding.done.addedCount", { count: sources.length })}
+                  </Text>
                 </View>
                 <View style={[styles.recapRow, styles.recapDivider]}>
-                  <Text style={styles.muted}>Email digest</Text>
-                  <Text style={styles.recapValue}>{savedEmailMe ? "On" : "Off"}</Text>
+                  <Text style={styles.muted}>{t("onboarding.done.email")}</Text>
+                  <Text style={styles.recapValue}>{savedEmailMe ? t("onboarding.done.on") : t("onboarding.done.off")}</Text>
                 </View>
               </View>
               <View style={{ gap: 10 }}>
@@ -623,10 +625,10 @@ export function OnboardingWizard({ visible, onClose, hidden, onHiddenChange }: O
                   style={({ pressed }) => [styles.primaryBtn, sources.length === 0 && styles.disabled, pressed && styles.pressed]}
                 >
                   <Play size={16} color={Colors.white} fill={Colors.white} />
-                  <Text style={styles.primaryText}>Run it now</Text>
+                  <Text style={styles.primaryText}>{t("onboarding.done.runNow")}</Text>
                 </Pressable>
                 <Pressable style={({ pressed }) => [styles.outlineBtn, pressed && styles.pressed]} onPress={() => close()}>
-                  <Text style={styles.outlineText}>Go to my feed</Text>
+                  <Text style={styles.outlineText}>{t("onboarding.done.goToFeed")}</Text>
                 </Pressable>
               </View>
               <View style={styles.checkSection}>{dontShowBox}</View>
@@ -641,12 +643,12 @@ export function OnboardingWizard({ visible, onClose, hidden, onHiddenChange }: O
             {error ? <Text style={styles.error}>{error}</Text> : hint ? <Text style={styles.hint}>{hint}</Text> : null}
             {tourOnly ? dontShowBox : null}
             <View style={styles.footerRow}>
-              <Pressable onPress={back} accessibilityLabel="Back" style={({ pressed }) => [styles.backBtn, pressed && styles.pressed]}>
+              <Pressable onPress={back} accessibilityLabel={t("common.back")} style={({ pressed }) => [styles.backBtn, pressed && styles.pressed]}>
                 <ArrowLeft size={20} color={Colors.textPrimary} />
               </Pressable>
               {step === 2 && sources.length === 0 ? (
                 <Pressable onPress={() => goTo(3)} style={({ pressed }) => [styles.skipBtn, pressed && styles.pressed]}>
-                  <Text style={styles.skipText}>Skip for now</Text>
+                  <Text style={styles.skipText}>{t("onboarding.skipForNow")}</Text>
                 </Pressable>
               ) : null}
               <Pressable
@@ -655,7 +657,7 @@ export function OnboardingWizard({ visible, onClose, hidden, onHiddenChange }: O
                 style={({ pressed }) => [styles.primaryBtn, { flex: 1 }, nextDisabled && styles.disabled, pressed && styles.pressed]}
               >
                 {saving || finishing ? <ActivityIndicator size="small" color={Colors.white} /> : null}
-                <Text style={styles.primaryText}>{tourOnly ? "Done" : step === LAST_STEP - 1 ? "Finish" : "Continue"}</Text>
+                <Text style={styles.primaryText}>{tourOnly ? t("common.done") : step === LAST_STEP - 1 ? t("onboarding.finish") : t("onboarding.continue")}</Text>
               </Pressable>
             </View>
           </View>

@@ -967,5 +967,344 @@
     "watchedOf_other": "{{done}} de {{count}} vídeos assistidos",
     "fraction_one": "{{done}}/{{count}} vídeo",
     "fraction_other": "{{done}}/{{count}} vídeos"
+  },
+  "onboarding": {
+    "errors": {
+      "saveWith": "Não foi possível salvar a coleção: {{message}}",
+      "save": "Não foi possível salvar a coleção. Tente de novo.",
+      "finish": "Algo deu errado ao salvar sua coleção. Confira no Painel e tente de novo."
+    },
+    "youtubeLinkNeeded": "Cole o link do canal, como youtube.com/@NomeDoCanal.",
+    "hints": {
+      "name": "Dê um nome à sua coleção.",
+      "sources": "Adicione pelo menos uma fonte, ou pule por enquanto."
+    },
+    "dontShow": "Não mostrar de novo",
+    "stepOf": "Passo {{step}} de {{total}} · {{label}}",
+    "steps": {
+      "collection": "Sua coleção",
+      "sources": "Fontes",
+      "readWatch": "Ler e assistir"
+    },
+    "intro": {
+      "title": "Tudo o que você segue, em um só feed.",
+      "body": "O My Feeds acompanha os assuntos que importam para você no YouTube, X, Reddit e muito mais, resume as novidades e deixa você assistir e ler tudo aqui mesmo.",
+      "getStarted": "Começar",
+      "seeHow": "Ver como funciona",
+      "explain": "Começar cria uma nova coleção em três passos rápidos. Ver como funciona só mostra como ler e assistir.",
+      "reopen": "Você pode abrir isto de novo quando quiser pelo botão ? no Painel."
+    },
+    "skipForNow": "Pular por enquanto",
+    "name": {
+      "title": "Crie sua primeira coleção",
+      "body": "Uma coleção acompanha um assunto e reúne os melhores posts das fontes dela em um só lugar. O nome é o assunto, então dê o nome do que você quer acompanhar.",
+      "label": "Nome e assunto da coleção",
+      "email": "Me enviar um resumo por e-mail a cada atualização",
+      "emailHint": "Enviado para o e-mail da sua conta. Dá para mudar isso na coleção depois.",
+      "schedule": "Atualiza todo dia às {{time}} · busca as últimas {{hours}} horas"
+    },
+    "sources": {
+      "titleNamed": "Adicione fontes a {{name}}",
+      "title": "Adicione fontes à sua coleção",
+      "body": "Adicione os canais, contas e comunidades que esta coleção deve acompanhar. Você pode adicionar mais depois na página da coleção.",
+      "added": "Adicionadas",
+      "empty": "Nada ainda. Adicione pelo menos uma fonte para a coleção ter o que acompanhar."
+    },
+    "tour": {
+      "title": "Assista e leia sem sair do app",
+      "body": "Escolha uma plataforma para ver como os posts dela funcionam no My Feeds e toque nos números."
+    },
+    "done": {
+      "title": "Seu feed está pronto",
+      "body": "Atualize a coleção agora para encher seu feed na hora, ou deixe que ela se atualize sozinha toda manhã.",
+      "collection": "Coleção",
+      "sources": "Fontes",
+      "noneYet": "Nenhuma ainda",
+      "addedCount_one": "{{count}} adicionada",
+      "addedCount_other": "{{count}} adicionadas",
+      "email": "Resumo por e-mail",
+      "on": "Ligado",
+      "off": "Desligado",
+      "runNow": "Atualizar agora",
+      "goToFeed": "Ir para o meu feed"
+    },
+    "finish": "Concluir",
+    "continue": "Continuar"
+  },
+  "tour": {
+    "youtube": {
+      "title": "Por que as small caps ficam para trás quando os juros sobem",
+      "steps": {
+        "0": {
+          "title": "Assista aqui",
+          "body": "Toque no vídeo para assistir dentro do My Feeds. Ele lembra onde você parou."
+        },
+        "1": {
+          "title": "Vá direto ao que interessa",
+          "body": "Abaixo do player, o resumo lista os momentos principais. Toque em um horário para ir direto até ele."
+        },
+        "2": {
+          "title": "Organize",
+          "body": "Marque como Visto, Depois ou Curtido no próprio card para manter seu feed em ordem."
+        }
+      }
+    },
+    "x": {
+      "body": "A nova versão do onboarding está no ar. Uma thread sobre o que cortamos e por quê.",
+      "quote": "O melhor onboarding pede uma decisão por tela.",
+      "outNote": "Abre o X",
+      "steps": {
+        "0": {
+          "title": "Leia o post inteiro",
+          "body": "Toque no post para abri-lo. Fotos, vídeos e posts citados aparecem completos dentro do My Feeds."
+        },
+        "1": {
+          "title": "Curtir ou salvar",
+          "body": "Curtir salva no My Feeds. Salvar nos favoritos adiciona em Ler depois."
+        },
+        "2": {
+          "title": "Responder ou repostar no X",
+          "body": "Responder e repostar abrem o X, porque publicam pela sua conta do X."
+        }
+      }
+    },
+    "reddit": {
+      "title": "Como fazer Patch numa coleção sem o aviso de delegação?",
+      "body": "Tenho uma galeria com mais de 2.000 linhas e o Patch não para de reclamar. Qual é o jeito mais limpo de contornar isso?",
+      "outNote": "Abre o Reddit",
+      "steps": {
+        "0": {
+          "title": "Abra o post",
+          "body": "Toque nele para ler o post completo com fotos ou vídeo, mais um resumo da discussão."
+        },
+        "1": {
+          "title": "Upvote para salvar",
+          "body": "O upvote salva no My Feeds, o downvote marca como lido e Salvar adiciona em Ler depois."
+        },
+        "2": {
+          "title": "Comentários abrem no Reddit",
+          "body": "Toque no número de comentários para entrar na conversa no Reddit."
+        }
+      }
+    },
+    "github": {
+      "handle": "Nova release",
+      "title": "openfeeds/parser v1.4.0",
+      "body": "Notas da release do parser, com um resumo curto do que mudou.",
+      "outNote": "Abre o GitHub",
+      "steps": {
+        "0": {
+          "title": "Veja as novidades",
+          "body": "Toque em um novo repositório ou release para ler do que se trata, com um resumo curto."
+        },
+        "1": {
+          "title": "Estrela para salvar",
+          "body": "A estrela salva no My Feeds. Salvar adiciona em Ler depois."
+        },
+        "2": {
+          "title": "Fork no GitHub",
+          "body": "Fazer fork abre o GitHub, já que acontece na sua conta do GitHub."
+        }
+      }
+    },
+    "instagram": {
+      "body": "Três jeitos de aproveitar o arroz que sobrou esta semana.",
+      "outNote": "Abre o Instagram",
+      "steps": {
+        "0": {
+          "title": "Fotos e reels tocam aqui",
+          "body": "Toque no post para abri-lo. Passe pelos carrosséis e assista aos reels sem sair."
+        },
+        "1": {
+          "title": "Coração para salvar",
+          "body": "O coração salva no My Feeds, e o marcador adiciona em Ler depois."
+        },
+        "2": {
+          "title": "Comentários abrem no Instagram",
+          "body": "Comentar abre o Instagram, porque publica pela sua conta."
+        }
+      }
+    },
+    "linkedin": {
+      "handle": "Líder de produto",
+      "body": "Reduzimos nosso onboarding de nove telas para três. Veja o que aprendemos sobre pedir menos logo de cara.",
+      "outNote": "Abre o LinkedIn",
+      "steps": {
+        "0": {
+          "title": "Leia o post completo",
+          "body": "Toque nele para ler o post inteiro e ver as imagens dentro do My Feeds."
+        },
+        "1": {
+          "title": "Curtir para salvar",
+          "body": "Curtir salva no My Feeds. Salvar adiciona em Ler depois."
+        },
+        "2": {
+          "title": "Comentar e repostar no LinkedIn",
+          "body": "Essas ações abrem o LinkedIn, já que publicam pela sua conta."
+        }
+      }
+    },
+    "tiktok": {
+      "body": "Arroz crocante em 60 segundos.",
+      "outNote": "Abre o TikTok",
+      "steps": {
+        "0": {
+          "title": "Assista aqui",
+          "body": "Toque no vídeo para assistir dentro do My Feeds com o player do próprio TikTok."
+        },
+        "1": {
+          "title": "Curtir para salvar",
+          "body": "Curtir salva no My Feeds. Salvar adiciona em Ler depois."
+        },
+        "2": {
+          "title": "Comentários abrem no TikTok",
+          "body": "Comentar abre o TikTok, porque publica pela sua conta."
+        }
+      }
+    },
+    "facebook": {
+      "handle": "Página",
+      "body": "A trilha da beira do rio reabre no sábado. Veja o que mudou.",
+      "outNote": "Abre o Facebook",
+      "steps": {
+        "0": {
+          "title": "Leia e assista aqui",
+          "body": "Toque no post para ler tudo. As fotos abrem em tamanho grande e os vídeos tocam dentro do My Feeds."
+        },
+        "1": {
+          "title": "Curtir para salvar",
+          "body": "Curtir salva no My Feeds. Salvar adiciona em Ler depois."
+        },
+        "2": {
+          "title": "Comentários abrem no Facebook",
+          "body": "Comentar abre o Facebook, porque publica pela sua conta."
+        }
+      }
+    },
+    "apple_music": {
+      "handle": "Novo single",
+      "title": "Paper Lanterns",
+      "body": "Novo single de Nova Lane · 1 faixa · Pop",
+      "outNote": "Abre o Apple Music",
+      "steps": {
+        "0": {
+          "title": "Ouça aqui",
+          "body": "Toque para abrir o player do Apple Music. Você ouve uma prévia, ou as músicas completas se tiver entrado no Apple Music."
+        },
+        "1": {
+          "title": "Coração para salvar",
+          "body": "O coração salva no My Feeds. Salvar adiciona em Depois."
+        },
+        "2": {
+          "title": "Adicione ao Apple Music",
+          "body": "\"Adicionar álbum ao Apple Music\" coloca as músicas na sua playlist My Feeds de lá, prontas para baixar e ouvir offline."
+        }
+      }
+    },
+    "apple_podcasts": {
+      "handle": "Podcast",
+      "title": "Episódio 212: Treinando durante o inverno",
+      "body": "Episódio completo, tocado dentro do My Feeds.",
+      "outNote": "Abre o Apple Podcasts",
+      "steps": {
+        "0": {
+          "title": "Ouça o episódio inteiro",
+          "body": "Toque para tocar o episódio completo aqui. Ele lembra onde você parou, em qualquer dispositivo."
+        },
+        "1": {
+          "title": "Coração para salvar",
+          "body": "O coração salva no My Feeds. Salvar adiciona em Depois."
+        },
+        "2": {
+          "title": "Siga o programa no Apple Podcasts",
+          "body": "Seguir ou avaliar o programa abre o Apple Podcasts."
+        }
+      }
+    },
+    "apple_books": {
+      "handle": "Audiolivro",
+      "title": "The Quiet Harbor",
+      "body": "Novo audiolivro de Maya Ortiz · Ficção",
+      "outNote": "Abre o Apple Books",
+      "steps": {
+        "0": {
+          "title": "Ouça uma amostra",
+          "body": "Toque para ver a capa e a descrição, e tocar a amostra da Apple aqui mesmo."
+        },
+        "1": {
+          "title": "Coração para salvar",
+          "body": "O coração salva no My Feeds. Salvar adiciona em Depois."
+        },
+        "2": {
+          "title": "Ouça no Apple Books",
+          "body": "Comprar e ouvir o livro inteiro abre o Apple Books."
+        }
+      }
+    },
+    "youtube_music": {
+      "handle": "Novo álbum",
+      "title": "Night Garden",
+      "body": "Novo álbum de Nova Lane · 10 faixas",
+      "outNote": "Abre o YouTube Music",
+      "steps": {
+        "0": {
+          "title": "Ouça aqui",
+          "body": "Toque para tocar as músicas, ou o clipe, dentro do My Feeds."
+        },
+        "1": {
+          "title": "Coração para salvar",
+          "body": "O coração salva no My Feeds. Salvar adiciona em Depois."
+        },
+        "2": {
+          "title": "Adicione ao YouTube Music",
+          "body": "\"Adicionar ao YouTube Music\" coloca as músicas na sua playlist My Feeds de lá, usando sua conta do YouTube conectada."
+        }
+      }
+    },
+    "spotify": {
+      "handle": "Novo single",
+      "title": "Paper Lanterns",
+      "body": "Novo single de Nova Lane · 1 faixa · Pop",
+      "outNote": "Abre o Spotify",
+      "steps": {
+        "0": {
+          "title": "Ouça aqui",
+          "body": "Toque para abrir o player do Spotify e ouvir uma prévia aqui mesmo no My Feeds."
+        },
+        "1": {
+          "title": "Coração para salvar",
+          "body": "O coração salva no My Feeds. Salvar adiciona em Depois."
+        },
+        "2": {
+          "title": "Toque no Spotify",
+          "body": "\"Abrir no Spotify\" toca o lançamento completo no app do Spotify, onde dá para curtir ou adicionar a uma playlist."
+        }
+      }
+    },
+    "actions": {
+      "like": "Curtir",
+      "bookmark": "Salvar",
+      "reply": "Responder",
+      "repost": "Repostar",
+      "upvote": "Upvote",
+      "downvote": "Downvote",
+      "save": "Salvar",
+      "comments": "Comentários",
+      "star": "Estrela",
+      "fork": "Fork",
+      "comment": "Comentar"
+    },
+    "ui": {
+      "fromTranscript": "DA TRANSCRIÇÃO",
+      "moment1": "Quando os empréstimos das small caps são reajustados",
+      "moment2": "O que o faria mudar de ideia",
+      "marker": "{{n}}, {{label}}"
+    },
+    "ago": {
+      "h_one": "{{count}} h",
+      "h_other": "{{count}} h",
+      "d_one": "{{count}} d",
+      "d_other": "{{count}} d"
+    }
   }
 }

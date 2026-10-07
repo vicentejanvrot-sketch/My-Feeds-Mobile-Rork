@@ -967,5 +967,344 @@
     "watchedOf_other": "{{done}} of {{count}} videos watched",
     "fraction_one": "{{done}}/{{count}} video",
     "fraction_other": "{{done}}/{{count}} videos"
+  },
+  "onboarding": {
+    "errors": {
+      "saveWith": "Couldn't save the collection: {{message}}",
+      "save": "Couldn't save the collection: please try again.",
+      "finish": "Something went wrong saving your collection. Check it on the Dashboard and try again."
+    },
+    "youtubeLinkNeeded": "Paste the channel link, like youtube.com/@ChannelName.",
+    "hints": {
+      "name": "Give your collection a name.",
+      "sources": "Add at least one source, or skip for now."
+    },
+    "dontShow": "Don't show this again",
+    "stepOf": "Step {{step}} of {{total}} · {{label}}",
+    "steps": {
+      "collection": "Your collection",
+      "sources": "Sources",
+      "readWatch": "Read & watch"
+    },
+    "intro": {
+      "title": "Everything you follow, in one feed.",
+      "body": "My Feeds watches the topics you care about across YouTube, X, Reddit and more, sums up what's new, and lets you watch and read it all right here.",
+      "getStarted": "Get started",
+      "seeHow": "See how it works",
+      "explain": "Get started builds a new collection in three quick steps. See how it works only shows how to read and watch.",
+      "reopen": "You can open this again any time with the ? button on the Dashboard."
+    },
+    "skipForNow": "Skip for now",
+    "name": {
+      "title": "Build your first collection",
+      "body": "A collection follows one topic and pulls the best posts from its sources into one stream. Its name is the topic, so name it after what you want to follow.",
+      "label": "Collection name and topic",
+      "email": "Email me a digest after each run",
+      "emailHint": "Sent to your account email. You can change it on the collection later.",
+      "schedule": "Runs daily at {{time}} · looks back {{hours}} hours"
+    },
+    "sources": {
+      "titleNamed": "Add sources to {{name}}",
+      "title": "Add sources to your collection",
+      "body": "Add the channels, accounts and communities this collection should watch. You can add more later from the collection page.",
+      "added": "Added",
+      "empty": "Nothing yet. Add at least one source so the collection has something to watch."
+    },
+    "tour": {
+      "title": "Watch and read without leaving",
+      "body": "Pick a platform to see how its posts work in My Feeds, then tap the numbers."
+    },
+    "done": {
+      "title": "Your feed is ready",
+      "body": "Run the collection now to fill your feed straight away, or let it run on its own every morning.",
+      "collection": "Collection",
+      "sources": "Sources",
+      "noneYet": "None yet",
+      "addedCount_one": "{{count}} added",
+      "addedCount_other": "{{count}} added",
+      "email": "Email digest",
+      "on": "On",
+      "off": "Off",
+      "runNow": "Run it now",
+      "goToFeed": "Go to my feed"
+    },
+    "finish": "Finish",
+    "continue": "Continue"
+  },
+  "tour": {
+    "youtube": {
+      "title": "Why small caps lag when rates rise",
+      "steps": {
+        "0": {
+          "title": "Play it here",
+          "body": "Tap the video to watch it inside My Feeds. It remembers where you stopped."
+        },
+        "1": {
+          "title": "Jump to the good parts",
+          "body": "Under the player, the summary lists the key moments. Tap a time to jump straight there."
+        },
+        "2": {
+          "title": "Keep track",
+          "body": "Mark it Seen, Later or Liked from the card so your feed stays tidy."
+        }
+      }
+    },
+    "x": {
+      "body": "Onboarding rewrite is live. A thread on what we cut and why.",
+      "quote": "The best onboarding asks for one decision per screen.",
+      "outNote": "Opens X",
+      "steps": {
+        "0": {
+          "title": "Read the whole post",
+          "body": "Tap the post to open it. Photos, videos and quoted posts show in full inside My Feeds."
+        },
+        "1": {
+          "title": "Like or bookmark",
+          "body": "Like saves it in My Feeds. Bookmark adds it to Read later."
+        },
+        "2": {
+          "title": "Reply or repost on X",
+          "body": "Replying and reposting open X, because they post from your X account."
+        }
+      }
+    },
+    "reddit": {
+      "title": "Patching a collection without the delegation warning?",
+      "body": "I've got a gallery over 2,000 rows and Patch keeps complaining. What's the cleanest way around it?",
+      "outNote": "Opens Reddit",
+      "steps": {
+        "0": {
+          "title": "Open the post",
+          "body": "Tap it to read the full post with its photos or video, plus a summary of the thread."
+        },
+        "1": {
+          "title": "Upvote to save",
+          "body": "Upvote saves it in My Feeds, downvote marks it as read, and Save adds it to Read later."
+        },
+        "2": {
+          "title": "Comments open on Reddit",
+          "body": "Tap the comment count to join the conversation on Reddit."
+        }
+      }
+    },
+    "github": {
+      "handle": "New release",
+      "title": "openfeeds/parser v1.4.0",
+      "body": "Release notes for the parser, with a short summary of what changed.",
+      "outNote": "Opens GitHub",
+      "steps": {
+        "0": {
+          "title": "See what's new",
+          "body": "Tap a new repository or release to read what it is, with a short summary."
+        },
+        "1": {
+          "title": "Star to save",
+          "body": "Star saves it in My Feeds. Save adds it to Read later."
+        },
+        "2": {
+          "title": "Fork on GitHub",
+          "body": "Forking opens GitHub, since it happens in your GitHub account."
+        }
+      }
+    },
+    "instagram": {
+      "body": "Three ways to use up leftover rice this week.",
+      "outNote": "Opens Instagram",
+      "steps": {
+        "0": {
+          "title": "Photos and reels play here",
+          "body": "Tap the post to open it. Swipe through carousels and play reels without leaving."
+        },
+        "1": {
+          "title": "Heart to save",
+          "body": "The heart saves it in My Feeds, and the bookmark adds it to Read later."
+        },
+        "2": {
+          "title": "Comments open on Instagram",
+          "body": "Commenting opens Instagram, because it posts from your account."
+        }
+      }
+    },
+    "linkedin": {
+      "handle": "Product lead",
+      "body": "We cut our onboarding from nine screens to three. Here's what we learned about asking for less up front.",
+      "outNote": "Opens LinkedIn",
+      "steps": {
+        "0": {
+          "title": "Read the full post",
+          "body": "Tap it to read the whole post and see its images inside My Feeds."
+        },
+        "1": {
+          "title": "Like to save",
+          "body": "Like saves it in My Feeds. Save adds it to Read later."
+        },
+        "2": {
+          "title": "Comment and repost on LinkedIn",
+          "body": "Those open LinkedIn, since they post from your account."
+        }
+      }
+    },
+    "tiktok": {
+      "body": "Crispy rice in 60 seconds.",
+      "outNote": "Opens TikTok",
+      "steps": {
+        "0": {
+          "title": "Watch it here",
+          "body": "Tap the video to play it inside My Feeds with TikTok's own player."
+        },
+        "1": {
+          "title": "Like to save",
+          "body": "Like saves it in My Feeds. Save adds it to Read later."
+        },
+        "2": {
+          "title": "Comments open on TikTok",
+          "body": "Commenting opens TikTok, because it posts from your account."
+        }
+      }
+    },
+    "facebook": {
+      "handle": "Page",
+      "body": "The riverside trail reopens Saturday. Here's what changed.",
+      "outNote": "Opens Facebook",
+      "steps": {
+        "0": {
+          "title": "Read and watch here",
+          "body": "Tap the post to read it in full. Photos open large and videos play inside My Feeds."
+        },
+        "1": {
+          "title": "Like to save",
+          "body": "Like saves it in My Feeds. Save adds it to Read later."
+        },
+        "2": {
+          "title": "Comments open on Facebook",
+          "body": "Commenting opens Facebook, because it posts from your account."
+        }
+      }
+    },
+    "apple_music": {
+      "handle": "New single",
+      "title": "Paper Lanterns",
+      "body": "New single by Nova Lane · 1 track · Pop",
+      "outNote": "Opens Apple Music",
+      "steps": {
+        "0": {
+          "title": "Listen here",
+          "body": "Tap it to open Apple Music's player. You hear a preview, or the full songs if you're signed in to Apple Music."
+        },
+        "1": {
+          "title": "Heart to save",
+          "body": "The heart saves it in My Feeds. Save adds it to Later."
+        },
+        "2": {
+          "title": "Add it to Apple Music",
+          "body": "\"Add album to Apple Music\" puts the songs in your My Feeds playlist there, ready to download for offline."
+        }
+      }
+    },
+    "apple_podcasts": {
+      "handle": "Podcast",
+      "title": "Episode 212: Training through the winter",
+      "body": "Full episode, played inside My Feeds.",
+      "outNote": "Opens Apple Podcasts",
+      "steps": {
+        "0": {
+          "title": "Listen to the whole episode",
+          "body": "Tap it to play the full episode here. It remembers where you stopped, on every device."
+        },
+        "1": {
+          "title": "Heart to save",
+          "body": "The heart saves it in My Feeds. Save adds it to Later."
+        },
+        "2": {
+          "title": "Follow the show on Apple Podcasts",
+          "body": "Following or rating the show opens Apple Podcasts."
+        }
+      }
+    },
+    "apple_books": {
+      "handle": "Audiobook",
+      "title": "The Quiet Harbor",
+      "body": "New audiobook by Maya Ortiz · Fiction",
+      "outNote": "Opens Apple Books",
+      "steps": {
+        "0": {
+          "title": "Hear a sample",
+          "body": "Tap it to see the cover and description, and play Apple's sample right here."
+        },
+        "1": {
+          "title": "Heart to save",
+          "body": "The heart saves it in My Feeds. Save adds it to Later."
+        },
+        "2": {
+          "title": "Listen in Apple Books",
+          "body": "Buying and listening to the whole book opens Apple Books."
+        }
+      }
+    },
+    "youtube_music": {
+      "handle": "New album",
+      "title": "Night Garden",
+      "body": "New album by Nova Lane · 10 tracks",
+      "outNote": "Opens YouTube Music",
+      "steps": {
+        "0": {
+          "title": "Listen here",
+          "body": "Tap it to play the songs, or the music video, right inside My Feeds."
+        },
+        "1": {
+          "title": "Heart to save",
+          "body": "The heart saves it in My Feeds. Save adds it to Later."
+        },
+        "2": {
+          "title": "Add it to YouTube Music",
+          "body": "\"Add to YouTube Music\" puts the songs in your My Feeds playlist there, using your connected YouTube account."
+        }
+      }
+    },
+    "spotify": {
+      "handle": "New single",
+      "title": "Paper Lanterns",
+      "body": "New single by Nova Lane · 1 track · Pop",
+      "outNote": "Opens Spotify",
+      "steps": {
+        "0": {
+          "title": "Listen here",
+          "body": "Tap it to open Spotify's player and hear a preview right inside My Feeds."
+        },
+        "1": {
+          "title": "Heart to save",
+          "body": "The heart saves it in My Feeds. Save adds it to Later."
+        },
+        "2": {
+          "title": "Play it in Spotify",
+          "body": "\"Open in Spotify\" plays the full release in the Spotify app, where you can like it or add it to a playlist."
+        }
+      }
+    },
+    "actions": {
+      "like": "Like",
+      "bookmark": "Bookmark",
+      "reply": "Reply",
+      "repost": "Repost",
+      "upvote": "Upvote",
+      "downvote": "Downvote",
+      "save": "Save",
+      "comments": "Comments",
+      "star": "Star",
+      "fork": "Fork",
+      "comment": "Comment"
+    },
+    "ui": {
+      "fromTranscript": "FROM THE TRANSCRIPT",
+      "moment1": "When small-cap loans reset",
+      "moment2": "What would change his view",
+      "marker": "{{n}}, {{label}}"
+    },
+    "ago": {
+      "h_one": "{{count}}h",
+      "h_other": "{{count}}h",
+      "d_one": "{{count}}d",
+      "d_other": "{{count}}d"
+    }
   }
 }

@@ -20,6 +20,8 @@ import {
 import { Colors } from "@/constants/colors";
 import { PlatformBadge } from "@/components/PlatformBadge";
 import { Platform, PLATFORMS, PLATFORM_META } from "@/lib/platforms";
+import { useTranslation } from "react-i18next";
+import i18n from "@/lib/i18n";
 
 // Onboarding walkthrough of how to read, watch and act on content, one platform
 // at a time. Same content as the web ReadWatchTour and the iOS ReadWatchTourView:
@@ -252,13 +254,52 @@ const TOURS: Record<Platform, Tour> = {
   },
 };
 
+// The tours above are the English source; this swaps in the texts for the
+// active language (names, handles and sample titles that are proper nouns stay).
+const ACTION_KEYS: Record<string, string> = {
+  Like: "like",
+  Bookmark: "bookmark",
+  Reply: "reply",
+  Repost: "repost",
+  Upvote: "upvote",
+  Downvote: "downvote",
+  Save: "save",
+  Comments: "comments",
+  Star: "star",
+  Fork: "fork",
+  Comment: "comment",
+};
+
+function tr(key: string, fallback: string): string {
+  return i18n.exists(key) ? i18n.t(key as never) : fallback;
+}
+
+function localTour(p: Platform, base: Tour): Tour {
+  const k = `tour.${p}`;
+  const ago = base.when.match(/^(\d+)([hd])$/);
+  const action = (a: TourAction): TourAction =>
+    ACTION_KEYS[a.label] ? { ...a, label: tr(`tour.actions.${ACTION_KEYS[a.label]}`, a.label) } : a;
+  return {
+    ...base,
+    handle: tr(`${k}.handle`, base.handle),
+    when: ago ? i18n.t(`tour.ago.${ago[2] as "h" | "d"}`, { count: Number(ago[1]) }) : base.when,
+    title: base.title ? tr(`${k}.title`, base.title) : undefined,
+    body: base.body ? tr(`${k}.body`, base.body) : undefined,
+    quote: base.quote ? { ...base.quote, text: tr(`${k}.quote`, base.quote.text) } : undefined,
+    steps: base.steps.map((s, i) => ({ title: tr(`${k}.steps.${i}.title`, s.title), body: tr(`${k}.steps.${i}.body`, s.body) })),
+    saveActions: base.saveActions.map(action),
+    outActions: base.outActions.map(action),
+    outNote: base.outNote ? tr(`${k}.outNote`, base.outNote) : undefined,
+  };
+}
+
 function Marker({ n, label, active, onPick }: { n: number; label: string; active: boolean; onPick: () => void }) {
   return (
     <Pressable
       onPress={onPick}
       hitSlop={6}
       accessibilityRole="button"
-      accessibilityLabel={`${n}, ${label}`}
+      accessibilityLabel={i18n.t("tour.ui.marker", { n, label })}
       accessibilityState={{ selected: active }}
       style={[styles.marker, active ? styles.markerActive : styles.markerIdle]}
     >
@@ -280,7 +321,8 @@ function ActionPill({ action }: { action: TourAction }) {
 export function ReadWatchTour({ defaultPlatform = "youtube" }: { defaultPlatform?: Platform }) {
   const [platform, setPlatform] = useState<Platform>(defaultPlatform);
   const [spot, setSpot] = useState(0);
-  const tour = TOURS[platform];
+  const { t } = useTranslation();
+  const tour = localTour(platform, TOURS[platform]);
 
   const pickPlatform = (p: Platform) => {
     setPlatform(p);
@@ -354,14 +396,14 @@ export function ReadWatchTour({ defaultPlatform = "youtube" }: { defaultPlatform
         <View style={[zoneStyle(1), styles.zoneWithMarker]}>
           {platform === "youtube" ? (
             <View style={{ gap: 6 }}>
-              <Text style={styles.summaryLabel}>FROM THE TRANSCRIPT</Text>
+              <Text style={styles.summaryLabel}>{t("tour.ui.fromTranscript")}</Text>
               <View style={styles.momentRow}>
                 <Text style={styles.moment}>4:10</Text>
-                <Text style={styles.postBody}>When small-cap loans reset</Text>
+                <Text style={styles.postBody}>{t("tour.ui.moment1")}</Text>
               </View>
               <View style={styles.momentRow}>
                 <Text style={styles.moment}>11:32</Text>
-                <Text style={styles.postBody}>What would change his view</Text>
+                <Text style={styles.postBody}>{t("tour.ui.moment2")}</Text>
               </View>
             </View>
           ) : (
@@ -378,9 +420,9 @@ export function ReadWatchTour({ defaultPlatform = "youtube" }: { defaultPlatform
         <View style={[zoneStyle(2), styles.zoneWithMarker]}>
           {platform === "youtube" ? (
             <View style={styles.pillRow}>
-              <ActionPill action={{ icon: CheckCircle2, label: "Seen" }} />
-              <ActionPill action={{ icon: Clock, label: "Later" }} />
-              <ActionPill action={{ icon: Heart, label: "Liked" }} />
+              <ActionPill action={{ icon: CheckCircle2, label: t("itemStatus.watched") }} />
+              <ActionPill action={{ icon: Clock, label: t("itemStatus.watch_later") }} />
+              <ActionPill action={{ icon: Heart, label: t("itemStatus.liked") }} />
             </View>
           ) : (
             <View style={styles.pillRow}>
@@ -405,7 +447,7 @@ export function ReadWatchTour({ defaultPlatform = "youtube" }: { defaultPlatform
           const active = spot === i;
           return (
             <Pressable
-              key={s.title}
+              key={i}
               onPress={() => setSpot(i)}
               accessibilityRole="button"
               accessibilityState={{ selected: active }}
