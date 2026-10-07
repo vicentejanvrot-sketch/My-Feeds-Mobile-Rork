@@ -19,6 +19,8 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Image } from "expo-image";
 import { formatDistanceToNow } from "date-fns";
+import { Trans, useTranslation } from "react-i18next";
+import { dateLocale } from "@/lib/i18n";
 import {
   ArrowLeft,
   Check,
@@ -48,6 +50,7 @@ import {
   isPersonSource,
   personSummary,
   sameNameAs,
+  evidenceText,
   type FoundAccount,
   type Person,
 } from "@/lib/alsoOn";
@@ -155,6 +158,7 @@ function FollowButton({ account, agentId }: { account: FoundAccount; agentId: st
 function FollowSourceButton({ account, agentId }: { account: FoundAccount; agentId: string | undefined }) {
   const follow = useFollowAccount();
   const showToast = useToast();
+  const { t } = useTranslation();
   const youtube = useYouTubeConnection();
   const { data: connections = [] } = useConnections();
   const platform = account.platform;
@@ -175,34 +179,34 @@ function FollowSourceButton({ account, agentId }: { account: FoundAccount; agent
                 youtube
                   .subscribe(account.url)
                   .then((result) =>
-                    showToast(result === "already" ? "Added. You were already subscribed on YouTube" : "Added and subscribed on YouTube", "success"),
+                    showToast(result === "already" ? t("people.toast.addedAlreadySubscribed") : t("people.toast.addedSubscribed"), "success"),
                   )
-                  .catch(() => showToast("Added, but couldn't subscribe on YouTube", "error"));
+                  .catch(() => showToast(t("people.toast.subscribeFailed"), "error"));
                 return;
               }
               if (connectProvider && providerConnected) {
                 followOnPlatform(connectProvider, account.url)
                   .then(({ already }) =>
-                    showToast(already ? `Added. You already follow them on ${label}` : `Added and following on ${label}`, "success"),
+                    showToast(already ? t("people.toast.addedAlreadyFollow", { platform: label }) : t("people.toast.addedFollowing", { platform: label }), "success"),
                   )
-                  .catch((e) => showToast(`Added, but couldn't follow on ${label}: ${e instanceof Error ? e.message : "try again"}`, "error"));
+                  .catch((e) => showToast(t("people.toast.followFailed", { platform: label, message: e instanceof Error ? e.message : t("people.tryAgain") }), "error"));
                 return;
               }
-              showToast("Added to your collection", "success");
+              showToast(t("people.toast.added"), "success");
             },
-            onError: (e) => showToast(e instanceof Error ? e.message : "Couldn't add that account", "error"),
+            onError: (e) => showToast(e instanceof Error ? e.message : t("errors.addAccountFailed"), "error"),
           },
         );
       }}
       style={({ pressed }) => [styles.followBtn, (pressed || follow.isPending) && styles.pressed]}
-      accessibilityLabel={youtubeConnected || providerConnected ? `Add and follow on ${label}` : "Add to your collection"}
+      accessibilityLabel={youtubeConnected || providerConnected ? t("people.addAndFollow", { platform: label }) : t("people.addOnly")}
     >
       {follow.isPending ? (
         <ActivityIndicator size="small" color={Colors.white} />
       ) : (
         <>
           <UserPlus size={14} color={Colors.white} />
-          <Text style={styles.followText}>Add</Text>
+          <Text style={styles.followText}>{t("common.add")}</Text>
         </>
       )}
     </Pressable>
@@ -212,12 +216,13 @@ function FollowSourceButton({ account, agentId }: { account: FoundAccount; agent
 function DecisionButtons({ account, channelIds }: { account: FoundAccount; channelIds: string[] }) {
   const decide = useDecideLink();
   const showToast = useToast();
+  const { t } = useTranslation();
   const run = (same: boolean) =>
     decide.mutate(
       { link: account.link, same, channelIds },
       {
-        onSuccess: () => showToast(same ? "Marked as the same person" : "Removed that match", "success"),
-        onError: (e) => showToast(e instanceof Error ? e.message : "Couldn't save that", "error"),
+        onSuccess: () => showToast(same ? t("people.toast.markedSame") : t("people.toast.removedMatch"), "success"),
+        onError: (e) => showToast(e instanceof Error ? e.message : t("people.toast.saveFailedPlain"), "error"),
       },
     );
   return (
@@ -228,7 +233,7 @@ function DecisionButtons({ account, channelIds }: { account: FoundAccount; chann
         style={({ pressed }) => [styles.samePersonBtn, pressed && styles.pressed]}
       >
         <Check size={15} color={Colors.white} />
-        <Text style={styles.samePersonText}>Same person</Text>
+        <Text style={styles.samePersonText}>{t("people.samePerson")}</Text>
       </Pressable>
       <Pressable
         disabled={decide.isPending}
@@ -236,7 +241,7 @@ function DecisionButtons({ account, channelIds }: { account: FoundAccount; chann
         style={({ pressed }) => [styles.notThemBtn, pressed && styles.pressed]}
       >
         <X size={15} color={Colors.textPrimary} />
-        <Text style={styles.notThemText}>Not them</Text>
+        <Text style={styles.notThemText}>{t("people.notThem")}</Text>
       </Pressable>
     </View>
   );
@@ -254,6 +259,7 @@ function CombinePicker({ person, people, initialPick, onCancel, onCombined }: {
 }) {
   const merge = useMergePeople();
   const showToast = useToast();
+  const { t } = useTranslation();
   const [query, setQuery] = useState("");
   const [pickId, setPickId] = useState<string | null>(initialPick);
   const twins = new Set(sameNameAs(person, people).map((p) => p.id));
@@ -266,26 +272,24 @@ function CombinePicker({ person, people, initialPick, onCancel, onCombined }: {
 
   return (
     <View style={styles.panel}>
-      <Text style={styles.panelName}>Combine {person.name} with…</Text>
-      <Text style={[styles.muted, styles.combineIntro]}>
-        Pick the card that&apos;s the same person. Their accounts end up together on one card. You can separate them again later.
-      </Text>
+      <Text style={styles.panelName}>{t("people.combineWith", { name: person.name })}</Text>
+      <Text style={[styles.muted, styles.combineIntro]}>{t("people.combineHint")}</Text>
       <View style={styles.searchBox}>
         <Search size={15} color={Colors.textMuted} />
         <TextInput
           value={query}
           onChangeText={setQuery}
-          placeholder="Search people"
+          placeholder={t("people.search")}
           placeholderTextColor={Colors.textMuted}
           style={styles.searchInput}
           autoCorrect={false}
           autoCapitalize="none"
-          accessibilityLabel="Search people"
+          accessibilityLabel={t("people.search")}
         />
       </View>
       <View style={[styles.box, styles.combineList]}>
         {candidates.length === 0 ? (
-          <Text style={[styles.muted, styles.emptyList]}>Nobody matches that search.</Text>
+          <Text style={[styles.muted, styles.emptyList]}>{t("people.noMatch")}</Text>
         ) : (
           candidates.map((p, i) => {
             const active = p.id === pickId;
@@ -306,7 +310,7 @@ function CombinePicker({ person, people, initialPick, onCancel, onCombined }: {
                 <View style={[styles.flex1, styles.gap6]}>
                   <View style={styles.rowTitle}>
                     <Text style={styles.rowName}>{p.name}</Text>
-                    {twins.has(p.id) ? <Text style={styles.sameNameTag}>Same name</Text> : null}
+                    {twins.has(p.id) ? <Text style={styles.sameNameTag}>{t("people.sameName")}</Text> : null}
                   </View>
                   <View style={styles.chipWrap}>
                     {p.following.map((f) => (
@@ -322,7 +326,7 @@ function CombinePicker({ person, people, initialPick, onCancel, onCombined }: {
       </View>
       <View style={[styles.decisionRow, styles.combineActions]}>
         <Pressable onPress={onCancel} style={({ pressed }) => [styles.notThemBtn, pressed && styles.pressed]}>
-          <Text style={styles.notThemText}>Cancel</Text>
+          <Text style={styles.notThemText}>{t("common.cancel")}</Text>
         </Pressable>
         <Pressable
           disabled={!pick || merge.isPending}
@@ -332,17 +336,17 @@ function CombinePicker({ person, people, initialPick, onCancel, onCombined }: {
               { into: person, other: pick },
               {
                 onSuccess: () => {
-                  showToast("Combined with " + pick.name, "success");
+                  showToast(t("people.toast.combined", { name: pick.name }), "success");
                   onCombined();
                 },
-                onError: (e) => showToast("Couldn't combine them: " + (e instanceof Error ? e.message : "try again"), "error"),
+                onError: (e) => showToast(t("people.toast.combineFailed", { message: e instanceof Error ? e.message : t("people.tryAgain") }), "error"),
               },
             );
           }}
           style={({ pressed }) => [styles.samePersonBtn, (!pick || pressed || merge.isPending) && styles.disabled]}
         >
           {merge.isPending ? <ActivityIndicator size="small" color={Colors.white} /> : <Merge size={15} color={Colors.white} />}
-          <Text style={styles.samePersonText}>Combine</Text>
+          <Text style={styles.samePersonText}>{t("people.combine")}</Text>
         </Pressable>
       </View>
     </View>
@@ -362,6 +366,7 @@ function PersonPanel({ person, people, agents, scanning, status, onRescan, onCom
 }) {
   const decide = useDecideLink();
   const showToast = useToast();
+  const { t } = useTranslation();
   const deleteChannel = useDeleteChannel();
   const separate = useSeparatePerson();
   // Picking a card to combine with: null when not combining, "" for no
@@ -374,18 +379,18 @@ function PersonPanel({ person, people, agents, scanning, status, onRescan, onCom
 
   const confirmSeparate = () =>
     Alert.alert(
-      `Separate ${person.name}'s cards?`,
-      "The cards you combined go back to being separate cards. Nothing is removed from your collections.",
+      t("people.separateTitle", { name: person.name }),
+      t("people.separateHint"),
       [
-        { text: "Cancel", style: "cancel" },
+        { text: t("common.cancel"), style: "cancel" },
         {
-          text: "Separate",
+          text: t("people.separate"),
           onPress: () =>
             separate.mutate(
               { person },
               {
-                onSuccess: () => showToast("Separated into their own cards again", "success"),
-                onError: (e) => showToast("Couldn't separate them: " + (e instanceof Error ? e.message : "try again"), "error"),
+                onSuccess: () => showToast(t("people.toast.separated"), "success"),
+                onError: (e) => showToast(t("people.toast.separateFailed", { message: e instanceof Error ? e.message : t("people.tryAgain") }), "error"),
               },
             ),
         },
@@ -399,21 +404,21 @@ function PersonPanel({ person, people, agents, scanning, status, onRescan, onCom
   // Stop following one of their accounts: removes that source from its
   // collection. Posts already in the feed stay.
   const confirmRemove = (a: Person["following"][number]) => {
-    const collection = agentName.get(a.channel.agent_id) ?? "your collection";
+    const collection = agentName.get(a.channel.agent_id) ?? t("people.yourCollection");
     const platformName = platformLabel(a.platform);
     Alert.alert(
-      `Remove ${person.name} on ${platformName}?`,
-      `${a.label} is removed from ${collection}, so new posts from it stop coming in. What's already in your feed stays.` +
-        (person.following.length === 1 ? " This is the only account you follow for them, so they'll leave your People list." : ""),
+      t("people.removeTitleConfirm", { name: person.name, platform: platformName }),
+      t("people.removeBody", { name: a.label, collection }) +
+        (person.following.length === 1 ? " " + t("people.removeLast") : ""),
       [
-        { text: "Cancel", style: "cancel" },
+        { text: t("common.cancel"), style: "cancel" },
         {
-          text: "Remove",
+          text: t("people.remove"),
           style: "destructive",
           onPress: () =>
             deleteChannel.mutate(a.channel.id, {
-              onSuccess: () => showToast(`Removed. You no longer follow them on ${platformName} here.`, "success"),
-              onError: (e) => showToast("Couldn't remove it: " + (e instanceof Error ? e.message : "try again"), "error"),
+              onSuccess: () => showToast(t("people.toast.removed", { platform: platformName }), "success"),
+              onError: (e) => showToast(t("people.toast.removeFailed", { message: e instanceof Error ? e.message : t("people.tryAgain") }), "error"),
             }),
         },
       ],
@@ -449,27 +454,31 @@ function PersonPanel({ person, people, agents, scanning, status, onRescan, onCom
           onPress={startCombine}
           style={({ pressed }) => [styles.outlineBtn, styles.combineBtn, pressed && styles.pressed]}
           accessibilityRole="button"
-          accessibilityLabel="Combine with another card that's the same person"
+          accessibilityLabel={t("people.combineTitle")}
         >
           <Merge size={14} color={Colors.textPrimary} />
-          <Text style={styles.outlineBtnText}>Combine with another card</Text>
+          <Text style={styles.outlineBtnText}>{t("people.combineWithAnother")}</Text>
         </Pressable>
       ) : null}
 
       {twins.length > 0 ? (
         <View style={styles.twinCard}>
           <Text style={styles.question}>
-            {twins.length === 1 ? "Another card is" : twins.length + " other cards are"} also called{" "}
-            <Text style={styles.bold}>{person.name}</Text>. If it&apos;s the same person, combine them so all their accounts are on one card.
+            <Trans
+              i18nKey="people.twins"
+              count={twins.length}
+              values={{ name: person.name }}
+              components={{ b: <Text style={styles.bold} /> }}
+            />
           </Text>
           <Pressable onPress={startCombine} style={({ pressed }) => [styles.samePersonBtn, pressed && styles.pressed]}>
             <Merge size={15} color={Colors.white} />
-            <Text style={styles.samePersonText}>{twins.length === 1 ? "Combine with that card" : "Choose which to combine"}</Text>
+            <Text style={styles.samePersonText}>{twins.length === 1 ? t("people.combineWithThat") : t("people.chooseCombine")}</Text>
           </Pressable>
         </View>
       ) : null}
 
-      <Text style={styles.sectionTitle}>You follow</Text>
+      <Text style={styles.sectionTitle}>{t("people.youFollow")}</Text>
       <View style={styles.box}>
         {person.following.map((a, i) => (
           <View key={a.channel.id} style={[styles.boxRow, i > 0 && styles.boxRowBorder]}>
@@ -478,22 +487,22 @@ function PersonPanel({ person, people, agents, scanning, status, onRescan, onCom
             <View style={[styles.flex1, styles.gap4]}>
               <AccountLine platform={a.platform} label={a.label} url={a.url} />
               <Text style={styles.agentTag}>
-                {"In " + (agentName.get(a.channel.agent_id) ?? "a collection")}
+                {t("people.inCollection", { name: agentName.get(a.channel.agent_id) ?? t("people.aCollection") })}
               </Text>
               {a.channel.is_private ? (
                 <>
                   <View style={styles.privateNote}>
                     <Lock size={11} color={Colors.textMuted} />
-                    <Text style={styles.privateNoteText}>Private account. Its posts aren&apos;t in your feed.</Text>
+                    <Text style={styles.privateNoteText}>{t("people.privateNote")}</Text>
                   </View>
                   <Pressable
                     onPress={() => openPrivateProfile({ url: a.url, name: a.label, platformLabel: PLATFORM_META[a.platform].label })}
                     style={({ pressed }) => [styles.openBtn, pressed && styles.pressed]}
                     accessibilityRole="link"
-                    accessibilityLabel="See their posts"
+                    accessibilityLabel={t("people.seeTheirPosts")}
                   >
                     <ExternalLink size={13} color={Colors.textPrimary} />
-                    <Text style={styles.openBtnText} numberOfLines={1}>See their posts</Text>
+                    <Text style={styles.openBtnText} numberOfLines={1}>{t("people.seeTheirPosts")}</Text>
                   </Pressable>
                 </>
               ) : null}
@@ -504,7 +513,7 @@ function PersonPanel({ person, people, agents, scanning, status, onRescan, onCom
               hitSlop={8}
               style={({ pressed }) => [styles.removeBtn, pressed && styles.pressed]}
               accessibilityRole="button"
-              accessibilityLabel={`Remove ${platformLabel(a.platform)} ${a.label}`}
+              accessibilityLabel={t("people.removeAccount", { platform: platformLabel(a.platform), name: a.label })}
             >
               <Trash2 size={16} color={Colors.textMuted} />
             </Pressable>
@@ -514,19 +523,19 @@ function PersonPanel({ person, people, agents, scanning, status, onRescan, onCom
       {person.merges.length > 0 ? (
         <View style={styles.mergedRow}>
           <Merge size={13} color={Colors.textMuted} />
-          <Text style={[styles.muted, styles.flex1]}>You combined separate cards into this one.</Text>
+          <Text style={[styles.muted, styles.flex1]}>{t("people.combinedNote")}</Text>
           <Pressable onPress={confirmSeparate} disabled={separate.isPending} hitSlop={8}>
-            <Text style={styles.removeLink}>Separate them</Text>
+            <Text style={styles.removeLink}>{t("people.separateThem")}</Text>
           </Pressable>
         </View>
       ) : null}
 
       {person.also.length > 0 ? (
         <>
-          <Text style={styles.sectionTitle}>Also on</Text>
+          <Text style={styles.sectionTitle}>{t("people.alsoOn")}</Text>
           {agents.length > 1 ? (
             <View style={styles.agentPicker}>
-              <Text style={styles.muted}>Add to</Text>
+              <Text style={styles.muted}>{t("people.addTo")}</Text>
               <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.agentChips}>
                 {agents.map((a) => {
                   const active = a.id === agentId;
@@ -550,21 +559,21 @@ function PersonPanel({ person, people, agents, scanning, status, onRescan, onCom
                   <AccountLine platform={a.platform} label={a.label} url={a.url} />
                   <View style={styles.evidenceRow}>
                     <Link2 size={12} color={Colors.success} />
-                    <Text style={styles.evidence}>{a.link.evidence}</Text>
+                    <Text style={styles.evidence}>{evidenceText(a.link.evidence)}</Text>
                   </View>
                   <Pressable
                     onPress={() =>
                       decide.mutate(
                         { link: a.link, same: false, channelIds: person.sources.map((c) => c.id) },
                         {
-                          onSuccess: () => showToast("Removed that match", "success"),
-                          onError: (e) => showToast(e instanceof Error ? e.message : "Couldn't save that", "error"),
+                          onSuccess: () => showToast(t("people.toast.removedMatch"), "success"),
+                          onError: (e) => showToast(e instanceof Error ? e.message : t("people.toast.saveFailedPlain"), "error"),
                         },
                       )
                     }
                     hitSlop={6}
                   >
-                    <Text style={styles.removeMatchLink}>Not them? Remove this match</Text>
+                    <Text style={styles.removeMatchLink}>{t("people.notThemRemove")}</Text>
                   </Pressable>
                 </View>
                 <View style={styles.suggestionActions}>
@@ -575,8 +584,8 @@ function PersonPanel({ person, people, agents, scanning, status, onRescan, onCom
                       decide.mutate(
                         { link: a.link, same: false, channelIds: person.sources.map((c) => c.id) },
                         {
-                          onSuccess: () => showToast("Suggestion deleted", "success"),
-                          onError: (e) => showToast(e instanceof Error ? e.message : "Couldn't delete it", "error"),
+                          onSuccess: () => showToast(t("people.toast.suggestionDeleted"), "success"),
+                          onError: (e) => showToast(e instanceof Error ? e.message : t("people.toast.deleteFailed"), "error"),
                         },
                       )
                     }
@@ -590,14 +599,14 @@ function PersonPanel({ person, people, agents, scanning, status, onRescan, onCom
 
       {person.possible.length > 0 ? (
         <>
-          <Text style={styles.sectionTitle}>Possible match</Text>
+          <Text style={styles.sectionTitle}>{t("people.possibleMatch")}</Text>
           {person.possible.map((a) => (
             <View key={a.key} style={styles.possibleCard}>
               <AccountLine platform={a.platform} label={a.label} url={a.url} />
               {a.link.display_name ? (
-                <Text style={styles.muted}>Name on that profile: {a.link.display_name}</Text>
+                <Text style={styles.muted}>{t("people.nameOnProfile", { name: a.link.display_name })}</Text>
               ) : null}
-              <Text style={styles.warningText}>{a.link.evidence}</Text>
+              <Text style={styles.warningText}>{evidenceText(a.link.evidence)}</Text>
               <DecisionButtons account={a} channelIds={person.sources.map((c) => c.id)} />
             </View>
           ))}
@@ -606,7 +615,7 @@ function PersonPanel({ person, people, agents, scanning, status, onRescan, onCom
 
       {person.lastScannedAt && person.also.length === 0 && person.possible.length === 0 ? (
         <Text style={[styles.muted, styles.noneFound]}>
-          No other accounts found. Their profile doesn't link anywhere we can follow, and no handle or name like theirs turned up on X, Instagram, YouTube, LinkedIn or Reddit.
+          {t("people.noneFound")}
         </Text>
       ) : null}
 
@@ -614,8 +623,8 @@ function PersonPanel({ person, people, agents, scanning, status, onRescan, onCom
         <View style={styles.footerRow}>
           <Text style={styles.muted}>
             {person.lastScannedAt
-              ? "Last searched " + formatDistanceToNow(new Date(person.lastScannedAt), { addSuffix: true })
-              : "Not searched yet"}
+              ? t("people.lastSearched", { when: formatDistanceToNow(new Date(person.lastScannedAt), { addSuffix: true, locale: dateLocale() }) })
+              : t("people.notSearched")}
           </Text>
           <Pressable
             disabled={scanning}
@@ -623,15 +632,15 @@ function PersonPanel({ person, people, agents, scanning, status, onRescan, onCom
             style={({ pressed }) => [styles.outlineBtn, (pressed || scanning) && styles.pressed]}
           >
             {scanning ? <ActivityIndicator size="small" color={Colors.accent} /> : <RefreshCw size={14} color={Colors.textPrimary} />}
-            <Text style={styles.outlineBtnText}>{person.lastScannedAt ? "Find more accounts" : "Find accounts"}</Text>
+            <Text style={styles.outlineBtnText}>{person.lastScannedAt ? t("people.findMore") : t("people.findAccounts")}</Text>
           </Pressable>
         </View>
         {scanning && status ? <Text style={styles.muted}>{status}</Text> : null}
         {person.scanErrors.length > 0 ? (
-          <Text style={styles.warningText}>Last check had a problem: {person.scanErrors[0]}</Text>
+          <Text style={styles.warningText}>{t("people.lastProblem", { error: person.scanErrors[0] })}</Text>
         ) : null}
         <Text style={styles.footNote}>
-          Matches come from links on their own profiles, their link-in-bio page and website, and handles like theirs on other platforms. A handle alone is only ever a possible match.
+          {t("people.howMatches")}
         </Text>
       </View>
     </View>
@@ -668,16 +677,17 @@ function PersonRow({ person, agentNames, onPress }: { person: Person; agentNames
 // Removes a suggested account: same as "Not them", so a later search won't
 // suggest it again.
 function DeleteSuggestionButton({ onPress, disabled }: { onPress: () => void; disabled?: boolean }) {
+  const { t } = useTranslation();
   return (
     <Pressable
       onPress={onPress}
       disabled={disabled}
       style={({ pressed }) => [styles.deleteSuggestionBtn, (pressed || disabled) && styles.pressed]}
       accessibilityRole="button"
-      accessibilityLabel="Delete this suggestion"
+      accessibilityLabel={t("people.deleteSuggestion")}
     >
       <Trash2 size={14} color={Colors.white} />
-      <Text style={styles.deleteSuggestionText}>Delete</Text>
+      <Text style={styles.deleteSuggestionText}>{t("common.delete")}</Text>
     </Pressable>
   );
 }
@@ -689,6 +699,7 @@ function GapsView({ people, agents, onOpen }: {
 }) {
   const decide = useDecideLink();
   const showToast = useToast();
+  const { t } = useTranslation();
   const agentName = new Map(agents.map((a) => [a.id, a.name]));
   const withGaps = people.filter((p) => p.also.length > 0);
   const checks = people.flatMap((p) => p.possible.map((a) => ({ person: p, account: a })));
@@ -696,7 +707,7 @@ function GapsView({ people, agents, onOpen }: {
   if (withGaps.length === 0 && checks.length === 0) {
     return (
       <View style={styles.emptyCard}>
-        <Text style={styles.muted}>No gaps. You follow everyone everywhere we found them.</Text>
+        <Text style={styles.muted}>{t("people.noGaps")}</Text>
       </View>
     );
   }
@@ -704,7 +715,7 @@ function GapsView({ people, agents, onOpen }: {
   return (
     <View style={styles.gap12}>
       {withGaps.length > 0 ? (
-        <Text style={styles.muted}>People you follow who are also somewhere you don't follow them yet.</Text>
+        <Text style={styles.muted}>{t("people.gapsIntro")}</Text>
       ) : null}
       {withGaps.map((p) => (
         <View key={p.id} style={styles.card}>
@@ -713,8 +724,8 @@ function GapsView({ people, agents, onOpen }: {
             <View style={styles.flex1}>
               <Text style={styles.rowName}>{p.name}</Text>
               <Text style={styles.muted}>
-                {"You follow on " + p.following.map((f) => platformLabel(f.platform)).join(" and ") +
-                  " · adds to " + (agentName.get(p.agentIds[0]) ?? "agent")}
+                {t("people.followOn", { platforms: p.following.map((f) => platformLabel(f.platform)).join(t("people.and")) }) +
+                  " · " + t("people.addsTo", { name: agentName.get(p.agentIds[0]) ?? t("people.aCollection") })}
               </Text>
             </View>
           </Pressable>
@@ -722,7 +733,7 @@ function GapsView({ people, agents, onOpen }: {
             <View key={a.key} style={[styles.boxRow, styles.boxRowStacked, styles.boxRowBorder]}>
               <View style={styles.gap4}>
                 <AccountLine platform={a.platform} label={a.label} url={a.url} />
-                <Text style={styles.muted}>{a.link.evidence}</Text>
+                <Text style={styles.muted}>{evidenceText(a.link.evidence)}</Text>
               </View>
               <View style={styles.suggestionActions}>
                 <FollowButton account={a} agentId={p.agentIds[0]} />
@@ -732,8 +743,8 @@ function GapsView({ people, agents, onOpen }: {
                     decide.mutate(
                       { link: a.link, same: false, channelIds: p.sources.map((c) => c.id) },
                       {
-                        onSuccess: () => showToast("Suggestion deleted", "success"),
-                        onError: (e) => showToast(e instanceof Error ? e.message : "Couldn't delete it", "error"),
+                        onSuccess: () => showToast(t("people.toast.suggestionDeleted"), "success"),
+                        onError: (e) => showToast(e instanceof Error ? e.message : t("people.toast.deleteFailed"), "error"),
                       },
                     )
                   }
@@ -746,17 +757,17 @@ function GapsView({ people, agents, onOpen }: {
 
       {checks.length > 0 ? (
         <>
-          <Text style={styles.sectionTitle}>Needs your check</Text>
+          <Text style={styles.sectionTitle}>{t("people.needsCheck")}</Text>
           {checks.map(({ person, account }) => (
             <View key={person.id + account.key} style={styles.possibleCard}>
               <Text style={styles.question}>
-                {"Is " + account.label + " on " + platformLabel(account.platform) + " the same " + person.name + " you follow?"}
+                {t("people.isSame", { account: account.label, platform: platformLabel(account.platform), name: person.name })}
               </Text>
               <AccountLine platform={account.platform} label={account.label} url={account.url} />
               {account.link.display_name ? (
-                <Text style={styles.muted}>Name on that profile: {account.link.display_name}</Text>
+                <Text style={styles.muted}>{t("people.nameOnProfile", { name: account.link.display_name })}</Text>
               ) : null}
-              <Text style={styles.warningText}>{account.link.evidence}</Text>
+              <Text style={styles.warningText}>{evidenceText(account.link.evidence)}</Text>
               <DecisionButtons account={account} channelIds={person.sources.map((c) => c.id)} />
             </View>
           ))}
@@ -772,6 +783,7 @@ export default function FollowingScreen() {
   const { width } = useWindowDimensions();
   const isWide = width >= IPAD_BREAKPOINT;
   const showToast = useToast();
+  const { t } = useTranslation();
 
   const sources = useChannelsAll();
   const links = useIdentityLinks();
@@ -842,15 +854,17 @@ export default function FollowingScreen() {
       const result = await scan(jobs);
       if (!result) return;
       if (result.failed) {
-        showToast(result.failed + " of " + result.total + " couldn't be checked. " + (result.firstError ?? ""), "error");
+        showToast(t("people.toast.someFailed", { failed: result.failed, count: result.total, error: result.firstError ?? "" }).trim(), "error");
       } else {
         showToast(
-          result.total === 1 && jobs[0] ? "Searched other platforms for " + jobs[0].name : "Searched other platforms for " + result.total + " people",
+          result.total === 1 && jobs[0]
+            ? t("people.toast.searchedOne", { name: jobs[0].name })
+            : t("people.toast.searchedMany", { count: result.total }),
           "success",
         );
       }
     },
-    [scan, showToast],
+    [scan, showToast, t],
   );
 
   const refreshing = sources.isRefetching || links.isRefetching || scans.isRefetching;
@@ -875,39 +889,39 @@ export default function FollowingScreen() {
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={Colors.accent} />}
       >
         <View style={styles.header}>
-          <Pressable onPress={() => router.back()} hitSlop={8} style={styles.backBtn} accessibilityLabel="Back">
+          <Pressable onPress={() => router.back()} hitSlop={8} style={styles.backBtn} accessibilityLabel={t("common.back")}>
             <ArrowLeft size={20} color={Colors.textSecondary} />
           </Pressable>
-          <Text style={styles.heading}>People</Text>
+          <Text style={styles.heading}>{t("dashboard.people")}</Text>
           <Pressable
             onPress={() => router.push("/share")}
             style={({ pressed }) => [styles.addLinkBtn, pressed && styles.pressed]}
-            accessibilityLabel="Add from link"
+            accessibilityLabel={t("people.addFromLink")}
           >
             <Link2 size={15} color={Colors.textPrimary} />
-            <Text style={styles.addLinkText}>Add from link</Text>
+            <Text style={styles.addLinkText}>{t("people.addFromLink")}</Text>
           </Pressable>
           {isScanning || (!loading && toScan.length > 0) ? (
             <Pressable
               disabled={isScanning}
               onPress={() => void runScan(toScan)}
               style={({ pressed }) => [styles.scanBtn, (pressed || isScanning) && styles.pressed]}
-              accessibilityLabel={isScanning ? "Searching" : "Find more accounts for " + toScan.length + (toScan.length === 1 ? " person" : " people")}
+              accessibilityLabel={isScanning ? t("people.searching") : t("people.findMoreFor", { count: toScan.length })}
             >
               {isScanning ? <ActivityIndicator size="small" color={Colors.white} /> : <ScanSearch size={15} color={Colors.white} />}
-              <Text style={styles.scanText}>{isScanning ? "Searching" : "Find more (" + toScan.length + ")"}</Text>
+              <Text style={styles.scanText}>{isScanning ? t("people.searching") : t("people.findMoreCount", { count: toScan.length })}</Text>
             </Pressable>
           ) : null}
         </View>
-        <Text style={[styles.muted, styles.subtitle]}>Everyone you follow across your collections, and where else they are.</Text>
+        <Text style={[styles.muted, styles.subtitle]}>{t("people.intro")}</Text>
 
         <View style={styles.controlsRow}>
           <View style={styles.segment}>
             <Pressable onPress={() => setTab("all")} style={[styles.segmentBtn, tab === "all" && styles.segmentBtnActive]}>
-              <Text style={[styles.segmentText, tab === "all" && styles.segmentTextActive]} numberOfLines={1}>Everyone</Text>
+              <Text style={[styles.segmentText, tab === "all" && styles.segmentTextActive]} numberOfLines={1}>{t("people.everyone")}</Text>
             </Pressable>
             <Pressable onPress={() => setTab("gaps")} style={[styles.segmentBtn, tab === "gaps" && styles.segmentBtnActive]}>
-              <Text style={[styles.segmentText, tab === "gaps" && styles.segmentTextActive]} numberOfLines={1}>{"Gaps · " + gapCount}</Text>
+              <Text style={[styles.segmentText, tab === "gaps" && styles.segmentTextActive]} numberOfLines={1}>{t("people.gaps", { count: gapCount })}</Text>
             </Pressable>
           </View>
 
@@ -916,15 +930,15 @@ export default function FollowingScreen() {
             <TextInput
               value={query}
               onChangeText={setQuery}
-              placeholder="Search people"
+              placeholder={t("people.search")}
               placeholderTextColor={Colors.textMuted}
               style={styles.searchInput}
               autoCapitalize="none"
               autoCorrect={false}
-              accessibilityLabel="Search people"
+              accessibilityLabel={t("people.search")}
             />
             {query ? (
-              <Pressable onPress={() => setQuery("")} hitSlop={8} accessibilityLabel="Clear search">
+              <Pressable onPress={() => setQuery("")} hitSlop={8} accessibilityLabel={t("people.clearSearch")}>
                 <X size={15} color={Colors.textMuted} />
               </Pressable>
             ) : null}
@@ -939,7 +953,7 @@ export default function FollowingScreen() {
             style={styles.agentFilter}
             contentContainerStyle={styles.agentChips}
           >
-            {[{ id: "all", name: "All collections" }, ...agents].map((a) => {
+            {[{ id: "all", name: t("feed.allCollections") }, ...agents].map((a) => {
               const active = a.id === agentFilter;
               return (
                 <Pressable
@@ -962,27 +976,26 @@ export default function FollowingScreen() {
               <View style={[styles.progressFill, { width: ((progress.done / progress.total) * 100 + "%") as unknown as number }]} />
             </View>
             <Text style={styles.muted}>
-              {scanStatus(progress) + (progress.failed ? " · " + progress.failed + " couldn't be searched" : "")}
+              {scanStatus(progress) + (progress.failed ? " · " + t("people.failedCount", { count: progress.failed }) : "")}
             </Text>
           </View>
         ) : null}
 
         {loadError ? (
           <View style={styles.errorCard}>
-            <Text style={styles.errorText}>Couldn't load this screen: {loadError.message}</Text>
+            <Text style={styles.errorText}>{t("people.loadFailed", { message: loadError.message })}</Text>
           </View>
         ) : null}
 
         {!loading && scanList.length === 0 && people.length > 0 && !isScanning ? (
           <View style={styles.introCard}>
-            <Text style={styles.introTitle}>Find where the people you follow also post</Text>
+            <Text style={styles.introTitle}>{t("people.firstScanTitle")}</Text>
             <Text style={styles.muted}>
-              {"Checks each of your " + people.length + " people and companies once: the links on their profile, their link-in-bio page and website, and handles like theirs on other platforms. Each person is searched once, across all the places you follow them, using at most " +
-                MAX_LOOKUPS_PER_PERSON + " to 30 AIsa lookups, so up to about $" + maxCost + " for this first check."}
+              {t("people.firstScanBody", { count: people.length, min: MAX_LOOKUPS_PER_PERSON, max: 30, cost: "$" + maxCost })}
             </Text>
             <Pressable onPress={() => void runScan(toScan)} style={({ pressed }) => [styles.introBtn, pressed && styles.pressed]}>
               <ScanSearch size={16} color={Colors.white} />
-              <Text style={styles.scanText}>{"Check " + toScan.length + (toScan.length === 1 ? " person" : " people")}</Text>
+              <Text style={styles.scanText}>{t("people.checkCount", { count: toScan.length })}</Text>
             </Pressable>
           </View>
         ) : null}
@@ -996,21 +1009,21 @@ export default function FollowingScreen() {
             <View style={styles.legend}>
               <View style={styles.legendItem}>
                 <View style={[styles.legendDot, styles.chipFollowing]} />
-                <Text style={styles.legendText}>You follow</Text>
+                <Text style={styles.legendText}>{t("people.youFollow")}</Text>
               </View>
               <View style={styles.legendItem}>
                 <View style={[styles.legendDot, styles.chipAlso]} />
-                <Text style={styles.legendText}>Also there</Text>
+                <Text style={styles.legendText}>{t("people.alsoThere")}</Text>
               </View>
               <View style={styles.legendItem}>
                 <View style={[styles.legendDot, styles.chipPossible]} />
-                <Text style={styles.legendText}>Possible match</Text>
+                <Text style={styles.legendText}>{t("people.possibleMatch")}</Text>
               </View>
             </View>
             <View style={styles.listCard}>
               {filtered.length === 0 ? (
                 <Text style={[styles.muted, styles.emptyList]}>
-                  {people.length === 0 ? "No people or companies in your collections yet." : "Nobody matches that search."}
+                  {people.length === 0 ? t("people.emptyAll") : t("people.noMatch")}
                 </Text>
               ) : (
                 filtered.map((p) => (
@@ -1025,7 +1038,7 @@ export default function FollowingScreen() {
             </View>
             {skipped > 0 ? (
               <Text style={[styles.muted, styles.skippedNote]}>
-                {skipped + (skipped === 1 ? " subreddit isn't" : " subreddits aren't") + " listed here, since they aren't people or companies."}
+                {t("people.subredditsSkipped", { count: skipped })}
               </Text>
             ) : null}
           </>
@@ -1041,14 +1054,14 @@ export default function FollowingScreen() {
         onRequestClose={() => openPerson(null)}
       >
         <View style={styles.sheetBackdrop}>
-          <Pressable style={styles.flex1} onPress={() => openPerson(null)} accessibilityLabel="Close" />
+          <Pressable style={styles.flex1} onPress={() => openPerson(null)} accessibilityLabel={t("common.close")} />
           <View style={[styles.sheet, isWide && styles.sheetWide, { paddingBottom: insets.bottom + 16 }]}>
             {/* The content stops above the home indicator with the same gap as
                 the sides and is clipped with rounded corners there, so the
                 phone's rounded corners never cut through buttons or text. */}
             <View style={styles.sheetTop}>
               <View style={styles.grabber} />
-              <Pressable onPress={() => openPerson(null)} hitSlop={10} style={styles.sheetClose} accessibilityLabel="Close">
+              <Pressable onPress={() => openPerson(null)} hitSlop={10} style={styles.sheetClose} accessibilityLabel={t("common.close")}>
                 <X size={20} color={Colors.textSecondary} />
               </Pressable>
             </View>

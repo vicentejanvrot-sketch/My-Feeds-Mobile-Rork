@@ -118,11 +118,15 @@ export function useScanSources() {
 export function scanStatus(progress: ScanProgress): string {
   const names = progress.current;
   const now = names.length === 0
-    ? "Finishing…"
+    ? i18n.t("people.scan.finishing")
     : names.length === 1
-    ? "Checking " + names[0] + "…"
-    : "Checking " + names.slice(0, -1).join(", ") + " and " + names[names.length - 1] + "…";
-  return progress.total > 1 ? now + " · " + progress.done + " of " + progress.total + " people done" : now;
+    ? i18n.t("people.scan.checking", { names: names[0] })
+    : i18n.t("people.scan.checking", {
+        names: i18n.t("people.scan.andList", { first: names.slice(0, -1).join(", "), last: names[names.length - 1] }),
+      });
+  return progress.total > 1
+    ? now + " · " + i18n.t("people.scan.done", { done: progress.done, count: progress.total })
+    : now;
 }
 
 // "Same person" / "Not them". channelIds are all the sources of this person

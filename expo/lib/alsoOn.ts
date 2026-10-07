@@ -6,6 +6,7 @@
 
 import type { Channel } from "@/lib/database";
 import { platformOf, type Platform } from "@/lib/platforms";
+import i18n from "@/lib/i18n";
 
 export type LinkStatus = "confirmed" | "possible" | "rejected";
 
@@ -207,6 +208,18 @@ function linkKeys(link: IdentityLink): string[] {
   return fromUrl && fromUrl !== link.match_key ? [link.match_key, fromUrl] : [link.match_key];
 }
 
+// Match notes the app itself saves (in English, in the database) shown in the
+// active language. Notes written by the server pass through as they are.
+const OWN_EVIDENCE = {
+  "You confirmed this match.": "people.evidence.confirmed",
+  "You combined these cards.": "people.evidence.combined",
+} as const;
+export function evidenceText(evidence: string | null | undefined): string {
+  if (!evidence) return "";
+  const key = OWN_EVIDENCE[evidence as keyof typeof OWN_EVIDENCE];
+  return key ? i18n.t(key) : evidence;
+}
+
 // "Lena Ortiz (@lenabuilds)" -> "Lena Ortiz"
 export function cleanName(name: string | null | undefined, fallback: string): string {
   const n = (name ?? "").replace(/\s*\(@[^)]*\)\s*$/, "").trim();
@@ -214,15 +227,15 @@ export function cleanName(name: string | null | undefined, fallback: string): st
 }
 
 export function accountLabel(platform: Platform, handle: string | null, url: string): string {
-  if (platform === "apple_music") return "Artist page";
-  if (platform === "apple_podcasts") return "Show";
-  if (platform === "apple_books") return "Author";
-  if (platform === "youtube_music") return "Artist";
-  if (platform === "spotify") return /\/show\//.test(url) ? "Show" : "Artist";
+  if (platform === "apple_music") return i18n.t("people.labels.artistPage");
+  if (platform === "apple_podcasts") return i18n.t("people.labels.show");
+  if (platform === "apple_books") return i18n.t("people.labels.author");
+  if (platform === "youtube_music") return i18n.t("people.labels.artist");
+  if (platform === "spotify") return /\/show\//.test(url) ? i18n.t("people.labels.show") : i18n.t("people.labels.artist");
   if (!handle || platform === "facebook") return url.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "");
   if (platform === "x" || platform === "instagram" || platform === "tiktok") return "@" + handle;
   if (platform === "reddit") return "u/" + handle.replace(/^\/?u(ser)?\//i, "");
-  if (platform === "youtube") return /^UC[A-Za-z0-9_-]{10,}$/.test(handle) ? "Channel" : "@" + handle;
+  if (platform === "youtube") return /^UC[A-Za-z0-9_-]{10,}$/.test(handle) ? i18n.t("people.labels.channel") : "@" + handle;
   return handle;
 }
 
@@ -233,7 +246,7 @@ function sourceLabel(ch: Channel): string {
   if (m) return "@" + m[1];
   if ((platform === "linkedin" || platform === "github") && ch.handle) return ch.handle;
   if (platform === "reddit" && ch.handle) return "u/" + ch.handle.replace(/^\/?u(ser)?\//i, "");
-  return cleanName(ch.channel_name, ch.channel_url ?? "Source");
+  return cleanName(ch.channel_name, ch.channel_url ?? i18n.t("agentDetail.source"));
 }
 
 export function buildPeople(channels: Channel[], links: IdentityLink[], scans: IdentityScan[]): Person[] {
@@ -383,10 +396,10 @@ export function initials(name: string): string {
 export function personSummary(p: Person, platformLabel: (p: Platform) => string): string {
   const total = p.following.length + p.also.length;
   const parts: string[] = [];
-  if (!p.lastScannedAt) parts.push("Not searched yet");
-  else if (total === 1) parts.push("Only on " + platformLabel(p.following[0].platform));
-  else parts.push("On " + total + " platforms");
-  if (p.also.length) parts.push(p.also.length + " you don't follow");
-  if (p.possible.length) parts.push(p.possible.length + " to check");
+  if (!p.lastScannedAt) parts.push(i18n.t("people.notSearched"));
+  else if (total === 1) parts.push(i18n.t("people.onlyOn", { platform: platformLabel(p.following[0].platform) }));
+  else parts.push(i18n.t("people.onPlatforms", { count: total }));
+  if (p.also.length) parts.push(i18n.t("people.notFollowed", { count: p.also.length }));
+  if (p.possible.length) parts.push(i18n.t("people.toCheck", { count: p.possible.length }));
   return parts.join(" · ");
 }
