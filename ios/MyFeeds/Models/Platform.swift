@@ -127,73 +127,73 @@ extension SourcePlatform {
 
     var sourceNoun: String {
         switch self {
-        case .youtube: return "Channel"
-        case .x: return "Account"
-        case .reddit: return "Subreddit or user"
-        case .instagram: return "Account"
-        case .linkedin: return "Profile or company"
-        case .github: return "User or organization"
-        case .tiktok: return "Account"
-        case .facebook: return "Page"
-        case .appleMusic: return "Artist"
-        case .applePodcasts: return "Show"
-        case .appleBooks: return "Author"
-        case .youtubeMusic: return "Artist"
-        case .spotify: return "Artist"
+        case .youtube: return String(localized: "Channel")
+        case .x: return String(localized: "Account")
+        case .reddit: return String(localized: "Subreddit or user")
+        case .instagram: return String(localized: "Account")
+        case .linkedin: return String(localized: "Profile or company")
+        case .github: return String(localized: "User or organization")
+        case .tiktok: return String(localized: "Account")
+        case .facebook: return String(localized: "Page")
+        case .appleMusic: return String(localized: "Artist")
+        case .applePodcasts: return String(localized: "Show")
+        case .appleBooks: return String(localized: "Author")
+        case .youtubeMusic: return String(localized: "Artist")
+        case .spotify: return String(localized: "Artist")
         }
     }
 
     var addPlaceholder: String {
         switch self {
         case .youtube: return "https://www.youtube.com/@ChannelName"
-        case .x: return "@handle or https://x.com/handle"
-        case .reddit: return "r/subreddit, u/username or a reddit.com link"
-        case .instagram: return "@handle or https://www.instagram.com/handle"
+        case .x: return String(localized: "@handle or https://x.com/handle")
+        case .reddit: return String(localized: "r/subreddit, u/username or a reddit.com link")
+        case .instagram: return String(localized: "@handle or https://www.instagram.com/handle")
         case .linkedin: return "https://www.linkedin.com/in/name or /company/name"
-        case .github: return "@username or https://github.com/username"
-        case .tiktok: return "@username or https://www.tiktok.com/@username"
+        case .github: return String(localized: "@username or https://github.com/username")
+        case .tiktok: return String(localized: "@username or https://www.tiktok.com/@username")
         case .facebook: return "https://www.facebook.com/PageName"
-        case .appleMusic: return "Artist name or https://music.apple.com/us/artist/name/123"
-        case .applePodcasts: return "Show name or https://podcasts.apple.com/us/podcast/name/id123"
-        case .appleBooks: return "Author name or https://books.apple.com/us/author/name/id123"
-        case .youtubeMusic: return "Artist name or https://music.youtube.com/channel/UC..."
+        case .appleMusic: return String(localized: "Artist name or https://music.apple.com/us/artist/name/123")
+        case .applePodcasts: return String(localized: "Show name or https://podcasts.apple.com/us/podcast/name/id123")
+        case .appleBooks: return String(localized: "Author name or https://books.apple.com/us/author/name/id123")
+        case .youtubeMusic: return String(localized: "Artist name or https://music.youtube.com/channel/UC...")
         case .spotify: return "https://open.spotify.com/artist/..."
         }
     }
 
     var addHelp: String {
         switch self {
-        case .youtube: return "Paste the channel link."
-        case .x: return "Original posts only. Reposts and replies are skipped."
-        case .reddit: return "Top posts from a subreddit, or a user's own posts, from the lookback window."
-        case .instagram: return "Public accounts only. Posts and reels from the lookback window."
-        case .linkedin: return "Paste a person's profile link or a company page link."
-        case .github: return "New repositories and releases from the lookback window."
-        case .tiktok: return "Public accounts only. Videos from the lookback window."
-        case .facebook: return "Public Pages only. Posts from the lookback window."
-        case .appleMusic: return "New singles and albums. Adding an artist also brings in their latest album."
-        case .applePodcasts: return "New episodes, played right here. Adding a show also brings in its latest episode."
-        case .appleBooks: return "New audiobooks, with a sample to listen to. Adding an author also brings in their latest audiobook."
-        case .youtubeMusic: return "New songs, albums and music videos. Adding an artist also brings in their latest album."
-        case .spotify: return "New singles and albums, played with Spotify's player. Paste the artist's Spotify link. Adding an artist also brings in their latest album."
+        case .youtube: return String(localized: "Paste the channel link.")
+        case .x: return String(localized: "Original posts only. Reposts and replies are skipped.")
+        case .reddit: return String(localized: "Top posts from a subreddit, or a user's own posts, from the lookback window.")
+        case .instagram: return String(localized: "Public accounts only. Posts and reels from the lookback window.")
+        case .linkedin: return String(localized: "Paste a person's profile link or a company page link.")
+        case .github: return String(localized: "New repositories and releases from the lookback window.")
+        case .tiktok: return String(localized: "Public accounts only. Videos from the lookback window.")
+        case .facebook: return String(localized: "Public Pages only. Posts from the lookback window.")
+        case .appleMusic: return String(localized: "New singles and albums. Adding an artist also brings in their latest album.")
+        case .applePodcasts: return String(localized: "New episodes, played right here. Adding a show also brings in its latest episode.")
+        case .appleBooks: return String(localized: "New audiobooks, with a sample to listen to. Adding an author also brings in their latest audiobook.")
+        case .youtubeMusic: return String(localized: "New songs, albums and music videos. Adding an artist also brings in their latest album.")
+        case .spotify: return String(localized: "New singles and albums, played with Spotify's player. Paste the artist's Spotify link. Adding an artist also brings in their latest album.")
         }
     }
 
     var openLabel: String {
         switch self {
-        case .youtube: return "Open on YouTube"
-        case .x: return "Open on X"
-        case .reddit: return "Open on Reddit"
-        case .instagram: return "Open on Instagram"
-        case .linkedin: return "Open on LinkedIn"
-        case .github: return "Open on GitHub"
-        case .tiktok: return "Open on TikTok"
-        case .facebook: return "Open on Facebook"
-        case .appleMusic: return "Open in Apple Music"
-        case .applePodcasts: return "Open in Apple Podcasts"
-        case .appleBooks: return "Open in Apple Books"
-        case .youtubeMusic: return "Open in YouTube Music"
-        case .spotify: return "Open in Spotify"
+        case .youtube: return String(localized: "Open on YouTube")
+        case .x: return String(localized: "Open on X")
+        case .reddit: return String(localized: "Open on Reddit")
+        case .instagram: return String(localized: "Open on Instagram")
+        case .linkedin: return String(localized: "Open on LinkedIn")
+        case .github: return String(localized: "Open on GitHub")
+        case .tiktok: return String(localized: "Open on TikTok")
+        case .facebook: return String(localized: "Open on Facebook")
+        case .appleMusic: return String(localized: "Open in Apple Music")
+        case .applePodcasts: return String(localized: "Open in Apple Podcasts")
+        case .appleBooks: return String(localized: "Open in Apple Books")
+        case .youtubeMusic: return String(localized: "Open in YouTube Music")
+        case .spotify: return String(localized: "Open in Spotify")
         }
     }
 

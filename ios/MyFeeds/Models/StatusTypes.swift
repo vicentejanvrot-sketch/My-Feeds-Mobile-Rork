@@ -11,19 +11,22 @@ nonisolated enum ItemStatus: String, Codable, CaseIterable, Sendable {
 extension ItemStatus {
     var label: String {
         switch self {
-        case .notWatched: return "New"
-        case .watched: return "Seen"
-        case .liked: return "Liked"
-        case .watchLater: return "Later"
+        case .notWatched: return String(localized: "New")
+        case .watched: return String(localized: "Seen")
+        case .liked: return String(localized: "Liked")
+        case .watchLater: return String(localized: "Later")
         }
     }
 
+    /// One item's status ("Marked as Seen"); `label` is the filter / tab name.
+    /// Separate keys because Portuguese uses the plural for filters (Vistos)
+    /// and the singular for a single item (Visto).
     var actionLabel: String {
         switch self {
-        case .notWatched: return "New"
-        case .watched: return "Seen"
-        case .liked: return "Liked"
-        case .watchLater: return "Later"
+        case .notWatched: return String(localized: "status.single.new", defaultValue: "New")
+        case .watched: return String(localized: "status.single.seen", defaultValue: "Seen")
+        case .liked: return String(localized: "status.single.liked", defaultValue: "Liked")
+        case .watchLater: return String(localized: "status.single.later", defaultValue: "Later")
         }
     }
 
@@ -58,11 +61,11 @@ nonisolated enum RunStatus: String, Codable, Sendable {
 extension RunStatus {
     var label: String {
         switch self {
-        case .running: return "Running"
-        case .success: return "Success"
-        case .partial: return "Partial"
-        case .failed: return "Failed"
-        case .cancelled: return "Cancelled"
+        case .running: return String(localized: "Running")
+        case .success: return String(localized: "Success")
+        case .partial: return String(localized: "Partial")
+        case .failed: return String(localized: "Failed")
+        case .cancelled: return String(localized: "Cancelled")
         }
     }
 

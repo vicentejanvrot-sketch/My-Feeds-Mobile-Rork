@@ -121,6 +121,46 @@
         }
       }
     },
+    "@handle or https://www.instagram.com/handle" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "@usuario ou https://www.instagram.com/usuario"
+          }
+        }
+      }
+    },
+    "@handle or https://x.com/handle" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "@usuario ou https://x.com/usuario"
+          }
+        }
+      }
+    },
+    "@username or https://github.com/username" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "@usuario ou https://github.com/usuario"
+          }
+        }
+      }
+    },
+    "@username or https://www.tiktok.com/@username" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "@usuario ou https://www.tiktok.com/@usuario"
+          }
+        }
+      }
+    },
     "API keys (YouTube, OpenAI, Anthropic, Gemini) are optional and let the app fetch video data and run AI analysis on your behalf. Keys are stored securely and are never displayed back to you after saving." : {
       "localizations" : {
         "pt-BR" : {
@@ -141,6 +181,16 @@
         }
       }
     },
+    "Account" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Conta"
+          }
+        }
+      }
+    },
     "Add" : {
       "localizations" : {
         "pt-BR" : {
@@ -157,6 +207,66 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Todos os downloads foram excluídos"
+          }
+        }
+      }
+    },
+    "Artist" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Artista"
+          }
+        }
+      }
+    },
+    "Artist name or https://music.apple.com/us/artist/name/123" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nome do artista ou https://music.apple.com/br/artist/nome/123"
+          }
+        }
+      }
+    },
+    "Artist name or https://music.youtube.com/channel/UC..." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nome do artista ou https://music.youtube.com/channel/UC..."
+          }
+        }
+      }
+    },
+    "Artist page" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Página do artista"
+          }
+        }
+      }
+    },
+    "Author" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Autor"
+          }
+        }
+      }
+    },
+    "Author name or https://books.apple.com/us/author/name/id123" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nome do autor ou https://books.apple.com/br/author/nome/id123"
           }
         }
       }
@@ -221,6 +331,16 @@
         }
       }
     },
+    "Cancelled" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cancelada"
+          }
+        }
+      }
+    },
     "Changes to These Terms" : {
       "localizations" : {
         "pt-BR" : {
@@ -237,6 +357,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Alterações nesta política"
+          }
+        }
+      }
+    },
+    "Channel" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Canal"
           }
         }
       }
@@ -541,12 +671,32 @@
         }
       }
     },
+    "Everything without a video" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tudo o que não tem vídeo"
+          }
+        }
+      }
+    },
     "FAQ" : {
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Perguntas frequentes"
+          }
+        }
+      }
+    },
+    "Failed" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Falhou"
           }
         }
       }
@@ -631,12 +781,32 @@
         }
       }
     },
+    "Includes saved live videos" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inclui vídeos ao vivo salvos"
+          }
+        }
+      }
+    },
     "Information We Collect" : {
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Informações que coletamos"
+          }
+        }
+      }
+    },
+    "Instagram and TikTok live streams can't be included: they leave the account's posts when they end, so there's nothing for My Feeds to collect." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lives do Instagram e do TikTok não podem ser incluídas: elas saem dos posts da conta quando terminam, então não há nada para o My Feeds coletar."
           }
         }
       }
@@ -681,6 +851,26 @@
         }
       }
     },
+    "Later" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Depois"
+          }
+        }
+      }
+    },
+    "Liked" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Curtidos"
+          }
+        }
+      }
+    },
     "Limitation of Liability" : {
       "localizations" : {
         "pt-BR" : {
@@ -707,6 +897,76 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "O My Feeds permite criar coleções que seguem canais do YouTube e outras contas, trazem automaticamente novos vídeos e posts para o seu feed e registram quais vídeos você já assistiu."
+          }
+        }
+      }
+    },
+    "New" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Novos"
+          }
+        }
+      }
+    },
+    "New audiobooks, with a sample to listen to. Adding an author also brings in their latest audiobook." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Novos audiolivros, com uma amostra para ouvir. Ao adicionar um autor, o audiolivro mais recente também vem junto."
+          }
+        }
+      }
+    },
+    "New episodes, played right here. Adding a show also brings in its latest episode." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Novos episódios, tocados aqui mesmo. Ao adicionar um programa, o episódio mais recente também vem junto."
+          }
+        }
+      }
+    },
+    "New repositories and releases from the lookback window." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Novos repositórios e releases dentro do período de busca."
+          }
+        }
+      }
+    },
+    "New singles and albums, played with Spotify's player. Paste the artist's Spotify link. Adding an artist also brings in their latest album." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Novos singles e álbuns, tocados no player do Spotify. Cole o link do artista no Spotify. Ao adicionar um artista, o álbum mais recente também vem junto."
+          }
+        }
+      }
+    },
+    "New singles and albums. Adding an artist also brings in their latest album." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Novos singles e álbuns. Ao adicionar um artista, o álbum mais recente também vem junto."
+          }
+        }
+      }
+    },
+    "New songs, albums and music videos. Adding an artist also brings in their latest album." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Novas músicas, álbuns e clipes. Ao adicionar um artista, o álbum mais recente também vem junto."
           }
         }
       }
@@ -771,6 +1031,186 @@
         }
       }
     },
+    "Open in Apple Books" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abrir no Apple Books"
+          }
+        }
+      }
+    },
+    "Open in Apple Music" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abrir no Apple Music"
+          }
+        }
+      }
+    },
+    "Open in Apple Podcasts" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abrir no Apple Podcasts"
+          }
+        }
+      }
+    },
+    "Open in Spotify" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abrir no Spotify"
+          }
+        }
+      }
+    },
+    "Open in YouTube Music" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abrir no YouTube Music"
+          }
+        }
+      }
+    },
+    "Open on Facebook" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abrir no Facebook"
+          }
+        }
+      }
+    },
+    "Open on GitHub" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abrir no GitHub"
+          }
+        }
+      }
+    },
+    "Open on Instagram" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abrir no Instagram"
+          }
+        }
+      }
+    },
+    "Open on LinkedIn" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abrir no LinkedIn"
+          }
+        }
+      }
+    },
+    "Open on Reddit" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abrir no Reddit"
+          }
+        }
+      }
+    },
+    "Open on TikTok" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abrir no TikTok"
+          }
+        }
+      }
+    },
+    "Open on X" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abrir no X"
+          }
+        }
+      }
+    },
+    "Open on YouTube" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abrir no YouTube"
+          }
+        }
+      }
+    },
+    "Original posts only. Reposts and replies are skipped." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Só posts originais. Reposts e respostas ficam de fora."
+          }
+        }
+      }
+    },
+    "Page" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Página"
+          }
+        }
+      }
+    },
+    "Partial" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Parcial"
+          }
+        }
+      }
+    },
+    "Paste a person's profile link or a company page link." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cole o link do perfil de uma pessoa ou da página de uma empresa."
+          }
+        }
+      }
+    },
+    "Paste the channel link." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cole o link do canal."
+          }
+        }
+      }
+    },
     "Permanently delete your account and all associated data. This action cannot be undone." : {
       "localizations" : {
         "pt-BR" : {
@@ -781,12 +1221,52 @@
         }
       }
     },
+    "Photo and carousel posts" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Posts de foto e carrossel"
+          }
+        }
+      }
+    },
+    "Photo and text posts" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Posts de foto e texto"
+          }
+        }
+      }
+    },
+    "Photo slideshows" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apresentações de fotos"
+          }
+        }
+      }
+    },
     "Please enter a valid email address." : {
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Digite um endereço de e-mail válido."
+          }
+        }
+      }
+    },
+    "Posts made of photos" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Posts feitos de fotos"
           }
         }
       }
@@ -821,6 +1301,46 @@
         }
       }
     },
+    "Profile or company" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Perfil ou empresa"
+          }
+        }
+      }
+    },
+    "Public Pages only. Posts from the lookback window." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Só páginas públicas. Posts dentro do período de busca."
+          }
+        }
+      }
+    },
+    "Public accounts only. Posts and reels from the lookback window." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Só contas públicas. Posts e reels dentro do período de busca."
+          }
+        }
+      }
+    },
+    "Public accounts only. Videos from the lookback window." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Só contas públicas. Vídeos dentro do período de busca."
+          }
+        }
+      }
+    },
     "Questions? Contact us at" : {
       "localizations" : {
         "pt-BR" : {
@@ -837,6 +1357,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Entrada rápida"
+          }
+        }
+      }
+    },
+    "Reels" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reels"
+          }
+        }
+      }
+    },
+    "Regular TikTok videos" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vídeos normais do TikTok"
           }
         }
       }
@@ -891,6 +1431,16 @@
         }
       }
     },
+    "Running" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Em andamento"
+          }
+        }
+      }
+    },
     "Running or walking with the phone in your pocket? Tap the lock icon in the video player to turn on Pocket Lock. The screen goes dark and ignores every touch while the video keeps playing. Press and hold the lock for 2 seconds to unlock." : {
       "localizations" : {
         "pt-BR" : {
@@ -941,6 +1491,16 @@
         }
       }
     },
+    "Seen" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vistos"
+          }
+        }
+      }
+    },
     "Settings" : {
       "localizations" : {
         "pt-BR" : {
@@ -957,6 +1517,36 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Configurações salvas."
+          }
+        }
+      }
+    },
+    "Short videos" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vídeos curtos"
+          }
+        }
+      }
+    },
+    "Show" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Programa"
+          }
+        }
+      }
+    },
+    "Show name or https://podcasts.apple.com/us/podcast/name/id123" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nome do programa ou https://podcasts.apple.com/br/podcast/nome/id123"
           }
         }
       }
@@ -991,6 +1581,16 @@
         }
       }
     },
+    "Single photos and multi-photo posts" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fotos únicas e posts com várias fotos"
+          }
+        }
+      }
+    },
     "Skip" : {
       "localizations" : {
         "pt-BR" : {
@@ -1001,12 +1601,42 @@
         }
       }
     },
+    "Source" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fonte"
+          }
+        }
+      }
+    },
     "Still need help? Contact us at" : {
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ainda precisa de ajuda? Fale com a gente em"
+          }
+        }
+      }
+    },
+    "Subreddit or user" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Subreddit ou usuário"
+          }
+        }
+      }
+    },
+    "Success" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Concluída"
           }
         }
       }
@@ -1141,12 +1771,32 @@
         }
       }
     },
+    "Top posts from a subreddit, or a user's own posts, from the lookback window." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Os principais posts de um subreddit, ou os posts de um usuário, dentro do período de busca."
+          }
+        }
+      }
+    },
     "Try again" : {
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tentar de novo"
+          }
+        }
+      }
+    },
+    "Unnamed" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sem nome"
           }
         }
       }
@@ -1201,12 +1851,42 @@
         }
       }
     },
+    "User or organization" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Usuário ou organização"
+          }
+        }
+      }
+    },
     "Video Playback" : {
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Reprodução de vídeo"
+          }
+        }
+      }
+    },
+    "Videos" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vídeos"
+          }
+        }
+      }
+    },
+    "Videos and reels" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vídeos e reels"
           }
         }
       }
@@ -1411,12 +2091,86 @@
         }
       }
     },
+    "r/subreddit, u/username or a reddit.com link" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "r/subreddit, u/usuario ou um link do reddit.com"
+          }
+        }
+      }
+    },
     "saved %@" : {
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "salvo %@"
+          }
+        }
+      }
+    },
+    "status.single.later" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Later"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Depois"
+          }
+        }
+      }
+    },
+    "status.single.liked" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Liked"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Curtido"
+          }
+        }
+      }
+    },
+    "status.single.new" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "New"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Novo"
+          }
+        }
+      }
+    },
+    "status.single.seen" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seen"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Visto"
           }
         }
       }

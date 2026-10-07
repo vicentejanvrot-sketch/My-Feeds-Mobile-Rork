@@ -21,20 +21,20 @@ nonisolated enum ContentTypes {
 
     static let groups: [Group] = [
         Group(platform: .instagram, options: [
-            Option(key: "instagram_reels", label: "Reels", help: "Short videos"),
-            Option(key: "instagram_posts", label: "Photo and carousel posts", help: "Single photos and multi-photo posts"),
+            Option(key: "instagram_reels", label: String(localized: "Reels"), help: String(localized: "Short videos")),
+            Option(key: "instagram_posts", label: String(localized: "Photo and carousel posts"), help: String(localized: "Single photos and multi-photo posts")),
         ]),
         Group(platform: .tiktok, options: [
-            Option(key: "tiktok_videos", label: "Videos", help: "Regular TikTok videos"),
-            Option(key: "tiktok_photos", label: "Photo slideshows", help: "Posts made of photos"),
+            Option(key: "tiktok_videos", label: String(localized: "Videos"), help: String(localized: "Regular TikTok videos")),
+            Option(key: "tiktok_photos", label: String(localized: "Photo slideshows"), help: String(localized: "Posts made of photos")),
         ]),
         Group(platform: .facebook, options: [
-            Option(key: "facebook_videos", label: "Videos and reels", help: "Includes saved live videos"),
-            Option(key: "facebook_posts", label: "Photo and text posts", help: "Everything without a video"),
+            Option(key: "facebook_videos", label: String(localized: "Videos and reels"), help: String(localized: "Includes saved live videos")),
+            Option(key: "facebook_posts", label: String(localized: "Photo and text posts"), help: String(localized: "Everything without a video")),
         ]),
     ]
 
-    static let liveNote = "Instagram and TikTok live streams can't be included: they leave the account's posts when they end, so there's nothing for My Feeds to collect."
+    static let liveNote = String(localized: "Instagram and TikTok live streams can't be included: they leave the account's posts when they end, so there's nothing for My Feeds to collect.")
 
     /// The app's decoder turns "instagram_reels" into "instagramReels";
     /// this puts the stored keys back as the database has them.

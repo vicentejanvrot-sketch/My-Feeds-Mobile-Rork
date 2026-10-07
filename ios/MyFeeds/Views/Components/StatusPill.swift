@@ -32,7 +32,7 @@ struct ChannelStatusPill: View {
             Circle()
                 .fill(status.color)
                 .frame(width: 6, height: 6)
-            Text(status.label)
+            Text(status.actionLabel)
                 .font(.system(size: 11, weight: .semibold))
         }
         .foregroundStyle(status.color)

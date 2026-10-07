@@ -256,11 +256,11 @@ nonisolated enum AlsoOn {
     }
 
     static func accountLabel(platform: SourcePlatform, handle: String?, url: String) -> String {
-        if platform == .appleMusic { return "Artist page" }
-        if platform == .applePodcasts { return "Show" }
-        if platform == .appleBooks { return "Author" }
-        if platform == .youtubeMusic { return "Artist" }
-        if platform == .spotify { return url.contains("/show/") ? "Show" : "Artist" }
+        if platform == .appleMusic { return String(localized: "Artist page") }
+        if platform == .applePodcasts { return String(localized: "Show") }
+        if platform == .appleBooks { return String(localized: "Author") }
+        if platform == .youtubeMusic { return String(localized: "Artist") }
+        if platform == .spotify { return url.contains("/show/") ? String(localized: "Show") : String(localized: "Artist") }
         guard let handle, !handle.isEmpty, platform != .facebook else {
             var value = url
             for prefix in ["https://www.", "http://www.", "https://", "http://"] where value.hasPrefix(prefix) {
@@ -272,7 +272,7 @@ nonisolated enum AlsoOn {
         }
         switch platform {
         case .x, .instagram, .tiktok: return "@" + handle
-        case .youtube: return isYouTubeChannelId(handle) ? "Channel" : "@" + handle
+        case .youtube: return isYouTubeChannelId(handle) ? String(localized: "Channel") : "@" + handle
         case .reddit: return "u/" + redditName(handle)
         default: return handle
         }
@@ -289,7 +289,7 @@ nonisolated enum AlsoOn {
         }
         if platform == .linkedin || platform == .github, let handle = ch.handle, !handle.isEmpty { return handle }
         if platform == .reddit, let handle = ch.handle, !handle.isEmpty { return "u/" + redditName(handle) }
-        return cleanName(ch.channelName, fallback: ch.channelUrl ?? "Source")
+        return cleanName(ch.channelName, fallback: ch.channelUrl ?? String(localized: "Source"))
     }
 
     /// Where to follow this account on the platform itself. X and YouTube open

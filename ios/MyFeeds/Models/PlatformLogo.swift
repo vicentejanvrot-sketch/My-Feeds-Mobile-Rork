@@ -720,7 +720,7 @@ struct PlatformLogo: View {
                     RoundedRectangle(cornerRadius: 4.5 * s)
                         .fill(Color(red: 10 / 255, green: 102 / 255, blue: 194 / 255))
                         .frame(width: 24 * s, height: 24 * s)
-                    Text("in")
+                    Text(verbatim: "in")
                         .font(.system(size: 16 * s, weight: .bold))
                         .foregroundStyle(Color.white)
                         .offset(y: 0.5 * s)
