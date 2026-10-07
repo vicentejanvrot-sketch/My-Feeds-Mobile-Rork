@@ -55,6 +55,8 @@ import {
 } from "@/lib/hooks";
 import { useToast } from "@/components/Toast";
 import { timeAgo, compactNumber, formatDuration } from "@/lib/format";
+import i18n, { formatNumber } from "@/lib/i18n";
+import { useTranslation } from "react-i18next";
 import { PlatformBadge } from "@/components/PlatformBadge";
 // Named SourcePlatform here: react-native's Platform (Platform.OS) is imported too.
 import { PLATFORMS, PLATFORM_META, platformOf, isPostVideoId, isNewPostsCard, type Platform as SourcePlatform } from "@/lib/platforms";
@@ -77,39 +79,44 @@ function extractYoutubeId(url: string | null): string | null {
 type StatusFilter = "all" | ItemStatus;
 type SortMode = "account" | "priority" | "recent" | "views";
 
-const STATUS_OPTIONS: { key: StatusFilter; label: string; icon?: React.ReactNode }[] = [
-  { key: "all", label: "All Statuses" },
-  { key: "not_watched", label: "New", icon: <Circle size={16} color={Colors.textMuted} /> },
-  { key: "watched", label: "Seen", icon: <Check size={16} color={Colors.success} /> },
-  { key: "liked", label: "Liked", icon: <Heart size={16} color={Colors.destructive} /> },
-  { key: "watch_later", label: "Later", icon: <Clock size={16} color={Colors.warning} /> },
-];
+function statusOptions(): { key: StatusFilter; label: string; icon?: React.ReactNode }[] {
+  return [
+    { key: "all", label: i18n.t("feed.allStatuses") },
+    { key: "not_watched", label: i18n.t("channelFilter.not_watched"), icon: <Circle size={16} color={Colors.textMuted} /> },
+    { key: "watched", label: i18n.t("channelFilter.watched"), icon: <Check size={16} color={Colors.success} /> },
+    { key: "liked", label: i18n.t("channelFilter.liked"), icon: <Heart size={16} color={Colors.destructive} /> },
+    { key: "watch_later", label: i18n.t("channelFilter.watch_later"), icon: <Clock size={16} color={Colors.warning} /> },
+  ];
+}
 
 // Feed cards load 10 at a time; the next 10 when the list reaches the end.
 const PAGE_SIZE = 10;
 
-const SORT_OPTIONS: { key: SortMode; label: string }[] = [
-  { key: "account", label: "Account" },
-  { key: "priority", label: "Priority" },
-  { key: "recent", label: "Recent" },
-  { key: "views", label: "Views" },
-];
+function sortOptions(): { key: SortMode; label: string }[] {
+  return [
+    { key: "account", label: i18n.t("feed.sort.account") },
+    { key: "priority", label: i18n.t("feed.sort.priority") },
+    { key: "recent", label: i18n.t("feed.sort.recent") },
+    { key: "views", label: i18n.t("feed.sort.views") },
+  ];
+}
 
 const ITEM_STATUS_ICONS: Record<
   ItemStatus,
-  { icon: typeof Check; color: string; label: string }
+  { icon: typeof Check; color: string }
 > = {
-  not_watched: { icon: Circle, color: Colors.textMuted, label: "New" },
-  watched: { icon: Check, color: Colors.success, label: "Seen" },
-  liked: { icon: Heart, color: Colors.destructive, label: "Liked" },
-  watch_later: { icon: Clock, color: Colors.warning, label: "Later" },
+  not_watched: { icon: Circle, color: Colors.textMuted },
+  watched: { icon: Check, color: Colors.success },
+  liked: { icon: Heart, color: Colors.destructive },
+  watch_later: { icon: Clock, color: Colors.warning },
 };
 
-const STATUS_OPTIONS_COMPACT: { key: ItemStatus; label: string }[] = [
-  { key: "not_watched", label: "New" },
-  { key: "watched", label: "Seen" },
-  { key: "liked", label: "Liked" },
-  { key: "watch_later", label: "Later" },
+// Labels are the single-item forms ("Seen" / "Visto"), read at render time.
+const STATUS_OPTIONS_COMPACT: { key: ItemStatus }[] = [
+  { key: "not_watched" },
+  { key: "watched" },
+  { key: "liked" },
+  { key: "watch_later" },
 ];
 
 // ── Helpers ───────────────────────────────────────────────────────
@@ -119,7 +126,7 @@ function normalizeText(s: string | null | undefined): string {
 }
 
 function channelDisplayName(ch: Channel): string {
-  return ch.channel_name || (ch.channel_url ?? "").replace(/^https?:\/\/www\.youtube\.com\//, "") || "Unknown";
+  return ch.channel_name || (ch.channel_url ?? "").replace(/^https?:\/\/www\.youtube\.com\//, "") || i18n.t("feed.unknown");
 }
 
 // ── Main Screen ───────────────────────────────────────────────────
@@ -131,6 +138,7 @@ export default function FeedScreen() {
   const { width: windowWidth } = useWindowDimensions();
   const isWide = windowWidth >= IPAD_BREAKPOINT;
   const showToast = useToast();
+  const { t } = useTranslation();
   const listRef = useRef<FlatList>(null);
   // openedAt changes on every "View Feed" from a collection, so the filter is
   // applied again even when the same collection was opened here before.
@@ -448,8 +456,8 @@ export default function FeedScreen() {
   const totalShown = filtered.length;
   const loadingMessage =
     items.isLoading || totalShown === 0
-      ? "Loading feeds…"
-      : `Loading ${Math.min(visibleCount, totalShown).toLocaleString()} of ${totalShown.toLocaleString()} feeds`;
+      ? t("feed.loading")
+      : t("feed.loadingCount", { shown: formatNumber(Math.min(visibleCount, totalShown)), total: formatNumber(totalShown), count: totalShown });
   const showMore = useCallback(() => {
     setVisibleCount((count) => (count < filtered.length ? count + PAGE_SIZE : count));
   }, [filtered.length]);
@@ -479,10 +487,10 @@ export default function FeedScreen() {
       try {
         await updateStatus.mutateAsync({ id, status });
       } catch {
-        showToast("Couldn't update status", "error");
+        showToast(t("feed.statusFailed"), "error");
       }
     },
-    [updateStatus, showToast],
+    [updateStatus, showToast, t],
   );
 
   const toggleSelection = useCallback((id: string) => {
@@ -507,13 +515,13 @@ export default function FeedScreen() {
       void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       try {
         await bulkUpdateStatus.mutateAsync({ ids, status });
-        showToast(`Updated ${ids.length} video${ids.length === 1 ? "" : "s"}`, "success");
+        showToast(t("feed.bulkUpdated", { count: ids.length }), "success");
         exitSelectionMode();
       } catch {
-        showToast("Couldn't update selected videos", "error");
+        showToast(t("feed.bulkFailed"), "error");
       }
     },
-    [selectedIds, bulkUpdateStatus, showToast, exitSelectionMode],
+    [selectedIds, bulkUpdateStatus, showToast, exitSelectionMode, t],
   );
 
   const openVideo = useCallback(
@@ -579,7 +587,7 @@ export default function FeedScreen() {
     return [
       {
         key: "all" as const,
-        label: "All Channels",
+        label: t("channelFilter.all"),
         // How many people are listed below (each row shows its post count)
         badge: rows.length,
       },
@@ -591,17 +599,17 @@ export default function FeedScreen() {
         thumbnailText: (p.name || "?")[0].toUpperCase(),
       })),
     ];
-  }, [people, channelCounts, agentFilter, channelFilter]);
+  }, [people, channelCounts, agentFilter, channelFilter, t]);
 
   // ── Render ──────────────────────────────────────────────────────
 
   return (
     <View style={[styles.root, isWide && styles.rootWide, { paddingTop: insets.top }]}>
       <View style={styles.headerRow}>
-        <Text style={styles.heading}>Feeds</Text>
+        <Text style={styles.heading}>{t("tabs.feeds")}</Text>
         {selectionMode ? (
           <Pressable onPress={exitSelectionMode} hitSlop={8}>
-            <Text style={styles.selectButtonText}>Cancel</Text>
+            <Text style={styles.selectButtonText}>{t("common.cancel")}</Text>
           </Pressable>
         ) : !items.isLoading ? (
           <>
@@ -616,21 +624,21 @@ export default function FeedScreen() {
               }
               hitSlop={8}
               accessibilityRole="button"
-              accessibilityLabel={agentFilter !== "all" ? "See this collection's people" : "See everyone you follow"}
+              accessibilityLabel={agentFilter !== "all" ? t("feed.seeCollectionPeople") : t("feed.seeEveryone")}
             >
               <Users size={14} color={Colors.accent} />
-              <Text style={styles.selectButtonText}>People</Text>
+              <Text style={styles.selectButtonText}>{t("dashboard.people")}</Text>
             </Pressable>
             <Pressable
               style={[styles.selectButton, { marginLeft: 0 }]}
               onPress={() => setSelectionMode(true)}
             >
-              <Text style={styles.selectButtonText}>Select</Text>
+              <Text style={styles.selectButtonText}>{t("feed.select")}</Text>
             </Pressable>
           </>
         ) : null}
         {!selectionMode && !items.isLoading ? (
-          <Text style={styles.countBadge}>{filtered.length} videos</Text>
+          <Text style={styles.countBadge}>{t("feed.videoCount", { count: filtered.length, formatted: formatNumber(filtered.length) })}</Text>
         ) : null}
       </View>
 
@@ -648,7 +656,7 @@ export default function FeedScreen() {
           <Search size={16} color={Colors.textMuted} style={styles.searchIcon} />
           <TextInput
             style={styles.searchInput}
-            placeholder="Search videos, channels, tags..."
+            placeholder={t("feed.searchPlaceholder")}
             placeholderTextColor={Colors.textMuted}
             value={search}
             onChangeText={setSearch}
@@ -672,10 +680,10 @@ export default function FeedScreen() {
           <View style={styles.filterHalf}>
             <FilterDropdownFull
               icon={<Bot size={15} color={Colors.textSecondary} />}
-              label="Collection"
+              label={t("feed.collection")}
               value={agentFilter}
               options={[
-                { key: "all", label: "All Collections" },
+                { key: "all", label: t("feed.allCollections") },
                 ...agentList.map((a) => ({ key: a.id, label: a.name })),
               ]}
               onChange={handleAgentChange}
@@ -686,10 +694,10 @@ export default function FeedScreen() {
               style={({ pressed }) => [styles.dropdownFull, styles.openCollectionBtn, pressed && styles.pressed]}
               onPress={() => router.push({ pathname: "/(tabs)/agent-detail", params: { agentId: agentFilter } })}
               accessibilityRole="button"
-              accessibilityLabel="Open this collection"
+              accessibilityLabel={t("feed.openCollectionHint")}
             >
               <FolderOpen size={15} color={Colors.textSecondary} />
-              <Text style={styles.openCollectionText}>Open</Text>
+              <Text style={styles.openCollectionText}>{t("feed.open")}</Text>
             </Pressable>
           ) : null}
         </View>
@@ -698,7 +706,7 @@ export default function FeedScreen() {
         {visibleChannels.length > 0 ? (
           <FilterDropdownFull
             icon={<Radio size={15} color={Colors.textSecondary} />}
-            label="Channel"
+            label={t("feed.channel")}
             value={channelFilter}
             options={channelOptions}
             onChange={(v) => setChannelFilter(v)}
@@ -710,18 +718,18 @@ export default function FeedScreen() {
           <View style={styles.filterHalf}>
             <FilterDropdownFull
               icon={<Filter size={15} color={Colors.textSecondary} />}
-              label="Status"
+              label={t("feed.status")}
               value={statusFilter}
-              options={STATUS_OPTIONS}
+              options={statusOptions()}
               onChange={(v) => setStatusFilter(v)}
             />
           </View>
           <View style={styles.filterHalf}>
             <FilterDropdownFull
               icon={<ArrowUpDown size={15} color={Colors.textSecondary} />}
-              label="Sort"
+              label={t("feed.sortLabel")}
               value={sortMode}
-              options={SORT_OPTIONS}
+              options={sortOptions()}
               onChange={(v) => setSortMode(v)}
             />
           </View>
@@ -743,7 +751,7 @@ export default function FeedScreen() {
               >
                 {p !== "all" ? <PlatformBadge platform={p as SourcePlatform} /> : null}
                 <Text style={[postPreviewStyles.chipText, active && postPreviewStyles.chipTextActive]}>
-                  {p === "all" ? `All · ${baseFilteredItems.length}` : p === "x"
+                  {p === "all" ? t("feed.allCount", { count: baseFilteredItems.length }) : p === "x"
                     ? `${platformCounts.get(p as SourcePlatform)}` // X's logo is already the letter X
                     : `${PLATFORM_META[p as SourcePlatform].label} · ${platformCounts.get(p as SourcePlatform)}`}
                 </Text>
@@ -772,7 +780,7 @@ export default function FeedScreen() {
                 <Text style={styles.loadingText}>
                   {loadingMore
                     ? loadingMessage
-                    : `Showing ${shown.length.toLocaleString()} of ${totalShown.toLocaleString()} feeds`}
+                    : t("feed.showingCount", { shown: formatNumber(shown.length), total: formatNumber(totalShown), count: totalShown })}
                 </Text>
               </View>
             ) : null
@@ -792,13 +800,13 @@ export default function FeedScreen() {
             <View style={styles.emptyCard}>
               <Text style={styles.emptyTitle}>
                 {search || agentFilter !== "all" || statusFilter !== "not_watched"
-                  ? "No videos match your filters"
-                  : "No videos yet"}
+                  ? t("feed.emptyFilteredTitle")
+                  : t("feed.emptyTitle")}
               </Text>
               <Text style={styles.emptyText}>
                 {search || agentFilter !== "all" || statusFilter !== "not_watched"
-                  ? "Try adjusting your search or filters."
-                  : "Run a collection to start discovering videos."}
+                  ? t("feed.emptyFilteredHint")
+                  : t("feed.emptyHint")}
               </Text>
             </View>
           }
@@ -997,6 +1005,8 @@ const FeedCard = React.memo(function FeedCard({
   selected: boolean;
   onToggleSelection: (id: string) => void;
 }) {
+  // Its own subscription: the memo comparator ignores the language.
+  const { t } = useTranslation();
   const realAnalysis = useMemo(() => item.item_analysis?.[0] ?? null, [item.item_analysis]);
   // Always produce an analysis object — real fields take priority, fallback fills gaps.
   const analysis = useMemo(() => {
@@ -1105,7 +1115,7 @@ const FeedCard = React.memo(function FeedCard({
         ) : null}
         {/* Carousel: the card shows the first photo/video; the count says how many are inside */}
         {isPost && carouselCount > 1 && !selectionMode ? (
-          <View style={postPreviewStyles.carouselBadge} accessibilityLabel={`Carousel: ${carouselCount} photos and videos`}>
+          <View style={postPreviewStyles.carouselBadge} accessibilityLabel={t("feed.carouselLabel", { count: carouselCount })}>
             <Copy size={12} color={Colors.white} />
             <Text style={postPreviewStyles.carouselBadgeText}>{carouselCount}</Text>
           </View>
@@ -1122,7 +1132,7 @@ const FeedCard = React.memo(function FeedCard({
         {/* Title + status control */}
         <View style={styles.titleRow}>
           <Text style={styles.title} numberOfLines={2}>
-            {item.title ?? "Untitled"}
+            {item.title ?? t("feed.untitled")}
           </Text>
           {!selectionMode ? <StatusControl
             status={status}
@@ -1145,7 +1155,7 @@ const FeedCard = React.memo(function FeedCard({
               <Text style={styles.channelAvatarText}>{channelInitial}</Text>
             </View>
             <Text style={styles.channel} numberOfLines={1}>
-              {item.channel_name ?? "Unknown channel"} · {timeAgo(item.published_at)}
+              {item.channel_name ?? t("feed.unknownChannel")} · {timeAgo(item.published_at)}
             </Text>
           </View>
           <Text style={styles.durationInline}>
@@ -1279,9 +1289,10 @@ function BulkStatusBar({
   onApply: (status: ItemStatus) => void;
 }) {
   const [open, setOpen] = useState(false);
+  const { t } = useTranslation();
   return (
     <View style={styles.bulkBar}>
-      <Text style={styles.bulkCount}>{count} selected</Text>
+      <Text style={styles.bulkCount}>{t("feed.selectedCount", { count })}</Text>
       <Pressable
         disabled={count === 0 || loading}
         style={({ pressed }) => [
@@ -1293,7 +1304,7 @@ function BulkStatusBar({
       >
         {loading ? <ActivityIndicator size="small" color={Colors.white} /> : (
           <>
-            <Text style={styles.bulkButtonText}>Set status</Text>
+            <Text style={styles.bulkButtonText}>{t("feed.setStatus")}</Text>
             <ChevronDown size={14} color={Colors.white} />
           </>
         )}
@@ -1301,7 +1312,7 @@ function BulkStatusBar({
       <Modal visible={open} transparent animationType="fade" onRequestClose={() => setOpen(false)}>
         <Pressable style={styles.modalBackdrop} onPress={() => setOpen(false)}>
           <View style={styles.statusModal}>
-            <Text style={styles.statusModalTitle}>Set status for {count} videos</Text>
+            <Text style={styles.statusModalTitle}>{t("feed.setStatusFor", { count })}</Text>
             {STATUS_OPTIONS_COMPACT.map((opt) => {
               const cfg = ITEM_STATUS_ICONS[opt.key];
               const IconC = cfg.icon;
@@ -1316,7 +1327,7 @@ function BulkStatusBar({
                 >
                   <View style={styles.checkSlot} />
                   <IconC size={16} color={cfg.color} />
-                  <Text style={styles.statusOptionText}>{opt.label}</Text>
+                  <Text style={styles.statusOptionText}>{t(`itemStatus.${opt.key}` as const)}</Text>
                 </Pressable>
               );
             })}
@@ -1346,10 +1357,13 @@ function StatusControl({
   onSelect: (s: ItemStatus) => void;
   onClose: () => void;
 }) {
+  const { t } = useTranslation();
   return (
     <>
       <Pressable
         style={styles.statusControl}
+        accessibilityRole="button"
+        accessibilityLabel={t("feed.statusLabel", { status: t(`itemStatus.${status}` as const) })}
         onPress={(e) => {
           e.stopPropagation?.();
           onToggle();
@@ -1372,7 +1386,7 @@ function StatusControl({
       >
         <Pressable style={styles.modalBackdrop} onPress={onClose}>
           <View style={styles.statusModal}>
-            <Text style={styles.statusModalTitle}>Set status</Text>
+            <Text style={styles.statusModalTitle}>{t("feed.setStatus")}</Text>
             {STATUS_OPTIONS_COMPACT.map((opt) => {
               const cfg = ITEM_STATUS_ICONS[opt.key];
               const IconC = cfg.icon;
@@ -1407,7 +1421,7 @@ function StatusControl({
                       active && styles.statusOptionTextActive,
                     ]}
                   >
-                    {opt.label}
+                    {t(`itemStatus.${opt.key}` as const)}
                   </Text>
                 </Pressable>
               );
