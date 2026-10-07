@@ -43,10 +43,8 @@ struct OnboardingWizardView: View {
 
     @State private var step = 0
     @State private var name = ""
-    @State private var emailMe = true
     @State private var agentId: String?
     @State private var savedName = ""
-    @State private var savedEmailMe = true
     @State private var saving = false
     @State private var finishing = false
     @State private var errorText: String?
@@ -234,22 +232,6 @@ struct OnboardingWizardView: View {
                     }
                     .accessibilityLabel("Collection name and topic")
             }
-            HStack(spacing: 12) {
-                VStack(alignment: .leading, spacing: 2) {
-                    fieldLabel(String(localized: "Email me a digest after each run", bundle: .appStrings))
-                    Text("Sent to your account email. You can change it on the collection later.")
-                        .font(.system(size: 13))
-                        .foregroundStyle(Theme.textSecondary)
-                }
-                Spacer(minLength: 0)
-                Toggle("", isOn: $emailMe)
-                    .labelsHidden()
-                    .tint(Theme.accent)
-                    .accessibilityLabel("Email me a digest after each run")
-            }
-            .padding(14)
-            .overlay(RoundedRectangle(cornerRadius: 10).stroke(Theme.border, lineWidth: 1))
-
             if !trimmedName.isEmpty {
                 HStack(spacing: 12) {
                     Text(String(trimmedName.prefix(1)).uppercased())
@@ -492,7 +474,7 @@ struct OnboardingWizardView: View {
                 Rectangle().fill(Theme.border).frame(height: 0.5)
                 recapRow(String(localized: "Sources", bundle: .appStrings), sources.isEmpty ? String(localized: "None yet", bundle: .appStrings) : String(localized: "\(sources.count) added", bundle: .appStrings))
                 Rectangle().fill(Theme.border).frame(height: 0.5)
-                recapRow(String(localized: "Email digest", bundle: .appStrings), savedEmailMe ? String(localized: "On", bundle: .appStrings) : String(localized: "Off", bundle: .appStrings))
+                recapRow(String(localized: "Email digest", bundle: .appStrings), String(localized: "On", bundle: .appStrings))
             }
             .cardStyle(radius: 12)
             VStack(spacing: 10) {
@@ -731,25 +713,10 @@ struct OnboardingWizardView: View {
         )
     }
 
-    private func recipientEmails(wantEmail: Bool) async -> [String] {
-        guard wantEmail, let userId = auth.userId else { return [] }
-        let settings = try? await SupabaseService.shared.fetchUserSettings(userId: userId)
-        let saved = settings?.defaultEmail?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
-        let email = saved.isEmpty ? (auth.userEmail ?? "") : saved
-        return email.isEmpty ? [] : [email]
-    }
-
-    /// Replace the agent's recipients, the same way the web app does.
-    private func saveRecipients(agentId: String, emails: [String]) async throws {
-        let service = SupabaseService.shared
-        try await service.client.from("agent_recipients").delete().eq("agent_id", value: agentId).execute()
-        for email in emails {
-            try await service.addRecipient(agentId: agentId, email: email)
-        }
-    }
-
     /// Step 1: create the agent the first time, update it if they come back and
     /// change it. No success message here; the user gets one when they finish.
+    /// The database adds the user's email as the digest recipient when the
+    /// collection is created (add_owner_recipient trigger), so nothing to save here.
     private func saveAgent() {
         let newName = trimmedName
         guard !newName.isEmpty, newName.count <= 100, auth.userId != nil else { return }
@@ -762,16 +729,11 @@ struct OnboardingWizardView: View {
                     if newName != savedName {
                         _ = try await service.updateAgent(id: agentId, payload: agentPayload(name: newName))
                     }
-                    if emailMe != savedEmailMe {
-                        try await saveRecipients(agentId: agentId, emails: await recipientEmails(wantEmail: emailMe))
-                    }
                 } else {
                     let created = try await service.createAgent(agentPayload(name: newName))
-                    try await saveRecipients(agentId: created.id, emails: await recipientEmails(wantEmail: emailMe))
                     agentId = created.id
                 }
                 savedName = newName
-                savedEmailMe = emailMe
                 go(to: 2)
             } catch {
                 errorText = String(localized: "Couldn't save the collection: \(error.localizedDescription)", bundle: .appStrings)
