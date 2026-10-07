@@ -93,7 +93,7 @@ struct AgentFormView: View {
             }
         }
         .background(Theme.background)
-        .navigationTitle(isEdit ? String(localized: "Edit Collection") : String(localized: "New Collection"))
+        .navigationTitle(isEdit ? String(localized: "Edit Collection", bundle: .appStrings) : String(localized: "New Collection", bundle: .appStrings))
         .navigationBarTitleDisplayMode(.inline)
         .toolbarBackground(Theme.background, for: .navigationBar)
         .task { await populate() }
@@ -193,13 +193,13 @@ struct AgentFormView: View {
     private var videoFiltersSection: some View {
         formSection(title: "Content Filters — \"What kinds of posts should be included?\"") {
             contentGroupLabel("YouTube")
-            toggleRow(title: String(localized: "Include Shorts"), subtitle: String(localized: "Include YouTube Shorts in results"), isOn: $includeShorts)
-            toggleRow(title: String(localized: "Include Live/Upcoming"), subtitle: String(localized: "Include live streams and premieres"), isOn: $includeLive)
+            toggleRow(title: String(localized: "Include Shorts", bundle: .appStrings), subtitle: String(localized: "Include YouTube Shorts in results", bundle: .appStrings), isOn: $includeShorts)
+            toggleRow(title: String(localized: "Include Live/Upcoming", bundle: .appStrings), subtitle: String(localized: "Include live streams and premieres", bundle: .appStrings), isOn: $includeLive)
             ForEach(ContentTypes.groups) { group in
                 contentGroupLabel(group.platform.label)
                 ForEach(group.options) { option in
                     toggleRow(
-                        title: String(localized: "Include \(option.label)"),
+                        title: String(localized: "Include \(option.label)", bundle: .appStrings),
                         subtitle: option.help,
                         isOn: Binding(
                             get: { contentTypes[option.key] != false },
@@ -277,7 +277,7 @@ struct AgentFormView: View {
                     if isSaving {
                         ProgressView().tint(.white)
                     } else {
-                        Text(isEdit ? String(localized: "Save Changes") : String(localized: "Create Collection"))
+                        Text(isEdit ? String(localized: "Save Changes", bundle: .appStrings) : String(localized: "Create Collection", bundle: .appStrings))
                             .font(.system(size: 16, weight: .bold))
                     }
                 }
@@ -386,11 +386,11 @@ struct AgentFormView: View {
     private func addRecipientEmail() {
         let email = newRecipientEmail.trimmingCharacters(in: .whitespaces)
         guard isValidEmail(email) else {
-            toasts.show(String(localized: "Enter a valid email"), type: .error)
+            toasts.show(String(localized: "Enter a valid email", bundle: .appStrings), type: .error)
             return
         }
         guard !recipientEmails.contains(email) else {
-            toasts.show(String(localized: "Recipient already added"), type: .error)
+            toasts.show(String(localized: "Recipient already added", bundle: .appStrings), type: .error)
             return
         }
         recipientEmails.append(email)
@@ -444,7 +444,7 @@ struct AgentFormView: View {
                 recipientEmails = loadedRecipients.map(\.email)
                 recipientIdMap = Dictionary(uniqueKeysWithValues: loadedRecipients.map { ($0.email, $0.id) })
             } catch {
-                toasts.show(String(localized: "Couldn't load collection"), type: .error)
+                toasts.show(String(localized: "Couldn't load collection", bundle: .appStrings), type: .error)
             }
         } else {
             runTime = date(fromTimeString: "07:00")
@@ -467,16 +467,16 @@ struct AgentFormView: View {
 
     private func save() {
         guard !trimmedName.isEmpty else {
-            toasts.show(String(localized: "Collection name is required"), type: .error)
+            toasts.show(String(localized: "Collection name is required", bundle: .appStrings), type: .error)
             return
         }
         guard trimmedName.count <= 100 else {
-            toasts.show(String(localized: "Name must be 100 characters or fewer"), type: .error)
+            toasts.show(String(localized: "Name must be 100 characters or fewer", bundle: .appStrings), type: .error)
             return
         }
         let trimmedDescription = descriptionText.trimmingCharacters(in: .whitespacesAndNewlines)
         guard trimmedDescription.count <= 500 else {
-            toasts.show(String(localized: "Description must be 500 characters or fewer"), type: .error)
+            toasts.show(String(localized: "Description must be 500 characters or fewer", bundle: .appStrings), type: .error)
             return
         }
 
@@ -518,14 +518,14 @@ struct AgentFormView: View {
                     for email in validEmails where recipientIdMap[email] == nil {
                         try? await service.addRecipient(agentId: agentId, email: email)
                     }
-                    toasts.show(String(localized: "Collection updated"))
+                    toasts.show(String(localized: "Collection updated", bundle: .appStrings))
                 } else {
                     payload.userId = auth.userId
                     let created = try await service.createAgent(payload)
                     for email in validEmails {
                         try? await service.addRecipient(agentId: created.id, email: email)
                     }
-                    toasts.show(String(localized: "Collection created"))
+                    toasts.show(String(localized: "Collection created", bundle: .appStrings))
                 }
                 dismiss()
             } catch {

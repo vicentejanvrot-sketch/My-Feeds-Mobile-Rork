@@ -11,10 +11,10 @@ nonisolated enum ItemStatus: String, Codable, CaseIterable, Sendable {
 extension ItemStatus {
     var label: String {
         switch self {
-        case .notWatched: return String(localized: "New")
-        case .watched: return String(localized: "Seen")
-        case .liked: return String(localized: "Liked")
-        case .watchLater: return String(localized: "Later")
+        case .notWatched: return String(localized: "New", bundle: .appStrings)
+        case .watched: return String(localized: "Seen", bundle: .appStrings)
+        case .liked: return String(localized: "Liked", bundle: .appStrings)
+        case .watchLater: return String(localized: "Later", bundle: .appStrings)
         }
     }
 
@@ -23,10 +23,10 @@ extension ItemStatus {
     /// and the singular for a single item (Visto).
     var actionLabel: String {
         switch self {
-        case .notWatched: return String(localized: "status.single.new", defaultValue: "New")
-        case .watched: return String(localized: "status.single.seen", defaultValue: "Seen")
-        case .liked: return String(localized: "status.single.liked", defaultValue: "Liked")
-        case .watchLater: return String(localized: "status.single.later", defaultValue: "Later")
+        case .notWatched: return String(localized: "status.single.new", defaultValue: "New", bundle: .appStrings)
+        case .watched: return String(localized: "status.single.seen", defaultValue: "Seen", bundle: .appStrings)
+        case .liked: return String(localized: "status.single.liked", defaultValue: "Liked", bundle: .appStrings)
+        case .watchLater: return String(localized: "status.single.later", defaultValue: "Later", bundle: .appStrings)
         }
     }
 
@@ -61,11 +61,11 @@ nonisolated enum RunStatus: String, Codable, Sendable {
 extension RunStatus {
     var label: String {
         switch self {
-        case .running: return String(localized: "Running")
-        case .success: return String(localized: "Success")
-        case .partial: return String(localized: "Partial")
-        case .failed: return String(localized: "Failed")
-        case .cancelled: return String(localized: "Cancelled")
+        case .running: return String(localized: "Running", bundle: .appStrings)
+        case .success: return String(localized: "Success", bundle: .appStrings)
+        case .partial: return String(localized: "Partial", bundle: .appStrings)
+        case .failed: return String(localized: "Failed", bundle: .appStrings)
+        case .cancelled: return String(localized: "Cancelled", bundle: .appStrings)
         }
     }
 

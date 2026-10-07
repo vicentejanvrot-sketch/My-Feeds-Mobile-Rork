@@ -49,7 +49,7 @@ struct DownloadsView: View {
             Button("Cancel", role: .cancel) {}
             Button("Delete all", role: .destructive) {
                 store.deleteAll()
-                toasts.show(String(localized: "All downloads deleted"))
+                toasts.show(String(localized: "All downloads deleted", bundle: .appStrings))
             }
         } message: {
             Text("Frees \(DownloadStore.formatBytes(store.totalBytes)) on this phone. Your feeds aren't affected.")
@@ -62,12 +62,12 @@ struct DownloadsView: View {
             Button("Remove", role: .destructive) {
                 if let entry = toRemove {
                     store.delete(itemId: entry.itemId)
-                    toasts.show(String(localized: "Download removed"))
+                    toasts.show(String(localized: "Download removed", bundle: .appStrings))
                 }
                 toRemove = nil
             }
         } message: {
-            Text(toRemove?.title ?? String(localized: "This item"))
+            Text(toRemove?.title ?? String(localized: "This item", bundle: .appStrings))
         }
     }
 
@@ -117,7 +117,7 @@ struct DownloadsView: View {
                     .clipShape(.rect(cornerRadius: 8))
 
                     VStack(alignment: .leading, spacing: 4) {
-                        Text(entry.title ?? String(localized: "Untitled"))
+                        Text(entry.title ?? String(localized: "Untitled", bundle: .appStrings))
                             .font(.system(size: 14, weight: .bold))
                             .foregroundStyle(Theme.textPrimary)
                             .lineLimit(2)
@@ -160,7 +160,7 @@ struct DownloadsView: View {
 
     private func meta(_ entry: DownloadEntry) -> String {
         let size = DownloadStore.formatBytes(entry.bytes)
-        let saved = String(localized: "saved \(entry.savedAt.formatted(.relative(presentation: .named)))")
+        let saved = String(localized: "saved \(entry.savedAt.formatted(.relative(presentation: .named)))", bundle: .appStrings)
         if let name = entry.channelName, !name.isEmpty { return "\(name) · \(size) · \(saved)" }
         return "\(size) · \(saved)"
     }

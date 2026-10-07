@@ -46,7 +46,7 @@ final class YouTubeAccount {
 
         let start: AuthStartResponse = try await invoke("youtube-auth", body: AuthStartPayload(appReturnUrl: Self.returnURL))
         guard let raw = start.authUrl, let authURL = URL(string: raw) else {
-            throw YouTubeAccountError.message(start.error ?? String(localized: "Couldn't start YouTube sign-in."))
+            throw YouTubeAccountError.message(start.error ?? String(localized: "Couldn't start YouTube sign-in.", bundle: .appStrings))
         }
 
         let callbackURL: URL = try await withCheckedThrowingContinuation { continuation in
@@ -56,24 +56,24 @@ final class YouTubeAccount {
                 } else if let authError = error as? ASWebAuthenticationSessionError, authError.code == .canceledLogin {
                     continuation.resume(throwing: YouTubeAccountError.cancelled)
                 } else {
-                    continuation.resume(throwing: error ?? YouTubeAccountError.message(String(localized: "YouTube sign-in failed.")))
+                    continuation.resume(throwing: error ?? YouTubeAccountError.message(String(localized: "YouTube sign-in failed.", bundle: .appStrings)))
                 }
             }
             session.presentationContextProvider = presenter
             session.prefersEphemeralWebBrowserSession = false
             self.session = session
             if !session.start() {
-                continuation.resume(throwing: YouTubeAccountError.message(String(localized: "Couldn't open YouTube sign-in.")))
+                continuation.resume(throwing: YouTubeAccountError.message(String(localized: "Couldn't open YouTube sign-in.", bundle: .appStrings)))
             }
         }
         session = nil
 
         let query = URLComponents(url: callbackURL, resolvingAgainstBaseURL: false)?.queryItems ?? []
         if let error = query.first(where: { $0.name == "error" })?.value {
-            throw YouTubeAccountError.message(error == "access_denied" ? String(localized: "YouTube access was denied.") : String(localized: "YouTube sign-in failed (\(error))."))
+            throw YouTubeAccountError.message(error == "access_denied" ? String(localized: "YouTube access was denied.", bundle: .appStrings) : String(localized: "YouTube sign-in failed (\(error)).", bundle: .appStrings))
         }
         guard let code = query.first(where: { $0.name == "code" })?.value, !code.isEmpty else {
-            throw YouTubeAccountError.message(String(localized: "YouTube didn't send a sign-in code. Try again."))
+            throw YouTubeAccountError.message(String(localized: "YouTube didn't send a sign-in code. Try again.", bundle: .appStrings))
         }
 
         let tokens: AuthCallbackResponse = try await invoke(
@@ -81,7 +81,7 @@ final class YouTubeAccount {
             body: AuthCallbackPayload(code: code, redirectUri: Self.redirectURI)
         )
         guard let accessToken = tokens.accessToken else {
-            throw YouTubeAccountError.message(tokens.error ?? String(localized: "Couldn't finish connecting YouTube."))
+            throw YouTubeAccountError.message(tokens.error ?? String(localized: "Couldn't finish connecting YouTube.", bundle: .appStrings))
         }
         let name = tokens.channel?.name ?? tokens.email
         Self.writeTokens(StoredTokens(
@@ -141,12 +141,12 @@ final class YouTubeAccount {
         }
         guard let refreshToken = stored.refreshToken else {
             disconnect()
-            throw YouTubeAccountError.message(String(localized: "Your YouTube sign-in expired. Connect YouTube again."))
+            throw YouTubeAccountError.message(String(localized: "Your YouTube sign-in expired. Connect YouTube again.", bundle: .appStrings))
         }
         let refreshed: RefreshResponse = try await invoke("youtube-api", body: RefreshPayload(action: "refresh", refreshToken: refreshToken))
         guard let token = refreshed.accessToken else {
             disconnect()
-            throw YouTubeAccountError.message(String(localized: "Your YouTube sign-in expired. Connect YouTube again."))
+            throw YouTubeAccountError.message(String(localized: "Your YouTube sign-in expired. Connect YouTube again.", bundle: .appStrings))
         }
         stored.accessToken = token
         stored.expiresAt = Date().addingTimeInterval(TimeInterval(refreshed.expiresIn ?? 3600))
@@ -165,7 +165,7 @@ final class YouTubeAccount {
             )
         } catch FunctionsError.httpError(_, let data) {
             let message = (try? decoder.decode(ErrorResponse.self, from: data))?.error
-            throw YouTubeAccountError.message(message ?? String(localized: "YouTube request failed. Try again."))
+            throw YouTubeAccountError.message(message ?? String(localized: "YouTube request failed. Try again.", bundle: .appStrings))
         }
     }
 
@@ -212,8 +212,8 @@ nonisolated enum YouTubeAccountError: LocalizedError {
 
     var errorDescription: String? {
         switch self {
-        case .cancelled: return String(localized: "YouTube sign-in was cancelled.")
-        case .notConnected: return String(localized: "Connect YouTube first.")
+        case .cancelled: return String(localized: "YouTube sign-in was cancelled.", bundle: .appStrings)
+        case .notConnected: return String(localized: "Connect YouTube first.", bundle: .appStrings)
         case .message(let text): return text
         }
     }

@@ -68,7 +68,7 @@ final class AccountConnections {
 
         let start: StartResponse = try await invoke(Payload(action: "start", provider: provider.rawValue, appReturnUrl: Self.returnURL))
         guard let raw = start.authUrl, let authURL = URL(string: raw) else {
-            throw AccountConnectionError.message(start.error ?? String(localized: "Couldn't open \(provider.label)."))
+            throw AccountConnectionError.message(start.error ?? String(localized: "Couldn't open \(provider.label).", bundle: .appStrings))
         }
 
         let callbackURL: URL = try await withCheckedThrowingContinuation { continuation in
@@ -78,14 +78,14 @@ final class AccountConnections {
                 } else if let authError = error as? ASWebAuthenticationSessionError, authError.code == .canceledLogin {
                     continuation.resume(throwing: AccountConnectionError.cancelled)
                 } else {
-                    continuation.resume(throwing: error ?? AccountConnectionError.message(String(localized: "\(provider.label) sign-in failed.")))
+                    continuation.resume(throwing: error ?? AccountConnectionError.message(String(localized: "\(provider.label) sign-in failed.", bundle: .appStrings)))
                 }
             }
             session.presentationContextProvider = presenter
             session.prefersEphemeralWebBrowserSession = false
             self.session = session
             if !session.start() {
-                continuation.resume(throwing: AccountConnectionError.message(String(localized: "Couldn't open \(provider.label) sign-in.")))
+                continuation.resume(throwing: AccountConnectionError.message(String(localized: "Couldn't open \(provider.label) sign-in.", bundle: .appStrings)))
             }
         }
         session = nil
@@ -93,11 +93,11 @@ final class AccountConnections {
         let query = URLComponents(url: callbackURL, resolvingAgainstBaseURL: false)?.queryItems ?? []
         if let error = query.first(where: { $0.name == "error" })?.value {
             if error == "access_denied" { throw AccountConnectionError.cancelled }
-            throw AccountConnectionError.message(String(localized: "\(provider.label) sign-in failed (\(error))."))
+            throw AccountConnectionError.message(String(localized: "\(provider.label) sign-in failed (\(error)).", bundle: .appStrings))
         }
         guard let code = query.first(where: { $0.name == "code" })?.value, !code.isEmpty,
               let state = query.first(where: { $0.name == "state" })?.value, !state.isEmpty else {
-            throw AccountConnectionError.message(String(localized: "\(provider.label) didn't finish the sign-in. Try again."))
+            throw AccountConnectionError.message(String(localized: "\(provider.label) didn't finish the sign-in. Try again.", bundle: .appStrings))
         }
 
         let done: FinishResponse = try await invoke(Payload(action: "finish", code: code, state: state))
@@ -131,7 +131,7 @@ final class AccountConnections {
             )
         } catch FunctionsError.httpError(_, let data) {
             let message = (try? JSONDecoder().decode(OkResponse.self, from: data))?.error
-            throw AccountConnectionError.message(message ?? String(localized: "Something went wrong. Try again."))
+            throw AccountConnectionError.message(message ?? String(localized: "Something went wrong. Try again.", bundle: .appStrings))
         }
     }
 }
@@ -142,7 +142,7 @@ nonisolated enum AccountConnectionError: LocalizedError {
 
     var errorDescription: String? {
         switch self {
-        case .cancelled: return String(localized: "The connection was cancelled.")
+        case .cancelled: return String(localized: "The connection was cancelled.", bundle: .appStrings)
         case .message(let text): return text
         }
     }

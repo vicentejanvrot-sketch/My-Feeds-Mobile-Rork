@@ -21,20 +21,20 @@ nonisolated enum ContentTypes {
 
     static let groups: [Group] = [
         Group(platform: .instagram, options: [
-            Option(key: "instagram_reels", label: String(localized: "Reels"), help: String(localized: "Short videos")),
-            Option(key: "instagram_posts", label: String(localized: "Photo and carousel posts"), help: String(localized: "Single photos and multi-photo posts")),
+            Option(key: "instagram_reels", label: String(localized: "Reels", bundle: .appStrings), help: String(localized: "Short videos", bundle: .appStrings)),
+            Option(key: "instagram_posts", label: String(localized: "Photo and carousel posts", bundle: .appStrings), help: String(localized: "Single photos and multi-photo posts", bundle: .appStrings)),
         ]),
         Group(platform: .tiktok, options: [
-            Option(key: "tiktok_videos", label: String(localized: "Videos"), help: String(localized: "Regular TikTok videos")),
-            Option(key: "tiktok_photos", label: String(localized: "Photo slideshows"), help: String(localized: "Posts made of photos")),
+            Option(key: "tiktok_videos", label: String(localized: "Videos", bundle: .appStrings), help: String(localized: "Regular TikTok videos", bundle: .appStrings)),
+            Option(key: "tiktok_photos", label: String(localized: "Photo slideshows", bundle: .appStrings), help: String(localized: "Posts made of photos", bundle: .appStrings)),
         ]),
         Group(platform: .facebook, options: [
-            Option(key: "facebook_videos", label: String(localized: "Videos and reels"), help: String(localized: "Includes saved live videos")),
-            Option(key: "facebook_posts", label: String(localized: "Photo and text posts"), help: String(localized: "Everything without a video")),
+            Option(key: "facebook_videos", label: String(localized: "Videos and reels", bundle: .appStrings), help: String(localized: "Includes saved live videos", bundle: .appStrings)),
+            Option(key: "facebook_posts", label: String(localized: "Photo and text posts", bundle: .appStrings), help: String(localized: "Everything without a video", bundle: .appStrings)),
         ]),
     ]
 
-    static let liveNote = String(localized: "Instagram and TikTok live streams can't be included: they leave the account's posts when they end, so there's nothing for My Feeds to collect.")
+    static let liveNote = String(localized: "Instagram and TikTok live streams can't be included: they leave the account's posts when they end, so there's nothing for My Feeds to collect.", bundle: .appStrings)
 
     /// The app's decoder turns "instagram_reels" into "instagramReels";
     /// this puts the stored keys back as the database has them.

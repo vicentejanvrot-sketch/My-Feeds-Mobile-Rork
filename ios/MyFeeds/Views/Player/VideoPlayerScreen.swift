@@ -478,7 +478,7 @@ struct VideoPlayerScreen: View {
         if !summary.isEmpty || !moments.isEmpty {
             ScrollView {
                 VStack(alignment: .leading, spacing: 10) {
-                    Text(analysis?.isFromTranscript == true ? String(localized: "FROM THE TRANSCRIPT") : String(localized: "SUMMARY"))
+                    Text(analysis?.isFromTranscript == true ? String(localized: "FROM THE TRANSCRIPT", bundle: .appStrings) : String(localized: "SUMMARY", bundle: .appStrings))
                         .font(.system(size: 11, weight: .heavy))
                         .kerning(0.8)
                         .foregroundStyle(Theme.accent)
@@ -789,7 +789,7 @@ struct VideoPlayerScreen: View {
                     .background(.white.opacity(0.22))
                     .clipShape(Circle())
             }
-            .accessibilityLabel(controller.isPlaying ? String(localized: "Pause") : String(localized: "Play"))
+            .accessibilityLabel(controller.isPlaying ? String(localized: "Pause", bundle: .appStrings) : String(localized: "Play", bundle: .appStrings))
 
             Button {
                 UIImpactFeedbackGenerator(style: .light).impactOccurred()
@@ -818,7 +818,7 @@ struct VideoPlayerScreen: View {
                     .background(.white.opacity(0.12))
                     .clipShape(Circle())
             }
-            .accessibilityLabel(isMuted ? String(localized: "Turn sound on") : String(localized: "Mute"))
+            .accessibilityLabel(isMuted ? String(localized: "Turn sound on", bundle: .appStrings) : String(localized: "Mute", bundle: .appStrings))
 
             SystemVolumeSlider(value: volumeBinding)
                 .frame(height: 36)
@@ -927,16 +927,16 @@ struct VideoPlayerScreen: View {
             Button {
                 UIPasteboard.general.string = watchURL
                 showShareSheet = false
-                toasts.show(String(localized: "Link copied"))
+                toasts.show(String(localized: "Link copied", bundle: .appStrings))
             } label: {
-                shareRowContent(icon: "doc.on.doc", label: String(localized: "Copy link"), color: Theme.textSecondary)
+                shareRowContent(icon: "doc.on.doc", label: String(localized: "Copy link", bundle: .appStrings), color: Theme.textSecondary)
             }
             .buttonStyle(.plain)
 
             Divider().background(Theme.border).padding(.vertical, 6)
 
             ShareLink(item: URL(string: watchURL)!, message: Text("Check out this video:")) {
-                shareRowContent(icon: "square.and.arrow.up", label: String(localized: "More…"), color: Theme.textSecondary)
+                shareRowContent(icon: "square.and.arrow.up", label: String(localized: "More…", bundle: .appStrings), color: Theme.textSecondary)
             }
         }
         .padding(.horizontal, 20)
@@ -1165,7 +1165,7 @@ struct VideoPlayerScreen: View {
         }
         // Show the popup straight away; the Supabase write runs in the
         // background instead of holding up the feedback.
-        toasts.show(String(localized: "Marked as \(status.actionLabel)"), type: .info)
+        toasts.show(String(localized: "Marked as \(status.actionLabel)", bundle: .appStrings), type: .info)
         saveStatus(status)
     }
 
@@ -1178,7 +1178,7 @@ struct VideoPlayerScreen: View {
             do {
                 try await SupabaseService.shared.updateItemStatus(id: itemId, status: status)
             } catch {
-                toasts.show(String(localized: "Couldn't update status"), type: .error)
+                toasts.show(String(localized: "Couldn't update status", bundle: .appStrings), type: .error)
             }
             router.settleStatusChange(itemId: itemId)
         }

@@ -23,7 +23,7 @@ struct ProfileWebScreen: View {
                     circleButton("chevron.left", label: "Back") { model.webView?.goBack() }
                 }
                 VStack(alignment: .leading, spacing: 1) {
-                    Text(name.isEmpty ? String(localized: "Profile") : name)
+                    Text(name.isEmpty ? String(localized: "Profile", bundle: .appStrings) : name)
                         .font(.system(size: 16, weight: .bold))
                         .foregroundStyle(Theme.textPrimary)
                         .lineLimit(1)

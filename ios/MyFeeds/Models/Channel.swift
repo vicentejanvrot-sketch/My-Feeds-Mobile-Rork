@@ -36,6 +36,6 @@ nonisolated struct Channel: Codable, Identifiable, Hashable, Sendable {
         if let channelName, !channelName.isEmpty { return channelName }
         if let handle, !handle.isEmpty { return handle }
         if let channelUrl, !channelUrl.isEmpty { return channelUrl }
-        return String(localized: "Unnamed")
+        return String(localized: "Unnamed", bundle: .appStrings)
     }
 }

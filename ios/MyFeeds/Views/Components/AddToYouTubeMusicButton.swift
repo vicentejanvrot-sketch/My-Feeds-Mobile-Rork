@@ -20,10 +20,10 @@ struct AddToYouTubeMusicButton: View {
 
     private var addLabel: String {
         switch kind {
-        case "video": return String(localized: "Add video to YouTube Music")
-        case "single": return String(localized: "Add song to YouTube Music")
-        case "ep": return String(localized: "Add EP to YouTube Music")
-        default: return String(localized: "Add album to YouTube Music")
+        case "video": return String(localized: "Add video to YouTube Music", bundle: .appStrings)
+        case "single": return String(localized: "Add song to YouTube Music", bundle: .appStrings)
+        case "ep": return String(localized: "Add EP to YouTube Music", bundle: .appStrings)
+        default: return String(localized: "Add album to YouTube Music", bundle: .appStrings)
         }
     }
 
@@ -41,8 +41,8 @@ struct AddToYouTubeMusicButton: View {
                             .foregroundStyle(Self.red)
                     }
                     Text(state == .added
-                         ? String(localized: "Added to YouTube Music")
-                         : account.isConnected ? addLabel : String(localized: "Connect YouTube to add it"))
+                         ? String(localized: "Added to YouTube Music", bundle: .appStrings)
+                         : account.isConnected ? addLabel : String(localized: "Connect YouTube to add it", bundle: .appStrings))
                         .font(.system(size: 14, weight: .bold))
                         .foregroundStyle(Theme.textPrimary)
                 }
@@ -66,16 +66,16 @@ struct AddToYouTubeMusicButton: View {
             do {
                 if !account.isConnected {
                     try await account.connect()
-                    toasts.show(String(localized: "YouTube connected"))
+                    toasts.show(String(localized: "YouTube connected", bundle: .appStrings))
                 }
                 state = .adding
                 let added = try await account.addToMusicPlaylist(videoIds: videoIds)
                 state = .added
                 toasts.show(added == 0
-                    ? String(localized: "Already in your \"My Feeds\" playlist")
+                    ? String(localized: "Already in your \"My Feeds\" playlist", bundle: .appStrings)
                     : kind == "video"
-                        ? String(localized: "Added \(added) videos to \"My Feeds\" in YouTube Music")
-                        : String(localized: "Added \(added) songs to \"My Feeds\" in YouTube Music"))
+                        ? String(localized: "Added \(added) videos to \"My Feeds\" in YouTube Music", bundle: .appStrings)
+                        : String(localized: "Added \(added) songs to \"My Feeds\" in YouTube Music", bundle: .appStrings))
             } catch YouTubeAccountError.cancelled {
                 state = .idle
             } catch {

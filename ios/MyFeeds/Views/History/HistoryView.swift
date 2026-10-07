@@ -101,8 +101,8 @@ struct HistoryView: View {
                     .font(.system(size: 24, weight: .heavy))
                     .foregroundStyle(Theme.textPrimary)
                 Text(runs.isEmpty
-                     ? String(localized: "Timeline of collection activity")
-                     : String(localized: "\(runs.count) runs across all collections"))
+                     ? String(localized: "Timeline of collection activity", bundle: .appStrings)
+                     : String(localized: "\(runs.count) runs across all collections", bundle: .appStrings))
                     .font(.system(size: 13))
                     .foregroundStyle(Theme.textSecondary)
             }
@@ -114,7 +114,7 @@ struct HistoryView: View {
                     HStack(spacing: 6) {
                         Image(systemName: "trash")
                             .font(.system(size: 14))
-                        Text(isDeletingAll ? String(localized: "Deleting…") : String(localized: "Delete All"))
+                        Text(isDeletingAll ? String(localized: "Deleting…", bundle: .appStrings) : String(localized: "Delete All", bundle: .appStrings))
                             .font(.system(size: 13, weight: .semibold))
                     }
                     .foregroundStyle(Theme.destructive)
@@ -180,10 +180,10 @@ struct HistoryView: View {
         Task {
             do {
                 try await SupabaseService.shared.cancelRun(runId: run.id)
-                toasts.show(String(localized: "Run cancelled"), type: .info)
+                toasts.show(String(localized: "Run cancelled", bundle: .appStrings), type: .info)
                 await load()
             } catch {
-                toasts.show(String(localized: "Failed to cancel run"), type: .error)
+                toasts.show(String(localized: "Failed to cancel run", bundle: .appStrings), type: .error)
             }
             cancellingRunId = nil
         }
@@ -195,10 +195,10 @@ struct HistoryView: View {
         Task {
             do {
                 try await SupabaseService.shared.clearRuns(ids: ids)
-                toasts.show(String(localized: "Run history deleted"))
+                toasts.show(String(localized: "Run history deleted", bundle: .appStrings))
                 await load()
             } catch {
-                toasts.show(String(localized: "Failed to delete run history"), type: .error)
+                toasts.show(String(localized: "Failed to delete run history", bundle: .appStrings), type: .error)
             }
             isDeletingAll = false
         }
@@ -224,7 +224,7 @@ private struct RunCard: View {
         VStack(alignment: .leading, spacing: 0) {
             HStack(spacing: 10) {
                 NavigationLink(value: AppRoute.agentDetail(run.agentId)) {
-                    Text(agent?.name ?? String(localized: "Unknown Collection"))
+                    Text(agent?.name ?? String(localized: "Unknown Collection", bundle: .appStrings))
                         .font(.system(size: 16, weight: .bold))
                         .foregroundStyle(Theme.textPrimary)
                         .lineLimit(1)
@@ -249,7 +249,7 @@ private struct RunCard: View {
                     HStack(spacing: 6) {
                         Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
                             .font(.system(size: 12, weight: .semibold))
-                        Text(isExpanded ? String(localized: "Hide channels") : String(localized: "Channels (\(channels.count))"))
+                        Text(isExpanded ? String(localized: "Hide channels", bundle: .appStrings) : String(localized: "Channels (\(channels.count))", bundle: .appStrings))
                             .font(.system(size: 12, weight: .semibold))
                     }
                     .foregroundStyle(Theme.textSecondary)
@@ -418,7 +418,7 @@ private struct RunCard: View {
                 .foregroundStyle(Theme.textPrimary)
                 .lineLimit(1)
             Spacer()
-            Text(channel.lastScannedAt != nil ? Format.timeAgo(channel.lastScannedAt) : String(localized: "Never"))
+            Text(channel.lastScannedAt != nil ? Format.timeAgo(channel.lastScannedAt) : String(localized: "Never", bundle: .appStrings))
                 .font(.system(size: 11))
                 .foregroundStyle(Theme.textMuted)
         }

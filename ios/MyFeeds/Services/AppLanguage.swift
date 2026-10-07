@@ -106,12 +106,24 @@ final class LiveLanguage {
     var locale: Locale { Locale(identifier: code) }
 }
 
-/// Bundle.main is switched to this class at launch so every lookup
-/// (Text("..."), String(localized:), NSLocalizedString) reads the strings of
-/// the language picked in Settings instead of the one iOS chose at launch.
+extension Bundle {
+    /// The strings of the language picked in Settings. Pass it to every
+    /// String(localized:) call (`bundle: .appStrings`): that initializer
+    /// doesn't go through LanguageBundle's override below, so without it the
+    /// text would stay in the language the app was launched in.
+    nonisolated static var appStrings: Bundle { LanguageBundle.strings }
+}
+
+/// Bundle.main is switched to this class at launch so Text("...") and
+/// NSLocalizedString read the strings of the language picked in Settings
+/// instead of the one iOS chose at launch. String(localized:) needs
+/// `bundle: .appStrings` (see above).
 nonisolated final class LanguageBundle: Bundle, @unchecked Sendable {
     nonisolated(unsafe) private static var languageBundle: Bundle?
     nonisolated(unsafe) private static var installed = false
+
+    /// The chosen language's .lproj bundle, or Bundle.main if it wasn't found.
+    static var strings: Bundle { languageBundle ?? Bundle.main }
 
     static func install() {
         guard !installed else { return }

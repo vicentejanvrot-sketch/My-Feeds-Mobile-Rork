@@ -694,13 +694,13 @@ struct LoginView: View {
                 Button {
                     showPassword.toggle()
                 } label: {
-                    Text(showPassword ? String(localized: "Hide") : String(localized: "password.show", defaultValue: "Show"))
+                    Text(showPassword ? String(localized: "Hide", bundle: .appStrings) : String(localized: "password.show", defaultValue: "Show", bundle: .appStrings))
                         .font(.system(size: 13, weight: .semibold))
                         .foregroundStyle(LBColor.placeholderToggle)
                         .frame(minWidth: 56, minHeight: 44)
                 }
                 .padding(.trailing, 4)
-                .accessibilityLabel(showPassword ? String(localized: "Hide password") : String(localized: "Show password"))
+                .accessibilityLabel(showPassword ? String(localized: "Hide password", bundle: .appStrings) : String(localized: "Show password", bundle: .appStrings))
             }
 
             Button {
@@ -791,7 +791,7 @@ struct LoginView: View {
                         Image(systemName: biometryIcon)
                             .font(.system(size: 18, weight: .semibold))
                     }
-                    Text("Sign in with \(biometryName ?? String(localized: "biometrics"))")
+                    Text("Sign in with \(biometryName ?? String(localized: "biometrics", bundle: .appStrings))")
                         .font(.system(size: 15, weight: .bold))
                 }
                 .foregroundStyle(.white)
@@ -802,7 +802,7 @@ struct LoginView: View {
             }
             .disabled(isBiometricLoading || isLoading)
 
-            Text("Use \(biometryName ?? String(localized: "biometrics")) to unlock your saved login.")
+            Text("Use \(biometryName ?? String(localized: "biometrics", bundle: .appStrings)) to unlock your saved login.")
                 .font(.system(size: 12))
                 .foregroundStyle(Theme.textMuted)
                 .multilineTextAlignment(.center)
@@ -838,7 +838,7 @@ struct LoginView: View {
         let trimmedEmail = email.trimmingCharacters(in: .whitespaces)
         guard !trimmedEmail.isEmpty, !password.isEmpty else {
             UINotificationFeedbackGenerator().notificationOccurred(.error)
-            toast = AuthToast(message: String(localized: "Please fill in both email and password."), isError: true)
+            toast = AuthToast(message: String(localized: "Please fill in both email and password.", bundle: .appStrings), isError: true)
             return
         }
         isLoading = true
@@ -853,7 +853,7 @@ struct LoginView: View {
                 // login when the user has opted in (toggle in Settings).
                 auth.persistCredentialsForBiometricLogin(email: trimmedEmail, password: password)
                 UINotificationFeedbackGenerator().notificationOccurred(.success)
-                toast = AuthToast(message: String(localized: "Welcome back!"), isError: false)
+                toast = AuthToast(message: String(localized: "Welcome back!", bundle: .appStrings), isError: false)
             }
         }
     }
@@ -867,7 +867,7 @@ struct LoginView: View {
             toast = AuthToast(message: error, isError: true)
         } else {
             UINotificationFeedbackGenerator().notificationOccurred(.success)
-            toast = AuthToast(message: String(localized: "Welcome back!"), isError: false)
+            toast = AuthToast(message: String(localized: "Welcome back!", bundle: .appStrings), isError: false)
         }
     }
 }

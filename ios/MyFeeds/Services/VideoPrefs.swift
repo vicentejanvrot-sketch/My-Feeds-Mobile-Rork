@@ -15,8 +15,8 @@ enum VideoQuality: String, CaseIterable {
 
     var label: String {
         switch self {
-        case .highest: return String(localized: "Highest available")
-        case .auto: return String(localized: "Auto")
+        case .highest: return String(localized: "Highest available", bundle: .appStrings)
+        case .auto: return String(localized: "Auto", bundle: .appStrings)
         case .q1080: return "1080p HD"
         case .q720: return "720p HD"
         case .q480: return "480p"
@@ -46,7 +46,7 @@ enum VideoSpeed: String, CaseIterable {
     case x175 = "1.75"
     case x2 = "2"
 
-    var label: String { self == .x1 ? String(localized: "Normal (1×)") : "\(rawValue)×" }
+    var label: String { self == .x1 ? String(localized: "Normal (1×)", bundle: .appStrings) : "\(rawValue)×" }
     var pillLabel: String { "\(rawValue)×" }
     var value: Double { Double(rawValue) ?? 1 }
 }

@@ -108,12 +108,12 @@ final class AuthStore {
     /// - Returns: An error string on failure, `nil` on success.
     func signInWithBiometrics() async -> String? {
         guard let (email, password) = KeychainCredentialStore.savedCredentials() else {
-            return String(localized: "No saved credentials. Please sign in with your password first.")
+            return String(localized: "No saved credentials. Please sign in with your password first.", bundle: .appStrings)
         }
         let ok = await BiometricAuthService.authenticate(
-            reason: String(localized: "Unlock My Feeds with your saved login.")
+            reason: String(localized: "Unlock My Feeds with your saved login.", bundle: .appStrings)
         )
-        guard ok else { return String(localized: "Biometric authentication was canceled.") }
+        guard ok else { return String(localized: "Biometric authentication was canceled.", bundle: .appStrings) }
         return await signIn(email: email, password: password)
     }
 }

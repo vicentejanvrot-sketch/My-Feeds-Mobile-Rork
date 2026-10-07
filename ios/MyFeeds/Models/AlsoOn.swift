@@ -260,18 +260,18 @@ nonisolated enum AlsoOn {
     /// server's search is shown as it is.
     static func displayEvidence(_ evidence: String) -> String {
         switch evidence {
-        case "You confirmed this match.": return String(localized: "You confirmed this match.")
-        case "You combined these cards.": return String(localized: "You combined these cards.")
+        case "You confirmed this match.": return String(localized: "You confirmed this match.", bundle: .appStrings)
+        case "You combined these cards.": return String(localized: "You combined these cards.", bundle: .appStrings)
         default: return evidence
         }
     }
 
     static func accountLabel(platform: SourcePlatform, handle: String?, url: String) -> String {
-        if platform == .appleMusic { return String(localized: "Artist page") }
-        if platform == .applePodcasts { return String(localized: "Show") }
-        if platform == .appleBooks { return String(localized: "Author") }
-        if platform == .youtubeMusic { return String(localized: "Artist") }
-        if platform == .spotify { return url.contains("/show/") ? String(localized: "Show") : String(localized: "Artist") }
+        if platform == .appleMusic { return String(localized: "Artist page", bundle: .appStrings) }
+        if platform == .applePodcasts { return String(localized: "Show", bundle: .appStrings) }
+        if platform == .appleBooks { return String(localized: "Author", bundle: .appStrings) }
+        if platform == .youtubeMusic { return String(localized: "Artist", bundle: .appStrings) }
+        if platform == .spotify { return url.contains("/show/") ? String(localized: "Show", bundle: .appStrings) : String(localized: "Artist", bundle: .appStrings) }
         guard let handle, !handle.isEmpty, platform != .facebook else {
             var value = url
             for prefix in ["https://www.", "http://www.", "https://", "http://"] where value.hasPrefix(prefix) {
@@ -283,7 +283,7 @@ nonisolated enum AlsoOn {
         }
         switch platform {
         case .x, .instagram, .tiktok: return "@" + handle
-        case .youtube: return isYouTubeChannelId(handle) ? String(localized: "Channel") : "@" + handle
+        case .youtube: return isYouTubeChannelId(handle) ? String(localized: "Channel", bundle: .appStrings) : "@" + handle
         case .reddit: return "u/" + redditName(handle)
         default: return handle
         }
@@ -300,7 +300,7 @@ nonisolated enum AlsoOn {
         }
         if platform == .linkedin || platform == .github, let handle = ch.handle, !handle.isEmpty { return handle }
         if platform == .reddit, let handle = ch.handle, !handle.isEmpty { return "u/" + redditName(handle) }
-        return cleanName(ch.channelName, fallback: ch.channelUrl ?? String(localized: "Source"))
+        return cleanName(ch.channelName, fallback: ch.channelUrl ?? String(localized: "Source", bundle: .appStrings))
     }
 
     /// Where to follow this account on the platform itself. X and YouTube open

@@ -85,7 +85,7 @@ struct ResetPasswordView: View {
     private func submit() {
         guard !newPassword.isEmpty, !confirmPassword.isEmpty else {
             UINotificationFeedbackGenerator().notificationOccurred(.error)
-            toast = AuthToast(message: String(localized: "Please fill in both password fields."), isError: true)
+            toast = AuthToast(message: String(localized: "Please fill in both password fields.", bundle: .appStrings), isError: true)
             return
         }
         isLoading = true
@@ -97,7 +97,7 @@ struct ResetPasswordView: View {
                 toast = AuthToast(message: error, isError: true)
             } else {
                 UINotificationFeedbackGenerator().notificationOccurred(.success)
-                toast = AuthToast(message: String(localized: "Password updated! Sign in with your new password."), isError: false)
+                toast = AuthToast(message: String(localized: "Password updated! Sign in with your new password.", bundle: .appStrings), isError: false)
                 try? await Task.sleep(for: .seconds(1.5))
                 path.removeAll()
             }

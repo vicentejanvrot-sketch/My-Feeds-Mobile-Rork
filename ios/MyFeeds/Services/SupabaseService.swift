@@ -444,7 +444,7 @@ final class SupabaseService {
     func addSource(agentId: String, platform: SourcePlatform, value: String, priority: Int, privateAccount: Bool = false) async throws -> Channel {
         let decoder = JSONDecoder()
         decoder.keyDecodingStrategy = .convertFromSnakeCase
-        let fallback = String(localized: "Couldn't add this \(platform.sourceNoun.lowercased()).")
+        let fallback = String(localized: "Couldn't add this \(platform.sourceNoun.lowercased()).", bundle: .appStrings)
         let response: AddSourceResponse
         do {
             response = try await client.functions.invoke(

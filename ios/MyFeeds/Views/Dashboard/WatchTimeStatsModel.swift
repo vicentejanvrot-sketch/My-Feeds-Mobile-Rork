@@ -57,9 +57,9 @@ enum StatsPeriod: String, CaseIterable {
 
     var label: String {
         switch self {
-        case .week: return String(localized: "7 days")
-        case .month: return String(localized: "30 days")
-        case .all: return String(localized: "All time")
+        case .week: return String(localized: "7 days", bundle: .appStrings)
+        case .month: return String(localized: "30 days", bundle: .appStrings)
+        case .all: return String(localized: "All time", bundle: .appStrings)
         }
     }
 
@@ -197,7 +197,7 @@ nonisolated enum WatchTimeStatsBuilder {
 
         for item in items {
             let agentId = item.agentId ?? "unknown"
-            let agentName = agentNames[agentId] ?? String(localized: "Unknown Collection")
+            let agentName = agentNames[agentId] ?? String(localized: "Unknown Collection", bundle: .appStrings)
             var agent = agentBuckets[agentId] ?? WatchTimeStatsData.AgentBucket(id: agentId, name: agentName)
             let duration = durations[item.id] ?? 0
             agent.totalCount += 1
@@ -211,7 +211,7 @@ nonisolated enum WatchTimeStatsBuilder {
 
             let channelId = item.channelId ?? "unknown"
             var channel = channelBuckets[agentId]?[channelId]
-                ?? WatchTimeStatsData.ChannelBucket(id: channelId, name: item.channelName ?? String(localized: "Unknown Channel"))
+                ?? WatchTimeStatsData.ChannelBucket(id: channelId, name: item.channelName ?? String(localized: "Unknown Channel", bundle: .appStrings))
             channel.totalCount += 1
             if isWatched(item.userStatus) {
                 channel.watchedCount += 1

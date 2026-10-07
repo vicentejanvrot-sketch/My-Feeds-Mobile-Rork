@@ -49,10 +49,10 @@ struct DashboardView: View {
                     followingCard
 
                     CollapsibleSectionHeader(
-                        title: String(localized: "Feeds"),
+                        title: String(localized: "Feeds", bundle: .appStrings),
                         count: sortedAgents.count,
                         isOpen: $feedsOpen,
-                        actionLabel: agents.isEmpty ? nil : String(localized: "View All")
+                        actionLabel: agents.isEmpty ? nil : String(localized: "View All", bundle: .appStrings)
                     ) {
                         router.openFeed(agentId: nil, status: nil)
                     }
@@ -81,7 +81,7 @@ struct DashboardView: View {
                     WatchTimeStatsSection()
 
                     CollapsibleSectionHeader(
-                        title: String(localized: "My Collections"),
+                        title: String(localized: "My Collections", bundle: .appStrings),
                         count: sortedAgents.count,
                         isOpen: $collectionsOpen
                     )
@@ -310,7 +310,7 @@ struct DashboardView: View {
     private func saveOnboardingHidden(_ hidden: Bool) {
         Task {
             if let message = await OnboardingPrefs.setHidden(hidden) {
-                toasts.show(String(localized: "Couldn't save that setting: \(message)"), type: .error)
+                toasts.show(String(localized: "Couldn't save that setting: \(message)", bundle: .appStrings), type: .error)
             }
         }
     }
@@ -319,7 +319,7 @@ struct DashboardView: View {
     private func handleWizardClose(_ result: OnboardingResult?) {
         wizardOpen = false
         guard let result else { return }
-        toasts.show(String(localized: "\(result.agent.name) is set up"))
+        toasts.show(String(localized: "\(result.agent.name) is set up", bundle: .appStrings))
         Task {
             await load()
             if result.runNow {
@@ -354,7 +354,7 @@ struct DashboardView: View {
         Task {
             do {
                 try await SupabaseService.shared.deleteAgent(id: agent.id)
-                toasts.show(String(localized: "Collection deleted"))
+                toasts.show(String(localized: "Collection deleted", bundle: .appStrings))
                 await load()
             } catch {
                 toasts.show(error.localizedDescription, type: .error)
@@ -666,8 +666,8 @@ private struct CollapsibleSectionHeader: View {
             }
             .buttonStyle(.plain)
             .accessibilityLabel(title)
-            .accessibilityValue(isOpen ? String(localized: "Expanded") : String(localized: "Collapsed"))
-            .accessibilityHint(isOpen ? String(localized: "Collapses the section") : String(localized: "Expands the section"))
+            .accessibilityValue(isOpen ? String(localized: "Expanded", bundle: .appStrings) : String(localized: "Collapsed", bundle: .appStrings))
+            .accessibilityHint(isOpen ? String(localized: "Collapses the section", bundle: .appStrings) : String(localized: "Expands the section", bundle: .appStrings))
             Spacer()
             if let actionLabel, let action {
                 Button(action: action) {

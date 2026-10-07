@@ -51,10 +51,10 @@ extension Agent {
     /// schedule_frequency ("daily", "weekly", "hourly", none) as shown to the user.
     static func frequencyLabel(_ value: String?) -> String {
         switch value?.lowercased() {
-        case "daily": return String(localized: "Daily")
-        case "weekly": return String(localized: "Weekly")
-        case "hourly": return String(localized: "Hourly")
-        case nil, "", "manual": return String(localized: "Manual")
+        case "daily": return String(localized: "Daily", bundle: .appStrings)
+        case "weekly": return String(localized: "Weekly", bundle: .appStrings)
+        case "hourly": return String(localized: "Hourly", bundle: .appStrings)
+        case nil, "", "manual": return String(localized: "Manual", bundle: .appStrings)
         default: return value ?? ""
         }
     }

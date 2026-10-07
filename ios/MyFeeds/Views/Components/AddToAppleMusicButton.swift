@@ -32,7 +32,7 @@ struct AddToAppleMusicButton: View {
                             .font(.system(size: 14, weight: .semibold))
                             .foregroundStyle(Self.appleMusicRed)
                     }
-                    Text(state == .added ? String(localized: "Added to Apple Music") : single ? String(localized: "Add song to Apple Music") : String(localized: "Add album to Apple Music"))
+                    Text(state == .added ? String(localized: "Added to Apple Music", bundle: .appStrings) : single ? String(localized: "Add song to Apple Music", bundle: .appStrings) : String(localized: "Add album to Apple Music", bundle: .appStrings))
                         .font(.system(size: 14, weight: .bold))
                         .foregroundStyle(Theme.textPrimary)
                 }
@@ -58,7 +58,7 @@ struct AddToAppleMusicButton: View {
             do {
                 let added = try await AppleMusicLibrary.addRelease(albumId: albumId)
                 state = .added
-                toasts.show(String(localized: "Added \(added) songs to \"My Feeds\" in Apple Music"))
+                toasts.show(String(localized: "Added \(added) songs to \"My Feeds\" in Apple Music", bundle: .appStrings))
             } catch AppleMusicLibraryError.cancelled {
                 state = .idle
             } catch {

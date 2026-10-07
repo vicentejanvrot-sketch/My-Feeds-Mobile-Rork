@@ -38,7 +38,7 @@ struct OnboardingWizardView: View {
         var isPrivate = false
     }
 
-    private let stepLabels = [String(localized: "Your collection"), String(localized: "Sources"), String(localized: "Read & watch")]
+    private let stepLabels = [String(localized: "Your collection", bundle: .appStrings), String(localized: "Sources", bundle: .appStrings), String(localized: "Read & watch", bundle: .appStrings)]
     private let lastStep = 4
 
     @State private var step = 0
@@ -73,8 +73,8 @@ struct OnboardingWizardView: View {
             || (step == 2 && sources.isEmpty)
     }
     private var hint: String? {
-        if step == 1 && trimmedName.isEmpty { return String(localized: "Give your collection a name.") }
-        if step == 2 && sources.isEmpty { return String(localized: "Add at least one source, or skip for now.") }
+        if step == 1 && trimmedName.isEmpty { return String(localized: "Give your collection a name.", bundle: .appStrings) }
+        if step == 2 && sources.isEmpty { return String(localized: "Add at least one source, or skip for now.", bundle: .appStrings) }
         return nil
     }
 
@@ -183,9 +183,9 @@ struct OnboardingWizardView: View {
                 }
             }
             VStack(spacing: 10) {
-                Button { go(to: 1) } label: { primaryLabel(String(localized: "Get started")) }
+                Button { go(to: 1) } label: { primaryLabel(String(localized: "Get started", bundle: .appStrings)) }
                     .buttonStyle(.plain)
-                Button { startTour() } label: { outlineLabel(String(localized: "See how it works")) }
+                Button { startTour() } label: { outlineLabel(String(localized: "See how it works", bundle: .appStrings)) }
                     .buttonStyle(.plain)
                 Button { close(runNow: false) } label: {
                     Text("Skip for now")
@@ -220,11 +220,11 @@ struct OnboardingWizardView: View {
     private var agentStep: some View {
         VStack(alignment: .leading, spacing: 20) {
             stepHeading(
-                String(localized: "Build your first collection"),
+                String(localized: "Build your first collection", bundle: .appStrings),
                 "A collection follows one topic and pulls the best posts from its sources into one stream. Its name is the topic, so name it after what you want to follow."
             )
             VStack(alignment: .leading, spacing: 8) {
-                fieldLabel(String(localized: "Collection name and topic"))
+                fieldLabel(String(localized: "Collection name and topic", bundle: .appStrings))
                 TextField("", text: $name, prompt: Text("e.g. Crypto, AI, Power Apps").foregroundColor(Theme.textMuted))
                     .modifier(WizardInputStyle())
                     .submitLabel(.next)
@@ -236,7 +236,7 @@ struct OnboardingWizardView: View {
             }
             HStack(spacing: 12) {
                 VStack(alignment: .leading, spacing: 2) {
-                    fieldLabel(String(localized: "Email me a digest after each run"))
+                    fieldLabel(String(localized: "Email me a digest after each run", bundle: .appStrings))
                     Text("Sent to your account email. You can change it on the collection later.")
                         .font(.system(size: 13))
                         .foregroundStyle(Theme.textSecondary)
@@ -277,12 +277,12 @@ struct OnboardingWizardView: View {
     private var sourcesStep: some View {
         VStack(alignment: .leading, spacing: 20) {
             stepHeading(
-                savedName.isEmpty ? String(localized: "Add sources to your collection") : String(localized: "Add sources to \(savedName)"),
+                savedName.isEmpty ? String(localized: "Add sources to your collection", bundle: .appStrings) : String(localized: "Add sources to \(savedName)", bundle: .appStrings),
                 "Add the channels, accounts and communities this collection should watch. You can add more later from the collection page."
             )
 
             VStack(alignment: .leading, spacing: 10) {
-                fieldLabel(String(localized: "Platform"))
+                fieldLabel(String(localized: "Platform", bundle: .appStrings))
                 LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: 3), spacing: 8) {
                     ForEach(SourcePlatform.addable, id: \.self) { p in
                         let selected = platform == p
@@ -409,7 +409,7 @@ struct OnboardingWizardView: View {
             }
 
             VStack(alignment: .leading, spacing: 8) {
-                fieldLabel(sources.isEmpty ? String(localized: "Added") : String(localized: "Added (\(sources.count))"))
+                fieldLabel(sources.isEmpty ? String(localized: "Added", bundle: .appStrings) : String(localized: "Added (\(sources.count))", bundle: .appStrings))
                 if sources.isEmpty {
                     Text("Nothing yet. Add at least one source so the collection has something to watch.")
                         .font(.system(size: 13))
@@ -464,7 +464,7 @@ struct OnboardingWizardView: View {
     private var tourStep: some View {
         VStack(alignment: .leading, spacing: 18) {
             stepHeading(
-                String(localized: "Watch and read without leaving"),
+                String(localized: "Watch and read without leaving", bundle: .appStrings),
                 "Pick a platform to see how its posts work in My Feeds, then tap the numbers."
             )
             ReadWatchTourView(defaultPlatform: sources.first?.platform ?? .youtube)
@@ -488,19 +488,19 @@ struct OnboardingWizardView: View {
                     .lineSpacing(4)
             }
             VStack(spacing: 0) {
-                recapRow(String(localized: "Collection"), savedName)
+                recapRow(String(localized: "Collection", bundle: .appStrings), savedName)
                 Rectangle().fill(Theme.border).frame(height: 0.5)
-                recapRow(String(localized: "Sources"), sources.isEmpty ? String(localized: "None yet") : String(localized: "\(sources.count) added"))
+                recapRow(String(localized: "Sources", bundle: .appStrings), sources.isEmpty ? String(localized: "None yet", bundle: .appStrings) : String(localized: "\(sources.count) added", bundle: .appStrings))
                 Rectangle().fill(Theme.border).frame(height: 0.5)
-                recapRow(String(localized: "Email digest"), savedEmailMe ? String(localized: "On") : String(localized: "Off"))
+                recapRow(String(localized: "Email digest", bundle: .appStrings), savedEmailMe ? String(localized: "On", bundle: .appStrings) : String(localized: "Off", bundle: .appStrings))
             }
             .cardStyle(radius: 12)
             VStack(spacing: 10) {
-                Button { close(runNow: true) } label: { primaryLabel(String(localized: "Run it now"), icon: "play.fill") }
+                Button { close(runNow: true) } label: { primaryLabel(String(localized: "Run it now", bundle: .appStrings), icon: "play.fill") }
                     .buttonStyle(.plain)
                     .disabled(sources.isEmpty)
                     .opacity(sources.isEmpty ? 0.45 : 1)
-                Button { close(runNow: false) } label: { outlineLabel(String(localized: "Go to my feed")) }
+                Button { close(runNow: false) } label: { outlineLabel(String(localized: "Go to my feed", bundle: .appStrings)) }
                     .buttonStyle(.plain)
             }
             dontShowBox
@@ -552,7 +552,7 @@ struct OnboardingWizardView: View {
                 }
 
                 Button { next() } label: {
-                    primaryLabel(tourOnly ? String(localized: "Done") : step == lastStep - 1 ? String(localized: "Finish") : String(localized: "Continue"), busy: saving || finishing)
+                    primaryLabel(tourOnly ? String(localized: "Done", bundle: .appStrings) : step == lastStep - 1 ? String(localized: "Finish", bundle: .appStrings) : String(localized: "Continue", bundle: .appStrings), busy: saving || finishing)
                 }
                 .buttonStyle(.plain)
                 .disabled(nextDisabled)
@@ -774,7 +774,7 @@ struct OnboardingWizardView: View {
                 savedEmailMe = emailMe
                 go(to: 2)
             } catch {
-                errorText = String(localized: "Couldn't save the collection: \(error.localizedDescription)")
+                errorText = String(localized: "Couldn't save the collection: \(error.localizedDescription)", bundle: .appStrings)
             }
             saving = false
         }
@@ -788,12 +788,12 @@ struct OnboardingWizardView: View {
         errorText = nil
         privateOffer = nil
         if let detected = SourcePlatform.detect(from: value), detected != platform {
-            errorText = String(localized: "That's a \(detected.label) link. Select \(detected.label) or paste a \(platform.label) link.")
+            errorText = String(localized: "That's a \(detected.label) link. Select \(detected.label) or paste a \(platform.label) link.", bundle: .appStrings)
             return
         }
         if platform == .youtube,
            value.range(of: #"youtube\.com|youtu\.be|^@"#, options: [.regularExpression, .caseInsensitive]) == nil {
-            errorText = String(localized: "Paste the channel link, like youtube.com/@ChannelName.")
+            errorText = String(localized: "Paste the channel link, like youtube.com/@ChannelName.", bundle: .appStrings)
             return
         }
         let chosen = platform
@@ -829,7 +829,7 @@ struct OnboardingWizardView: View {
                 try await SupabaseService.shared.deleteChannel(id: source.id)
                 sources.removeAll { $0.id == source.id }
             } catch {
-                errorText = String(localized: "Couldn't remove it: \(error.localizedDescription)")
+                errorText = String(localized: "Couldn't remove it: \(error.localizedDescription)", bundle: .appStrings)
             }
             removingId = nil
         }
@@ -847,7 +847,7 @@ struct OnboardingWizardView: View {
                 savedName = agent.name
                 go(to: lastStep)
             } catch {
-                errorText = String(localized: "Something went wrong saving your collection. Check it on the Dashboard and try again.")
+                errorText = String(localized: "Something went wrong saving your collection. Check it on the Dashboard and try again.", bundle: .appStrings)
             }
             finishing = false
         }

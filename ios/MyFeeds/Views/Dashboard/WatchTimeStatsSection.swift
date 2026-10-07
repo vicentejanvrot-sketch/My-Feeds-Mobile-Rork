@@ -17,8 +17,8 @@ struct WatchTimeStatsSection: View {
 
         var label: String {
             switch self {
-            case .bar: return String(localized: "Bar")
-            case .area: return String(localized: "Area")
+            case .bar: return String(localized: "Bar", bundle: .appStrings)
+            case .area: return String(localized: "Area", bundle: .appStrings)
             }
         }
     }

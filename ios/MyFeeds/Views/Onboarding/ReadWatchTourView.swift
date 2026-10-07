@@ -178,8 +178,8 @@ struct ReadWatchTourView: View {
                     .font(.system(size: 11, weight: .heavy))
                     .kerning(0.6)
                     .foregroundStyle(Theme.accent)
-                momentRow(time: "4:10", text: String(localized: "When small-cap loans reset"))
-                momentRow(time: "11:32", text: String(localized: "What would change his view"))
+                momentRow(time: "4:10", text: String(localized: "When small-cap loans reset", bundle: .appStrings))
+                momentRow(time: "11:32", text: String(localized: "What would change his view", bundle: .appStrings))
             }
         } else {
             pillGrid(tour.saveActions, note: nil)
@@ -321,181 +321,181 @@ private struct TourContent {
         switch platform {
         case .spotify:
             return TourContent(
-                author: "Nova Lane", handle: String(localized: "New single"), when: String(localized: "\(1)d"), media: .video,
+                author: "Nova Lane", handle: String(localized: "New single", bundle: .appStrings), when: String(localized: "\(1)d", bundle: .appStrings), media: .video,
                 title: "Paper Lanterns",
-                text: String(localized: "New single by Nova Lane · 1 track · Pop"),
+                text: String(localized: "New single by Nova Lane · 1 track · Pop", bundle: .appStrings),
                 steps: [
-                    TourStep(title: String(localized: "Listen here"), body: String(localized: "Tap it to open Spotify's player and hear a preview right inside My Feeds.")),
-                    TourStep(title: String(localized: "Heart to save"), body: String(localized: "The heart saves it in My Feeds. Save adds it to Later.")),
-                    TourStep(title: String(localized: "Play it in Spotify"), body: String(localized: "\"Open in Spotify\" plays the full release in the Spotify app, where you can like it or add it to a playlist.")),
+                    TourStep(title: String(localized: "Listen here", bundle: .appStrings), body: String(localized: "Tap it to open Spotify's player and hear a preview right inside My Feeds.", bundle: .appStrings)),
+                    TourStep(title: String(localized: "Heart to save", bundle: .appStrings), body: String(localized: "The heart saves it in My Feeds. Save adds it to Later.", bundle: .appStrings)),
+                    TourStep(title: String(localized: "Play it in Spotify", bundle: .appStrings), body: String(localized: "\"Open in Spotify\" plays the full release in the Spotify app, where you can like it or add it to a playlist.", bundle: .appStrings)),
                 ],
-                saveActions: [TourAction(icon: "heart", label: String(localized: "Like")), TourAction(icon: "bookmark", label: String(localized: "Save"))],
+                saveActions: [TourAction(icon: "heart", label: String(localized: "Like", bundle: .appStrings)), TourAction(icon: "bookmark", label: String(localized: "Save", bundle: .appStrings))],
                 outActions: [TourAction(icon: "arrow.up.right.square", label: "Spotify")],
-                outNote: String(localized: "Opens Spotify")
+                outNote: String(localized: "Opens Spotify", bundle: .appStrings)
             )
         case .youtube:
             return TourContent(
-                author: "Two Minute Markets", handle: "YouTube", when: String(localized: "\(2)h"), media: .video,
-                title: String(localized: "Why small caps lag when rates rise"),
+                author: "Two Minute Markets", handle: "YouTube", when: String(localized: "\(2)h", bundle: .appStrings), media: .video,
+                title: String(localized: "Why small caps lag when rates rise", bundle: .appStrings),
                 steps: [
-                    TourStep(title: String(localized: "Play it here"), body: String(localized: "Tap the video to watch it inside My Feeds. It remembers where you stopped.")),
-                    TourStep(title: String(localized: "Jump to the good parts"), body: String(localized: "Under the player, the summary lists the key moments. Tap a time to jump straight there.")),
-                    TourStep(title: String(localized: "Keep track"), body: String(localized: "Mark it Seen, Later or Liked from the card so your feed stays tidy.")),
+                    TourStep(title: String(localized: "Play it here", bundle: .appStrings), body: String(localized: "Tap the video to watch it inside My Feeds. It remembers where you stopped.", bundle: .appStrings)),
+                    TourStep(title: String(localized: "Jump to the good parts", bundle: .appStrings), body: String(localized: "Under the player, the summary lists the key moments. Tap a time to jump straight there.", bundle: .appStrings)),
+                    TourStep(title: String(localized: "Keep track", bundle: .appStrings), body: String(localized: "Mark it Seen, Later or Liked from the card so your feed stays tidy.", bundle: .appStrings)),
                 ]
             )
         case .x:
             return TourContent(
-                author: "Lena Ortiz", handle: "@lena_builds", when: String(localized: "\(5)h"), media: .text,
-                text: String(localized: "Onboarding rewrite is live. A thread on what we cut and why."),
-                quote: TourQuote(author: "Design Notes Daily", handle: "@designnotes", text: String(localized: "The best onboarding asks for one decision per screen.")),
+                author: "Lena Ortiz", handle: "@lena_builds", when: String(localized: "\(5)h", bundle: .appStrings), media: .text,
+                text: String(localized: "Onboarding rewrite is live. A thread on what we cut and why.", bundle: .appStrings),
+                quote: TourQuote(author: "Design Notes Daily", handle: "@designnotes", text: String(localized: "The best onboarding asks for one decision per screen.", bundle: .appStrings)),
                 steps: [
-                    TourStep(title: String(localized: "Read the whole post"), body: String(localized: "Tap the post to open it. Photos, videos and quoted posts show in full inside My Feeds.")),
-                    TourStep(title: String(localized: "Like or bookmark"), body: String(localized: "Like saves it in My Feeds. Bookmark adds it to Read later.")),
-                    TourStep(title: String(localized: "Reply or repost on X"), body: String(localized: "Replying and reposting open X, because they post from your X account.")),
+                    TourStep(title: String(localized: "Read the whole post", bundle: .appStrings), body: String(localized: "Tap the post to open it. Photos, videos and quoted posts show in full inside My Feeds.", bundle: .appStrings)),
+                    TourStep(title: String(localized: "Like or bookmark", bundle: .appStrings), body: String(localized: "Like saves it in My Feeds. Bookmark adds it to Read later.", bundle: .appStrings)),
+                    TourStep(title: String(localized: "Reply or repost on X", bundle: .appStrings), body: String(localized: "Replying and reposting open X, because they post from your X account.", bundle: .appStrings)),
                 ],
-                saveActions: [TourAction(icon: "heart", label: String(localized: "Like")), TourAction(icon: "bookmark", label: String(localized: "Bookmark"))],
-                outActions: [TourAction(icon: "bubble.left", label: String(localized: "Reply")), TourAction(icon: "arrow.2.squarepath", label: String(localized: "Repost"))],
-                outNote: String(localized: "Opens X")
+                saveActions: [TourAction(icon: "heart", label: String(localized: "Like", bundle: .appStrings)), TourAction(icon: "bookmark", label: String(localized: "Bookmark", bundle: .appStrings))],
+                outActions: [TourAction(icon: "bubble.left", label: String(localized: "Reply", bundle: .appStrings)), TourAction(icon: "arrow.2.squarepath", label: String(localized: "Repost", bundle: .appStrings))],
+                outNote: String(localized: "Opens X", bundle: .appStrings)
             )
         case .reddit:
             return TourContent(
-                author: "r/PowerApps", handle: "u/canvas_dev", when: String(localized: "\(8)h"), media: .text,
-                title: String(localized: "Patching a collection without the delegation warning?"),
-                text: String(localized: "I've got a gallery over 2,000 rows and Patch keeps complaining. What's the cleanest way around it?"),
+                author: "r/PowerApps", handle: "u/canvas_dev", when: String(localized: "\(8)h", bundle: .appStrings), media: .text,
+                title: String(localized: "Patching a collection without the delegation warning?", bundle: .appStrings),
+                text: String(localized: "I've got a gallery over 2,000 rows and Patch keeps complaining. What's the cleanest way around it?", bundle: .appStrings),
                 steps: [
-                    TourStep(title: String(localized: "Open the post"), body: String(localized: "Tap it to read the full post with its photos or video, plus a summary of the thread.")),
-                    TourStep(title: String(localized: "Upvote to save"), body: String(localized: "Upvote saves it in My Feeds, downvote marks it as read, and Save adds it to Read later.")),
-                    TourStep(title: String(localized: "Comments open on Reddit"), body: String(localized: "Tap the comment count to join the conversation on Reddit.")),
+                    TourStep(title: String(localized: "Open the post", bundle: .appStrings), body: String(localized: "Tap it to read the full post with its photos or video, plus a summary of the thread.", bundle: .appStrings)),
+                    TourStep(title: String(localized: "Upvote to save", bundle: .appStrings), body: String(localized: "Upvote saves it in My Feeds, downvote marks it as read, and Save adds it to Read later.", bundle: .appStrings)),
+                    TourStep(title: String(localized: "Comments open on Reddit", bundle: .appStrings), body: String(localized: "Tap the comment count to join the conversation on Reddit.", bundle: .appStrings)),
                 ],
                 saveActions: [
-                    TourAction(icon: "arrowshape.up", label: String(localized: "Upvote")),
-                    TourAction(icon: "arrowshape.down", label: String(localized: "Downvote")),
-                    TourAction(icon: "bookmark", label: String(localized: "Save")),
+                    TourAction(icon: "arrowshape.up", label: String(localized: "Upvote", bundle: .appStrings)),
+                    TourAction(icon: "arrowshape.down", label: String(localized: "Downvote", bundle: .appStrings)),
+                    TourAction(icon: "bookmark", label: String(localized: "Save", bundle: .appStrings)),
                 ],
-                outActions: [TourAction(icon: "bubble.left.and.bubble.right", label: String(localized: "Comments"))],
-                outNote: String(localized: "Opens Reddit")
+                outActions: [TourAction(icon: "bubble.left.and.bubble.right", label: String(localized: "Comments", bundle: .appStrings))],
+                outNote: String(localized: "Opens Reddit", bundle: .appStrings)
             )
         case .github:
             return TourContent(
-                author: "openfeeds", handle: String(localized: "New release"), when: String(localized: "\(1)d"), media: .text,
+                author: "openfeeds", handle: String(localized: "New release", bundle: .appStrings), when: String(localized: "\(1)d", bundle: .appStrings), media: .text,
                 title: "openfeeds/parser v1.4.0",
-                text: String(localized: "Release notes for the parser, with a short summary of what changed."),
+                text: String(localized: "Release notes for the parser, with a short summary of what changed.", bundle: .appStrings),
                 steps: [
-                    TourStep(title: String(localized: "See what's new"), body: String(localized: "Tap a new repository or release to read what it is, with a short summary.")),
-                    TourStep(title: String(localized: "Star to save"), body: String(localized: "Star saves it in My Feeds. Save adds it to Read later.")),
-                    TourStep(title: String(localized: "Fork on GitHub"), body: String(localized: "Forking opens GitHub, since it happens in your GitHub account.")),
+                    TourStep(title: String(localized: "See what's new", bundle: .appStrings), body: String(localized: "Tap a new repository or release to read what it is, with a short summary.", bundle: .appStrings)),
+                    TourStep(title: String(localized: "Star to save", bundle: .appStrings), body: String(localized: "Star saves it in My Feeds. Save adds it to Read later.", bundle: .appStrings)),
+                    TourStep(title: String(localized: "Fork on GitHub", bundle: .appStrings), body: String(localized: "Forking opens GitHub, since it happens in your GitHub account.", bundle: .appStrings)),
                 ],
-                saveActions: [TourAction(icon: "star", label: String(localized: "Star")), TourAction(icon: "bookmark", label: String(localized: "Save"))],
-                outActions: [TourAction(icon: "arrow.triangle.branch", label: String(localized: "Fork"))],
-                outNote: String(localized: "Opens GitHub")
+                saveActions: [TourAction(icon: "star", label: String(localized: "Star", bundle: .appStrings)), TourAction(icon: "bookmark", label: String(localized: "Save", bundle: .appStrings))],
+                outActions: [TourAction(icon: "arrow.triangle.branch", label: String(localized: "Fork", bundle: .appStrings))],
+                outNote: String(localized: "Opens GitHub", bundle: .appStrings)
             )
         case .instagram:
             return TourContent(
-                author: "Ember Kitchen", handle: "@emberkitchen", when: String(localized: "\(3)h"), media: .photo,
-                text: String(localized: "Three ways to use up leftover rice this week."),
+                author: "Ember Kitchen", handle: "@emberkitchen", when: String(localized: "\(3)h", bundle: .appStrings), media: .photo,
+                text: String(localized: "Three ways to use up leftover rice this week.", bundle: .appStrings),
                 steps: [
-                    TourStep(title: String(localized: "Photos and reels play here"), body: String(localized: "Tap the post to open it. Swipe through carousels and play reels without leaving.")),
-                    TourStep(title: String(localized: "Heart to save"), body: String(localized: "The heart saves it in My Feeds, and the bookmark adds it to Read later.")),
-                    TourStep(title: String(localized: "Comments open on Instagram"), body: String(localized: "Commenting opens Instagram, because it posts from your account.")),
+                    TourStep(title: String(localized: "Photos and reels play here", bundle: .appStrings), body: String(localized: "Tap the post to open it. Swipe through carousels and play reels without leaving.", bundle: .appStrings)),
+                    TourStep(title: String(localized: "Heart to save", bundle: .appStrings), body: String(localized: "The heart saves it in My Feeds, and the bookmark adds it to Read later.", bundle: .appStrings)),
+                    TourStep(title: String(localized: "Comments open on Instagram", bundle: .appStrings), body: String(localized: "Commenting opens Instagram, because it posts from your account.", bundle: .appStrings)),
                 ],
-                saveActions: [TourAction(icon: "heart", label: String(localized: "Like")), TourAction(icon: "bookmark", label: String(localized: "Save"))],
-                outActions: [TourAction(icon: "bubble.left", label: String(localized: "Comment"))],
-                outNote: String(localized: "Opens Instagram")
+                saveActions: [TourAction(icon: "heart", label: String(localized: "Like", bundle: .appStrings)), TourAction(icon: "bookmark", label: String(localized: "Save", bundle: .appStrings))],
+                outActions: [TourAction(icon: "bubble.left", label: String(localized: "Comment", bundle: .appStrings))],
+                outNote: String(localized: "Opens Instagram", bundle: .appStrings)
             )
         case .linkedin:
             return TourContent(
-                author: "Maya Chen", handle: String(localized: "Product lead"), when: String(localized: "\(1)d"), media: .text,
-                text: String(localized: "We cut our onboarding from nine screens to three. Here's what we learned about asking for less up front."),
+                author: "Maya Chen", handle: String(localized: "Product lead", bundle: .appStrings), when: String(localized: "\(1)d", bundle: .appStrings), media: .text,
+                text: String(localized: "We cut our onboarding from nine screens to three. Here's what we learned about asking for less up front.", bundle: .appStrings),
                 steps: [
-                    TourStep(title: String(localized: "Read the full post"), body: String(localized: "Tap it to read the whole post and see its images inside My Feeds.")),
-                    TourStep(title: String(localized: "Like to save"), body: String(localized: "Like saves it in My Feeds. Save adds it to Read later.")),
-                    TourStep(title: String(localized: "Comment and repost on LinkedIn"), body: String(localized: "Those open LinkedIn, since they post from your account.")),
+                    TourStep(title: String(localized: "Read the full post", bundle: .appStrings), body: String(localized: "Tap it to read the whole post and see its images inside My Feeds.", bundle: .appStrings)),
+                    TourStep(title: String(localized: "Like to save", bundle: .appStrings), body: String(localized: "Like saves it in My Feeds. Save adds it to Read later.", bundle: .appStrings)),
+                    TourStep(title: String(localized: "Comment and repost on LinkedIn", bundle: .appStrings), body: String(localized: "Those open LinkedIn, since they post from your account.", bundle: .appStrings)),
                 ],
-                saveActions: [TourAction(icon: "hand.thumbsup", label: String(localized: "Like")), TourAction(icon: "bookmark", label: String(localized: "Save"))],
-                outActions: [TourAction(icon: "bubble.left", label: String(localized: "Comment")), TourAction(icon: "arrow.2.squarepath", label: String(localized: "Repost"))],
-                outNote: String(localized: "Opens LinkedIn")
+                saveActions: [TourAction(icon: "hand.thumbsup", label: String(localized: "Like", bundle: .appStrings)), TourAction(icon: "bookmark", label: String(localized: "Save", bundle: .appStrings))],
+                outActions: [TourAction(icon: "bubble.left", label: String(localized: "Comment", bundle: .appStrings)), TourAction(icon: "arrow.2.squarepath", label: String(localized: "Repost", bundle: .appStrings))],
+                outNote: String(localized: "Opens LinkedIn", bundle: .appStrings)
             )
         case .tiktok:
             return TourContent(
-                author: "Ember Kitchen", handle: "@emberkitchen", when: String(localized: "\(4)h"), media: .video,
-                text: String(localized: "Crispy rice in 60 seconds."),
+                author: "Ember Kitchen", handle: "@emberkitchen", when: String(localized: "\(4)h", bundle: .appStrings), media: .video,
+                text: String(localized: "Crispy rice in 60 seconds.", bundle: .appStrings),
                 steps: [
-                    TourStep(title: String(localized: "Watch it here"), body: String(localized: "Tap the video to play it inside My Feeds with TikTok's own player.")),
-                    TourStep(title: String(localized: "Like to save"), body: String(localized: "Like saves it in My Feeds. Save adds it to Read later.")),
-                    TourStep(title: String(localized: "Comments open on TikTok"), body: String(localized: "Commenting opens TikTok, because it posts from your account.")),
+                    TourStep(title: String(localized: "Watch it here", bundle: .appStrings), body: String(localized: "Tap the video to play it inside My Feeds with TikTok's own player.", bundle: .appStrings)),
+                    TourStep(title: String(localized: "Like to save", bundle: .appStrings), body: String(localized: "Like saves it in My Feeds. Save adds it to Read later.", bundle: .appStrings)),
+                    TourStep(title: String(localized: "Comments open on TikTok", bundle: .appStrings), body: String(localized: "Commenting opens TikTok, because it posts from your account.", bundle: .appStrings)),
                 ],
-                saveActions: [TourAction(icon: "heart", label: String(localized: "Like")), TourAction(icon: "bookmark", label: String(localized: "Save"))],
-                outActions: [TourAction(icon: "bubble.left", label: String(localized: "Comment"))],
-                outNote: String(localized: "Opens TikTok")
+                saveActions: [TourAction(icon: "heart", label: String(localized: "Like", bundle: .appStrings)), TourAction(icon: "bookmark", label: String(localized: "Save", bundle: .appStrings))],
+                outActions: [TourAction(icon: "bubble.left", label: String(localized: "Comment", bundle: .appStrings))],
+                outNote: String(localized: "Opens TikTok", bundle: .appStrings)
             )
         case .facebook:
             return TourContent(
-                author: "City Parks & Rec", handle: String(localized: "Page"), when: String(localized: "\(6)h"), media: .photo,
-                text: String(localized: "The riverside trail reopens Saturday. Here's what changed."),
+                author: "City Parks & Rec", handle: String(localized: "Page", bundle: .appStrings), when: String(localized: "\(6)h", bundle: .appStrings), media: .photo,
+                text: String(localized: "The riverside trail reopens Saturday. Here's what changed.", bundle: .appStrings),
                 steps: [
-                    TourStep(title: String(localized: "Read and watch here"), body: String(localized: "Tap the post to read it in full. Photos open large and videos play inside My Feeds.")),
-                    TourStep(title: String(localized: "Like to save"), body: String(localized: "Like saves it in My Feeds. Save adds it to Read later.")),
-                    TourStep(title: String(localized: "Comments open on Facebook"), body: String(localized: "Commenting opens Facebook, because it posts from your account.")),
+                    TourStep(title: String(localized: "Read and watch here", bundle: .appStrings), body: String(localized: "Tap the post to read it in full. Photos open large and videos play inside My Feeds.", bundle: .appStrings)),
+                    TourStep(title: String(localized: "Like to save", bundle: .appStrings), body: String(localized: "Like saves it in My Feeds. Save adds it to Read later.", bundle: .appStrings)),
+                    TourStep(title: String(localized: "Comments open on Facebook", bundle: .appStrings), body: String(localized: "Commenting opens Facebook, because it posts from your account.", bundle: .appStrings)),
                 ],
-                saveActions: [TourAction(icon: "hand.thumbsup", label: String(localized: "Like")), TourAction(icon: "bookmark", label: String(localized: "Save"))],
-                outActions: [TourAction(icon: "bubble.left", label: String(localized: "Comment"))],
-                outNote: String(localized: "Opens Facebook")
+                saveActions: [TourAction(icon: "hand.thumbsup", label: String(localized: "Like", bundle: .appStrings)), TourAction(icon: "bookmark", label: String(localized: "Save", bundle: .appStrings))],
+                outActions: [TourAction(icon: "bubble.left", label: String(localized: "Comment", bundle: .appStrings))],
+                outNote: String(localized: "Opens Facebook", bundle: .appStrings)
             )
         case .appleMusic:
             return TourContent(
-                author: "Nova Lane", handle: String(localized: "New single"), when: String(localized: "\(1)d"), media: .video,
+                author: "Nova Lane", handle: String(localized: "New single", bundle: .appStrings), when: String(localized: "\(1)d", bundle: .appStrings), media: .video,
                 title: "Paper Lanterns",
-                text: String(localized: "New single by Nova Lane · 1 track · Pop"),
+                text: String(localized: "New single by Nova Lane · 1 track · Pop", bundle: .appStrings),
                 steps: [
-                    TourStep(title: String(localized: "Listen here"), body: String(localized: "Tap it to open Apple Music's player. You hear a preview, or the full songs if you're signed in to Apple Music.")),
-                    TourStep(title: String(localized: "Heart to save"), body: String(localized: "The heart saves it in My Feeds. Save adds it to Later.")),
-                    TourStep(title: String(localized: "Add it to Apple Music"), body: String(localized: "\"Add album to Apple Music\" puts the songs in your My Feeds playlist there, ready to download for offline.")),
+                    TourStep(title: String(localized: "Listen here", bundle: .appStrings), body: String(localized: "Tap it to open Apple Music's player. You hear a preview, or the full songs if you're signed in to Apple Music.", bundle: .appStrings)),
+                    TourStep(title: String(localized: "Heart to save", bundle: .appStrings), body: String(localized: "The heart saves it in My Feeds. Save adds it to Later.", bundle: .appStrings)),
+                    TourStep(title: String(localized: "Add it to Apple Music", bundle: .appStrings), body: String(localized: "\"Add album to Apple Music\" puts the songs in your My Feeds playlist there, ready to download for offline.", bundle: .appStrings)),
                 ],
-                saveActions: [TourAction(icon: "heart", label: String(localized: "Like")), TourAction(icon: "bookmark", label: String(localized: "Save"))],
+                saveActions: [TourAction(icon: "heart", label: String(localized: "Like", bundle: .appStrings)), TourAction(icon: "bookmark", label: String(localized: "Save", bundle: .appStrings))],
                 outActions: [TourAction(icon: "arrow.up.right.square", label: "Apple Music")],
-                outNote: String(localized: "Opens Apple Music")
+                outNote: String(localized: "Opens Apple Music", bundle: .appStrings)
             )
         case .applePodcasts:
             return TourContent(
-                author: "The Long Run", handle: String(localized: "Podcast"), when: String(localized: "\(5)h"), media: .video,
-                title: String(localized: "Episode 212: Training through the winter"),
-                text: String(localized: "Full episode, played inside My Feeds."),
+                author: "The Long Run", handle: String(localized: "Podcast", bundle: .appStrings), when: String(localized: "\(5)h", bundle: .appStrings), media: .video,
+                title: String(localized: "Episode 212: Training through the winter", bundle: .appStrings),
+                text: String(localized: "Full episode, played inside My Feeds.", bundle: .appStrings),
                 steps: [
-                    TourStep(title: String(localized: "Listen to the whole episode"), body: String(localized: "Tap it to play the full episode here. It remembers where you stopped, on every device.")),
-                    TourStep(title: String(localized: "Heart to save"), body: String(localized: "The heart saves it in My Feeds. Save adds it to Later.")),
-                    TourStep(title: String(localized: "Follow the show on Apple Podcasts"), body: String(localized: "Following or rating the show opens Apple Podcasts.")),
+                    TourStep(title: String(localized: "Listen to the whole episode", bundle: .appStrings), body: String(localized: "Tap it to play the full episode here. It remembers where you stopped, on every device.", bundle: .appStrings)),
+                    TourStep(title: String(localized: "Heart to save", bundle: .appStrings), body: String(localized: "The heart saves it in My Feeds. Save adds it to Later.", bundle: .appStrings)),
+                    TourStep(title: String(localized: "Follow the show on Apple Podcasts", bundle: .appStrings), body: String(localized: "Following or rating the show opens Apple Podcasts.", bundle: .appStrings)),
                 ],
-                saveActions: [TourAction(icon: "heart", label: String(localized: "Like")), TourAction(icon: "bookmark", label: String(localized: "Save"))],
+                saveActions: [TourAction(icon: "heart", label: String(localized: "Like", bundle: .appStrings)), TourAction(icon: "bookmark", label: String(localized: "Save", bundle: .appStrings))],
                 outActions: [TourAction(icon: "arrow.up.right.square", label: "Apple Podcasts")],
-                outNote: String(localized: "Opens Apple Podcasts")
+                outNote: String(localized: "Opens Apple Podcasts", bundle: .appStrings)
             )
         case .appleBooks:
             return TourContent(
-                author: "Maya Ortiz", handle: String(localized: "Audiobook"), when: String(localized: "\(2)d"), media: .photo,
+                author: "Maya Ortiz", handle: String(localized: "Audiobook", bundle: .appStrings), when: String(localized: "\(2)d", bundle: .appStrings), media: .photo,
                 title: "The Quiet Harbor",
-                text: String(localized: "New audiobook by Maya Ortiz · Fiction"),
+                text: String(localized: "New audiobook by Maya Ortiz · Fiction", bundle: .appStrings),
                 steps: [
-                    TourStep(title: String(localized: "Hear a sample"), body: String(localized: "Tap it to see the cover and description, and play Apple's sample right here.")),
-                    TourStep(title: String(localized: "Heart to save"), body: String(localized: "The heart saves it in My Feeds. Save adds it to Later.")),
-                    TourStep(title: String(localized: "Listen in Apple Books"), body: String(localized: "Buying and listening to the whole book opens Apple Books.")),
+                    TourStep(title: String(localized: "Hear a sample", bundle: .appStrings), body: String(localized: "Tap it to see the cover and description, and play Apple's sample right here.", bundle: .appStrings)),
+                    TourStep(title: String(localized: "Heart to save", bundle: .appStrings), body: String(localized: "The heart saves it in My Feeds. Save adds it to Later.", bundle: .appStrings)),
+                    TourStep(title: String(localized: "Listen in Apple Books", bundle: .appStrings), body: String(localized: "Buying and listening to the whole book opens Apple Books.", bundle: .appStrings)),
                 ],
-                saveActions: [TourAction(icon: "heart", label: String(localized: "Like")), TourAction(icon: "bookmark", label: String(localized: "Save"))],
+                saveActions: [TourAction(icon: "heart", label: String(localized: "Like", bundle: .appStrings)), TourAction(icon: "bookmark", label: String(localized: "Save", bundle: .appStrings))],
                 outActions: [TourAction(icon: "arrow.up.right.square", label: "Apple Books")],
-                outNote: String(localized: "Opens Apple Books")
+                outNote: String(localized: "Opens Apple Books", bundle: .appStrings)
             )
         case .youtubeMusic:
             return TourContent(
-                author: "Nova Lane", handle: String(localized: "New album"), when: String(localized: "\(1)d"), media: .video,
+                author: "Nova Lane", handle: String(localized: "New album", bundle: .appStrings), when: String(localized: "\(1)d", bundle: .appStrings), media: .video,
                 title: "Night Garden",
-                text: String(localized: "New album by Nova Lane · 10 tracks"),
+                text: String(localized: "New album by Nova Lane · 10 tracks", bundle: .appStrings),
                 steps: [
-                    TourStep(title: String(localized: "Listen here"), body: String(localized: "Tap it to play the songs, or the music video, right inside My Feeds.")),
-                    TourStep(title: String(localized: "Heart to save"), body: String(localized: "The heart saves it in My Feeds. Save adds it to Later.")),
-                    TourStep(title: String(localized: "Add it to YouTube Music"), body: String(localized: "\"Add to YouTube Music\" puts the songs in your My Feeds playlist there, using your connected YouTube account.")),
+                    TourStep(title: String(localized: "Listen here", bundle: .appStrings), body: String(localized: "Tap it to play the songs, or the music video, right inside My Feeds.", bundle: .appStrings)),
+                    TourStep(title: String(localized: "Heart to save", bundle: .appStrings), body: String(localized: "The heart saves it in My Feeds. Save adds it to Later.", bundle: .appStrings)),
+                    TourStep(title: String(localized: "Add it to YouTube Music", bundle: .appStrings), body: String(localized: "\"Add to YouTube Music\" puts the songs in your My Feeds playlist there, using your connected YouTube account.", bundle: .appStrings)),
                 ],
-                saveActions: [TourAction(icon: "heart", label: String(localized: "Like")), TourAction(icon: "bookmark", label: String(localized: "Save"))],
+                saveActions: [TourAction(icon: "heart", label: String(localized: "Like", bundle: .appStrings)), TourAction(icon: "bookmark", label: String(localized: "Save", bundle: .appStrings))],
                 outActions: [TourAction(icon: "arrow.up.right.square", label: "YouTube Music")],
-                outNote: String(localized: "Opens YouTube Music")
+                outNote: String(localized: "Opens YouTube Music", bundle: .appStrings)
             )
         }
     }

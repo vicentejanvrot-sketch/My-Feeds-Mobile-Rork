@@ -29,34 +29,34 @@ nonisolated enum Format {
     static func timeAgo(_ isoString: String?) -> String {
         guard let date = parseDate(isoString) else { return "—" }
         let sec = Int((Date().timeIntervalSince(date)).rounded())
-        if sec < 60 { return String(localized: "just now") }
+        if sec < 60 { return String(localized: "just now", bundle: .appStrings) }
         let min = Int((Double(sec) / 60).rounded())
-        if min < 60 { return String(localized: "\(min)m ago") }
+        if min < 60 { return String(localized: "\(min)m ago", bundle: .appStrings) }
         let hr = Int((Double(min) / 60).rounded())
-        if hr < 24 { return String(localized: "\(hr)h ago") }
+        if hr < 24 { return String(localized: "\(hr)h ago", bundle: .appStrings) }
         let day = Int((Double(hr) / 24).rounded())
-        if day < 30 { return String(localized: "\(day)d ago") }
+        if day < 30 { return String(localized: "\(day)d ago", bundle: .appStrings) }
         let mo = Int((Double(day) / 30).rounded())
-        if mo < 12 { return String(localized: "\(mo)mo ago") }
-        return String(localized: "\(Int((Double(mo) / 12).rounded()))y ago")
+        if mo < 12 { return String(localized: "\(mo)mo ago", bundle: .appStrings) }
+        return String(localized: "\(Int((Double(mo) / 12).rounded()))y ago", bundle: .appStrings)
     }
 
     /// Human relative time like "about 3 hours ago".
     static func relativeTime(_ isoString: String?) -> String {
         guard let date = parseDate(isoString) else { return "—" }
         let sec = Int((Date().timeIntervalSince(date)).rounded())
-        if sec < 10 { return String(localized: "just now") }
-        if sec < 60 { return String(localized: "less than a minute ago") }
+        if sec < 10 { return String(localized: "just now", bundle: .appStrings) }
+        if sec < 60 { return String(localized: "less than a minute ago", bundle: .appStrings) }
         let min = Int((Double(sec) / 60).rounded())
-        if min < 60 { return String(localized: "about \(min) minutes ago") }
+        if min < 60 { return String(localized: "about \(min) minutes ago", bundle: .appStrings) }
         let hr = Int((Double(min) / 60).rounded())
-        if hr < 24 { return String(localized: "about \(hr) hours ago") }
+        if hr < 24 { return String(localized: "about \(hr) hours ago", bundle: .appStrings) }
         let day = Int((Double(hr) / 24).rounded())
-        if day < 30 { return String(localized: "about \(day) days ago") }
+        if day < 30 { return String(localized: "about \(day) days ago", bundle: .appStrings) }
         let mo = Int((Double(day) / 30).rounded())
-        if mo < 12 { return String(localized: "about \(mo) months ago") }
+        if mo < 12 { return String(localized: "about \(mo) months ago", bundle: .appStrings) }
         let yr = Int((Double(mo) / 12).rounded())
-        return String(localized: "about \(yr) years ago")
+        return String(localized: "about \(yr) years ago", bundle: .appStrings)
     }
 
     /// Compact count in the app language: 1.2K / 3.4M in English, 1,2 mil / 3,4 mi in Portuguese.
@@ -84,12 +84,12 @@ nonisolated enum Format {
 
     /// Seconds → "Xh Ym" / "Ym" for watch-time stats.
     static func watchDuration(_ seconds: Int) -> String {
-        if seconds <= 0 { return String(localized: "\(0)m") }
+        if seconds <= 0 { return String(localized: "\(0)m", bundle: .appStrings) }
         let h = seconds / 3600
         let m = (seconds % 3600) / 60
         // Same format as the web app: "3h", "3h 5m", "5m".
-        if h > 0 { return m > 0 ? String(localized: "\(h)h \(m)m") : String(localized: "\(h)h") }
-        return String(localized: "\(m)m")
+        if h > 0 { return m > 0 ? String(localized: "\(h)h \(m)m", bundle: .appStrings) : String(localized: "\(h)h", bundle: .appStrings) }
+        return String(localized: "\(m)m", bundle: .appStrings)
     }
 
     /// Player time "m:ss" / "h:mm:ss".
@@ -106,12 +106,12 @@ nonisolated enum Format {
     /// Run duration between two timestamps: "42s" / "3m 12s" / "In progress".
     static func runDuration(started: String?, finished: String?) -> String {
         guard let start = parseDate(started) else { return "—" }
-        guard let end = parseDate(finished) else { return String(localized: "In progress") }
+        guard let end = parseDate(finished) else { return String(localized: "In progress", bundle: .appStrings) }
         let sec = Int(end.timeIntervalSince(start))
         if sec < 0 { return "—" }
-        if sec < 60 { return String(localized: "\(sec)s") }
+        if sec < 60 { return String(localized: "\(sec)s", bundle: .appStrings) }
         let m = sec / 60
         let rem = sec % 60
-        return rem == 0 ? String(localized: "\(m)m") : String(localized: "\(m)m \(rem)s")
+        return rem == 0 ? String(localized: "\(m)m", bundle: .appStrings) : String(localized: "\(m)m \(rem)s", bundle: .appStrings)
     }
 }

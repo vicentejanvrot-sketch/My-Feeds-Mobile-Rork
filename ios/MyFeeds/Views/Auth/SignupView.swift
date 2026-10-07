@@ -66,15 +66,15 @@ struct SignupView: View {
     private func submit() {
         let trimmedEmail = email.trimmingCharacters(in: .whitespaces)
         guard !trimmedEmail.isEmpty, !password.isEmpty, !confirmPassword.isEmpty else {
-            showError(String(localized: "Please fill in all fields."))
+            showError(String(localized: "Please fill in all fields.", bundle: .appStrings))
             return
         }
         guard password == confirmPassword else {
-            showError(String(localized: "Passwords do not match."))
+            showError(String(localized: "Passwords do not match.", bundle: .appStrings))
             return
         }
         guard password.count >= 6 else {
-            showError(String(localized: "Password must be at least 6 characters."))
+            showError(String(localized: "Password must be at least 6 characters.", bundle: .appStrings))
             return
         }
         isLoading = true
@@ -85,7 +85,7 @@ struct SignupView: View {
                 showError(error)
             } else {
                 UINotificationFeedbackGenerator().notificationOccurred(.success)
-                toast = AuthToast(message: String(localized: "Account created!"), isError: false)
+                toast = AuthToast(message: String(localized: "Account created!", bundle: .appStrings), isError: false)
             }
         }
     }

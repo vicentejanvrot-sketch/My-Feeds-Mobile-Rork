@@ -148,7 +148,7 @@ struct FollowingView: View {
         }
         .scrollDismissesKeyboard(.interactively)
         .background(Theme.background)
-        .navigationTitle(String(localized: "People"))
+        .navigationTitle(String(localized: "People", bundle: .appStrings))
         .navigationBarTitleDisplayMode(.inline)
         .toolbarBackground(Theme.background, for: .navigationBar)
         .toolbar {
@@ -226,21 +226,21 @@ struct FollowingView: View {
                     Image(systemName: "magnifyingglass")
                         .font(.system(size: 13, weight: .semibold))
                 }
-                Text(isScanning ? String(localized: "Searching") : String(localized: "Find more (\(toScan.count))"))
+                Text(isScanning ? String(localized: "Searching", bundle: .appStrings) : String(localized: "Find more (\(toScan.count))", bundle: .appStrings))
                     .font(.system(size: 14, weight: .semibold))
             }
             .foregroundStyle(Theme.accent)
         }
         .disabled(isScanning)
-        .accessibilityLabel(isScanning ? String(localized: "Searching") : String(localized: "Find more accounts for \(toScan.count) people"))
+        .accessibilityLabel(isScanning ? String(localized: "Searching", bundle: .appStrings) : String(localized: "Find more accounts for \(toScan.count) people", bundle: .appStrings))
     }
 
     /// Everyone / Gaps switch, styled like the web tabs: a muted track with
     /// the active tab set in the page background colour.
     private var tabSwitcher: some View {
         HStack(spacing: 0) {
-            tabButton(String(localized: "Everyone"), value: .everyone)
-            tabButton(String(localized: "Gaps · \(gapCount)"), value: .gaps)
+            tabButton(String(localized: "Everyone", bundle: .appStrings), value: .everyone)
+            tabButton(String(localized: "Gaps · \(gapCount)", bundle: .appStrings), value: .gaps)
         }
         .padding(3)
         .background(Theme.input)
@@ -273,7 +273,7 @@ struct FollowingView: View {
         if agents.count > 1 {
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 6) {
-                    agentChip(String(localized: "All collections"), id: nil)
+                    agentChip(String(localized: "All collections", bundle: .appStrings), id: nil)
                     ForEach(sortedAgents) { agent in
                         agentChip(agent.name, id: agent.id)
                     }
@@ -335,7 +335,7 @@ struct FollowingView: View {
         VStack(alignment: .leading, spacing: 6) {
             ProgressView(value: Double(progress.done), total: Double(max(progress.total, 1)))
                 .tint(Theme.accent)
-            Text(progress.failed > 0 ? "\(progress.status) · \(String(localized: "\(progress.failed) couldn't be searched"))" : progress.status)
+            Text(progress.failed > 0 ? "\(progress.status) · \(String(localized: "\(progress.failed) couldn't be searched", bundle: .appStrings))" : progress.status)
                 .font(.system(size: 12))
                 .foregroundStyle(Theme.textSecondary)
         }
@@ -387,7 +387,7 @@ struct FollowingView: View {
 
             VStack(spacing: 0) {
                 if filtered.isEmpty {
-                    Text(people.isEmpty ? String(localized: "No people or companies in your collections yet.") : String(localized: "Nobody matches that search."))
+                    Text(people.isEmpty ? String(localized: "No people or companies in your collections yet.", bundle: .appStrings) : String(localized: "Nobody matches that search.", bundle: .appStrings))
                         .font(.system(size: 13))
                         .foregroundStyle(Theme.textSecondary)
                         .frame(maxWidth: .infinity)
@@ -524,8 +524,8 @@ struct FollowingView: View {
 
     private func gapSubtitle(_ person: AlsoOnPerson) -> String {
         let platforms: String = person.following.map { $0.platform.label }.formatted(.list(type: .and))
-        let agent: String = person.agentIds.first.flatMap { agentNames[$0] } ?? String(localized: "your collection")
-        return String(localized: "You follow on \(platforms) · adds to \(agent)")
+        let agent: String = person.agentIds.first.flatMap { agentNames[$0] } ?? String(localized: "your collection", bundle: .appStrings)
+        return String(localized: "You follow on \(platforms) · adds to \(agent)", bundle: .appStrings)
     }
 
     // MARK: - Data
@@ -539,11 +539,11 @@ struct FollowingView: View {
         Task {
             do {
                 try await SupabaseService.shared.deleteChannel(id: removed.id)
-                toasts.show(String(localized: "Removed. You no longer follow them on \(account.platform.label) here."))
+                toasts.show(String(localized: "Removed. You no longer follow them on \(account.platform.label) here.", bundle: .appStrings))
             } catch {
                 channels.append(removed)
                 rebuild()
-                toasts.show(String(localized: "Couldn't remove it: \(error.localizedDescription)"), type: .error)
+                toasts.show(String(localized: "Couldn't remove it: \(error.localizedDescription)", bundle: .appStrings), type: .error)
             }
         }
     }
@@ -619,9 +619,9 @@ struct FollowingView: View {
 
         progress = nil
         if failed > 0 {
-            toasts.show(String(localized: "\(failed) of \(total) couldn't be checked. \(firstError ?? "")"), type: .error)
+            toasts.show(String(localized: "\(failed) of \(total) couldn't be checked. \(firstError ?? "")", bundle: .appStrings), type: .error)
         } else {
-            toasts.show(total == 1 ? String(localized: "Searched other platforms for \(list[0].name)") : String(localized: "Searched other platforms for \(total) people"))
+            toasts.show(total == 1 ? String(localized: "Searched other platforms for \(list[0].name)", bundle: .appStrings) : String(localized: "Searched other platforms for \(total) people", bundle: .appStrings))
         }
     }
 
@@ -659,20 +659,20 @@ struct FollowingView: View {
             if account.platform == .youtube, YouTubeAccount.shared.isConnected {
                 do {
                     let already = try await YouTubeAccount.shared.subscribe(channelURL: account.url)
-                    toasts.show(already ? String(localized: "Added. You were already subscribed on YouTube") : String(localized: "Added and subscribed on YouTube"))
+                    toasts.show(already ? String(localized: "Added. You were already subscribed on YouTube", bundle: .appStrings) : String(localized: "Added and subscribed on YouTube", bundle: .appStrings))
                 } catch {
-                    toasts.show(String(localized: "Added, but couldn't subscribe on YouTube: \(error.localizedDescription)"), type: .error)
+                    toasts.show(String(localized: "Added, but couldn't subscribe on YouTube: \(error.localizedDescription)", bundle: .appStrings), type: .error)
                 }
             } else if let provider = AccountConnections.Provider(platform: account.platform),
                       AccountConnections.shared.isConnected(provider) {
                 do {
                     let already = try await AccountConnections.shared.follow(provider, url: account.url)
-                    toasts.show(already ? String(localized: "Added. You already follow them on \(label)") : String(localized: "Added and following on \(label)"))
+                    toasts.show(already ? String(localized: "Added. You already follow them on \(label)", bundle: .appStrings) : String(localized: "Added and following on \(label)", bundle: .appStrings))
                 } catch {
-                    toasts.show(String(localized: "Added, but couldn't follow on \(label): \(error.localizedDescription)"), type: .error)
+                    toasts.show(String(localized: "Added, but couldn't follow on \(label): \(error.localizedDescription)", bundle: .appStrings), type: .error)
                 }
             } else {
-                toasts.show(String(localized: "Added to your collection"))
+                toasts.show(String(localized: "Added to your collection", bundle: .appStrings))
             }
         }
     }
@@ -697,9 +697,9 @@ struct FollowingView: View {
                 try await SupabaseService.shared.combinePeople(person, with: other)
                 await reloadIdentity()
                 reselect(sourceId: person.sources.first?.id)
-                toasts.show(String(localized: "Combined with \(other.name)"))
+                toasts.show(String(localized: "Combined with \(other.name)", bundle: .appStrings))
             } catch {
-                toasts.show(String(localized: "Couldn't combine them: \(error.localizedDescription)"), type: .error)
+                toasts.show(String(localized: "Couldn't combine them: \(error.localizedDescription)", bundle: .appStrings), type: .error)
             }
         }
     }
@@ -714,9 +714,9 @@ struct FollowingView: View {
                 try await SupabaseService.shared.separatePerson(person)
                 await reloadIdentity()
                 reselect(sourceId: person.sources.first?.id)
-                toasts.show(String(localized: "Separated into their own cards again"))
+                toasts.show(String(localized: "Separated into their own cards again", bundle: .appStrings))
             } catch {
-                toasts.show(String(localized: "Couldn't separate them: \(error.localizedDescription)"), type: .error)
+                toasts.show(String(localized: "Couldn't separate them: \(error.localizedDescription)", bundle: .appStrings), type: .error)
             }
         }
     }
@@ -732,10 +732,10 @@ struct FollowingView: View {
                     person.sources.contains { $0.id == account.link.channelId }
                 }?.sources.map(\.id) ?? [account.link.channelId]
                 try await SupabaseService.shared.decideIdentityLink(account.link, channelIds: channelIds, same: same)
-                toasts.show(same ? String(localized: "Marked as the same person") : String(localized: "Removed that match"))
+                toasts.show(same ? String(localized: "Marked as the same person", bundle: .appStrings) : String(localized: "Removed that match", bundle: .appStrings))
                 await reloadIdentity()
             } catch {
-                toasts.show(String(localized: "Couldn't save that: \(error.localizedDescription)"), type: .error)
+                toasts.show(String(localized: "Couldn't save that: \(error.localizedDescription)", bundle: .appStrings), type: .error)
             }
             busyKeys.remove(busyKey)
         }
@@ -748,14 +748,14 @@ private extension AlsoOnPerson {
     var summary: String {
         var parts: [String] = []
         if lastScannedAt == nil {
-            parts.append(String(localized: "Not searched yet"))
+            parts.append(String(localized: "Not searched yet", bundle: .appStrings))
         } else if platformCount == 1, let only = following.first {
-            parts.append(String(localized: "Only on \(only.platform.label)"))
+            parts.append(String(localized: "Only on \(only.platform.label)", bundle: .appStrings))
         } else {
-            parts.append(String(localized: "On \(platformCount) platforms"))
+            parts.append(String(localized: "On \(platformCount) platforms", bundle: .appStrings))
         }
-        if !also.isEmpty { parts.append(String(localized: "\(also.count) you don't follow")) }
-        if !possible.isEmpty { parts.append(String(localized: "\(possible.count) to check")) }
+        if !also.isEmpty { parts.append(String(localized: "\(also.count) you don't follow", bundle: .appStrings)) }
+        if !possible.isEmpty { parts.append(String(localized: "\(possible.count) to check", bundle: .appStrings)) }
         return parts.joined(separator: " · ")
     }
 }
@@ -773,7 +773,7 @@ private struct GapCheck: Identifiable {
 
     var question: String {
         let platform: String = account.platform.label
-        return String(localized: "Is \(account.label) on \(platform) the same \(person.name) you follow?")
+        return String(localized: "Is \(account.label) on \(platform) the same \(person.name) you follow?", bundle: .appStrings)
     }
 }
 
@@ -795,10 +795,10 @@ private struct ScanProgress: Equatable {
     var status: String {
         let now: String
         switch current.count {
-        case 0: now = String(localized: "Finishing…")
-        default: now = String(localized: "Checking \(current.formatted(.list(type: .and)))…")
+        case 0: now = String(localized: "Finishing…", bundle: .appStrings)
+        default: now = String(localized: "Checking \(current.formatted(.list(type: .and)))…", bundle: .appStrings)
         }
-        return total > 1 ? "\(now) · \(String(localized: "\(done) of \(total) people done"))" : now
+        return total > 1 ? "\(now) · \(String(localized: "\(done) of \(total) people done", bundle: .appStrings))" : now
     }
 }
 
@@ -1136,10 +1136,10 @@ private struct PersonSheet: View {
 
     private var removeMessage: String {
         guard let account = toRemove else { return "" }
-        let collection = agentNames[account.channel.agentId] ?? String(localized: "your collection")
-        var text = String(localized: "\(account.label) is removed from \(collection), so new posts from it stop coming in. What's already in your feed stays.")
+        let collection = agentNames[account.channel.agentId] ?? String(localized: "your collection", bundle: .appStrings)
+        var text = String(localized: "\(account.label) is removed from \(collection), so new posts from it stop coming in. What's already in your feed stays.", bundle: .appStrings)
         if person.following.count == 1 {
-            text += " " + String(localized: "This is the only account you follow for them, so they'll leave your People list.")
+            text += " " + String(localized: "This is the only account you follow for them, so they'll leave your People list.", bundle: .appStrings)
         }
         return text
     }
@@ -1221,7 +1221,7 @@ private struct PersonSheet: View {
                             HStack(spacing: 6) {
                                 Image(systemName: "arrow.triangle.merge")
                                     .font(.system(size: 13, weight: .bold))
-                                Text(twins.count == 1 ? String(localized: "Combine with that card") : String(localized: "Choose which to combine"))
+                                Text(twins.count == 1 ? String(localized: "Combine with that card", bundle: .appStrings) : String(localized: "Choose which to combine", bundle: .appStrings))
                                     .font(.system(size: 14, weight: .bold))
                             }
                             .foregroundStyle(.white)
@@ -1251,7 +1251,7 @@ private struct PersonSheet: View {
                         HStack(spacing: 10) {
                             VStack(alignment: .leading, spacing: 4) {
                                 AccountLine(platform: account.platform, label: account.label, url: account.url)
-                                Text(agentNames[account.channel.agentId] ?? String(localized: "Collection"))
+                                Text(agentNames[account.channel.agentId] ?? String(localized: "Collection", bundle: .appStrings))
                                     .font(.system(size: 11, weight: .semibold))
                                     .foregroundStyle(Theme.textSecondary)
                                     .padding(.horizontal, 8)
@@ -1553,7 +1553,7 @@ private struct PersonSheet: View {
                         }
                     } label: {
                         HStack(spacing: 4) {
-                            Text(agents.first { $0.id == agentId }?.name ?? String(localized: "Choose a collection"))
+                            Text(agents.first { $0.id == agentId }?.name ?? String(localized: "Choose a collection", bundle: .appStrings))
                                 .font(.system(size: 13, weight: .semibold))
                                 .lineLimit(1)
                                 .truncationMode(.tail)
@@ -1629,7 +1629,7 @@ private struct PersonSheet: View {
         VStack(alignment: .leading, spacing: 10) {
             Rectangle().fill(Theme.border).frame(height: 0.5)
             HStack(spacing: 10) {
-                Text(person.lastScannedAt.map { String(localized: "Last searched \(Format.relativeTime($0))") } ?? String(localized: "Not searched yet"))
+                Text(person.lastScannedAt.map { String(localized: "Last searched \(Format.relativeTime($0))", bundle: .appStrings) } ?? String(localized: "Not searched yet", bundle: .appStrings))
                     .font(.system(size: 12))
                     .foregroundStyle(Theme.textSecondary)
                 Spacer(minLength: 0)
@@ -1641,7 +1641,7 @@ private struct PersonSheet: View {
                             Image(systemName: "arrow.clockwise")
                                 .font(.system(size: 12, weight: .bold))
                         }
-                        Text(person.lastScannedAt == nil ? String(localized: "Find accounts") : String(localized: "Find more accounts"))
+                        Text(person.lastScannedAt == nil ? String(localized: "Find accounts", bundle: .appStrings) : String(localized: "Find more accounts", bundle: .appStrings))
                             .font(.system(size: 13, weight: .bold))
                     }
                     .foregroundStyle(Theme.textPrimary)

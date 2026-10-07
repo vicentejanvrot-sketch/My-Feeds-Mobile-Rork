@@ -64,7 +64,7 @@ final class RunningOverlayStore {
             runCompletionCounter += 1
         }
 
-        let label = String(localized: "All collections (\(agents.count))")
+        let label = String(localized: "All collections (\(agents.count))", bundle: .appStrings)
         state = OverlayState(
             agentName: label, runId: Self.batchRunId, phase: .running,
             channelsTotal: agents.count, channelsScanned: 0, currentChannelName: nil
@@ -85,17 +85,17 @@ final class RunningOverlayStore {
                     newTotal += outcome.newCount
                 }
                 state?.channelsScanned = finished
-                state?.currentChannelName = String(localized: "\(outcome.agentName) finished")
+                state?.currentChannelName = String(localized: "\(outcome.agentName) finished", bundle: .appStrings)
             }
         }
 
-        let found = newTotal > 0 ? String(localized: "Found \(newTotal) new videos") : String(localized: "No new videos found")
+        let found = newTotal > 0 ? String(localized: "Found \(newTotal) new videos", bundle: .appStrings) : String(localized: "No new videos found", bundle: .appStrings)
         if failedNames.isEmpty {
             state = OverlayState(agentName: label, runId: Self.batchRunId, phase: .success(message: found))
             try? await Task.sleep(for: .seconds(2.5))
             if case .success = state?.phase { state = nil }
         } else {
-            let message = String(localized: "\(found). Failed: \(failedNames.formatted(.list(type: .and)))")
+            let message = String(localized: "\(found). Failed: \(failedNames.formatted(.list(type: .and)))", bundle: .appStrings)
             state = OverlayState(agentName: label, runId: Self.batchRunId, phase: .error(message: message))
             await holdThenClearIfError(seconds: 4)
         }
@@ -168,7 +168,7 @@ final class RunningOverlayStore {
                 }
             case .success:
                 let count = current.videosNewCount ?? 0
-                let message = count > 0 ? String(localized: "Found \(count) new videos") : String(localized: "No new videos found")
+                let message = count > 0 ? String(localized: "Found \(count) new videos", bundle: .appStrings) : String(localized: "No new videos found", bundle: .appStrings)
                 state = OverlayState(agentName: agent.name, runId: run.id, phase: .success(message: message))
                 try? await Task.sleep(for: .seconds(2.5))
                 if case .success = state?.phase { state = nil }
@@ -176,14 +176,14 @@ final class RunningOverlayStore {
             case .partial:
                 let count = current.videosNewCount ?? 0
                 let message = count > 0
-                    ? String(localized: "Found \(count) new videos (some channels couldn't be scanned)")
-                    : String(localized: "Scan finished — some channels couldn't be scanned.")
+                    ? String(localized: "Found \(count) new videos (some channels couldn't be scanned)", bundle: .appStrings)
+                    : String(localized: "Scan finished — some channels couldn't be scanned.", bundle: .appStrings)
                 state = OverlayState(agentName: agent.name, runId: run.id, phase: .success(message: message))
                 try? await Task.sleep(for: .seconds(2.5))
                 if case .success = state?.phase { state = nil }
                 return
             case .failed, .cancelled:
-                let message = current.errorSummary ?? String(localized: "An unknown error occurred")
+                let message = current.errorSummary ?? String(localized: "An unknown error occurred", bundle: .appStrings)
                 state = OverlayState(agentName: agent.name, runId: run.id, phase: .error(message: message))
                 await holdThenClearIfError(seconds: 4)
                 return
@@ -198,7 +198,7 @@ final class RunningOverlayStore {
 
     private func extractEdgeErrorMessage(_ error: Error) -> String {
         let message = error.localizedDescription
-        return message.isEmpty ? String(localized: "Something went wrong. Try again.") : message
+        return message.isEmpty ? String(localized: "Something went wrong. Try again.", bundle: .appStrings) : message
     }
 }
 
@@ -262,7 +262,7 @@ struct RunningOverlayView: View {
                 if state.channelsTotal > 0 {
                     VStack(spacing: 8) {
                         HStack {
-                            Text(state.runId == RunningOverlayStore.batchRunId ? String(localized: "Collections finished") : String(localized: "Scanning channels"))
+                            Text(state.runId == RunningOverlayStore.batchRunId ? String(localized: "Collections finished", bundle: .appStrings) : String(localized: "Scanning channels", bundle: .appStrings))
                             Spacer()
                             Text(verbatim: "\(state.channelsScanned) / \(state.channelsTotal)")
                                 .monospacedDigit()

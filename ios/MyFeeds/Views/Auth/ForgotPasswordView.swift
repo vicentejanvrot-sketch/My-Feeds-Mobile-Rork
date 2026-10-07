@@ -49,7 +49,7 @@ struct ForgotPasswordView: View {
         let trimmedEmail = email.trimmingCharacters(in: .whitespaces)
         guard !trimmedEmail.isEmpty else {
             UINotificationFeedbackGenerator().notificationOccurred(.error)
-            toast = AuthToast(message: String(localized: "Please enter your email address."), isError: true)
+            toast = AuthToast(message: String(localized: "Please enter your email address.", bundle: .appStrings), isError: true)
             return
         }
         isLoading = true
@@ -61,7 +61,7 @@ struct ForgotPasswordView: View {
                 toast = AuthToast(message: error, isError: true)
             } else {
                 UINotificationFeedbackGenerator().notificationOccurred(.success)
-                toast = AuthToast(message: String(localized: "Check your inbox — we've sent a password reset link."), isError: false)
+                toast = AuthToast(message: String(localized: "Check your inbox — we've sent a password reset link.", bundle: .appStrings), isError: false)
             }
         }
     }

@@ -73,7 +73,7 @@ struct DownloadButton: View {
             Button("Cancel", role: .cancel) {}
             Button("Remove", role: .destructive) {
                 store.delete(itemId: itemId)
-                toasts.show(String(localized: "Download removed"))
+                toasts.show(String(localized: "Download removed", bundle: .appStrings))
             }
         } message: {
             Text("It stays in your feed. Only the copy on this phone is deleted.")
@@ -87,10 +87,10 @@ struct DownloadButton: View {
                 try await store.download(itemId: itemId)
                 // Downloads stay inside My Feeds (not Photos or Files), so say where to find them.
                 toasts.show(hasAudio
-                    ? String(localized: "Episode saved inside My Feeds for offline listening. See it in this app's Settings tab > Downloads.")
+                    ? String(localized: "Episode saved inside My Feeds for offline listening. See it in this app's Settings tab > Downloads.", bundle: .appStrings)
                     : youtubeVideoId != nil
-                        ? String(localized: "Summary saved inside My Feeds for offline reading. The video still needs a connection. See it in this app's Settings tab > Downloads.")
-                        : String(localized: "Saved inside My Feeds for offline reading. See it in this app's Settings tab > Downloads."))
+                        ? String(localized: "Summary saved inside My Feeds for offline reading. The video still needs a connection. See it in this app's Settings tab > Downloads.", bundle: .appStrings)
+                        : String(localized: "Saved inside My Feeds for offline reading. See it in this app's Settings tab > Downloads.", bundle: .appStrings))
             } catch {
                 toasts.show(error.localizedDescription, type: .error)
             }

@@ -127,73 +127,73 @@ extension SourcePlatform {
 
     var sourceNoun: String {
         switch self {
-        case .youtube: return String(localized: "Channel")
-        case .x: return String(localized: "Account")
-        case .reddit: return String(localized: "Subreddit or user")
-        case .instagram: return String(localized: "Account")
-        case .linkedin: return String(localized: "Profile or company")
-        case .github: return String(localized: "User or organization")
-        case .tiktok: return String(localized: "Account")
-        case .facebook: return String(localized: "Page")
-        case .appleMusic: return String(localized: "Artist")
-        case .applePodcasts: return String(localized: "Show")
-        case .appleBooks: return String(localized: "Author")
-        case .youtubeMusic: return String(localized: "Artist")
-        case .spotify: return String(localized: "Artist")
+        case .youtube: return String(localized: "Channel", bundle: .appStrings)
+        case .x: return String(localized: "Account", bundle: .appStrings)
+        case .reddit: return String(localized: "Subreddit or user", bundle: .appStrings)
+        case .instagram: return String(localized: "Account", bundle: .appStrings)
+        case .linkedin: return String(localized: "Profile or company", bundle: .appStrings)
+        case .github: return String(localized: "User or organization", bundle: .appStrings)
+        case .tiktok: return String(localized: "Account", bundle: .appStrings)
+        case .facebook: return String(localized: "Page", bundle: .appStrings)
+        case .appleMusic: return String(localized: "Artist", bundle: .appStrings)
+        case .applePodcasts: return String(localized: "Show", bundle: .appStrings)
+        case .appleBooks: return String(localized: "Author", bundle: .appStrings)
+        case .youtubeMusic: return String(localized: "Artist", bundle: .appStrings)
+        case .spotify: return String(localized: "Artist", bundle: .appStrings)
         }
     }
 
     var addPlaceholder: String {
         switch self {
         case .youtube: return "https://www.youtube.com/@ChannelName"
-        case .x: return String(localized: "@handle or https://x.com/handle")
-        case .reddit: return String(localized: "r/subreddit, u/username or a reddit.com link")
-        case .instagram: return String(localized: "@handle or https://www.instagram.com/handle")
+        case .x: return String(localized: "@handle or https://x.com/handle", bundle: .appStrings)
+        case .reddit: return String(localized: "r/subreddit, u/username or a reddit.com link", bundle: .appStrings)
+        case .instagram: return String(localized: "@handle or https://www.instagram.com/handle", bundle: .appStrings)
         case .linkedin: return "https://www.linkedin.com/in/name or /company/name"
-        case .github: return String(localized: "@username or https://github.com/username")
-        case .tiktok: return String(localized: "@username or https://www.tiktok.com/@username")
+        case .github: return String(localized: "@username or https://github.com/username", bundle: .appStrings)
+        case .tiktok: return String(localized: "@username or https://www.tiktok.com/@username", bundle: .appStrings)
         case .facebook: return "https://www.facebook.com/PageName"
-        case .appleMusic: return String(localized: "Artist name or https://music.apple.com/us/artist/name/123")
-        case .applePodcasts: return String(localized: "Show name or https://podcasts.apple.com/us/podcast/name/id123")
-        case .appleBooks: return String(localized: "Author name or https://books.apple.com/us/author/name/id123")
-        case .youtubeMusic: return String(localized: "Artist name or https://music.youtube.com/channel/UC...")
+        case .appleMusic: return String(localized: "Artist name or https://music.apple.com/us/artist/name/123", bundle: .appStrings)
+        case .applePodcasts: return String(localized: "Show name or https://podcasts.apple.com/us/podcast/name/id123", bundle: .appStrings)
+        case .appleBooks: return String(localized: "Author name or https://books.apple.com/us/author/name/id123", bundle: .appStrings)
+        case .youtubeMusic: return String(localized: "Artist name or https://music.youtube.com/channel/UC...", bundle: .appStrings)
         case .spotify: return "https://open.spotify.com/artist/..."
         }
     }
 
     var addHelp: String {
         switch self {
-        case .youtube: return String(localized: "Paste the channel link.")
-        case .x: return String(localized: "Original posts only. Reposts and replies are skipped.")
-        case .reddit: return String(localized: "Top posts from a subreddit, or a user's own posts, from the lookback window.")
-        case .instagram: return String(localized: "Public accounts only. Posts and reels from the lookback window.")
-        case .linkedin: return String(localized: "Paste a person's profile link or a company page link.")
-        case .github: return String(localized: "New repositories and releases from the lookback window.")
-        case .tiktok: return String(localized: "Public accounts only. Videos from the lookback window.")
-        case .facebook: return String(localized: "Public Pages only. Posts from the lookback window.")
-        case .appleMusic: return String(localized: "New singles and albums. Adding an artist also brings in their latest album.")
-        case .applePodcasts: return String(localized: "New episodes, played right here. Adding a show also brings in its latest episode.")
-        case .appleBooks: return String(localized: "New audiobooks, with a sample to listen to. Adding an author also brings in their latest audiobook.")
-        case .youtubeMusic: return String(localized: "New songs, albums and music videos. Adding an artist also brings in their latest album.")
-        case .spotify: return String(localized: "New singles and albums, played with Spotify's player. Paste the artist's Spotify link. Adding an artist also brings in their latest album.")
+        case .youtube: return String(localized: "Paste the channel link.", bundle: .appStrings)
+        case .x: return String(localized: "Original posts only. Reposts and replies are skipped.", bundle: .appStrings)
+        case .reddit: return String(localized: "Top posts from a subreddit, or a user's own posts, from the lookback window.", bundle: .appStrings)
+        case .instagram: return String(localized: "Public accounts only. Posts and reels from the lookback window.", bundle: .appStrings)
+        case .linkedin: return String(localized: "Paste a person's profile link or a company page link.", bundle: .appStrings)
+        case .github: return String(localized: "New repositories and releases from the lookback window.", bundle: .appStrings)
+        case .tiktok: return String(localized: "Public accounts only. Videos from the lookback window.", bundle: .appStrings)
+        case .facebook: return String(localized: "Public Pages only. Posts from the lookback window.", bundle: .appStrings)
+        case .appleMusic: return String(localized: "New singles and albums. Adding an artist also brings in their latest album.", bundle: .appStrings)
+        case .applePodcasts: return String(localized: "New episodes, played right here. Adding a show also brings in its latest episode.", bundle: .appStrings)
+        case .appleBooks: return String(localized: "New audiobooks, with a sample to listen to. Adding an author also brings in their latest audiobook.", bundle: .appStrings)
+        case .youtubeMusic: return String(localized: "New songs, albums and music videos. Adding an artist also brings in their latest album.", bundle: .appStrings)
+        case .spotify: return String(localized: "New singles and albums, played with Spotify's player. Paste the artist's Spotify link. Adding an artist also brings in their latest album.", bundle: .appStrings)
         }
     }
 
     var openLabel: String {
         switch self {
-        case .youtube: return String(localized: "Open on YouTube")
-        case .x: return String(localized: "Open on X")
-        case .reddit: return String(localized: "Open on Reddit")
-        case .instagram: return String(localized: "Open on Instagram")
-        case .linkedin: return String(localized: "Open on LinkedIn")
-        case .github: return String(localized: "Open on GitHub")
-        case .tiktok: return String(localized: "Open on TikTok")
-        case .facebook: return String(localized: "Open on Facebook")
-        case .appleMusic: return String(localized: "Open in Apple Music")
-        case .applePodcasts: return String(localized: "Open in Apple Podcasts")
-        case .appleBooks: return String(localized: "Open in Apple Books")
-        case .youtubeMusic: return String(localized: "Open in YouTube Music")
-        case .spotify: return String(localized: "Open in Spotify")
+        case .youtube: return String(localized: "Open on YouTube", bundle: .appStrings)
+        case .x: return String(localized: "Open on X", bundle: .appStrings)
+        case .reddit: return String(localized: "Open on Reddit", bundle: .appStrings)
+        case .instagram: return String(localized: "Open on Instagram", bundle: .appStrings)
+        case .linkedin: return String(localized: "Open on LinkedIn", bundle: .appStrings)
+        case .github: return String(localized: "Open on GitHub", bundle: .appStrings)
+        case .tiktok: return String(localized: "Open on TikTok", bundle: .appStrings)
+        case .facebook: return String(localized: "Open on Facebook", bundle: .appStrings)
+        case .appleMusic: return String(localized: "Open in Apple Music", bundle: .appStrings)
+        case .applePodcasts: return String(localized: "Open in Apple Podcasts", bundle: .appStrings)
+        case .appleBooks: return String(localized: "Open in Apple Books", bundle: .appStrings)
+        case .youtubeMusic: return String(localized: "Open in YouTube Music", bundle: .appStrings)
+        case .spotify: return String(localized: "Open in Spotify", bundle: .appStrings)
         }
     }
 
@@ -364,12 +364,12 @@ nonisolated struct ItemMedia: Codable, Hashable, Sendable {
     var displayLabel: String? {
         guard let label, !label.isEmpty else { return nil }
         switch label {
-        case "New single": return String(localized: "New single")
-        case "New EP": return String(localized: "New EP")
-        case "New album": return String(localized: "New album")
-        case "Latest album": return String(localized: "Latest album")
-        case "New audiobook": return String(localized: "New audiobook")
-        case "Latest audiobook": return String(localized: "Latest audiobook")
+        case "New single": return String(localized: "New single", bundle: .appStrings)
+        case "New EP": return String(localized: "New EP", bundle: .appStrings)
+        case "New album": return String(localized: "New album", bundle: .appStrings)
+        case "Latest album": return String(localized: "Latest album", bundle: .appStrings)
+        case "New audiobook": return String(localized: "New audiobook", bundle: .appStrings)
+        case "Latest audiobook": return String(localized: "Latest audiobook", bundle: .appStrings)
         default: return label
         }
     }

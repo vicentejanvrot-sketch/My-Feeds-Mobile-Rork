@@ -95,7 +95,7 @@ struct AgentDetailView: View {
             modalOverlays
         }
         .background(Theme.background)
-        .navigationTitle(agent?.name ?? String(localized: "Collection"))
+        .navigationTitle(agent?.name ?? String(localized: "Collection", bundle: .appStrings))
         .navigationBarTitleDisplayMode(.inline)
         .toolbarBackground(Theme.background, for: .navigationBar)
         .refreshable { await load() }
@@ -166,7 +166,7 @@ struct AgentDetailView: View {
         } message: {
             Text("Stop this run in progress?")
         }
-        .alert("Delete \(agent?.name ?? String(localized: "collection"))?", isPresented: $showDeleteAgent) {
+        .alert("Delete \(agent?.name ?? String(localized: "collection", bundle: .appStrings))?", isPresented: $showDeleteAgent) {
             Button("Cancel", role: .cancel) {}
             Button("Delete collection", role: .destructive) { deleteThisAgent() }
         } message: {
@@ -182,7 +182,7 @@ struct AgentDetailView: View {
         Task {
             do {
                 try await SupabaseService.shared.deleteAgent(id: agent.id)
-                toasts.show(String(localized: "Collection deleted"))
+                toasts.show(String(localized: "Collection deleted", bundle: .appStrings))
                 dismiss()
             } catch {
                 toasts.show(error.localizedDescription, type: .error)
@@ -335,12 +335,12 @@ struct AgentDetailView: View {
             if let time = agent.runTimeLocal, !time.isEmpty {
                 return "\(time) (\(agent.timezone ?? "UTC"))"
             }
-            return String(localized: "No schedule set")
+            return String(localized: "No schedule set", bundle: .appStrings)
         }()
         let subtitle: String? = {
             let frequency = Agent.frequencyLabel(agent.scheduleFrequency)
             if let lookback = agent.lookbackHours {
-                return String(localized: "\(frequency) • \(lookback)h lookback")
+                return String(localized: "\(frequency) • \(lookback)h lookback", bundle: .appStrings)
             }
             return frequency
         }()
@@ -348,14 +348,14 @@ struct AgentDetailView: View {
     }
 
     private func filtersCard(_ agent: Agent) -> some View {
-        infoCard(icon: "star", title: String(localized: "Filters"), subtitle: nil) {
+        infoCard(icon: "star", title: String(localized: "Filters", bundle: .appStrings), subtitle: nil) {
             VStack(alignment: .leading, spacing: 6) {
                 booleanRow(label: "Shorts", isOn: agent.includeShorts == true)
-                booleanRow(label: String(localized: "Live/Upcoming"), isOn: agent.includeLive == true)
+                booleanRow(label: String(localized: "Live/Upcoming", bundle: .appStrings), isOn: agent.includeLive == true)
                 ForEach(ContentTypes.groups) { group in
                     ForEach(group.options) { option in
                         booleanRow(
-                            label: String(localized: "\(group.platform.label) \(option.label.lowercased())"),
+                            label: String(localized: "\(group.platform.label) \(option.label.lowercased())", bundle: .appStrings),
                             isOn: ContentTypes.isOn(agent.contentTypes, option.key)
                         )
                     }
@@ -490,7 +490,7 @@ struct AgentDetailView: View {
                     showFilterModal = true
                 } label: {
                     HStack {
-                        Text(filterAll ? String(localized: "All Channels") : (channelStatusFilter?.label ?? String(localized: "All Channels")))
+                        Text(filterAll ? String(localized: "All Channels", bundle: .appStrings) : (channelStatusFilter?.label ?? String(localized: "All Channels", bundle: .appStrings)))
                             .font(.system(size: 13))
                             .foregroundStyle(Theme.textPrimary)
                         Spacer()
@@ -511,7 +511,7 @@ struct AgentDetailView: View {
             .padding(.bottom, 12)
 
             if filteredChannels.isEmpty {
-                Text(filterAll ? String(localized: "No channels added yet.") : String(localized: "No channels match this filter."))
+                Text(filterAll ? String(localized: "No channels added yet.", bundle: .appStrings) : String(localized: "No channels match this filter.", bundle: .appStrings))
                     .font(.system(size: 13))
                     .foregroundStyle(Theme.textMuted)
                     .frame(maxWidth: .infinity)
@@ -540,7 +540,7 @@ struct AgentDetailView: View {
             } label: {
                 HStack(spacing: 10) {
                     checkBox(on: count > 0, partial: count > 0 && !allPicked)
-                    Text(count > 0 ? String(localized: "\(count) selected") : String(localized: "Select all"))
+                    Text(count > 0 ? String(localized: "\(count) selected", bundle: .appStrings) : String(localized: "Select all", bundle: .appStrings))
                         .font(.system(size: 14, weight: .semibold))
                         .foregroundStyle(Theme.textPrimary)
                 }
@@ -743,7 +743,7 @@ struct AgentDetailView: View {
                         .labelsHidden()
                         .tint(Theme.accent)
                         .scaleEffect(0.8)
-                        Text((channel.isEnabled ?? true) ? String(localized: "On") : String(localized: "Off"))
+                        Text((channel.isEnabled ?? true) ? String(localized: "On", bundle: .appStrings) : String(localized: "Off", bundle: .appStrings))
                             .font(.system(size: 11))
                             .foregroundStyle(Theme.textSecondary)
                     }
@@ -751,10 +751,10 @@ struct AgentDetailView: View {
                 .padding(.top, 10)
 
                 Text(channel.isPrivateAccount
-                     ? String(localized: "Not scanned (private)")
+                     ? String(localized: "Not scanned (private)", bundle: .appStrings)
                      : channel.lastScannedAt != nil
-                     ? String(localized: "Scanned \(Format.timeAgo(channel.lastScannedAt))")
-                     : String(localized: "Never scanned"))
+                     ? String(localized: "Scanned \(Format.timeAgo(channel.lastScannedAt))", bundle: .appStrings)
+                     : String(localized: "Never scanned", bundle: .appStrings))
                     .font(.system(size: 11))
                     .foregroundStyle(Theme.textMuted)
                     .padding(.top, 8)
@@ -920,7 +920,7 @@ struct AgentDetailView: View {
     private var modalOverlays: some View {
         if showFilterModal {
             PickerModal(title: "Filter by status", onDismiss: { showFilterModal = false }) {
-                PickerRow(label: String(localized: "All Channels"), isActive: filterAll) {
+                PickerRow(label: String(localized: "All Channels", bundle: .appStrings), isActive: filterAll) {
                     filterAll = true
                     channelStatusFilter = nil
                     showFilterModal = false
@@ -1093,7 +1093,7 @@ struct AgentDetailView: View {
                         .accessibilityAddTraits(active ? .isSelected : [])
                     }
                 }
-                Text(newSourcePlatform == .youtube ? String(localized: "Channel URL") : newSourcePlatform.sourceNoun)
+                Text(newSourcePlatform == .youtube ? String(localized: "Channel URL", bundle: .appStrings) : newSourcePlatform.sourceNoun)
                     .font(.system(size: 12, weight: .semibold))
                     .foregroundStyle(Theme.textSecondary)
                 TextField(newSourcePlatform.addPlaceholder, text: $newChannelUrl)
@@ -1272,7 +1272,7 @@ struct AgentDetailView: View {
             do {
                 try await SupabaseService.shared.toggleChannel(id: channel.id, isEnabled: isEnabled)
             } catch {
-                toasts.show(String(localized: "Couldn't update channel"), type: .error)
+                toasts.show(String(localized: "Couldn't update channel", bundle: .appStrings), type: .error)
                 await load()
             }
         }
@@ -1287,7 +1287,7 @@ struct AgentDetailView: View {
                 try await SupabaseService.shared.updateChannelPriority(id: channel.id, priority: priority)
                 await load()
             } catch {
-                toasts.show(String(localized: "Couldn't update priority"), type: .error)
+                toasts.show(String(localized: "Couldn't update priority", bundle: .appStrings), type: .error)
                 await load()
             }
         }
@@ -1298,10 +1298,10 @@ struct AgentDetailView: View {
         Task {
             do {
                 try await SupabaseService.shared.moveSource(channel, toAgentId: target.id)
-                toasts.show(String(localized: "Moved to \(target.name)"))
+                toasts.show(String(localized: "Moved to \(target.name)", bundle: .appStrings))
                 await load()
             } catch {
-                toasts.show(String(localized: "Couldn't move it"), type: .error)
+                toasts.show(String(localized: "Couldn't move it", bundle: .appStrings), type: .error)
             }
         }
     }
@@ -1322,9 +1322,9 @@ struct AgentDetailView: View {
             isMovingMany = false
             picked = []
             if failed.isEmpty {
-                toasts.show(moved == 1 ? String(localized: "Moved to \(target.name)") : String(localized: "Moved \(moved) accounts to \(target.name)"))
+                toasts.show(moved == 1 ? String(localized: "Moved to \(target.name)", bundle: .appStrings) : String(localized: "Moved \(moved) accounts to \(target.name)", bundle: .appStrings))
             } else {
-                toasts.show(String(localized: "Couldn't move \(failed.formatted(.list(type: .and)))"), type: .error)
+                toasts.show(String(localized: "Couldn't move \(failed.formatted(.list(type: .and)))", bundle: .appStrings), type: .error)
             }
             await load()
         }
@@ -1334,10 +1334,10 @@ struct AgentDetailView: View {
         Task {
             do {
                 try await SupabaseService.shared.deleteChannel(id: channel.id)
-                toasts.show(String(localized: "Channel removed"))
+                toasts.show(String(localized: "Channel removed", bundle: .appStrings))
                 await load()
             } catch {
-                toasts.show(String(localized: "Couldn't remove channel"), type: .error)
+                toasts.show(String(localized: "Couldn't remove channel", bundle: .appStrings), type: .error)
             }
             channelToRemove = nil
         }
@@ -1364,7 +1364,7 @@ struct AgentDetailView: View {
         privateOffer = nil
         // The link says one platform but another is selected (picked after pasting).
         if let detected = SourcePlatform.detect(from: url), detected != newSourcePlatform {
-            toasts.show(String(localized: "That's a \(detected.label) link. Select \(detected.label) or paste a \(newSourcePlatform.label) link."), type: .error)
+            toasts.show(String(localized: "That's a \(detected.label) link. Select \(detected.label) or paste a \(newSourcePlatform.label) link.", bundle: .appStrings), type: .error)
             return
         }
         isSubmittingModal = true
@@ -1372,7 +1372,7 @@ struct AgentDetailView: View {
             do {
                 if newSourcePlatform == .youtube {
                     try await SupabaseService.shared.addChannel(agentId: agentId, url: url, priority: newChannelPriority)
-                    toasts.show(String(localized: "Channel added"))
+                    toasts.show(String(localized: "Channel added", bundle: .appStrings))
                 } else {
                     // X accounts and subreddits are checked and named by the add-source function.
                     let channel = try await SupabaseService.shared.addSource(
@@ -1383,15 +1383,15 @@ struct AgentDetailView: View {
                         privateAccount: asPrivate
                     )
                     toasts.show(channel.isPrivateAccount
-                        ? String(localized: "Added \(channel.displayName) as a private account")
-                        : String(localized: "Added \(channel.displayName)"))
+                        ? String(localized: "Added \(channel.displayName) as a private account", bundle: .appStrings)
+                        : String(localized: "Added \(channel.displayName)", bundle: .appStrings))
                 }
                 showAddChannel = false
                 await load()
             } catch let error as SourceError where !asPrivate && error.canAddAsPrivate {
                 privateOffer = error.message
             } catch {
-                let fallback = String(localized: "Couldn't add \(newSourcePlatform.sourceNoun.lowercased())")
+                let fallback = String(localized: "Couldn't add \(newSourcePlatform.sourceNoun.lowercased())", bundle: .appStrings)
                 toasts.show((error as? SourceError)?.message ?? fallback, type: .error)
             }
             isSubmittingModal = false
@@ -1405,11 +1405,11 @@ struct AgentDetailView: View {
         Task {
             do {
                 try await SupabaseService.shared.addRecipient(agentId: agentId, email: email)
-                toasts.show(String(localized: "Recipient added"))
+                toasts.show(String(localized: "Recipient added", bundle: .appStrings))
                 showAddRecipient = false
                 await load()
             } catch {
-                toasts.show(String(localized: "Couldn't add recipient"), type: .error)
+                toasts.show(String(localized: "Couldn't add recipient", bundle: .appStrings), type: .error)
             }
             isSubmittingModal = false
         }
@@ -1419,10 +1419,10 @@ struct AgentDetailView: View {
         Task {
             do {
                 try await SupabaseService.shared.deleteRecipient(id: recipient.id)
-                toasts.show(String(localized: "Recipient removed"))
+                toasts.show(String(localized: "Recipient removed", bundle: .appStrings))
                 await load()
             } catch {
-                toasts.show(String(localized: "Couldn't remove recipient"), type: .error)
+                toasts.show(String(localized: "Couldn't remove recipient", bundle: .appStrings), type: .error)
             }
             recipientToRemove = nil
         }
@@ -1432,10 +1432,10 @@ struct AgentDetailView: View {
         Task {
             do {
                 try await SupabaseService.shared.cancelRun(runId: run.id)
-                toasts.show(String(localized: "Run cancelled"), type: .info)
+                toasts.show(String(localized: "Run cancelled", bundle: .appStrings), type: .info)
                 await load()
             } catch {
-                toasts.show(String(localized: "Failed to cancel run"), type: .error)
+                toasts.show(String(localized: "Failed to cancel run", bundle: .appStrings), type: .error)
             }
             runToCancel = nil
         }

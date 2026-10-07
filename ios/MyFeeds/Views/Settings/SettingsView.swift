@@ -95,8 +95,8 @@ struct SettingsView: View {
     }
 
     private var defaultEmailCard: some View {
-        settingsCard(icon: "envelope", iconColor: Theme.accent, title: String(localized: "Default Email"),
-                     description: String(localized: "Pre-filled when adding email recipients to new collections.")) {
+        settingsCard(icon: "envelope", iconColor: Theme.accent, title: String(localized: "Default Email", bundle: .appStrings),
+                     description: String(localized: "Pre-filled when adding email recipients to new collections.", bundle: .appStrings)) {
             TextField("your@email.com", text: $defaultEmail)
                 .font(.system(size: 15))
                 .foregroundStyle(Theme.textPrimary)
@@ -118,7 +118,7 @@ struct SettingsView: View {
     /// set this app's language override (kept on this phone). The app switches
     /// right away (see AppLanguage), no reopen needed.
     private var languageCard: some View {
-        settingsCard(icon: "globe", iconColor: Theme.accent, title: String(localized: "Language"), description: nil) {
+        settingsCard(icon: "globe", iconColor: Theme.accent, title: String(localized: "Language", bundle: .appStrings), description: nil) {
             VStack(spacing: 0) {
                 ForEach(AppLanguage.Choice.allCases, id: \.self) { choice in
                     if choice != AppLanguage.Choice.allCases.first {
@@ -169,12 +169,12 @@ struct SettingsView: View {
     private var youtubeCard: some View {
         let account = YouTubeAccount.shared
         return settingsCard(icon: "play.rectangle", iconColor: Theme.accent, title: "YouTube",
-                            description: String(localized: "Connect your YouTube account to add songs to a \"My Feeds\" playlist in YouTube Music.")) {
+                            description: String(localized: "Connect your YouTube account to add songs to a \"My Feeds\" playlist in YouTube Music.", bundle: .appStrings)) {
             HStack(spacing: 12) {
                 Image(systemName: account.isConnected ? "checkmark.circle.fill" : "person.crop.circle.badge.questionmark")
                     .font(.system(size: 18))
                     .foregroundStyle(account.isConnected ? Theme.success : Theme.textMuted)
-                Text(account.isConnected ? (account.channelName ?? String(localized: "Connected")) : String(localized: "Not connected"))
+                Text(account.isConnected ? (account.channelName ?? String(localized: "Connected", bundle: .appStrings)) : String(localized: "Not connected", bundle: .appStrings))
                     .font(.system(size: 15, weight: .semibold))
                     .foregroundStyle(Theme.textPrimary)
                     .lineLimit(1)
@@ -182,12 +182,12 @@ struct SettingsView: View {
                 Button {
                     if account.isConnected {
                         account.disconnect()
-                        toasts.show(String(localized: "YouTube disconnected"))
+                        toasts.show(String(localized: "YouTube disconnected", bundle: .appStrings))
                     } else {
                         Task {
                             do {
                                 try await account.connect()
-                                toasts.show(String(localized: "YouTube connected"))
+                                toasts.show(String(localized: "YouTube connected", bundle: .appStrings))
                             } catch YouTubeAccountError.cancelled {
                                 // closed the sign-in sheet
                             } catch {
@@ -199,7 +199,7 @@ struct SettingsView: View {
                     if account.isConnecting {
                         ProgressView().tint(Theme.accent)
                     } else {
-                        Text(account.isConnected ? String(localized: "Disconnect") : String(localized: "Connect"))
+                        Text(account.isConnected ? String(localized: "Disconnect", bundle: .appStrings) : String(localized: "Connect", bundle: .appStrings))
                             .font(.system(size: 14, weight: .bold))
                             .foregroundStyle(account.isConnected ? Theme.destructive : Theme.accent)
                     }
@@ -215,8 +215,8 @@ struct SettingsView: View {
     /// adding a GitHub or Reddit account on People also follows it there.
     private var connectionsCard: some View {
         let connections = AccountConnections.shared
-        return settingsCard(icon: "link", iconColor: Theme.accent, title: String(localized: "GitHub & Reddit"),
-                            description: String(localized: "When you add a GitHub or Reddit account to a collection on People, the app also follows it with your connected account. Instagram, Facebook, LinkedIn, X, TikTok, Spotify and Apple don't let apps follow accounts for you, so those are only added to your feed.")) {
+        return settingsCard(icon: "link", iconColor: Theme.accent, title: String(localized: "GitHub & Reddit", bundle: .appStrings),
+                            description: String(localized: "When you add a GitHub or Reddit account to a collection on People, the app also follows it with your connected account. Instagram, Facebook, LinkedIn, X, TikTok, Spotify and Apple don't let apps follow accounts for you, so those are only added to your feed.", bundle: .appStrings)) {
             VStack(spacing: 0) {
                 ForEach(AccountConnections.Provider.allCases, id: \.self) { provider in
                     connectionRow(provider, connections: connections)
@@ -235,7 +235,7 @@ struct SettingsView: View {
                 Text(provider.label)
                     .font(.system(size: 15, weight: .semibold))
                     .foregroundStyle(Theme.textPrimary)
-                Text(isConnected ? (accountName.map { String(localized: "Connected as \($0)") } ?? String(localized: "Connected")) : String(localized: "Not connected"))
+                Text(isConnected ? (accountName.map { String(localized: "Connected as \($0)", bundle: .appStrings) } ?? String(localized: "Connected", bundle: .appStrings)) : String(localized: "Not connected", bundle: .appStrings))
                     .font(.system(size: 12))
                     .foregroundStyle(Theme.textSecondary)
                     .lineLimit(1)
@@ -246,10 +246,10 @@ struct SettingsView: View {
                     do {
                         if isConnected {
                             try await connections.disconnect(provider)
-                            toasts.show(String(localized: "\(provider.label) disconnected"))
+                            toasts.show(String(localized: "\(provider.label) disconnected", bundle: .appStrings))
                         } else {
                             let name = try await connections.connect(provider)
-                            toasts.show(name.map { String(localized: "\(provider.label) connected as \($0)") } ?? String(localized: "\(provider.label) connected"))
+                            toasts.show(name.map { String(localized: "\(provider.label) connected as \($0)", bundle: .appStrings) } ?? String(localized: "\(provider.label) connected", bundle: .appStrings))
                         }
                     } catch AccountConnectionError.cancelled {
                         // closed the sign-in sheet
@@ -261,7 +261,7 @@ struct SettingsView: View {
                 if connections.busy == provider {
                     ProgressView().tint(Theme.accent)
                 } else {
-                    Text(isConnected ? String(localized: "Disconnect") : String(localized: "Connect"))
+                    Text(isConnected ? String(localized: "Disconnect", bundle: .appStrings) : String(localized: "Connect", bundle: .appStrings))
                         .font(.system(size: 14, weight: .bold))
                         .foregroundStyle(isConnected ? Theme.destructive : Theme.accent)
                 }
@@ -274,8 +274,8 @@ struct SettingsView: View {
 
     private var videoPlaybackCard: some View {
         @Bindable var prefs = prefs
-        return settingsCard(icon: "display", iconColor: Theme.accent, title: String(localized: "Video Playback"),
-                            description: String(localized: "Configure default video playback settings. These sync across your devices via iCloud.")) {
+        return settingsCard(icon: "display", iconColor: Theme.accent, title: String(localized: "Video Playback", bundle: .appStrings),
+                            description: String(localized: "Configure default video playback settings. These sync across your devices via iCloud.", bundle: .appStrings)) {
             Text("Default Video Quality")
                 .font(.system(size: 13, weight: .semibold))
                 .foregroundStyle(Theme.textSecondary)
@@ -364,13 +364,13 @@ struct SettingsView: View {
     private var biometricCard: some View {
         @Bindable var prefs = prefs
         let biometryName = BiometricAuthService.biometryName
-        let biometryLabel = biometryName ?? String(localized: "biometrics")
+        let biometryLabel = biometryName ?? String(localized: "biometrics", bundle: .appStrings)
         let hasSavedCredentials = KeychainCredentialStore.savedCredentials() != nil
         return settingsCard(
             icon: biometryName == "Face ID" ? "faceid" : "touchid",
             iconColor: Theme.accent,
-            title: String(localized: "Quick Sign-In"),
-            description: String(localized: "Use \(biometryLabel) to unlock your saved login instead of typing your password.")
+            title: String(localized: "Quick Sign-In", bundle: .appStrings),
+            description: String(localized: "Use \(biometryLabel) to unlock your saved login instead of typing your password.", bundle: .appStrings)
         ) {
             if biometryName == nil {
                 HStack(spacing: 8) {
@@ -387,8 +387,8 @@ struct SettingsView: View {
                             .font(.system(size: 13, weight: .semibold))
                             .foregroundStyle(Theme.textSecondary)
                         Text(hasSavedCredentials
-                             ? String(localized: "Sign out and back in with your password to update the saved login.")
-                             : String(localized: "Sign in once with your password, then use \(biometryLabel) next time."))
+                             ? String(localized: "Sign out and back in with your password to update the saved login.", bundle: .appStrings)
+                             : String(localized: "Sign in once with your password, then use \(biometryLabel) next time.", bundle: .appStrings))
                             .font(.system(size: 11))
                             .foregroundStyle(Theme.textMuted)
                     }
@@ -451,9 +451,9 @@ struct SettingsView: View {
     }
 
     private var dangerZoneCard: some View {
-        settingsCard(icon: "trash", iconColor: Theme.destructive, title: String(localized: "Danger Zone"),
+        settingsCard(icon: "trash", iconColor: Theme.destructive, title: String(localized: "Danger Zone", bundle: .appStrings),
                      titleColor: Theme.destructive,
-                     description: String(localized: "Permanently delete your account and all associated data. This action cannot be undone.")) {
+                     description: String(localized: "Permanently delete your account and all associated data. This action cannot be undone.", bundle: .appStrings)) {
             Button {
                 UIImpactFeedbackGenerator(style: .heavy).impactOccurred()
                 showDeleteConfirm = true
@@ -486,29 +486,29 @@ struct SettingsView: View {
         let store = DownloadStore.shared
         let count = store.entries.count
         let label = count == 0
-            ? String(localized: "Saved for offline")
-            : String(localized: "\(count) saved · \(DownloadStore.formatBytes(store.totalBytes))")
-        return settingsCard(icon: "arrow.down.circle", iconColor: Theme.accent, title: String(localized: "Downloads"), description: nil) {
+            ? String(localized: "Saved for offline", bundle: .appStrings)
+            : String(localized: "\(count) saved · \(DownloadStore.formatBytes(store.totalBytes))", bundle: .appStrings)
+        return settingsCard(icon: "arrow.down.circle", iconColor: Theme.accent, title: String(localized: "Downloads", bundle: .appStrings), description: nil) {
             supportRow(icon: "arrow.down.circle", label: label, route: .downloads)
         }
         .onAppear { store.load() }
     }
 
     private var supportCard: some View {
-        settingsCard(icon: "questionmark.circle", iconColor: Theme.accent, title: String(localized: "Support"), description: nil) {
+        settingsCard(icon: "questionmark.circle", iconColor: Theme.accent, title: String(localized: "Support", bundle: .appStrings), description: nil) {
             VStack(spacing: 0) {
-                supportRow(icon: "questionmark.circle", label: String(localized: "FAQ"), route: .faq)
+                supportRow(icon: "questionmark.circle", label: String(localized: "FAQ", bundle: .appStrings), route: .faq)
                 Rectangle().fill(Theme.border).frame(height: 0.5)
-                supportRow(icon: "checkmark.shield", label: String(localized: "Privacy Policy"), route: .privacy)
+                supportRow(icon: "checkmark.shield", label: String(localized: "Privacy Policy", bundle: .appStrings), route: .privacy)
                 Rectangle().fill(Theme.border).frame(height: 0.5)
-                supportRow(icon: "doc.text", label: String(localized: "Terms of Service"), route: .terms)
+                supportRow(icon: "doc.text", label: String(localized: "Terms of Service", bundle: .appStrings), route: .terms)
                 Rectangle().fill(Theme.border).frame(height: 0.5)
                 Button {
                     if let url = URL(string: "mailto:support@travelone.ca") {
                         UIApplication.shared.open(url)
                     }
                 } label: {
-                    supportRowContent(icon: "bubble.left", label: String(localized: "Contact Support"))
+                    supportRowContent(icon: "bubble.left", label: String(localized: "Contact Support", bundle: .appStrings))
                 }
                 .buttonStyle(.plain)
             }
@@ -636,7 +636,7 @@ struct SettingsView: View {
         UIImpactFeedbackGenerator(style: .light).impactOccurred()
         let email = defaultEmail.trimmingCharacters(in: .whitespaces)
         if !email.isEmpty, email.range(of: "^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$", options: .regularExpression) == nil {
-            toasts.show(String(localized: "Please enter a valid email address."), type: .error)
+            toasts.show(String(localized: "Please enter a valid email address.", bundle: .appStrings), type: .error)
             return
         }
         isSaving = true
@@ -645,9 +645,9 @@ struct SettingsView: View {
                 if !email.isEmpty, let userId = auth.userId {
                     try await SupabaseService.shared.upsertDefaultEmail(userId: userId, email: email)
                 }
-                toasts.show(String(localized: "Settings saved."))
+                toasts.show(String(localized: "Settings saved.", bundle: .appStrings))
             } catch {
-                toasts.show(String(localized: "Failed to save settings. Please try again."), type: .error)
+                toasts.show(String(localized: "Failed to save settings. Please try again.", bundle: .appStrings), type: .error)
             }
             isSaving = false
         }
@@ -658,7 +658,7 @@ struct SettingsView: View {
         isDeleting = true
         Task {
             let usedEdgeFunction = (try? await SupabaseService.shared.deleteAccount(userId: userId)) ?? false
-            toasts.show(usedEdgeFunction ? String(localized: "Your account has been deleted.") : String(localized: "Your account data has been deleted."))
+            toasts.show(usedEdgeFunction ? String(localized: "Your account has been deleted.", bundle: .appStrings) : String(localized: "Your account data has been deleted.", bundle: .appStrings))
             await auth.signOut()
             if !usedEdgeFunction,
                let url = URL(string: "mailto:support@travelone.ca?subject=Account%20Deletion%20Request") {
