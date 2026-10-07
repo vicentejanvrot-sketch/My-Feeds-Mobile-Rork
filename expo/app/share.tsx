@@ -24,6 +24,7 @@ import { Image } from "expo-image";
 import * as Clipboard from "expo-clipboard";
 import { useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, Check, Lock, Plus, Rss, Sparkles, X } from "lucide-react-native";
+import { useTranslation } from "react-i18next";
 import { Colors } from "@/constants/colors";
 import { PlatformLogo } from "@/components/PlatformBadge";
 import { useToast } from "@/components/Toast";
@@ -34,8 +35,8 @@ import {
   createCollection,
   joinNames,
   previewShare,
+  priorityName,
   quickAccountFrom,
-  PRIORITY_NAMES,
   sortCollections,
   UNSORTED_ID,
   type SharePreview,
@@ -55,6 +56,7 @@ export default function ShareScreen() {
   const insets = useSafeAreaInsets();
   const queryClient = useQueryClient();
   const showToast = useToast();
+  const { t } = useTranslation();
   const { status } = useAuth();
 
   const [input, setInput] = useState(shared);
@@ -94,7 +96,7 @@ export default function ShareScreen() {
       setPriority(3);
       setStep("card");
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Couldn't read that link.");
+      setError(e instanceof Error ? e.message : t("share.readLinkFailed"));
       setStep("error");
     }
   }, []);
@@ -116,11 +118,11 @@ export default function ShareScreen() {
   const already = preview?.inCollections ?? [];
   const alreadyIds = useMemo(() => new Set(already.map((c) => c.agentId)), [already]);
   const nameOf = (id: string) =>
-    id === UNSORTED_ID ? "Unsorted" : preview?.collections.find((c) => c.id === id)?.name ?? "";
+    id === UNSORTED_ID ? t("share.unsorted") : preview?.collections.find((c) => c.id === id)?.name ?? "";
   const isSuggested = !!preview?.suggestion && selected.length === 1 && selected[0] === preview.suggestion.agentId && !addingMore;
   const showAlreadyBox = step === "card" && already.length > 0 && !addingMore;
   const alsoNames = preview ? joinNames([...new Set(preview.alsoOn.map((a) => platformLabel(a.platform)))]) : "";
-  const backLabel = "Done";
+  const backLabel = t("common.done");
 
   const toggle = (id: string) => {
     if (alreadyIds.has(id)) return;
@@ -133,10 +135,10 @@ export default function ShareScreen() {
 
   const addLabel =
     selected.length === 0
-      ? "Pick a collection"
+      ? t("share.pickCollection")
       : selected.length === 1
-      ? selected[0] === UNSORTED_ID ? "Save to Unsorted" : `Add to ${nameOf(selected[0])}`
-      : `Add to ${selected.length} collections`;
+      ? selected[0] === UNSORTED_ID ? t("share.saveToUnsorted") : t("share.addTo", { name: nameOf(selected[0]) })
+      : t("share.addToMany", { count: selected.length });
 
   const add = async () => {
     if (!preview || selected.length === 0) return;
@@ -146,7 +148,7 @@ export default function ShareScreen() {
       void queryClient.invalidateQueries();
       setStep("done");
     } catch (e) {
-      showToast(e instanceof Error ? e.message : "Couldn't add that account.", "error");
+      showToast(e instanceof Error ? e.message : t("errors.addAccountFailed"), "error");
       setStep("card");
     }
   };
@@ -162,7 +164,7 @@ export default function ShareScreen() {
       setNewOpen(false);
       void queryClient.invalidateQueries({ queryKey: ["agents"] });
     } catch (e) {
-      showToast(e instanceof Error ? e.message : "Couldn't create that collection.", "error");
+      showToast(e instanceof Error ? e.message : t("share.createFailed"), "error");
     } finally {
       setCreating(false);
     }
@@ -173,7 +175,7 @@ export default function ShareScreen() {
 
   const pickerRows = preview
     ? sortCollections(
-        [...preview.collections, { id: UNSORTED_ID, name: "Unsorted" }].filter(
+        [...preview.collections, { id: UNSORTED_ID, name: t("share.unsorted") }].filter(
           (c, _i, all) => !(c.id === UNSORTED_ID && all.some((o) => o.id !== UNSORTED_ID && o.name === "Unsorted")),
         ),
       )
@@ -181,14 +183,14 @@ export default function ShareScreen() {
 
   return (
     <KeyboardAvoidingView behavior={RNPlatform.OS === "ios" ? "padding" : undefined} style={styles.backdrop}>
-      <Pressable style={StyleSheet.absoluteFill} onPress={close} accessibilityLabel="Close" />
+      <Pressable style={StyleSheet.absoluteFill} onPress={close} accessibilityLabel={t("common.close")} />
       <View style={[styles.sheet, { paddingBottom: insets.bottom + 24 }]}>
         <View style={styles.grabber} />
         <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={styles.sheetContent} bounces={false}>
           {/* header */}
           <View style={styles.headerRow}>
             {step === "picker" ? (
-              <Pressable onPress={() => setStep("card")} style={styles.roundBtn} accessibilityLabel="Back" hitSlop={6}>
+              <Pressable onPress={() => setStep("card")} style={styles.roundBtn} accessibilityLabel={t("common.back")} hitSlop={6}>
                 <ArrowLeft size={18} color={Colors.textPrimary} />
               </Pressable>
             ) : (
@@ -196,24 +198,24 @@ export default function ShareScreen() {
                 <Rss size={17} color={Colors.accent} strokeWidth={2.4} />
               </View>
             )}
-            <Text style={styles.headerTitle}>{step === "picker" ? "Choose collections" : "Add to My Feeds"}</Text>
-            <Pressable onPress={close} style={styles.roundBtn} accessibilityLabel="Close" hitSlop={6}>
+            <Text style={styles.headerTitle}>{step === "picker" ? t("share.chooseCollections") : t("share.addToMyFeeds")}</Text>
+            <Pressable onPress={close} style={styles.roundBtn} accessibilityLabel={t("common.close")} hitSlop={6}>
               <X size={16} color={Colors.textSecondary} />
             </Pressable>
           </View>
 
           {status === "unauthenticated" ? (
             <View style={styles.block}>
-              <Text style={styles.body}>Sign in to My Feeds first, then share again.</Text>
+              <Text style={styles.body}>{t("share.signInFirst")}</Text>
               <Pressable style={styles.primaryBtn} onPress={() => router.replace("/auth/login" as never)}>
-                <Text style={styles.primaryText}>Sign in</Text>
+                <Text style={styles.primaryText}>{t("auth.signIn")}</Text>
               </Pressable>
             </View>
           ) : null}
 
           {status !== "unauthenticated" && step === "input" ? (
             <View style={styles.block}>
-              <Text style={styles.muted}>Paste a profile or post link from YouTube, X, Instagram, LinkedIn, TikTok, Facebook or Reddit.</Text>
+              <Text style={styles.muted}>{t("share.pastePrompt")}</Text>
               <TextInput
                 value={input}
                 onChangeText={setInput}
@@ -224,10 +226,10 @@ export default function ShareScreen() {
                 keyboardType="url"
                 style={styles.input}
                 onSubmitEditing={() => void lookUp(input)}
-                accessibilityLabel="Profile or post link"
+                accessibilityLabel={t("share.linkLabel")}
               />
               <Pressable style={[styles.primaryBtn, !input.trim() && styles.disabled]} disabled={!input.trim()} onPress={() => void lookUp(input)}>
-                <Text style={styles.primaryText}>Find account</Text>
+                <Text style={styles.primaryText}>{t("share.findAccount")}</Text>
               </Pressable>
             </View>
           ) : null}
@@ -256,7 +258,7 @@ export default function ShareScreen() {
               )}
               <View style={styles.inline}>
                 <ActivityIndicator size="small" color={Colors.accent} />
-                <Text style={styles.muted}>Looking up the account…</Text>
+                <Text style={styles.muted}>{t("share.lookingUp")}</Text>
               </View>
             </View>
           ) : null}
@@ -268,10 +270,10 @@ export default function ShareScreen() {
               </View>
               <View style={styles.twoBtns}>
                 <Pressable style={[styles.secondaryBtn, { flex: 1 }]} onPress={() => setStep("input")}>
-                  <Text style={styles.secondaryText}>Try another link</Text>
+                  <Text style={styles.secondaryText}>{t("share.tryAnother")}</Text>
                 </Pressable>
                 <Pressable style={[styles.primaryBtn, { flex: 1 }]} onPress={() => void lookUp(input)}>
-                  <Text style={styles.primaryText}>Try again</Text>
+                  <Text style={styles.primaryText}>{t("common.tryAgain")}</Text>
                 </Pressable>
               </View>
             </View>
@@ -300,7 +302,7 @@ export default function ShareScreen() {
                   {preview.platformLabel}
                 </Text>
                 <Text style={styles.small}>
-                  {preview.kind === "post" ? "From a post you shared. This is who posted it." : "From the profile you shared."}
+                  {preview.kind === "post" ? t("share.fromPost") : t("share.fromProfile")}
                 </Text>
               </View>
             </View>
@@ -310,10 +312,8 @@ export default function ShareScreen() {
             <View style={styles.alsoBox}>
               <Lock size={16} color={Colors.textMuted} />
               <View style={{ flex: 1, gap: 2 }}>
-                <Text style={styles.bodyStrong}>Private account</Text>
-                <Text style={styles.muted}>
-                  {`It's added as a private account: it shows on People with a button to open it in ${preview.platformLabel}. Its posts won't appear in your feed.`}
-                </Text>
+                <Text style={styles.bodyStrong}>{t("share.privateAccount")}</Text>
+                <Text style={styles.muted}>{t("share.privateNote", { platform: preview.platformLabel })}</Text>
               </View>
             </View>
           ) : null}
@@ -323,8 +323,8 @@ export default function ShareScreen() {
               <View style={styles.successBox}>
                 <Check size={20} color={Colors.success} />
                 <View style={{ flex: 1 }}>
-                  <Text style={styles.bodyStrong}>Already in {joinNames(already.map((c) => c.agentName))}</Text>
-                  <Text style={styles.muted}>You already get their posts in My Feeds.</Text>
+                  <Text style={styles.bodyStrong}>{t("share.alreadyIn", { names: joinNames(already.map((c) => c.agentName)) })}</Text>
+                  <Text style={styles.muted}>{t("share.alreadyHint")}</Text>
                 </View>
               </View>
               <View style={styles.twoBtns}>
@@ -336,7 +336,7 @@ export default function ShareScreen() {
                     setStep("picker");
                   }}
                 >
-                  <Text style={styles.secondaryText}>Add to another</Text>
+                  <Text style={styles.secondaryText}>{t("share.addToAnother")}</Text>
                 </Pressable>
                 <Pressable style={[styles.primaryBtn, { flex: 1 }]} onPress={close}>
                   <Text style={styles.primaryText}>{backLabel}</Text>
@@ -350,15 +350,15 @@ export default function ShareScreen() {
               {addingMore ? (
                 <View style={styles.inline}>
                   <Check size={15} color={Colors.success} />
-                  <Text style={[styles.small, { color: Colors.success }]}>Already in {joinNames(already.map((c) => c.agentName))}</Text>
+                  <Text style={[styles.small, { color: Colors.success }]}>{t("share.alreadyIn", { names: joinNames(already.map((c) => c.agentName)) })}</Text>
                 </View>
               ) : null}
 
               <View style={{ gap: 10 }}>
                 <View style={styles.labelRow}>
-                  <Text style={styles.label}>Collection</Text>
+                  <Text style={styles.label}>{t("feed.collection")}</Text>
                   <Pressable onPress={() => setStep("picker")} hitSlop={8}>
-                    <Text style={styles.link}>Change</Text>
+                    <Text style={styles.link}>{t("share.change")}</Text>
                   </Pressable>
                 </View>
                 <View style={styles.chips}>
@@ -369,14 +369,14 @@ export default function ShareScreen() {
                   ))}
                   {selected.length === 0 ? (
                     <Pressable onPress={() => setStep("picker")} style={styles.chipEmpty}>
-                      <Text style={styles.muted}>Pick a collection</Text>
+                      <Text style={styles.muted}>{t("share.pickCollection")}</Text>
                     </Pressable>
                   ) : null}
                 </View>
                 {isSuggested && preview.suggestion?.reason ? (
                   <View style={styles.inline}>
                     <Sparkles size={14} color={Colors.accent} />
-                    <Text style={[styles.small, { flex: 1 }]}>Suggested. {preview.suggestion.reason}</Text>
+                    <Text style={[styles.small, { flex: 1 }]}>{t("share.suggestedReason", { reason: preview.suggestion.reason })}</Text>
                   </View>
                 ) : null}
               </View>
@@ -384,23 +384,23 @@ export default function ShareScreen() {
               {preview.alsoOn.length > 0 ? (
                 <View style={styles.alsoBox}>
                   <View style={{ flex: 1 }}>
-                    <Text style={styles.bodyStrong}>Also on {alsoNames}</Text>
-                    <Text style={styles.small}>Same person, matched from their profile links. Add those too?</Text>
+                    <Text style={styles.bodyStrong}>{t("share.alsoOn", { platforms: alsoNames })}</Text>
+                    <Text style={styles.small}>{t("share.alsoOnHint")}</Text>
                   </View>
                   <Switch
                     value={includeAlsoOn}
                     onValueChange={setIncludeAlsoOn}
                     trackColor={{ true: Colors.accent, false: Colors.border }}
                     thumbColor={Colors.white}
-                    accessibilityLabel="Add their other accounts too"
+                    accessibilityLabel={t("share.alsoOnToggle")}
                   />
                 </View>
               ) : null}
 
               <View style={{ gap: 10 }}>
                 <View style={styles.labelRow}>
-                  <Text style={styles.label}>Priority</Text>
-                  <Text style={styles.muted}>{priority} · {PRIORITY_NAMES[priority]}</Text>
+                  <Text style={styles.label}>{t("agentDetail.priority")}</Text>
+                  <Text style={styles.muted}>{priority} · {priorityName(priority)}</Text>
                 </View>
                 <View style={styles.priorityRow}>
                   {[1, 2, 3, 4, 5].map((n) => (
@@ -408,6 +408,8 @@ export default function ShareScreen() {
                       key={n}
                       onPress={() => setPriority(n)}
                       style={[styles.priorityBtn, n === priority && styles.priorityBtnActive]}
+                      accessibilityRole="button"
+                      accessibilityLabel={t("agentDetail.priorityLabel", { value: n })}
                       accessibilityState={{ selected: n === priority }}
                     >
                       <Text style={[styles.priorityText, n === priority && { color: Colors.white }]}>{n}</Text>
@@ -435,19 +437,19 @@ export default function ShareScreen() {
                     autoFocus
                     value={newName}
                     onChangeText={setNewName}
-                    placeholder="New collection name"
+                    placeholder={t("share.newName")}
                     placeholderTextColor={Colors.textMuted}
                     returnKeyType="done"
                     onSubmitEditing={() => void createNew()}
                     style={[styles.input, { flex: 1 }]}
-                    accessibilityLabel="New collection name"
+                    accessibilityLabel={t("share.newName")}
                   />
                   <Pressable
                     style={[styles.primaryBtn, (!newName.trim() || creating) && styles.disabled]}
                     disabled={!newName.trim() || creating}
                     onPress={() => void createNew()}
                   >
-                    {creating ? <ActivityIndicator color={Colors.white} /> : <Text style={styles.primaryText}>Create</Text>}
+                    {creating ? <ActivityIndicator color={Colors.white} /> : <Text style={styles.primaryText}>{t("share.create")}</Text>}
                   </Pressable>
                   <Pressable
                     style={styles.roundBtn}
@@ -455,7 +457,7 @@ export default function ShareScreen() {
                       setNewOpen(false);
                       setNewName("");
                     }}
-                    accessibilityLabel="Cancel new collection"
+                    accessibilityLabel={t("share.cancelNew")}
                   >
                     <X size={18} color={Colors.textPrimary} />
                   </Pressable>
@@ -463,14 +465,14 @@ export default function ShareScreen() {
               ) : (
                 <Pressable style={styles.newBtn} onPress={() => setNewOpen(true)}>
                   <Plus size={18} color={Colors.accent} />
-                  <Text style={styles.link}>New collection</Text>
+                  <Text style={styles.link}>{t("share.newCollection")}</Text>
                 </Pressable>
               )}
               <View style={styles.list}>
                 {pickerRows.map((c, i) => {
                   const locked = alreadyIds.has(c.id);
                   const checked = locked || selected.includes(c.id);
-                  const note = locked ? "Already here" : c.id === UNSORTED_ID ? "Sort it later" : c.id === preview.suggestion?.agentId ? "Suggested" : "";
+                  const note = locked ? t("share.alreadyHere") : c.id === UNSORTED_ID ? t("share.sortLater") : c.id === preview.suggestion?.agentId ? t("share.suggested") : "";
                   return (
                     <Pressable
                       key={c.id}
@@ -493,7 +495,7 @@ export default function ShareScreen() {
                 disabled={selected.length === 0}
                 onPress={() => setStep("card")}
               >
-                <Text style={styles.primaryText}>Done</Text>
+                <Text style={styles.primaryText}>{t("common.done")}</Text>
               </Pressable>
             </View>
           ) : null}
@@ -503,13 +505,13 @@ export default function ShareScreen() {
               <View style={styles.doneCircle}>
                 <Check size={32} color={Colors.success} strokeWidth={2.6} />
               </View>
-              <Text style={styles.doneTitle}>Added {plainName(preview.account.name)}</Text>
-              <Text style={styles.muted}>to {joinNames(selected.map(nameOf))}</Text>
+              <Text style={styles.doneTitle}>{t("share.added", { name: plainName(preview.account.name) })}</Text>
+              <Text style={styles.muted}>{t("share.addedTo", { names: joinNames(selected.map(nameOf)) })}</Text>
               {includeAlsoOn && preview.alsoOn.length > 0 ? (
-                <Text style={styles.small}>Their {alsoNames} accounts were added too.</Text>
+                <Text style={styles.small}>{t("share.alsoAdded", { platforms: alsoNames })}</Text>
               ) : null}
               <Pressable style={[styles.primaryBtn, { alignSelf: "stretch", marginTop: 12 }]} onPress={close}>
-                <Text style={styles.primaryText}>Close</Text>
+                <Text style={styles.primaryText}>{t("common.close")}</Text>
               </Pressable>
             </View>
           ) : null}

@@ -110,11 +110,13 @@ export function sortCollections<T extends { id: string; name: string }>(list: T[
 
 export function joinNames(names: string[]): string {
   if (names.length <= 1) return names.join("");
-  if (names.length === 2) return `${names[0]} and ${names[1]}`;
-  return `${names.slice(0, -1).join(", ")} and ${names[names.length - 1]}`;
+  return i18n.t("share.list", { head: names.slice(0, -1).join(", "), last: names[names.length - 1] });
 }
 
-export const PRIORITY_NAMES: Record<number, string> = { 1: "Lowest", 2: "Low", 3: "Normal", 4: "High", 5: "Highest" };
+/** "Normal" / "Alta"… for priorities 1 to 5, in the active language. */
+export function priorityName(n: number): string {
+  return n >= 1 && n <= 5 ? i18n.t(`share.priority.${n as 1 | 2 | 3 | 4 | 5}`) : String(n);
+}
 
 // Who a shared link points to, from the link alone (no network): shown while
 // the full lookup runs. Same rules as QuickAccount in the iOS share card.
