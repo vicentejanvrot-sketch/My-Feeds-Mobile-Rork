@@ -7,7 +7,6 @@ import {
   Pressable,
   ScrollView,
   StyleSheet,
-  Switch,
   Text,
   TextInput,
   View,
@@ -74,10 +73,8 @@ export function OnboardingWizard({ visible, onClose, hidden, onHiddenChange }: O
 
   const [step, setStep] = useState(0);
   const [name, setName] = useState("");
-  const [emailMe, setEmailMe] = useState(true);
   const [agentId, setAgentId] = useState<string | null>(null);
   const [savedName, setSavedName] = useState("");
-  const [savedEmailMe, setSavedEmailMe] = useState(true);
   const [saving, setSaving] = useState(false);
   const [finishing, setFinishing] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -104,30 +101,10 @@ export function OnboardingWizard({ visible, onClose, hidden, onHiddenChange }: O
     setStep(n);
   };
 
-  const recipientsFor = async (wantEmail: boolean): Promise<string[]> => {
-    if (!wantEmail || !user) return [];
-    const { data } = await supabase
-      .from("user_settings")
-      .select("default_email")
-      .eq("user_id", user.id)
-      .maybeSingle();
-    const email = ((data?.default_email as string | null) || user.email || "").trim();
-    return email ? [email] : [];
-  };
-
-  // Replace the agent's recipients, the same way the web app does.
-  const saveRecipients = async (id: string, recipients: string[]) => {
-    await supabase.from("agent_recipients").delete().eq("agent_id", id);
-    if (recipients.length > 0) {
-      const { error: insertError } = await supabase
-        .from("agent_recipients")
-        .insert(recipients.map((email) => ({ agent_id: id, email })));
-      if (insertError) throw insertError;
-    }
-  };
-
   // Step 1: create the agent the first time, update it if they come back and change it.
   // No success message here; the user gets one when they finish.
+  // The database adds the user's email as the digest recipient when the
+  // collection is created (add_owner_recipient trigger), so nothing to save here.
   const saveAgent = async () => {
     if (!trimmedName || trimmedName.length > 100 || !user) return;
     setSaving(true);
@@ -151,18 +128,12 @@ export function OnboardingWizard({ visible, onClose, hidden, onHiddenChange }: O
           .select()
           .single();
         if (insertError) throw insertError;
-        await saveRecipients(agent.id as string, await recipientsFor(emailMe));
         setAgentId(agent.id as string);
         setSavedName(trimmedName);
-        setSavedEmailMe(emailMe);
-      } else if (trimmedName !== savedName || emailMe !== savedEmailMe) {
-        if (trimmedName !== savedName) {
-          const { error: updateError } = await supabase.from("agents").update({ name: trimmedName }).eq("id", agentId);
-          if (updateError) throw updateError;
-        }
-        if (emailMe !== savedEmailMe) await saveRecipients(agentId, await recipientsFor(emailMe));
+      } else if (trimmedName !== savedName) {
+        const { error: updateError } = await supabase.from("agents").update({ name: trimmedName }).eq("id", agentId);
+        if (updateError) throw updateError;
         setSavedName(trimmedName);
-        setSavedEmailMe(emailMe);
       }
       void queryClient.invalidateQueries({ queryKey: qk.agents });
       goTo(2);
@@ -411,19 +382,6 @@ export function OnboardingWizard({ visible, onClose, hidden, onHiddenChange }: O
                   accessibilityLabel={t("onboarding.name.label")}
                 />
               </View>
-              <View style={styles.switchRow}>
-                <View style={{ flex: 1, gap: 2 }}>
-                  <Text style={styles.label}>{t("onboarding.name.email")}</Text>
-                  <Text style={styles.muted}>{t("onboarding.name.emailHint")}</Text>
-                </View>
-                <Switch
-                  value={emailMe}
-                  onValueChange={setEmailMe}
-                  trackColor={{ true: Colors.accent, false: Colors.border }}
-                  thumbColor={Colors.white}
-                  accessibilityLabel={t("onboarding.name.email")}
-                />
-              </View>
               {trimmedName ? (
                 <View style={styles.previewCard}>
                   <View style={styles.previewAvatar}>
@@ -615,7 +573,7 @@ export function OnboardingWizard({ visible, onClose, hidden, onHiddenChange }: O
                 </View>
                 <View style={[styles.recapRow, styles.recapDivider]}>
                   <Text style={styles.muted}>{t("onboarding.done.email")}</Text>
-                  <Text style={styles.recapValue}>{savedEmailMe ? t("onboarding.done.on") : t("onboarding.done.off")}</Text>
+                  <Text style={styles.recapValue}>{t("onboarding.done.on")}</Text>
                 </View>
               </View>
               <View style={{ gap: 10 }}>
@@ -692,15 +650,6 @@ const styles = StyleSheet.create({
     color: Colors.textPrimary,
     fontSize: 16,
     paddingHorizontal: 14,
-  },
-  switchRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    borderRadius: 10,
-    padding: 14,
   },
   previewCard: {
     flexDirection: "row",

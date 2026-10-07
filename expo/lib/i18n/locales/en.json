@@ -1045,8 +1045,6 @@
       "title": "Build your first collection",
       "body": "A collection follows one topic and pulls the best posts from its sources into one stream. Its name is the topic, so name it after what you want to follow.",
       "label": "Collection name and topic",
-      "email": "Email me a digest after each run",
-      "emailHint": "Sent to your account email. You can change it on the collection later.",
       "schedule": "Runs daily at {{time}} · looks back {{hours}} hours"
     },
     "sources": {

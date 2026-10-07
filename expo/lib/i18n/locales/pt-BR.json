@@ -1045,8 +1045,6 @@
       "title": "Crie sua primeira coleção",
       "body": "Uma coleção acompanha um assunto e reúne os melhores posts das fontes dela em um só lugar. O nome é o assunto, então dê o nome do que você quer acompanhar.",
       "label": "Nome e assunto da coleção",
-      "email": "Me enviar um resumo por e-mail a cada atualização",
-      "emailHint": "Enviado para o e-mail da sua conta. Dá para mudar isso na coleção depois.",
       "schedule": "Atualiza todo dia às {{time}} · busca as últimas {{hours}} horas"
     },
     "sources": {
