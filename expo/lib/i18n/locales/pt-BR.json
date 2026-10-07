@@ -1351,5 +1351,127 @@
       "d_one": "{{count}} d",
       "d_other": "{{count}} d"
     }
+  },
+  "legal": {
+    "lastUpdated": "Última atualização: {{date}}",
+    "englishPrevails": "Esta é uma tradução do texto original em inglês. Se as duas versões forem diferentes, vale a versão em inglês.",
+    "privacy": {
+      "intro": "Esta Política de Privacidade explica como o My Feeds (\"nós\" ou \"o app\") coleta, usa e protege suas informações. Ao usar o app, você concorda com as práticas descritas aqui.",
+      "sections": {
+        "collect": {
+          "heading": "Informações que coletamos",
+          "body": "Coletamos o e-mail com que você entra, as configurações que você define (como seu e-mail padrão e suas coleções) e, se você optar por informá-las, chaves de API opcionais de serviços de terceiros (YouTube, OpenAI, Anthropic, Gemini). Se você conectar sua conta do YouTube, acessamos as playlists, o histórico e os dados de vídeos que você autorizar pelo login do Google."
+        },
+        "use": {
+          "heading": "Como usamos suas informações",
+          "body": "Usamos suas informações só para oferecer os recursos do app: acompanhar canais, montar seus feeds, sincronizar ações do YouTube que você pedir e gerar as análises com IA que você iniciar. Não vendemos suas informações pessoais."
+        },
+        "thirdParty": {
+          "heading": "Serviços de terceiros",
+          "body": "O app pode interagir com Google/YouTube, OpenAI, Anthropic e Google Gemini usando credenciais que você fornecer ou autorizar. O uso desses serviços também segue as políticas de privacidade de cada um."
+        },
+        "storage": {
+          "heading": "Armazenamento e segurança dos dados",
+          "body": "Seus dados ficam guardados com segurança nos nossos servidores. As chaves de API são guardadas só para gravação e nunca são mostradas de volta para você nem lidas pelo app depois de salvas."
+        },
+        "retention": {
+          "heading": "Retenção e exclusão de dados",
+          "body": "Guardamos seus dados enquanto sua conta estiver ativa. Você pode excluir permanentemente sua conta e todos os dados ligados a ela a qualquer momento, no próprio app, em Configurações > \"Excluir conta\". Isso remove seus dados — incluindo suas coleções, feeds, histórico e configurações salvas — e a exclusão vale na hora e não pode ser desfeita. Se preferir, ou se precisar de ajuda, você também pode pedir a exclusão por e-mail para <mail>{{email}}</mail>, e concluiremos a exclusão em até 30 dias."
+        },
+        "children": {
+          "heading": "Privacidade de crianças",
+          "body": "O app não é voltado para menores de 13 anos, e não coletamos intencionalmente informações pessoais deles."
+        },
+        "changes": {
+          "heading": "Mudanças nesta política",
+          "body": "Podemos atualizar esta Política de Privacidade de tempos em tempos. Mudanças importantes serão indicadas pela data de \"Última atualização\" acima."
+        },
+        "contact": {
+          "heading": "Fale com a gente",
+          "body": "Se tiver dúvidas sobre esta Política de Privacidade ou sobre seus dados, escreva para <mail>{{email}}</mail>."
+        }
+      }
+    },
+    "terms": {
+      "intro": "Estes Termos de Serviço (\"Termos\") regem o uso do My Feeds (\"o app\"). Ao baixar, acessar ou usar o app, você concorda com estes Termos. Se não concordar, não use o app.",
+      "sections": {
+        "use": {
+          "heading": "Uso do app",
+          "body": "Você só pode usar o app para fins legais e de acordo com estes Termos. Você é responsável por toda atividade feita na sua conta e por manter seguros seus dados de login e as chaves de API que fornecer."
+        },
+        "thirdParty": {
+          "heading": "Serviços de terceiros e credenciais",
+          "body": "O app se integra a serviços de terceiros, incluindo YouTube/Google, OpenAI, Anthropic e Google Gemini. Você é responsável por cumprir os termos desses serviços e por qualquer uso, cobrança ou limite ligado às credenciais que fornecer."
+        },
+        "conduct": {
+          "heading": "Conteúdo e conduta do usuário",
+          "body": "Você concorda em não usar o app de forma indevida, não tentar atrapalhar seu funcionamento, não fazer engenharia reversa e não usá-lo para violar leis ou direitos de terceiros."
+        },
+        "ip": {
+          "heading": "Propriedade intelectual",
+          "body": "O app e seu conteúdo original, recursos e funcionalidades pertencem a nós e são protegidos pelas leis de propriedade intelectual aplicáveis."
+        },
+        "warranty": {
+          "heading": "Isenção de garantias",
+          "body": "O app é oferecido \"como está\" e \"conforme disponível\", sem garantias de qualquer tipo, expressas ou implícitas, incluindo adequação a um fim específico. Não garantimos que o app funcione sem interrupções ou erros, nem que os resultados das análises com IA sejam precisos."
+        },
+        "liability": {
+          "heading": "Limitação de responsabilidade",
+          "body": "Na máxima extensão permitida por lei, não seremos responsáveis por danos indiretos, incidentais ou consequentes decorrentes do uso do app."
+        },
+        "termination": {
+          "heading": "Encerramento",
+          "body": "Podemos suspender ou encerrar seu acesso ao app a qualquer momento se você violar estes Termos. Você pode parar de usar o app quando quiser e pedir a exclusão dos seus dados por e-mail para <mail>{{email}}</mail>."
+        },
+        "changes": {
+          "heading": "Mudanças nestes Termos",
+          "body": "Podemos atualizar estes Termos de tempos em tempos. Continuar usando o app depois que as mudanças entrarem em vigor significa que você aceita os Termos revisados."
+        },
+        "contact": {
+          "heading": "Fale com a gente",
+          "body": "Para dúvidas sobre estes Termos, escreva para <mail>{{email}}</mail>."
+        }
+      }
+    }
+  },
+  "faq": {
+    "what": {
+      "q": "O que este app faz?",
+      "a": "O My Feeds permite criar coleções que acompanham canais do YouTube e outras contas, trazem automaticamente vídeos e posts novos para o seu Feed e registram quais vídeos você já assistiu."
+    },
+    "youtube": {
+      "q": "Preciso de uma conta do YouTube?",
+      "a": "Conectar sua conta do YouTube é opcional. Isso permite que o app sincronize suas playlists, seu histórico e suas ações nos vídeos. Você pode usar os recursos principais do feed sem conectar."
+    },
+    "apiKeys": {
+      "q": "Por que vocês pedem chaves de API?",
+      "a": "As chaves de API (YouTube, OpenAI, Anthropic, Gemini) são opcionais e permitem que o app busque dados de vídeos e gere análises com IA por você. As chaves ficam guardadas com segurança e nunca são mostradas de volta depois de salvas."
+    },
+    "storage": {
+      "q": "Como meus dados são guardados?",
+      "a": "Suas configurações e chaves salvas ficam guardadas com segurança nos nossos servidores. As chaves de API são só para gravação — depois de salvas, o app não consegue lê-las de volta nem mostrá-las na tela."
+    },
+    "delete": {
+      "q": "Como excluo minha conta ou meus dados?",
+      "a": "Você pode excluir sua conta a qualquer momento em Configurações → Excluir conta. Isso remove permanentemente sua conta e todos os seus dados — suas coleções, feeds, histórico e configurações salvas. A exclusão acontece na hora, dentro do app, e não pode ser desfeita. Se tiver qualquer problema, fale com a gente em support@travelone.ca."
+    },
+    "help": {
+      "q": "Como consigo ajuda?",
+      "a": "Fale com a gente quando quiser em support@travelone.ca e responderemos o quanto antes."
+    },
+    "stillNeedHelp": "Ainda precisa de ajuda? Fale com a gente em"
+  },
+  "notFound": {
+    "title": "Ops!",
+    "body": "Esta tela não existe.",
+    "home": "Ir para a tela inicial"
+  },
+  "profileViewer": {
+    "profile": "Perfil",
+    "signedInHere": "{{platform}} · conectado só neste celular",
+    "reload": "Recarregar",
+    "openIn": "Abrir no {{platform}}",
+    "openInApp": "Abrir no app",
+    "noLink": "Não há link para esta conta."
   }
 }

@@ -9,6 +9,7 @@ import { WebView } from "react-native-webview";
 import { router, useLocalSearchParams } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ArrowLeft, ExternalLink, RotateCw, X } from "lucide-react-native";
+import { useTranslation } from "react-i18next";
 import { Colors } from "@/constants/colors";
 import { openExternalLink } from "@/lib/open-link";
 
@@ -25,6 +26,7 @@ export default function ProfileViewer() {
   const name = typeof params.name === "string" ? params.name : "";
   const platformLabel = typeof params.platform === "string" ? params.platform : "";
   const insets = useSafeAreaInsets();
+  const { t } = useTranslation();
   const webRef = useRef<WebView>(null);
   const [loading, setLoading] = useState(true);
   const [canGoBack, setCanGoBack] = useState(false);
@@ -34,22 +36,22 @@ export default function ProfileViewer() {
   return (
     <View style={[styles.screen, { paddingTop: insets.top }]}>
       <View style={styles.header}>
-        <Pressable onPress={close} style={styles.roundBtn} hitSlop={8} accessibilityLabel="Close">
+        <Pressable onPress={close} style={styles.roundBtn} hitSlop={8} accessibilityLabel={t("common.close")}>
           <X size={18} color={Colors.textPrimary} />
         </Pressable>
         {canGoBack ? (
-          <Pressable onPress={() => webRef.current?.goBack()} style={styles.roundBtn} hitSlop={8} accessibilityLabel="Back">
+          <Pressable onPress={() => webRef.current?.goBack()} style={styles.roundBtn} hitSlop={8} accessibilityLabel={t("common.back")}>
             <ArrowLeft size={18} color={Colors.textPrimary} />
           </Pressable>
         ) : null}
         <View style={styles.titleWrap}>
-          <Text style={styles.title} numberOfLines={1}>{name || "Profile"}</Text>
-          {platformLabel ? <Text style={styles.subtitle} numberOfLines={1}>{platformLabel} · signed in on this phone only</Text> : null}
+          <Text style={styles.title} numberOfLines={1}>{name || t("profileViewer.profile")}</Text>
+          {platformLabel ? <Text style={styles.subtitle} numberOfLines={1}>{t("profileViewer.signedInHere", { platform: platformLabel })}</Text> : null}
         </View>
-        <Pressable onPress={() => webRef.current?.reload()} style={styles.roundBtn} hitSlop={8} accessibilityLabel="Reload">
+        <Pressable onPress={() => webRef.current?.reload()} style={styles.roundBtn} hitSlop={8} accessibilityLabel={t("profileViewer.reload")}>
           <RotateCw size={16} color={Colors.textPrimary} />
         </Pressable>
-        <Pressable onPress={() => void openExternalLink(url)} style={styles.roundBtn} hitSlop={8} accessibilityLabel={`Open in ${platformLabel || "the app"}`}>
+        <Pressable onPress={() => void openExternalLink(url)} style={styles.roundBtn} hitSlop={8} accessibilityLabel={platformLabel ? t("profileViewer.openIn", { platform: platformLabel }) : t("profileViewer.openInApp")}>
           <ExternalLink size={16} color={Colors.textPrimary} />
         </Pressable>
       </View>
@@ -81,7 +83,7 @@ export default function ProfileViewer() {
           ) : null}
         </View>
       ) : (
-        <Text style={styles.empty}>There's no link for this account.</Text>
+        <Text style={styles.empty}>{t("profileViewer.noLink")}</Text>
       )}
     </View>
   );
