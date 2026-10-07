@@ -152,7 +152,7 @@ final class DownloadStore {
                         }
                     }
                 } catch {
-                    throw DownloadError.message("Couldn't download the episode.")
+                    throw DownloadError.message(String(localized: "Couldn't download the episode."))
                 }
                 media[audioIndex].audioUrl = Self.localPrefix + file
             }
@@ -197,7 +197,7 @@ final class DownloadStore {
             throw error
         } catch {
             try? fm.removeItem(at: folder)
-            throw DownloadError.message("Couldn't download this item. Check your connection.")
+            throw DownloadError.message(String(localized: "Couldn't download this item. Check your connection."))
         }
     }
 
@@ -408,7 +408,7 @@ nonisolated enum FileFetcher {
                     return
                 }
                 guard let temp, let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {
-                    continuation.resume(throwing: DownloadError.message("Download failed."))
+                    continuation.resume(throwing: DownloadError.message(String(localized: "Download failed.")))
                     return
                 }
                 do {

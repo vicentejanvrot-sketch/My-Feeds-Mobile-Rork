@@ -12,7 +12,7 @@ import MusicKit
 /// account, and an Apple Music subscription on the user's side.
 enum AppleMusicLibrary {
     static let playlistName = "My Feeds"
-    private static let playlistDescription = "Songs added from My Feeds."
+    private static let playlistDescription = String(localized: "Songs added from My Feeds.")
     private static let playlistIdKey = "appleMusicPlaylistId"
 
     /// Adds the release's songs and returns how many were added.
@@ -24,7 +24,7 @@ enum AppleMusicLibrary {
         case .authorized:
             break
         case .denied, .restricted:
-            throw AppleMusicLibraryError.message("Allow My Feeds to use Apple Music in the Settings app (Settings > My Feeds).")
+            throw AppleMusicLibraryError.message(String(localized: "Allow My Feeds to use Apple Music in the Settings app (Settings > My Feeds)."))
         default:
             throw AppleMusicLibraryError.cancelled
         }
@@ -33,18 +33,18 @@ enum AppleMusicLibrary {
         if let subscription, !subscription.hasCloudLibraryEnabled {
             throw AppleMusicLibraryError.message(
                 subscription.canPlayCatalogContent
-                    ? "Turn on Sync Library in Settings > Music to add songs to your library."
-                    : "Adding songs to your library needs an Apple Music subscription."
+                    ? String(localized: "Turn on Sync Library in Settings > Music to add songs to your library.")
+                    : String(localized: "Adding songs to your library needs an Apple Music subscription.")
             )
         }
 
         let request = MusicCatalogResourceRequest<Album>(matching: \.id, equalTo: MusicItemID(albumId))
         guard let album = try await request.response().items.first else {
-            throw AppleMusicLibraryError.message("This release isn't available in your country's Apple Music.")
+            throw AppleMusicLibraryError.message(String(localized: "This release isn't available in your country's Apple Music."))
         }
         let detailed = try await album.with([.tracks])
         let tracks = Array(detailed.tracks ?? [])
-        guard !tracks.isEmpty else { throw AppleMusicLibraryError.message("No songs found for this release.") }
+        guard !tracks.isEmpty else { throw AppleMusicLibraryError.message(String(localized: "No songs found for this release.")) }
 
         if var playlist = try await existingPlaylist() {
             for track in tracks {
@@ -83,7 +83,7 @@ nonisolated enum AppleMusicLibraryError: LocalizedError {
 
     var errorDescription: String? {
         switch self {
-        case .cancelled: return "Apple Music access wasn't allowed."
+        case .cancelled: return String(localized: "Apple Music access wasn't allowed.")
         case .message(let text): return text
         }
     }

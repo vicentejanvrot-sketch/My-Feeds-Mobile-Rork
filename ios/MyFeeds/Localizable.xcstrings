@@ -21,6 +21,16 @@
         }
       }
     },
+    "%@ didn't finish the sign-in. Try again." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O %@ não concluiu a entrada. Tente de novo."
+          }
+        }
+      }
+    },
     "%@ disconnected" : {
       "localizations" : {
         "pt-BR" : {
@@ -31,12 +41,52 @@
         }
       }
     },
+    "%@ finished" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ concluída"
+          }
+        }
+      }
+    },
     "%@ is ready. You'll see the option on the login screen." : {
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "%@ está pronto. A opção vai aparecer na tela de login."
+          }
+        }
+      }
+    },
+    "%@ sign-in failed (%@)." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Falha ao entrar no %1$@ (%2$@)."
+          }
+        }
+      }
+    },
+    "%@ sign-in failed." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Falha ao entrar no %@."
+          }
+        }
+      }
+    },
+    "%@. Failed: %@" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@. Falharam: %2$@"
           }
         }
       }
@@ -201,12 +251,62 @@
         }
       }
     },
+    "Adding songs to your library needs an Apple Music subscription." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Para adicionar músicas à sua biblioteca, é preciso ter uma assinatura do Apple Music."
+          }
+        }
+      }
+    },
+    "All collections (%lld)" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Todas as coleções (%lld)"
+          }
+        }
+      }
+    },
     "All downloads deleted" : {
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Todos os downloads foram excluídos"
+          }
+        }
+      }
+    },
+    "Allow My Feeds to use Apple Music in the Settings app (Settings > My Feeds)." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Permita que o My Feeds use o Apple Music no app Ajustes (Ajustes > My Feeds)."
+          }
+        }
+      }
+    },
+    "An unknown error occurred" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ocorreu um erro desconhecido"
+          }
+        }
+      }
+    },
+    "Apple Music access wasn't allowed." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O acesso ao Apple Music não foi permitido."
           }
         }
       }
@@ -301,6 +401,16 @@
         }
       }
     },
+    "Biometric authentication was canceled." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A autenticação biométrica foi cancelada."
+          }
+        }
+      }
+    },
     "Biometrics aren't available or aren't set up on this device." : {
       "localizations" : {
         "pt-BR" : {
@@ -391,6 +501,16 @@
         }
       }
     },
+    "Collections finished" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Coleções concluídas"
+          }
+        }
+      }
+    },
     "Configure default video playback settings. These sync across your devices via iCloud." : {
       "localizations" : {
         "pt-BR" : {
@@ -407,6 +527,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Conectar"
+          }
+        }
+      }
+    },
+    "Connect YouTube first." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Conecte o YouTube primeiro."
           }
         }
       }
@@ -477,6 +607,96 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Fale com a gente a qualquer momento em support@travelone.ca e responderemos o quanto antes."
+          }
+        }
+      }
+    },
+    "Couldn't add this %@." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Não foi possível adicionar: %@."
+          }
+        }
+      }
+    },
+    "Couldn't check this source." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Não foi possível verificar esta fonte."
+          }
+        }
+      }
+    },
+    "Couldn't download the episode." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Não foi possível baixar o episódio."
+          }
+        }
+      }
+    },
+    "Couldn't download this item. Check your connection." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Não foi possível baixar este item. Verifique sua conexão."
+          }
+        }
+      }
+    },
+    "Couldn't finish connecting YouTube." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Não foi possível concluir a conexão com o YouTube."
+          }
+        }
+      }
+    },
+    "Couldn't open %@ sign-in." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Não foi possível abrir a entrada do %@."
+          }
+        }
+      }
+    },
+    "Couldn't open %@." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Não foi possível abrir o %@."
+          }
+        }
+      }
+    },
+    "Couldn't open YouTube sign-in." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Não foi possível abrir a entrada do YouTube."
+          }
+        }
+      }
+    },
+    "Couldn't start YouTube sign-in." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Não foi possível iniciar a entrada no YouTube."
           }
         }
       }
@@ -621,6 +841,16 @@
         }
       }
     },
+    "Download failed." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Falha no download."
+          }
+        }
+      }
+    },
     "Download removed" : {
       "localizations" : {
         "pt-BR" : {
@@ -711,6 +941,86 @@
         }
       }
     },
+    "Found %lld new videos" : {
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Found %lld new video"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Found %lld new videos"
+                }
+              }
+            }
+          }
+        },
+        "pt-BR" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld vídeo novo encontrado"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld vídeos novos encontrados"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "Found %lld new videos (some channels couldn't be scanned)" : {
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Found %lld new video (some channels couldn't be scanned)"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Found %lld new videos (some channels couldn't be scanned)"
+                }
+              }
+            }
+          }
+        },
+        "pt-BR" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld vídeo novo encontrado (alguns canais não puderam ser verificados)"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld vídeos novos encontrados (alguns canais não puderam ser verificados)"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "Frees %@ on this phone. Your feeds aren't affected." : {
       "localizations" : {
         "pt-BR" : {
@@ -797,6 +1107,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Informações que coletamos"
+          }
+        }
+      }
+    },
+    "Initializing…" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Iniciando…"
           }
         }
       }
@@ -977,6 +1297,36 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Avançar"
+          }
+        }
+      }
+    },
+    "No new videos found" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nenhum vídeo novo encontrado"
+          }
+        }
+      }
+    },
+    "No saved credentials. Please sign in with your password first." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nenhum login salvo. Entre com sua senha primeiro."
+          }
+        }
+      }
+    },
+    "No songs found for this release." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nenhuma música encontrada neste lançamento."
           }
         }
       }
@@ -1491,6 +1841,26 @@
         }
       }
     },
+    "Scan finished — some channels couldn't be scanned." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verificação concluída — alguns canais não puderam ser verificados."
+          }
+        }
+      }
+    },
+    "Scanning channels" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verificando canais"
+          }
+        }
+      }
+    },
     "Seen" : {
       "localizations" : {
         "pt-BR" : {
@@ -1601,6 +1971,26 @@
         }
       }
     },
+    "Something went wrong. Try again." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Algo deu errado. Tente de novo."
+          }
+        }
+      }
+    },
+    "Songs added from My Feeds." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Músicas adicionadas pelo My Feeds."
+          }
+        }
+      }
+    },
     "Source" : {
       "localizations" : {
         "pt-BR" : {
@@ -1647,6 +2037,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Suporte"
+          }
+        }
+      }
+    },
+    "Tap anywhere to dismiss" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toque em qualquer lugar para fechar"
           }
         }
       }
@@ -1721,6 +2121,26 @@
         }
       }
     },
+    "The connection was cancelled." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A conexão foi cancelada."
+          }
+        }
+      }
+    },
+    "These two can't be combined yet." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ainda não dá para juntar esses dois."
+          }
+        }
+      }
+    },
     "Third-Party Services" : {
       "localizations" : {
         "pt-BR" : {
@@ -1747,6 +2167,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Este item"
+          }
+        }
+      }
+    },
+    "This release isn't available in your country's Apple Music." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Este lançamento não está disponível no Apple Music do seu país."
           }
         }
       }
@@ -1787,6 +2217,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tentar de novo"
+          }
+        }
+      }
+    },
+    "Turn on Sync Library in Settings > Music to add songs to your library." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ative Sincronizar Biblioteca em Ajustes > Música para adicionar músicas à sua biblioteca."
+          }
+        }
+      }
+    },
+    "Unlock My Feeds with your saved login." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Desbloqueie o My Feeds com seu login salvo."
           }
         }
       }
@@ -1837,6 +2287,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Uso do app"
+          }
+        }
+      }
+    },
+    "Use password" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Usar senha"
           }
         }
       }
@@ -2001,6 +2461,26 @@
         }
       }
     },
+    "You're signed out. Sign in again and retry." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Você saiu da conta. Entre de novo e tente outra vez."
+          }
+        }
+      }
+    },
+    "YouTube access was denied." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O acesso ao YouTube foi negado."
+          }
+        }
+      }
+    },
     "YouTube connected" : {
       "localizations" : {
         "pt-BR" : {
@@ -2011,12 +2491,72 @@
         }
       }
     },
+    "YouTube didn't send a sign-in code. Try again." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O YouTube não enviou um código de entrada. Tente de novo."
+          }
+        }
+      }
+    },
     "YouTube disconnected" : {
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "YouTube desconectado"
+          }
+        }
+      }
+    },
+    "YouTube request failed. Try again." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A solicitação ao YouTube falhou. Tente de novo."
+          }
+        }
+      }
+    },
+    "YouTube sign-in failed (%@)." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Falha ao entrar no YouTube (%@)."
+          }
+        }
+      }
+    },
+    "YouTube sign-in failed." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Falha ao entrar no YouTube."
+          }
+        }
+      }
+    },
+    "YouTube sign-in was cancelled." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A entrada no YouTube foi cancelada."
+          }
+        }
+      }
+    },
+    "Your YouTube sign-in expired. Connect YouTube again." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sua entrada no YouTube expirou. Conecte o YouTube de novo."
           }
         }
       }
@@ -2181,6 +2721,36 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "seu@email.com"
+          }
+        }
+      }
+    },
+    "☑️ \"%@\" Completed!" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "☑️ \"%@\" concluída!"
+          }
+        }
+      }
+    },
+    "❌ \"%@\" Failed" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "❌ \"%@\" falhou"
+          }
+        }
+      }
+    },
+    "🚀 Running \"%@\"" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🚀 Atualizando \"%@\""
           }
         }
       }

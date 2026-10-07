@@ -121,7 +121,7 @@ enum BiometricAuthService {
     /// - Returns: `true` on success, `false` on failure or cancellation.
     static func authenticate(reason: String) async -> Bool {
         let context = LAContext()
-        context.localizedFallbackTitle = "Use password"
+        context.localizedFallbackTitle = String(localized: "Use password")
         var error: NSError?
         guard context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &error) else {
             return false

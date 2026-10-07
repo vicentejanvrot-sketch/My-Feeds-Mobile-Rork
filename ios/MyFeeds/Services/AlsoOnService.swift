@@ -27,7 +27,7 @@ extension SupabaseService {
         } catch FunctionsError.httpError(_, let data) {
             // The function explains what went wrong in {"error": "..."}.
             let message = (try? JSONDecoder().decode(EdgeFunctionErrorBody.self, from: data))?.error
-            throw SourceError(message: message ?? "Couldn't check this source.")
+            throw SourceError(message: message ?? String(localized: "Couldn't check this source."))
         }
     }
 
@@ -53,10 +53,10 @@ extension SupabaseService {
     /// user confirmed, so it also holds after a new search. Same as the web app.
     func combinePeople(_ person: AlsoOnPerson, with other: AlsoOnPerson) async throws {
         guard let userId = client.auth.currentUser?.id.uuidString.lowercased() else {
-            throw SourceError(message: "You're signed out. Sign in again and retry.")
+            throw SourceError(message: String(localized: "You're signed out. Sign in again and retry."))
         }
         guard let row = AlsoOn.mergeRow(person, other, userId: userId) else {
-            throw SourceError(message: "These two can't be combined yet.")
+            throw SourceError(message: String(localized: "These two can't be combined yet."))
         }
         try await client.schema("public").from("identity_links")
             .upsert(row, onConflict: "channel_id,match_key")
