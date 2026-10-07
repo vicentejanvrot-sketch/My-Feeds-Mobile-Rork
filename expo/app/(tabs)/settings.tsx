@@ -21,7 +21,10 @@ import { router } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
 import * as Haptics from "expo-haptics";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useTranslation } from "react-i18next";
 import {
+  Check,
+  Languages,
   Mail,
   Monitor,
   Save,
@@ -41,10 +44,11 @@ import { Colors } from "@/constants/colors";
 import { useAuth } from "@/lib/auth-provider";
 import { useUserSettings, useUpdateSettings, useUserSettingsSafe, useDeleteAccount } from "@/lib/hooks";
 import { useToast } from "@/components/Toast";
-import { useVideoQuality, QUALITY_KEYS, QUALITY_LABELS } from "@/lib/useVideoQuality";
+import { useVideoQuality, QUALITY_KEYS, qualityLabel } from "@/lib/useVideoQuality";
 import { useYouTubeConnection } from "@/lib/useYouTubeConnection";
 import { ConnectedAccountsCard } from "@/components/ConnectedAccountsCard";
 import { downloadsSupported, formatBytes, loadDownloads, useDownloadsStore } from "@/lib/downloads";
+import { setLanguagePreference, useLanguageStore, type LanguagePreference } from "@/lib/i18n";
 // ── Constants ─────────────────────────────────────────────────────
 
 /** Minimal email format check — matches the web app's validator. */
@@ -62,6 +66,13 @@ export default function SettingsScreen() {
   const isWide = windowWidth >= IPAD_BREAKPOINT;
   const { user, signOut } = useAuth();
   const showToast = useToast();
+  const { t } = useTranslation();
+  const languagePref = useLanguageStore((s) => s.preference);
+  const languageOptions: { key: LanguagePreference; label: string; hint?: string }[] = [
+    { key: "auto", label: t("language.automatic"), hint: t("language.automaticHint") },
+    { key: "en", label: t("language.en") },
+    { key: "pt-BR", label: t("language.ptBR") },
+  ];
 
   const settings = useUserSettings();
   const safeSettings = useUserSettingsSafe();
@@ -167,7 +178,7 @@ export default function SettingsScreen() {
     // Validate email
     const email = defaultEmail.trim();
     if (email && !isValidEmail(email)) {
-      showToast("Please enter a valid email address.", "error");
+      showToast(t("settings.invalidEmail"), "error");
       return;
     }
 
@@ -177,14 +188,14 @@ export default function SettingsScreen() {
 
     try {
       await updateSettings.mutateAsync(payload as any);
-      showToast("Settings saved.", "success");
+      showToast(t("settings.saved"), "success");
     } catch (err: any) {
       showToast(
-        err?.message ?? "Failed to save settings. Please try again.",
+        err?.message ?? t("settings.saveFailed"),
         "error",
       );
     }
-  }, [defaultEmail, updateSettings, showToast]);
+  }, [defaultEmail, updateSettings, showToast, t]);
 
   // ── Render ─────────────────────────────────────────────────────
 
@@ -199,7 +210,7 @@ export default function SettingsScreen() {
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        <Text style={styles.heading}>Settings</Text>
+        <Text style={styles.heading}>{t("settings.title")}</Text>
 
         {/* ── Profile card ──────────────────────────────── */}
         <View style={styles.profileCard}>
@@ -207,13 +218,44 @@ export default function SettingsScreen() {
             <User size={22} color={Colors.accent} />
           </View>
           <View style={styles.profileInfo}>
-            <Text style={styles.profileLabel}>Signed in as</Text>
+            <Text style={styles.profileLabel}>{t("settings.signedInAs")}</Text>
             <Text style={styles.profileEmail} numberOfLines={1}>
               {user?.email ?? "—"}
             </Text>
           </View>
         </View>
 
+        {/* ── Language (saved on this device only) ───────── */}
+        <View style={styles.card}>
+          <View style={styles.cardHeader}>
+            <Languages size={18} color={Colors.accent} />
+            <Text style={styles.cardTitle}>{t("language.title")}</Text>
+          </View>
+          {languageOptions.map((opt, i) => {
+            const selected = opt.key === languagePref;
+            return (
+              <View key={opt.key}>
+                {i > 0 ? <View style={styles.supportDivider} /> : null}
+                <Pressable
+                  style={({ pressed }) => [styles.supportRow, pressed && styles.pressed]}
+                  onPress={() => {
+                    void Haptics.selectionAsync();
+                    void setLanguagePreference(opt.key);
+                  }}
+                  accessibilityRole="radio"
+                  accessibilityState={{ selected }}
+                  accessibilityLabel={opt.hint ? `${opt.label}, ${opt.hint}` : opt.label}
+                >
+                  <View style={styles.languageText}>
+                    <Text style={styles.supportRowLabel}>{opt.label}</Text>
+                    {opt.hint ? <Text style={styles.helperText}>{opt.hint}</Text> : null}
+                  </View>
+                  {selected ? <Check size={18} color={Colors.accent} /> : null}
+                </Pressable>
+              </View>
+            );
+          })}
+        </View>
 
         {settings.isLoading ? (
           <View style={styles.loadingBox}>
@@ -225,16 +267,16 @@ export default function SettingsScreen() {
             <View style={styles.card}>
               <View style={styles.cardHeader}>
                 <Mail size={18} color={Colors.accent} />
-                <Text style={styles.cardTitle}>Default Email</Text>
+                <Text style={styles.cardTitle}>{t("settings.defaultEmail")}</Text>
               </View>
               <Text style={styles.cardDesc}>
-                Pre-filled when adding email recipients to new collections.
+                {t("settings.defaultEmailDesc")}
               </Text>
               <TextInput
                 style={styles.input}
                 value={defaultEmail}
                 onChangeText={setDefaultEmail}
-                placeholder="your@email.com"
+                placeholder={t("settings.emailPlaceholder")}
                 placeholderTextColor={Colors.textMuted}
                 autoCapitalize="none"
                 keyboardType="email-address"
@@ -246,19 +288,19 @@ export default function SettingsScreen() {
             <View style={styles.card}>
               <View style={styles.cardHeader}>
                 <Monitor size={18} color={Colors.accent} />
-                <Text style={styles.cardTitle}>Video Playback</Text>
+                <Text style={styles.cardTitle}>{t("settings.videoPlayback")}</Text>
               </View>
               <Text style={styles.cardDesc}>
-                Configure default video playback settings.
+                {t("settings.videoPlaybackDesc")}
               </Text>
 
               {/* Quality dropdown */}
-              <Text style={styles.fieldLabel}>Default Video Quality</Text>
+              <Text style={styles.fieldLabel}>{t("settings.defaultQuality")}</Text>
               <Pressable
                 style={styles.dropdown}
                 onPress={() => setQualityOpen((o) => !o)}
               >
-                <Text style={styles.dropdownText}>{QUALITY_LABELS[videoQuality] ?? videoQuality}</Text>
+                <Text style={styles.dropdownText}>{qualityLabel(videoQuality)}</Text>
                 <ChevronDown
                   size={16}
                   color={Colors.textSecondary}
@@ -289,22 +331,22 @@ export default function SettingsScreen() {
                           q === videoQuality && styles.dropdownItemTextActive,
                         ]}
                       >
-                        {QUALITY_LABELS[q]}
+                        {qualityLabel(q)}
                       </Text>
                     </Pressable>
                   ))}
                 </View>
               )}
               <Text style={styles.helperText}>
-                Videos will start playing at this quality when available. This setting is saved locally.
+                {t("settings.qualityHelp")}
               </Text>
 
               {/* Keep screen on */}
               <View style={styles.switchRow}>
                 <View style={styles.switchLabel}>
-                  <Text style={styles.fieldLabel}>Keep screen on while playing</Text>
+                  <Text style={styles.fieldLabel}>{t("settings.keepScreenOn")}</Text>
                   <Text style={styles.helperText}>
-                    Prevents your device from auto-locking during video playback.
+                    {t("settings.keepScreenOnHelp")}
                   </Text>
                 </View>
                 <Switch
@@ -323,16 +365,16 @@ export default function SettingsScreen() {
             <View style={styles.card}>
               <View style={styles.cardHeader}>
                 <LogIn size={18} color={Colors.accent} />
-                <Text style={styles.cardTitle}>YouTube Account</Text>
+                <Text style={styles.cardTitle}>{t("settings.youtubeAccount")}</Text>
               </View>
               <Text style={styles.cardDesc}>
-                Connect your YouTube account to save videos to a playlist and like them from the video player.
+                {t("settings.youtubeDesc")}
               </Text>
               {youtube.status === "connected" ? (
                 <>
-                  <Text style={styles.fieldLabel}>Connected</Text>
+                  <Text style={styles.fieldLabel}>{t("settings.connected")}</Text>
                   <Text style={styles.helperText} numberOfLines={1}>
-                    {youtube.channelName ?? "YouTube account"}
+                    {youtube.channelName ?? t("settings.youtubeAccountFallback")}
                   </Text>
                   <Pressable
                     style={({ pressed }) => [styles.youtubeBtn, pressed && styles.pressed]}
@@ -343,7 +385,7 @@ export default function SettingsScreen() {
                   >
                     <LogOut size={16} color={Colors.destructive} />
                     <Text style={[styles.youtubeBtnText, { color: Colors.destructive }]}>
-                      Disconnect YouTube
+                      {t("settings.disconnectYouTube")}
                     </Text>
                   </Pressable>
                 </>
@@ -365,7 +407,7 @@ export default function SettingsScreen() {
                   ) : (
                     <LogIn size={16} color={Colors.accent} />
                   )}
-                  <Text style={styles.youtubeBtnText}>Connect YouTube</Text>
+                  <Text style={styles.youtubeBtnText}>{t("settings.connectYouTube")}</Text>
                 </Pressable>
               )}
               {youtube.error && youtube.status !== "connected" ? (
@@ -379,7 +421,7 @@ export default function SettingsScreen() {
             {/* ═══ Card 3: About background playback (accordion) ═══ */}
             <Pressable style={styles.card} onPress={toggleAccordion}>
               <View style={styles.accordionHeader}>
-                <Text style={styles.accordionTitle}>About background playback</Text>
+                <Text style={styles.accordionTitle}>{t("settings.backgroundTitle")}</Text>
                 <Animated.View
                   style={{ transform: [{ rotate: chevronRotate }] }}
                 >
@@ -390,17 +432,10 @@ export default function SettingsScreen() {
                 style={[styles.accordionBody, { maxHeight: accordionHeight }]}
               >
                 <Text style={styles.accordionText}>
-                  Embedded YouTube videos automatically pause when your screen locks
-                  or the app moves to the background. This is expected behavior on iOS —
-                  both the operating system and the official YouTube embedded player
-                  enforce this to preserve battery and comply with platform policies.
-                  It is not a bug in the app.
+                  {t("settings.backgroundBody1")}
                 </Text>
                 <Text style={[styles.accordionText, { marginTop: 10 }]}>
-                  Running or walking with the phone in your pocket? Tap the lock icon in
-                  the video player to turn on Pocket Lock. The screen goes dark and
-                  ignores every touch while the video keeps playing. Press and hold the
-                  lock for 2 seconds to unlock.
+                  {t("settings.backgroundBody2")}
                 </Text>
               </Animated.View>
             </Pressable>
@@ -410,11 +445,11 @@ export default function SettingsScreen() {
               <View style={styles.cardHeader}>
                 <Trash2 size={18} color={Colors.destructive} />
                 <Text style={[styles.cardTitle, { color: Colors.destructive }]}>
-                  Danger Zone
+                  {t("settings.dangerZone")}
                 </Text>
               </View>
               <Text style={styles.cardDesc}>
-                Permanently delete your account and all associated data. This action cannot be undone.
+                {t("settings.dangerZoneDesc")}
               </Text>
               <Pressable
                 style={({ pressed }) => [
@@ -425,23 +460,23 @@ export default function SettingsScreen() {
                 onPress={() => {
                   void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
                   Alert.alert(
-                    "Delete Account?",
-                    "This will permanently delete your account and all your data, including your collections, feeds, watch history, and saved settings. This cannot be undone.",
+                    t("settings.deleteAccountConfirmTitle"),
+                    t("settings.deleteAccountConfirmBody"),
                     [
-                      { text: "Cancel", style: "cancel" },
+                      { text: t("common.cancel"), style: "cancel" },
                       {
-                        text: "Delete",
+                        text: t("common.delete"),
                         style: "destructive",
                         onPress: async () => {
                           try {
                             const result = await deleteAccount.mutateAsync();
 
                             if (result.method === "edge_function") {
-                              showToast("Your account has been deleted.", "success");
+                              showToast(t("settings.accountDeleted"), "success");
                               await signOut();
                             } else {
                               // Client-fallback cleanup succeeded
-                              showToast("Your account data has been deleted.", "success");
+                              showToast(t("settings.accountDataDeleted"), "success");
                               await signOut();
                               try {
                                 await Linking.openURL(
@@ -453,7 +488,7 @@ export default function SettingsScreen() {
                             }
                           } catch {
                             showToast(
-                              "Failed to delete account. Please try again or contact support@travelone.ca.",
+                              t("settings.deleteAccountFailed"),
                               "error",
                             );
                           }
@@ -469,7 +504,7 @@ export default function SettingsScreen() {
                 ) : (
                   <>
                     <Trash2 size={16} color={Colors.destructive} />
-                    <Text style={styles.deleteAccountText}>Delete Account</Text>
+                    <Text style={styles.deleteAccountText}>{t("settings.deleteAccount")}</Text>
                   </>
                 )}
               </Pressable>
@@ -480,7 +515,7 @@ export default function SettingsScreen() {
               <View style={styles.card}>
                 <View style={styles.cardHeader}>
                   <Download size={18} color={Colors.accent} />
-                  <Text style={styles.cardTitle}>Downloads</Text>
+                  <Text style={styles.cardTitle}>{t("settings.downloads")}</Text>
                 </View>
                 <Pressable
                   style={({ pressed }) => [styles.supportRow, pressed && styles.pressed]}
@@ -490,8 +525,8 @@ export default function SettingsScreen() {
                     <Download size={18} color={Colors.textSecondary} />
                     <Text style={styles.supportRowLabel}>
                       {downloadList.length === 0
-                        ? "Saved for offline"
-                        : `${downloadList.length} saved · ${formatBytes(downloadBytes)}`}
+                        ? t("settings.savedForOffline")
+                        : t("settings.savedCount", { count: downloadList.length, size: formatBytes(downloadBytes) })}
                     </Text>
                   </View>
                   <ChevronRight size={18} color={Colors.textMuted} />
@@ -503,7 +538,7 @@ export default function SettingsScreen() {
             <View style={styles.card}>
               <View style={styles.cardHeader}>
                 <CircleHelp size={18} color={Colors.accent} />
-                <Text style={styles.cardTitle}>Support</Text>
+                <Text style={styles.cardTitle}>{t("settings.support")}</Text>
               </View>
 
               <Pressable
@@ -515,7 +550,7 @@ export default function SettingsScreen() {
               >
                 <View style={styles.supportRowLeft}>
                   <CircleHelp size={18} color={Colors.textSecondary} />
-                  <Text style={styles.supportRowLabel}>FAQ</Text>
+                  <Text style={styles.supportRowLabel}>{t("support.faq")}</Text>
                 </View>
                 <ChevronRight size={18} color={Colors.textMuted} />
               </Pressable>
@@ -531,7 +566,7 @@ export default function SettingsScreen() {
               >
                 <View style={styles.supportRowLeft}>
                   <ShieldCheck size={18} color={Colors.textSecondary} />
-                  <Text style={styles.supportRowLabel}>Privacy Policy</Text>
+                  <Text style={styles.supportRowLabel}>{t("support.privacy")}</Text>
                 </View>
                 <ChevronRight size={18} color={Colors.textMuted} />
               </Pressable>
@@ -547,7 +582,7 @@ export default function SettingsScreen() {
               >
                 <View style={styles.supportRowLeft}>
                   <FileText size={18} color={Colors.textSecondary} />
-                  <Text style={styles.supportRowLabel}>Terms of Service</Text>
+                  <Text style={styles.supportRowLabel}>{t("support.terms")}</Text>
                 </View>
                 <ChevronRight size={18} color={Colors.textMuted} />
               </Pressable>
@@ -563,7 +598,7 @@ export default function SettingsScreen() {
               >
                 <View style={styles.supportRowLeft}>
                   <MessageSquare size={18} color={Colors.textSecondary} />
-                  <Text style={styles.supportRowLabel}>Contact Support</Text>
+                  <Text style={styles.supportRowLabel}>{t("settings.contactSupport")}</Text>
                 </View>
                 <ChevronRight size={18} color={Colors.textMuted} />
               </Pressable>
@@ -590,7 +625,7 @@ export default function SettingsScreen() {
               ) : (
                 <View style={styles.saveInner}>
                   <Save size={17} color={Colors.white} />
-                  <Text style={styles.saveText}>Save</Text>
+                  <Text style={styles.saveText}>{t("common.save")}</Text>
                 </View>
               )}
             </Pressable>
@@ -606,7 +641,7 @@ export default function SettingsScreen() {
           }}
         >
           <LogOut size={16} color={Colors.destructive} />
-          <Text style={styles.signOutText}>Sign out</Text>
+          <Text style={styles.signOutText}>{t("settings.signOut")}</Text>
         </Pressable>
       </ScrollView>
     </KeyboardAvoidingView>
@@ -845,6 +880,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 12,
   },
+  languageText: { flex: 1, gap: 2 },
   supportRowLabel: {
     fontSize: 15,
     fontWeight: "600" as const,

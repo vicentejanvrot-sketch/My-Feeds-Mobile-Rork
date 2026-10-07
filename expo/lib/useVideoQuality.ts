@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import i18n from "@/lib/i18n";
 
 // ── Canonical quality keys ──────────────────────────────────────────
 
@@ -26,6 +27,13 @@ export const QUALITY_LABELS: Record<QualityKey, string> = {
   "360p": "360p",
   "240p": "240p",
 };
+
+/** Label in the active language ("Highest available" / "Melhor disponível"). */
+export function qualityLabel(q: QualityKey): string {
+  if (q === "Highest") return i18n.t("quality.highest");
+  if (q === "Auto") return i18n.t("quality.auto");
+  return QUALITY_LABELS[q] ?? q;
+}
 
 /** YouTube IFrame API quality values. */
 export const QUALITY_YOUTUBE: Record<QualityKey, string> = {

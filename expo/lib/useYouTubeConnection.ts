@@ -6,6 +6,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/lib/auth-provider";
 import { useToast } from "@/components/Toast";
+import i18n from "@/lib/i18n";
 
 // ── Types ──────────────────────────────────────────────────────────
 
@@ -154,7 +155,7 @@ export const [YouTubeConnectionProvider, useYouTubeConnection] =
 
         if (authError) {
           throw new Error(
-            authError.message || JSON.stringify(authError) || "Failed to start authentication"
+            authError.message || JSON.stringify(authError) || i18n.t("youtube.authStartFailed")
           );
         }
 
@@ -164,7 +165,7 @@ export const [YouTubeConnectionProvider, useYouTubeConnection] =
 
         if (!authUrl) {
           const debugInfo = raw ? JSON.stringify(raw).slice(0, 200) : "(empty response)";
-          throw new Error(`No authorization URL returned from server. Response: ${debugInfo}`);
+          throw new Error(i18n.t("youtube.noAuthUrl", { info: debugInfo }));
         }
 
         // 2. Open the in-app browser. Google -> web callback page -> APP_RETURN_URL,
@@ -172,13 +173,13 @@ export const [YouTubeConnectionProvider, useYouTubeConnection] =
         const result = await WebBrowser.openAuthSessionAsync(authUrl, APP_RETURN_URL);
 
         if (result.type === "cancel" || result.type === "dismiss") {
-          notify("YouTube connection cancelled", "info");
+          notify(i18n.t("youtube.cancelled"), "info");
           return;
         }
 
         if (result.type !== "success" || !result.url) {
-          setError("Authentication failed — unexpected browser response");
-          notify("Authentication failed — unexpected browser response", "error");
+          setError(i18n.t("youtube.unexpectedResponse"));
+          notify(i18n.t("youtube.unexpectedResponse"), "error");
           return;
         }
 
@@ -189,12 +190,12 @@ export const [YouTubeConnectionProvider, useYouTubeConnection] =
 
         if (errorParam) {
           throw new Error(
-            errorParam === "access_denied" ? "YouTube access was denied" : errorParam
+            errorParam === "access_denied" ? i18n.t("youtube.accessDenied") : errorParam
           );
         }
 
         if (!code) {
-          throw new Error("No authorization code received");
+          throw new Error(i18n.t("youtube.noCode"));
         }
 
         // 4. Exchange the code for tokens (server-side)
@@ -204,7 +205,7 @@ export const [YouTubeConnectionProvider, useYouTubeConnection] =
           });
 
         if (callbackError) {
-          throw new Error(callbackError.message || "Failed to complete authentication");
+          throw new Error(callbackError.message || i18n.t("youtube.authFinishFailed"));
         }
 
         // 5. Pull account info from the response
@@ -232,9 +233,9 @@ export const [YouTubeConnectionProvider, useYouTubeConnection] =
           }),
         );
 
-        notify("YouTube connected", "success");
+        notify(i18n.t("youtube.connected"), "success");
       } catch (err: any) {
-        const message = err?.message ?? "Connection failed";
+        const message = err?.message ?? i18n.t("youtube.connectionFailed");
         setError(message);
         notify(message, "error");
       } finally {
@@ -248,14 +249,14 @@ export const [YouTubeConnectionProvider, useYouTubeConnection] =
     const getAccessToken = useCallback(async (): Promise<string> => {
       const stored = await readStored();
       if (!stored?.accessToken) {
-        throw new Error("Reconnect YouTube to use this");
+        throw new Error(i18n.t("youtube.reconnect"));
       }
       const expiresAt = stored.expiresAt ?? 0;
       if (expiresAt > Date.now() + 5 * 60 * 1000) {
         return stored.accessToken;
       }
       if (!stored.refreshToken) {
-        throw new Error("YouTube session expired — reconnect YouTube");
+        throw new Error(i18n.t("youtube.sessionExpired"));
       }
       const refreshed = await callYouTubeApi<{ access_token: string; expires_in: number }>({
         action: "refresh",
@@ -299,7 +300,7 @@ export const [YouTubeConnectionProvider, useYouTubeConnection] =
       setChannelThumbnail(null);
       setError(null);
       await AsyncStorage.removeItem(STORAGE_KEY).catch(() => {});
-      notify("YouTube disconnected", "success");
+      notify(i18n.t("youtube.disconnected"), "success");
     }, []);
 
     // ── Sync a video action to YouTube ──────────────────────────
@@ -307,7 +308,7 @@ export const [YouTubeConnectionProvider, useYouTubeConnection] =
 
     const syncAction = useCallback(
       async (videoId: string, action: YouTubeAction) => {
-        if (status !== "connected") throw new Error("YouTube is not connected");
+        if (status !== "connected") throw new Error(i18n.t("youtube.notConnected"));
         const accessToken = await getAccessToken();
 
         if (action === "rate") {
@@ -342,7 +343,7 @@ export const [YouTubeConnectionProvider, useYouTubeConnection] =
 
     const subscribe = useCallback(
       async (channelUrl: string): Promise<"subscribed" | "already"> => {
-        if (status !== "connected") throw new Error("YouTube is not connected");
+        if (status !== "connected") throw new Error(i18n.t("youtube.notConnected"));
         const accessToken = await getAccessToken();
         const data = await callYouTubeApi<{ alreadySubscribed?: boolean }>({ action: "subscribe", accessToken, channelUrl });
         return data?.alreadySubscribed ? "already" : "subscribed";
@@ -352,7 +353,7 @@ export const [YouTubeConnectionProvider, useYouTubeConnection] =
 
     const addToMusicPlaylist = useCallback(
       async (videoIds: string[]) => {
-        if (status !== "connected") throw new Error("Connect YouTube in Settings first");
+        if (status !== "connected") throw new Error(i18n.t("youtube.connectInSettings"));
         const accessToken = await getAccessToken();
         const result = await callYouTubeApi<{ added?: number; alreadyThere?: number }>({
           action: "add_tracks_to_music_playlist",

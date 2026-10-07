@@ -3,6 +3,7 @@ import * as WebBrowser from "expo-web-browser";
 import * as Linking from "expo-linking";
 import { supabase } from "@/lib/supabase";
 import { extractEdgeFunctionErrorMessage } from "@/lib/hooks";
+import i18n from "@/lib/i18n";
 
 // GitHub and Reddit accounts the user connected (account-connect function),
 // so adding a GitHub or Reddit account on People also follows it there. Same
@@ -49,7 +50,7 @@ export function useConnections() {
   return useQuery({
     queryKey: ["connections"],
     queryFn: async (): Promise<Connection[]> => {
-      const data = await call<{ connections?: Connection[]; error?: string }>({ action: "list" }, "Couldn't load your connected accounts.");
+      const data = await call<{ connections?: Connection[]; error?: string }>({ action: "list" }, i18n.t("connections.loadFailed"));
       return data.connections ?? [];
     },
     staleTime: 60_000,
@@ -65,9 +66,9 @@ export function useConnect() {
     mutationFn: async (provider: ConnectProvider): Promise<Connection | null> => {
       const start = await call<{ authUrl?: string; error?: string }>(
         { action: "start", provider, appReturnUrl: APP_RETURN_URL },
-        `Couldn't open ${CONNECT_LABEL[provider]}.`,
+        i18n.t("connections.openFailed", { provider: CONNECT_LABEL[provider] }),
       );
-      if (!start.authUrl) throw new ConnectError(`Couldn't open ${CONNECT_LABEL[provider]}.`);
+      if (!start.authUrl) throw new ConnectError(i18n.t("connections.openFailed", { provider: CONNECT_LABEL[provider] }));
       const result = await WebBrowser.openAuthSessionAsync(start.authUrl, APP_RETURN_URL);
       if (result.type !== "success" || !result.url) return null;
       const { queryParams } = Linking.parse(result.url);
@@ -75,10 +76,10 @@ export function useConnect() {
       const state = typeof queryParams?.state === "string" ? queryParams.state : null;
       const errorParam = typeof queryParams?.error === "string" ? queryParams.error : null;
       if (errorParam === "access_denied") return null;
-      if (!code || !state) throw new ConnectError(`${CONNECT_LABEL[provider]} didn't finish the sign-in. Try again.`);
+      if (!code || !state) throw new ConnectError(i18n.t("connections.signInUnfinished", { provider: CONNECT_LABEL[provider] }));
       const done = await call<{ provider?: ConnectProvider; accountName?: string | null; avatar?: string | null; error?: string }>(
         { action: "finish", code, state },
-        `Couldn't connect ${CONNECT_LABEL[provider]}.`,
+        i18n.t("connections.connectFailed", { provider: CONNECT_LABEL[provider] }),
       );
       return { provider, accountName: done.accountName ?? null, avatar: done.avatar ?? null };
     },
@@ -92,7 +93,7 @@ export function useDisconnect() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (provider: ConnectProvider) => {
-      await call({ action: "disconnect", provider }, `Couldn't disconnect ${CONNECT_LABEL[provider]}.`);
+      await call({ action: "disconnect", provider }, i18n.t("connections.disconnectFailed", { provider: CONNECT_LABEL[provider] }));
     },
     onSettled: () => {
       void queryClient.invalidateQueries({ queryKey: ["connections"] });
@@ -104,7 +105,7 @@ export function useDisconnect() {
 export async function followOnPlatform(provider: ConnectProvider, url: string): Promise<{ already: boolean }> {
   const data = await call<{ ok?: boolean; already?: boolean; error?: string }>(
     { action: "follow", provider, url },
-    `Couldn't follow on ${CONNECT_LABEL[provider]}.`,
+    i18n.t("connections.followFailed", { provider: CONNECT_LABEL[provider] }),
   );
   return { already: data.already === true };
 }

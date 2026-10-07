@@ -1,6 +1,7 @@
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
 import * as Haptics from "expo-haptics";
 import { Link2, Unlink } from "lucide-react-native";
+import { useTranslation } from "react-i18next";
 import { Colors } from "@/constants/colors";
 import { PlatformBadge } from "@/components/PlatformBadge";
 import { useToast } from "@/components/Toast";
@@ -20,6 +21,7 @@ export function ConnectedAccountsCard() {
   const connect = useConnect();
   const disconnect = useDisconnect();
   const showToast = useToast();
+  const { t } = useTranslation();
 
   const onConnect = (provider: ConnectProvider) => {
     void Haptics.selectionAsync();
@@ -27,19 +29,21 @@ export function ConnectedAccountsCard() {
       onSuccess: (connection) => {
         if (!connection) return;
         showToast(
-          `${CONNECT_LABEL[provider]} connected${connection.accountName ? " as " + connection.accountName : ""}`,
+          connection.accountName
+            ? t("connections.connectedAsToast", { provider: CONNECT_LABEL[provider], name: connection.accountName })
+            : t("connections.connectedToast", { provider: CONNECT_LABEL[provider] }),
           "success",
         );
       },
-      onError: (e) => showToast(e instanceof Error ? e.message : `Couldn't connect ${CONNECT_LABEL[provider]}`, "error"),
+      onError: (e) => showToast(e instanceof Error ? e.message : t("connections.connectFailed", { provider: CONNECT_LABEL[provider] }), "error"),
     });
   };
 
   const onDisconnect = (provider: ConnectProvider) => {
     void Haptics.selectionAsync();
     disconnect.mutate(provider, {
-      onSuccess: () => showToast(`${CONNECT_LABEL[provider]} disconnected`, "success"),
-      onError: (e) => showToast(e instanceof Error ? e.message : `Couldn't disconnect ${CONNECT_LABEL[provider]}`, "error"),
+      onSuccess: () => showToast(t("connections.disconnectedToast", { provider: CONNECT_LABEL[provider] }), "success"),
+      onError: (e) => showToast(e instanceof Error ? e.message : t("connections.disconnectFailed", { provider: CONNECT_LABEL[provider] }), "error"),
     });
   };
 
@@ -50,9 +54,7 @@ export function ConnectedAccountsCard() {
         <Text style={styles.cardTitle}>GitHub & Reddit</Text>
       </View>
       <Text style={styles.cardDesc}>
-        When you add a GitHub or Reddit account to a collection on People, the app also follows it with your connected
-        account, like YouTube does. Instagram, Facebook, LinkedIn, X, TikTok, Spotify and Apple don't let apps follow
-        accounts for you, so those are only added to your feed.
+        {t("connections.desc")}
       </Text>
       {CONNECT_PROVIDERS.map((provider) => {
         const connection = connections.find((c) => c.provider === provider);
@@ -65,7 +67,11 @@ export function ConnectedAccountsCard() {
               <View style={{ flex: 1 }}>
                 <Text style={styles.rowTitle}>{CONNECT_LABEL[provider]}</Text>
                 <Text style={styles.rowSub} numberOfLines={1}>
-                  {connection ? "Connected" + (connection.accountName ? " as " + connection.accountName : "") : "Not connected"}
+                  {connection
+                    ? connection.accountName
+                      ? t("connections.connectedAs", { name: connection.accountName })
+                      : t("connections.connected")
+                    : t("connections.notConnected")}
                 </Text>
               </View>
             </View>
@@ -74,7 +80,7 @@ export function ConnectedAccountsCard() {
               onPress={() => (connection ? onDisconnect(provider) : onConnect(provider))}
               style={({ pressed }) => [styles.btn, (pressed || busy) && styles.pressed]}
               accessibilityRole="button"
-              accessibilityLabel={(connection ? "Disconnect " : "Connect ") + CONNECT_LABEL[provider]}
+              accessibilityLabel={t(connection ? "connections.disconnectLabel" : "connections.connectLabel", { provider: CONNECT_LABEL[provider] })}
             >
               {busy ? (
                 <ActivityIndicator size="small" color={Colors.accent} />
@@ -84,7 +90,7 @@ export function ConnectedAccountsCard() {
                 <Link2 size={15} color={Colors.accent} />
               )}
               <Text style={[styles.btnText, connection && { color: Colors.destructive }]}>
-                {connection ? "Disconnect" : "Connect"}
+                {connection ? t("connections.disconnect") : t("connections.connect")}
               </Text>
             </Pressable>
           </View>
