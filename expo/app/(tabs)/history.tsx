@@ -38,47 +38,43 @@ import {
 import { useToast } from "@/components/Toast";
 import { StatusPill } from "@/components/StatusPill";
 import { timeAgo } from "@/lib/format";
+import i18n, { formatDateTime, formatNumber } from "@/lib/i18n";
+import { useTranslation } from "react-i18next";
 
 // ── Helpers ───────────────────────────────────────────────────────
 
 /** Duration from two ISO strings. "In progress" when no finished_at. */
 function formatDuration(start: string | null, end: string | null): string {
   if (!start) return "—";
-  if (!end) return "In progress";
+  if (!end) return i18n.t("history.inProgress");
   const ms = new Date(end).getTime() - new Date(start).getTime();
   if (Number.isNaN(ms) || ms < 0) return "—";
   const totalSec = Math.round(ms / 1000);
-  if (totalSec < 60) return `${totalSec}s`;
+  if (totalSec < 60) return i18n.t("duration.seconds", { s: totalSec });
   const min = Math.floor(totalSec / 60);
   const sec = totalSec % 60;
-  if (sec === 0) return `${min}m`;
-  return `${min}m ${sec}s`;
+  if (sec === 0) return i18n.t("duration.minutes", { m: min });
+  return i18n.t("duration.minutesSeconds", { m: min, s: sec });
 }
 
-/** "MMM d, yyyy at h:mm AM/PM" — e.g. "Jun 9, 2026 at 6:21 PM" */
+/** e.g. "Jun 9, 2026 at 6:21 PM" / "9 de jun. de 2026 às 18:21" */
 function formatTimestamp(iso: string | null): string {
-  if (!iso) return "—";
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return "—";
-  const months = [
-    "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
-  ];
-  const month = months[d.getMonth()];
-  const day = d.getDate();
-  const year = d.getFullYear();
-  let hours = d.getHours();
-  const ampm = hours >= 12 ? "PM" : "AM";
-  hours = hours % 12 || 12;
-  const mins = String(d.getMinutes()).padStart(2, "0");
-  return `${month} ${day}, ${year} at ${hours}:${mins} ${ampm}`;
+  return formatDateTime(iso);
 }
 
 /** Format a number or show "—" for null/undefined. */
 function fmtCount(n: number | null | undefined): string {
   if (n == null) return "—";
-  return String(n);
+  return formatNumber(n);
 }
+
+const RUN_STATUS_KEYS = {
+  success: "history.status.success",
+  partial: "history.status.partial",
+  failed: "history.status.failed",
+  running: "history.status.running",
+  cancelled: "history.status.cancelled",
+} as const satisfies Record<RunStatus, string>;
 
 // ── Screen ────────────────────────────────────────────────────────
 
@@ -86,6 +82,7 @@ export default function HistoryScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const toast = useToast();
+  const { t } = useTranslation();
   const listRef = useRef<FlatList>(null);
 
   useFocusEffect(
@@ -96,18 +93,18 @@ export default function HistoryScreen() {
 
   const handleDeleteAll = () => {
     Alert.alert(
-      "Delete Run History",
-      "This clears the Run History list only. Your videos, feed, and statistics are kept. This cannot be undone.",
+      t("history.deleteAllTitle"),
+      t("history.deleteAllConfirm"),
       [
-        { text: "Cancel", style: "cancel" },
+        { text: t("common.cancel"), style: "cancel" },
         {
-          text: "Delete All",
+          text: t("history.deleteAll"),
           style: "destructive",
           onPress: () => {
             const runIds = runData.map((r) => r.id);
             clearRuns.mutate(runIds, {
-              onSuccess: () => toast("Run history deleted", "success"),
-              onError: () => toast("Failed to delete run history", "error"),
+              onSuccess: () => toast(t("history.deleted"), "success"),
+              onError: () => toast(t("history.deleteFailed"), "error"),
             });
           },
         },
@@ -158,11 +155,11 @@ export default function HistoryScreen() {
       <View style={styles.header}>
         <History size={26} color={Colors.accent} />
         <View style={styles.headerText}>
-          <Text style={styles.heading}>Run History</Text>
+          <Text style={styles.heading}>{t("history.title")}</Text>
           <Text style={styles.subheading}>
             {runData.length > 0
-              ? `${runData.length} run${runData.length === 1 ? "" : "s"} across all collections`
-              : "Timeline of collection activity"}
+              ? t("history.count", { count: runData.length })
+              : t("history.subtitle")}
           </Text>
         </View>
 
@@ -178,7 +175,7 @@ export default function HistoryScreen() {
           >
             <Trash2 size={16} color={Colors.destructive} />
             <Text style={styles.deleteAllText}>
-              {clearRuns.isPending ? "Deleting…" : "Delete All"}
+              {clearRuns.isPending ? t("history.deleting") : t("history.deleteAll")}
             </Text>
           </Pressable>
         )}
@@ -187,7 +184,7 @@ export default function HistoryScreen() {
       {runs.isLoading && runData.length === 0 ? (
         <View style={styles.loadingBox}>
           <ActivityIndicator size="large" color={Colors.accent} />
-          <Text style={styles.loadingText}>Loading runs…</Text>
+          <Text style={styles.loadingText}>{t("history.loading")}</Text>
         </View>
       ) : (
         <FlatList
@@ -211,10 +208,8 @@ export default function HistoryScreen() {
           ListEmptyComponent={
             <View style={styles.emptyCard}>
               <History size={40} color={Colors.textMuted} />
-              <Text style={styles.emptyTitle}>No runs yet</Text>
-              <Text style={styles.emptyBody}>
-                When you run a collection, its results will appear here.
-              </Text>
+              <Text style={styles.emptyTitle}>{t("history.emptyTitle")}</Text>
+              <Text style={styles.emptyBody}>{t("history.emptyBody")}</Text>
             </View>
           }
           renderItem={({ item }) => {
@@ -253,7 +248,7 @@ export default function HistoryScreen() {
                     style={styles.agentPressable}
                   >
                     <Text style={styles.agentName} numberOfLines={1}>
-                      {agent?.name ?? "Unknown Collection"}
+                      {agent?.name ?? t("history.unknownCollection")}
                     </Text>
                   </Pressable>
 
@@ -273,17 +268,9 @@ export default function HistoryScreen() {
                       ) : null
                     }
                     label={
-                      item.status === "success"
-                        ? "Success"
-                        : item.status === "partial"
-                          ? "Partial"
-                          : item.status === "failed"
-                            ? "Failed"
-                            : item.status === "running"
-                              ? "Running"
-                              : item.status === "cancelled"
-                                ? "Cancelled"
-                                : undefined
+                      (item.status as string) in RUN_STATUS_KEYS
+                        ? t(RUN_STATUS_KEYS[item.status as RunStatus])
+                        : undefined
                     }
                   />
                 </View>
@@ -298,19 +285,19 @@ export default function HistoryScreen() {
                   {/* Left column */}
                   <View style={styles.statColumn}>
                     <View style={styles.statRow}>
-                      <Text style={styles.statLabel}>Duration: </Text>
+                      <Text style={styles.statLabel}>{t("history.labels.duration")} </Text>
                       <Text style={styles.statValue}>
                         {formatDuration(item.started_at, item.finished_at)}
                       </Text>
                     </View>
                     <View style={styles.statRow}>
-                      <Text style={styles.statLabel}>New: </Text>
+                      <Text style={styles.statLabel}>{t("history.labels.new")} </Text>
                       <Text style={styles.statValue}>
                         {fmtCount(item.videos_new_count)}
                       </Text>
                     </View>
                     <View style={styles.statRow}>
-                      <Text style={styles.statLabel}>Channels: </Text>
+                      <Text style={styles.statLabel}>{t("history.labels.channels")} </Text>
                       <Text style={styles.statValue}>
                         {fmtCount(item.channels_scanned)} / {fmtCount(item.channels_total)}
                       </Text>
@@ -320,13 +307,13 @@ export default function HistoryScreen() {
                   {/* Right column */}
                   <View style={styles.statColumn}>
                     <View style={styles.statRow}>
-                      <Text style={styles.statLabel}>Found: </Text>
+                      <Text style={styles.statLabel}>{t("history.labels.found")} </Text>
                       <Text style={styles.statValue}>
                         {fmtCount(item.videos_found_count)}
                       </Text>
                     </View>
                     <View style={styles.statRow}>
-                      <Text style={styles.statLabel}>Enriched: </Text>
+                      <Text style={styles.statLabel}>{t("history.labels.enriched")} </Text>
                       <Text style={styles.statValue}>
                         {fmtCount(item.videos_enriched_count)}
                       </Text>
@@ -338,7 +325,7 @@ export default function HistoryScreen() {
                 {item.status === "partial" && item.error_summary ? (
                   <View style={styles.warningRow}>
                     <AlertTriangle size={13} color={Colors.warning} />
-                    <Text style={styles.warningLabel}>Completed with issues</Text>
+                    <Text style={styles.warningLabel}>{t("history.completedWithIssues")}</Text>
                     <Text style={styles.warningSummary} numberOfLines={3}>
                       {item.error_summary}
                     </Text>
@@ -381,7 +368,7 @@ export default function HistoryScreen() {
                         <ChevronDown size={14} color={Colors.textSecondary} />
                       )}
                       <Text style={styles.expandToggleLabel}>
-                        {isExpanded ? "Hide channels" : `Channels (${agentChannels.length})`}
+                        {isExpanded ? t("history.hideChannels") : t("history.channelsCount", { count: agentChannels.length })}
                       </Text>
                     </Pressable>
 
@@ -408,12 +395,12 @@ export default function HistoryScreen() {
                                 style={styles.channelRowName}
                                 numberOfLines={1}
                               >
-                                {ch.channel_name ?? ch.channel_url ?? "Unnamed"}
+                                {ch.channel_name ?? ch.channel_url ?? t("history.unnamed")}
                               </Text>
                               <Text style={styles.channelRowScanned}>
                                 {ch.last_scanned_at
                                   ? timeAgo(ch.last_scanned_at)
-                                  : "Never"}
+                                  : t("history.never")}
                               </Text>
                             </View>
                           );
@@ -429,9 +416,9 @@ export default function HistoryScreen() {
                     onPress={() => {
                       void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
                       cancelRun.mutate(item.id, {
-                        onSuccess: () => toast("Run cancelled", "success"),
+                        onSuccess: () => toast(t("history.cancelled"), "success"),
                         onError: () =>
-                          toast("Failed to cancel run", "error"),
+                          toast(t("history.cancelFailed"), "error"),
                       });
                     }}
                     disabled={isCancelling}
@@ -446,7 +433,7 @@ export default function HistoryScreen() {
                       <X size={14} color={Colors.destructive} />
                     )}
                     <Text style={styles.cancelLabel}>
-                      {isCancelling ? "Cancelling…" : "Cancel Run"}
+                      {isCancelling ? t("history.cancelling") : t("history.cancelRun")}
                     </Text>
                   </Pressable>
                 ) : null}

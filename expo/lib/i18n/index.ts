@@ -5,7 +5,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { create } from "zustand";
 import { enUS } from "date-fns/locale/en-US";
 import { ptBR } from "date-fns/locale/pt-BR";
-import type { Locale as DateFnsLocale } from "date-fns";
+import { format as formatDateFns, type Locale as DateFnsLocale } from "date-fns";
 import en from "./locales/en.json";
 import ptBRStrings from "./locales/pt-BR.json";
 
@@ -137,6 +137,31 @@ export function formatNumber(n: number): string {
   } catch {
     return String(n);
   }
+}
+
+function toDate(value: string | number | Date | null | undefined): Date | null {
+  if (value == null) return null;
+  const d = value instanceof Date ? value : new Date(value);
+  return Number.isNaN(d.getTime()) ? null : d;
+}
+
+/** "Jun 9, 2026" / "9 de jun. de 2026". "—" when missing. */
+export function formatDate(value: string | number | Date | null | undefined): string {
+  const d = toDate(value);
+  return d ? formatDateFns(d, "PP", { locale: dateLocale() }) : "—";
+}
+
+/** "6:21 PM" / "18:21". "—" when missing. */
+export function formatTime(value: string | number | Date | null | undefined): string {
+  const d = toDate(value);
+  return d ? formatDateFns(d, "p", { locale: dateLocale() }) : "—";
+}
+
+/** "Jun 9, 2026 at 6:21 PM" / "9 de jun. de 2026 às 18:21". "—" when missing. */
+export function formatDateTime(value: string | number | Date | null | undefined): string {
+  const d = toDate(value);
+  if (!d) return "—";
+  return i18n.t("date.dateAtTime", { date: formatDate(d), time: formatTime(d) });
 }
 
 /** Schedule frequency stored in the database ("daily") in the active language. */

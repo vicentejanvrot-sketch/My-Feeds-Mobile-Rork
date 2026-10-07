@@ -277,5 +277,54 @@
     "emptyTitle": "Nenhuma coleção ainda",
     "emptyText": "Crie uma coleção no app web e ela aparece aqui automaticamente.",
     "runNow": "Atualizar agora"
+  },
+  "date": {
+    "dateAtTime": "{{date}} às {{time}}"
+  },
+  "duration": {
+    "seconds": "{{s}} s",
+    "minutes": "{{m}} min",
+    "minutesSeconds": "{{m}} min {{s}} s"
+  },
+  "history": {
+    "inProgress": "Em andamento",
+    "deleteAllTitle": "Excluir histórico de atualizações",
+    "deleteAllConfirm": "Isso limpa só a lista do Histórico de atualizações. Seus vídeos, feed e estatísticas são mantidos. Não dá para desfazer.",
+    "deleteAll": "Excluir tudo",
+    "deleted": "Histórico de atualizações excluído",
+    "deleteFailed": "Não foi possível excluir o histórico de atualizações",
+    "title": "Histórico de atualizações",
+    "count_one": "{{count}} atualização em todas as coleções",
+    "count_other": "{{count}} atualizações em todas as coleções",
+    "subtitle": "Linha do tempo das suas coleções",
+    "deleting": "Excluindo…",
+    "loading": "Carregando atualizações…",
+    "emptyTitle": "Nenhuma atualização ainda",
+    "emptyBody": "Quando você atualizar uma coleção, os resultados aparecem aqui.",
+    "unknownCollection": "Coleção desconhecida",
+    "status": {
+      "success": "Concluída",
+      "partial": "Parcial",
+      "failed": "Falhou",
+      "running": "Atualizando",
+      "cancelled": "Cancelada"
+    },
+    "labels": {
+      "duration": "Duração:",
+      "new": "Novos:",
+      "channels": "Canais:",
+      "found": "Encontrados:",
+      "enriched": "Analisados:"
+    },
+    "completedWithIssues": "Concluída com problemas",
+    "hideChannels": "Ocultar canais",
+    "channelsCount_one": "Canais ({{count}})",
+    "channelsCount_other": "Canais ({{count}})",
+    "unnamed": "Sem nome",
+    "never": "Nunca",
+    "cancelled": "Atualização cancelada",
+    "cancelFailed": "Não foi possível cancelar a atualização",
+    "cancelling": "Cancelando…",
+    "cancelRun": "Cancelar atualização"
   }
 }

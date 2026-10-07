@@ -277,5 +277,54 @@
     "emptyTitle": "No collections yet",
     "emptyText": "Create a collection on the web app and it will appear here automatically.",
     "runNow": "Run Now"
+  },
+  "date": {
+    "dateAtTime": "{{date}} at {{time}}"
+  },
+  "duration": {
+    "seconds": "{{s}}s",
+    "minutes": "{{m}}m",
+    "minutesSeconds": "{{m}}m {{s}}s"
+  },
+  "history": {
+    "inProgress": "In progress",
+    "deleteAllTitle": "Delete Run History",
+    "deleteAllConfirm": "This clears the Run History list only. Your videos, feed, and statistics are kept. This cannot be undone.",
+    "deleteAll": "Delete All",
+    "deleted": "Run history deleted",
+    "deleteFailed": "Failed to delete run history",
+    "title": "Run History",
+    "count_one": "{{count}} run across all collections",
+    "count_other": "{{count}} runs across all collections",
+    "subtitle": "Timeline of collection activity",
+    "deleting": "Deleting…",
+    "loading": "Loading runs…",
+    "emptyTitle": "No runs yet",
+    "emptyBody": "When you run a collection, its results will appear here.",
+    "unknownCollection": "Unknown Collection",
+    "status": {
+      "success": "Success",
+      "partial": "Partial",
+      "failed": "Failed",
+      "running": "Running",
+      "cancelled": "Cancelled"
+    },
+    "labels": {
+      "duration": "Duration:",
+      "new": "New:",
+      "channels": "Channels:",
+      "found": "Found:",
+      "enriched": "Enriched:"
+    },
+    "completedWithIssues": "Completed with issues",
+    "hideChannels": "Hide channels",
+    "channelsCount_one": "Channels ({{count}})",
+    "channelsCount_other": "Channels ({{count}})",
+    "unnamed": "Unnamed",
+    "never": "Never",
+    "cancelled": "Run cancelled",
+    "cancelFailed": "Failed to cancel run",
+    "cancelling": "Cancelling…",
+    "cancelRun": "Cancel Run"
   }
 }
