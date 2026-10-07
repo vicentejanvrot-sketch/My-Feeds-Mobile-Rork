@@ -18,7 +18,7 @@ struct DownloadsView: View {
                 if list.isEmpty {
                     emptyState
                 } else {
-                    Text("\(list.count) \(list.count == 1 ? "item" : "items") · \(DownloadStore.formatBytes(store.totalBytes)) on this phone. Posts are saved with their photos and videos, and podcasts with the episode. YouTube videos still need a connection.")
+                    Text("\(list.count) items · \(DownloadStore.formatBytes(store.totalBytes)) on this phone. Posts are saved with their photos and videos, and podcasts with the episode. YouTube videos still need a connection.")
                         .font(.system(size: 13))
                         .foregroundStyle(Theme.textSecondary)
                         .lineSpacing(3)
@@ -49,7 +49,7 @@ struct DownloadsView: View {
             Button("Cancel", role: .cancel) {}
             Button("Delete all", role: .destructive) {
                 store.deleteAll()
-                toasts.show("All downloads deleted")
+                toasts.show(String(localized: "All downloads deleted"))
             }
         } message: {
             Text("Frees \(DownloadStore.formatBytes(store.totalBytes)) on this phone. Your feeds aren't affected.")
@@ -62,12 +62,12 @@ struct DownloadsView: View {
             Button("Remove", role: .destructive) {
                 if let entry = toRemove {
                     store.delete(itemId: entry.itemId)
-                    toasts.show("Download removed")
+                    toasts.show(String(localized: "Download removed"))
                 }
                 toRemove = nil
             }
         } message: {
-            Text(toRemove?.title ?? "This item")
+            Text(toRemove?.title ?? String(localized: "This item"))
         }
     }
 
@@ -117,7 +117,7 @@ struct DownloadsView: View {
                     .clipShape(.rect(cornerRadius: 8))
 
                     VStack(alignment: .leading, spacing: 4) {
-                        Text(entry.title ?? "Untitled")
+                        Text(entry.title ?? String(localized: "Untitled"))
                             .font(.system(size: 14, weight: .bold))
                             .foregroundStyle(Theme.textPrimary)
                             .lineLimit(2)
@@ -160,7 +160,7 @@ struct DownloadsView: View {
 
     private func meta(_ entry: DownloadEntry) -> String {
         let size = DownloadStore.formatBytes(entry.bytes)
-        let saved = "saved " + entry.savedAt.formatted(.relative(presentation: .named))
+        let saved = String(localized: "saved \(entry.savedAt.formatted(.relative(presentation: .named)))")
         if let name = entry.channelName, !name.isEmpty { return "\(name) · \(size) · \(saved)" }
         return "\(size) · \(saved)"
     }

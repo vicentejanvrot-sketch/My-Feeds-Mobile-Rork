@@ -2,7 +2,7 @@ import SwiftUI
 
 /// Shared scroll scaffold for support screens.
 struct SupportScreen<Content: View>: View {
-    let title: String
+    let title: LocalizedStringKey
     @ViewBuilder let content: Content
 
     var body: some View {
@@ -23,7 +23,7 @@ struct SupportScreen<Content: View>: View {
 }
 
 struct SupportHeading: View {
-    let text: String
+    let text: LocalizedStringKey
 
     var body: some View {
         Text(text)
@@ -35,7 +35,7 @@ struct SupportHeading: View {
 }
 
 struct SupportParagraph: View {
-    let text: String
+    let text: LocalizedStringKey
 
     var body: some View {
         Text(text)
@@ -53,7 +53,7 @@ struct SupportEmailLink: View {
                 UIApplication.shared.open(url)
             }
         } label: {
-            Text("support@travelone.ca")
+            Text(verbatim: "support@travelone.ca")
                 .font(.system(size: 14, weight: .semibold))
                 .foregroundStyle(Theme.accent)
         }

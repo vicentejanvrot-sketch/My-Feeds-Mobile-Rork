@@ -95,8 +95,8 @@ struct SettingsView: View {
     }
 
     private var defaultEmailCard: some View {
-        settingsCard(icon: "envelope", iconColor: Theme.accent, title: "Default Email",
-                     description: "Pre-filled when adding email recipients to new collections.") {
+        settingsCard(icon: "envelope", iconColor: Theme.accent, title: String(localized: "Default Email"),
+                     description: String(localized: "Pre-filled when adding email recipients to new collections.")) {
             TextField("your@email.com", text: $defaultEmail)
                 .font(.system(size: 15))
                 .foregroundStyle(Theme.textPrimary)
@@ -179,12 +179,12 @@ struct SettingsView: View {
     private var youtubeCard: some View {
         let account = YouTubeAccount.shared
         return settingsCard(icon: "play.rectangle", iconColor: Theme.accent, title: "YouTube",
-                            description: "Connect your YouTube account to add songs to a \"My Feeds\" playlist in YouTube Music.") {
+                            description: String(localized: "Connect your YouTube account to add songs to a \"My Feeds\" playlist in YouTube Music.")) {
             HStack(spacing: 12) {
                 Image(systemName: account.isConnected ? "checkmark.circle.fill" : "person.crop.circle.badge.questionmark")
                     .font(.system(size: 18))
                     .foregroundStyle(account.isConnected ? Theme.success : Theme.textMuted)
-                Text(account.isConnected ? (account.channelName ?? "Connected") : "Not connected")
+                Text(account.isConnected ? (account.channelName ?? String(localized: "Connected")) : String(localized: "Not connected"))
                     .font(.system(size: 15, weight: .semibold))
                     .foregroundStyle(Theme.textPrimary)
                     .lineLimit(1)
@@ -192,12 +192,12 @@ struct SettingsView: View {
                 Button {
                     if account.isConnected {
                         account.disconnect()
-                        toasts.show("YouTube disconnected")
+                        toasts.show(String(localized: "YouTube disconnected"))
                     } else {
                         Task {
                             do {
                                 try await account.connect()
-                                toasts.show("YouTube connected")
+                                toasts.show(String(localized: "YouTube connected"))
                             } catch YouTubeAccountError.cancelled {
                                 // closed the sign-in sheet
                             } catch {
@@ -209,7 +209,7 @@ struct SettingsView: View {
                     if account.isConnecting {
                         ProgressView().tint(Theme.accent)
                     } else {
-                        Text(account.isConnected ? "Disconnect" : "Connect")
+                        Text(account.isConnected ? String(localized: "Disconnect") : String(localized: "Connect"))
                             .font(.system(size: 14, weight: .bold))
                             .foregroundStyle(account.isConnected ? Theme.destructive : Theme.accent)
                     }
@@ -225,8 +225,8 @@ struct SettingsView: View {
     /// adding a GitHub or Reddit account on People also follows it there.
     private var connectionsCard: some View {
         let connections = AccountConnections.shared
-        return settingsCard(icon: "link", iconColor: Theme.accent, title: "GitHub & Reddit",
-                            description: "When you add a GitHub or Reddit account to a collection on People, the app also follows it with your connected account. Instagram, Facebook, LinkedIn, X, TikTok, Spotify and Apple don't let apps follow accounts for you, so those are only added to your feed.") {
+        return settingsCard(icon: "link", iconColor: Theme.accent, title: String(localized: "GitHub & Reddit"),
+                            description: String(localized: "When you add a GitHub or Reddit account to a collection on People, the app also follows it with your connected account. Instagram, Facebook, LinkedIn, X, TikTok, Spotify and Apple don't let apps follow accounts for you, so those are only added to your feed.")) {
             VStack(spacing: 0) {
                 ForEach(AccountConnections.Provider.allCases, id: \.self) { provider in
                     connectionRow(provider, connections: connections)
@@ -245,7 +245,7 @@ struct SettingsView: View {
                 Text(provider.label)
                     .font(.system(size: 15, weight: .semibold))
                     .foregroundStyle(Theme.textPrimary)
-                Text(isConnected ? "Connected" + (accountName.map { " as \($0)" } ?? "") : "Not connected")
+                Text(isConnected ? (accountName.map { String(localized: "Connected as \($0)") } ?? String(localized: "Connected")) : String(localized: "Not connected"))
                     .font(.system(size: 12))
                     .foregroundStyle(Theme.textSecondary)
                     .lineLimit(1)
@@ -256,10 +256,10 @@ struct SettingsView: View {
                     do {
                         if isConnected {
                             try await connections.disconnect(provider)
-                            toasts.show("\(provider.label) disconnected")
+                            toasts.show(String(localized: "\(provider.label) disconnected"))
                         } else {
                             let name = try await connections.connect(provider)
-                            toasts.show("\(provider.label) connected" + (name.map { " as \($0)" } ?? ""))
+                            toasts.show(name.map { String(localized: "\(provider.label) connected as \($0)") } ?? String(localized: "\(provider.label) connected"))
                         }
                     } catch AccountConnectionError.cancelled {
                         // closed the sign-in sheet
@@ -271,7 +271,7 @@ struct SettingsView: View {
                 if connections.busy == provider {
                     ProgressView().tint(Theme.accent)
                 } else {
-                    Text(isConnected ? "Disconnect" : "Connect")
+                    Text(isConnected ? String(localized: "Disconnect") : String(localized: "Connect"))
                         .font(.system(size: 14, weight: .bold))
                         .foregroundStyle(isConnected ? Theme.destructive : Theme.accent)
                 }
@@ -284,8 +284,8 @@ struct SettingsView: View {
 
     private var videoPlaybackCard: some View {
         @Bindable var prefs = prefs
-        return settingsCard(icon: "display", iconColor: Theme.accent, title: "Video Playback",
-                            description: "Configure default video playback settings. These sync across your devices via iCloud.") {
+        return settingsCard(icon: "display", iconColor: Theme.accent, title: String(localized: "Video Playback"),
+                            description: String(localized: "Configure default video playback settings. These sync across your devices via iCloud.")) {
             Text("Default Video Quality")
                 .font(.system(size: 13, weight: .semibold))
                 .foregroundStyle(Theme.textSecondary)
@@ -374,12 +374,13 @@ struct SettingsView: View {
     private var biometricCard: some View {
         @Bindable var prefs = prefs
         let biometryName = BiometricAuthService.biometryName
+        let biometryLabel = biometryName ?? String(localized: "biometrics")
         let hasSavedCredentials = KeychainCredentialStore.savedCredentials() != nil
         return settingsCard(
             icon: biometryName == "Face ID" ? "faceid" : "touchid",
             iconColor: Theme.accent,
-            title: "Quick Sign-In",
-            description: "Use \(biometryName ?? "biometrics") to unlock your saved login instead of typing your password."
+            title: String(localized: "Quick Sign-In"),
+            description: String(localized: "Use \(biometryLabel) to unlock your saved login instead of typing your password.")
         ) {
             if biometryName == nil {
                 HStack(spacing: 8) {
@@ -392,12 +393,12 @@ struct SettingsView: View {
             } else {
                 HStack {
                     VStack(alignment: .leading, spacing: 3) {
-                        Text("Enable \(biometryName ?? "biometrics") sign-in")
+                        Text("Enable \(biometryLabel) sign-in")
                             .font(.system(size: 13, weight: .semibold))
                             .foregroundStyle(Theme.textSecondary)
                         Text(hasSavedCredentials
-                             ? "Sign out and back in with your password to update the saved login."
-                             : "Sign in once with your password, then use \(biometryName ?? "biometrics") next time.")
+                             ? String(localized: "Sign out and back in with your password to update the saved login.")
+                             : String(localized: "Sign in once with your password, then use \(biometryLabel) next time."))
                             .font(.system(size: 11))
                             .foregroundStyle(Theme.textMuted)
                     }
@@ -414,7 +415,7 @@ struct SettingsView: View {
                         .foregroundStyle(Theme.warning)
                         .padding(.top, 8)
                 } else if prefs.biometricEnabled && hasSavedCredentials {
-                    Text("\(biometryName ?? "Biometrics") is ready. You'll see the option on the login screen.")
+                    Text("\(biometryLabel) is ready. You'll see the option on the login screen.")
                         .font(.system(size: 11))
                         .foregroundStyle(Theme.success)
                         .padding(.top, 8)
@@ -460,9 +461,9 @@ struct SettingsView: View {
     }
 
     private var dangerZoneCard: some View {
-        settingsCard(icon: "trash", iconColor: Theme.destructive, title: "Danger Zone",
+        settingsCard(icon: "trash", iconColor: Theme.destructive, title: String(localized: "Danger Zone"),
                      titleColor: Theme.destructive,
-                     description: "Permanently delete your account and all associated data. This action cannot be undone.") {
+                     description: String(localized: "Permanently delete your account and all associated data. This action cannot be undone.")) {
             Button {
                 UIImpactFeedbackGenerator(style: .heavy).impactOccurred()
                 showDeleteConfirm = true
@@ -495,29 +496,29 @@ struct SettingsView: View {
         let store = DownloadStore.shared
         let count = store.entries.count
         let label = count == 0
-            ? "Saved for offline"
-            : "\(count) saved · \(DownloadStore.formatBytes(store.totalBytes))"
-        return settingsCard(icon: "arrow.down.circle", iconColor: Theme.accent, title: "Downloads", description: nil) {
+            ? String(localized: "Saved for offline")
+            : String(localized: "\(count) saved · \(DownloadStore.formatBytes(store.totalBytes))")
+        return settingsCard(icon: "arrow.down.circle", iconColor: Theme.accent, title: String(localized: "Downloads"), description: nil) {
             supportRow(icon: "arrow.down.circle", label: label, route: .downloads)
         }
         .onAppear { store.load() }
     }
 
     private var supportCard: some View {
-        settingsCard(icon: "questionmark.circle", iconColor: Theme.accent, title: "Support", description: nil) {
+        settingsCard(icon: "questionmark.circle", iconColor: Theme.accent, title: String(localized: "Support"), description: nil) {
             VStack(spacing: 0) {
-                supportRow(icon: "questionmark.circle", label: "FAQ", route: .faq)
+                supportRow(icon: "questionmark.circle", label: String(localized: "FAQ"), route: .faq)
                 Rectangle().fill(Theme.border).frame(height: 0.5)
-                supportRow(icon: "checkmark.shield", label: "Privacy Policy", route: .privacy)
+                supportRow(icon: "checkmark.shield", label: String(localized: "Privacy Policy"), route: .privacy)
                 Rectangle().fill(Theme.border).frame(height: 0.5)
-                supportRow(icon: "doc.text", label: "Terms of Service", route: .terms)
+                supportRow(icon: "doc.text", label: String(localized: "Terms of Service"), route: .terms)
                 Rectangle().fill(Theme.border).frame(height: 0.5)
                 Button {
                     if let url = URL(string: "mailto:support@travelone.ca") {
                         UIApplication.shared.open(url)
                     }
                 } label: {
-                    supportRowContent(icon: "bubble.left", label: "Contact Support")
+                    supportRowContent(icon: "bubble.left", label: String(localized: "Contact Support"))
                 }
                 .buttonStyle(.plain)
             }
@@ -645,7 +646,7 @@ struct SettingsView: View {
         UIImpactFeedbackGenerator(style: .light).impactOccurred()
         let email = defaultEmail.trimmingCharacters(in: .whitespaces)
         if !email.isEmpty, email.range(of: "^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$", options: .regularExpression) == nil {
-            toasts.show("Please enter a valid email address.", type: .error)
+            toasts.show(String(localized: "Please enter a valid email address."), type: .error)
             return
         }
         isSaving = true
@@ -654,9 +655,9 @@ struct SettingsView: View {
                 if !email.isEmpty, let userId = auth.userId {
                     try await SupabaseService.shared.upsertDefaultEmail(userId: userId, email: email)
                 }
-                toasts.show("Settings saved.")
+                toasts.show(String(localized: "Settings saved."))
             } catch {
-                toasts.show("Failed to save settings. Please try again.", type: .error)
+                toasts.show(String(localized: "Failed to save settings. Please try again."), type: .error)
             }
             isSaving = false
         }
@@ -667,7 +668,7 @@ struct SettingsView: View {
         isDeleting = true
         Task {
             let usedEdgeFunction = (try? await SupabaseService.shared.deleteAccount(userId: userId)) ?? false
-            toasts.show(usedEdgeFunction ? "Your account has been deleted." : "Your account data has been deleted.")
+            toasts.show(usedEdgeFunction ? String(localized: "Your account has been deleted.") : String(localized: "Your account data has been deleted."))
             await auth.signOut()
             if !usedEdgeFunction,
                let url = URL(string: "mailto:support@travelone.ca?subject=Account%20Deletion%20Request") {

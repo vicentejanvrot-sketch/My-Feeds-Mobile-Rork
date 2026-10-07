@@ -1,12 +1,172 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "%@ connected" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ conectado"
+          }
+        }
+      }
+    },
+    "%@ connected as %@" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ conectado como %2$@"
+          }
+        }
+      }
+    },
+    "%@ disconnected" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ desconectado"
+          }
+        }
+      }
+    },
+    "%@ is ready. You'll see the option on the login screen." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ está pronto. A opção vai aparecer na tela de login."
+          }
+        }
+      }
+    },
+    "%lld items · %@ on this phone. Posts are saved with their photos and videos, and podcasts with the episode. YouTube videos still need a connection." : {
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld item · %@ on this phone. Posts are saved with their photos and videos, and podcasts with the episode. YouTube videos still need a connection."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld items · %@ on this phone. Posts are saved with their photos and videos, and podcasts with the episode. YouTube videos still need a connection."
+                }
+              }
+            }
+          }
+        },
+        "pt-BR" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld item · %@ neste celular. Os posts são salvos com as fotos e os vídeos, e os podcasts com o episódio. Vídeos do YouTube ainda precisam de conexão."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld itens · %@ neste celular. Os posts são salvos com as fotos e os vídeos, e os podcasts com o episódio. Vídeos do YouTube ainda precisam de conexão."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "%lld saved · %@" : {
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld saved · %@"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld saved · %@"
+                }
+              }
+            }
+          }
+        },
+        "pt-BR" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld salvo · %@"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld salvos · %@"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "API keys (YouTube, OpenAI, Anthropic, Gemini) are optional and let the app fetch video data and run AI analysis on your behalf. Keys are stored securely and are never displayed back to you after saving." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "As chaves de API (YouTube, OpenAI, Anthropic, Gemini) são opcionais e permitem que o app busque dados de vídeos e faça análises com IA por você. As chaves são guardadas com segurança e nunca são exibidas de novo depois de salvas."
+          }
+        }
+      }
+    },
+    "About background playback" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sobre a reprodução em segundo plano"
+          }
+        }
+      }
+    },
     "Add" : {
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Adicionar"
+          }
+        }
+      }
+    },
+    "All downloads deleted" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Todos os downloads foram excluídos"
+          }
+        }
+      }
+    },
+    "Auto" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Automática"
           }
         }
       }
@@ -31,12 +191,62 @@
         }
       }
     },
+    "Biometrics aren't available or aren't set up on this device." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A biometria não está disponível ou não está configurada neste dispositivo."
+          }
+        }
+      }
+    },
+    "By using My Feeds (\"the app\"), you agree to these terms. Please read them carefully." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ao usar o My Feeds (\"o app\"), você concorda com estes termos. Leia com atenção."
+          }
+        }
+      }
+    },
     "Cancel" : {
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Cancelar"
+          }
+        }
+      }
+    },
+    "Changes to These Terms" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alterações nestes termos"
+          }
+        }
+      }
+    },
+    "Changes to This Policy" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alterações nesta política"
+          }
+        }
+      }
+    },
+    "Children's Privacy" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Privacidade de crianças"
           }
         }
       }
@@ -51,12 +261,222 @@
         }
       }
     },
+    "Configure default video playback settings. These sync across your devices via iCloud." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Configure a reprodução de vídeo padrão. Essas opções são sincronizadas entre seus dispositivos pelo iCloud."
+          }
+        }
+      }
+    },
+    "Connect" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Conectar"
+          }
+        }
+      }
+    },
+    "Connect your YouTube account to add songs to a \"My Feeds\" playlist in YouTube Music." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Conecte sua conta do YouTube para adicionar músicas a uma playlist \"My Feeds\" no YouTube Music."
+          }
+        }
+      }
+    },
+    "Connected" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Conectado"
+          }
+        }
+      }
+    },
+    "Connected as %@" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Conectado como %@"
+          }
+        }
+      }
+    },
+    "Connecting your YouTube account is optional. It lets the app sync your playlists, watch history, and video actions. You can use the core feed features without connecting." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Conectar sua conta do YouTube é opcional. Isso permite que o app sincronize suas playlists, seu histórico e as ações nos vídeos. Você pode usar os recursos principais do feed sem conectar."
+          }
+        }
+      }
+    },
+    "Contact Support" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Falar com o suporte"
+          }
+        }
+      }
+    },
+    "Contact Us" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fale com a gente"
+          }
+        }
+      }
+    },
+    "Contact us any time at support@travelone.ca and we'll respond as soon as possible." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fale com a gente a qualquer momento em support@travelone.ca e responderemos o quanto antes."
+          }
+        }
+      }
+    },
+    "Danger Zone" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zona de perigo"
+          }
+        }
+      }
+    },
+    "Data Retention and Deletion" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Retenção e exclusão de dados"
+          }
+        }
+      }
+    },
+    "Data Storage and Security" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Armazenamento e segurança dos dados"
+          }
+        }
+      }
+    },
+    "Default Email" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "E-mail padrão"
+          }
+        }
+      }
+    },
+    "Default Video Quality" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Qualidade de vídeo padrão"
+          }
+        }
+      }
+    },
     "Delete" : {
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Excluir"
+          }
+        }
+      }
+    },
+    "Delete Account" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Excluir conta"
+          }
+        }
+      }
+    },
+    "Delete Account?" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Excluir conta?"
+          }
+        }
+      }
+    },
+    "Delete all" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Excluir tudo"
+          }
+        }
+      }
+    },
+    "Delete all downloads?" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Excluir todos os downloads?"
+          }
+        }
+      }
+    },
+    "Disclaimer of Warranties" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Isenção de garantias"
+          }
+        }
+      }
+    },
+    "Disconnect" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Desconectar"
+          }
+        }
+      }
+    },
+    "Do I need a YouTube account?" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Preciso de uma conta do YouTube?"
           }
         }
       }
@@ -71,12 +491,172 @@
         }
       }
     },
+    "Download removed" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Download removido"
+          }
+        }
+      }
+    },
+    "Downloads" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Downloads"
+          }
+        }
+      }
+    },
     "Edit" : {
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Editar"
+          }
+        }
+      }
+    },
+    "Embedded YouTube videos automatically pause when your screen locks or the app moves to the background. This is expected behavior on iOS — both the operating system and the official YouTube embedded player enforce this to preserve battery and comply with platform policies. It is not a bug in the app." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vídeos do YouTube incorporados pausam automaticamente quando a tela bloqueia ou o app vai para segundo plano. Esse é o comportamento esperado no iOS — tanto o sistema quanto o player oficial do YouTube fazem isso para poupar bateria e seguir as políticas da plataforma. Não é um erro do app."
+          }
+        }
+      }
+    },
+    "Enable %@ sign-in" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ativar entrada com %@"
+          }
+        }
+      }
+    },
+    "FAQ" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Perguntas frequentes"
+          }
+        }
+      }
+    },
+    "Failed to save settings. Please try again." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Não foi possível salvar as configurações. Tente de novo."
+          }
+        }
+      }
+    },
+    "Frees %@ on this phone. Your feeds aren't affected." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Libera %@ neste celular. Seus feeds não são afetados."
+          }
+        }
+      }
+    },
+    "GitHub & Reddit" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "GitHub e Reddit"
+          }
+        }
+      }
+    },
+    "Highest available" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Máxima disponível"
+          }
+        }
+      }
+    },
+    "How We Use Your Information" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Como usamos suas informações"
+          }
+        }
+      }
+    },
+    "How do I delete my account or data?" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Como excluo minha conta ou meus dados?"
+          }
+        }
+      }
+    },
+    "How do I get help?" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Como consigo ajuda?"
+          }
+        }
+      }
+    },
+    "How is my data stored?" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Como meus dados são armazenados?"
+          }
+        }
+      }
+    },
+    "Information We Collect" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Informações que coletamos"
+          }
+        }
+      }
+    },
+    "Intellectual Property" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Propriedade intelectual"
+          }
+        }
+      }
+    },
+    "Keep screen on while playing" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Manter a tela ligada durante a reprodução"
           }
         }
       }
@@ -91,6 +671,46 @@
         }
       }
     },
+    "Last updated: June 10, 2026" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Última atualização: 10 de junho de 2026"
+          }
+        }
+      }
+    },
+    "Limitation of Liability" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Limitação de responsabilidade"
+          }
+        }
+      }
+    },
+    "My Feeds (\"the app\") helps you monitor YouTube channels with research collections and organize the videos they discover. This policy explains what information we collect, how we use it, and the choices you have." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O My Feeds (\"o app\") ajuda você a acompanhar canais do YouTube com coleções de pesquisa e a organizar os vídeos que elas encontram. Esta política explica quais informações coletamos, como as usamos e quais escolhas você tem."
+          }
+        }
+      }
+    },
+    "My Feeds lets you create collections that follow YouTube channels and other accounts, automatically surface new videos and posts into your Feed, and track which videos you've watched." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O My Feeds permite criar coleções que seguem canais do YouTube e outras contas, trazem automaticamente novos vídeos e posts para o seu feed e registram quais vídeos você já assistiu."
+          }
+        }
+      }
+    },
     "Next" : {
       "localizations" : {
         "pt-BR" : {
@@ -101,12 +721,152 @@
         }
       }
     },
+    "Normal (1×)" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Normal (1×)"
+          }
+        }
+      }
+    },
+    "Not connected" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Não conectado"
+          }
+        }
+      }
+    },
+    "Nothing downloaded yet" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nada baixado ainda"
+          }
+        }
+      }
+    },
     "OK" : {
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "OK"
+          }
+        }
+      }
+    },
+    "Open a post, podcast episode or video and tap the download icon at the top. It stays on this phone so you can read or listen with no connection." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abra um post, episódio de podcast ou vídeo e toque no ícone de download no topo. Ele fica neste celular para você ler ou ouvir sem conexão."
+          }
+        }
+      }
+    },
+    "Permanently delete your account and all associated data. This action cannot be undone." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Exclua permanentemente sua conta e todos os dados associados. Essa ação não pode ser desfeita."
+          }
+        }
+      }
+    },
+    "Please enter a valid email address." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Digite um endereço de e-mail válido."
+          }
+        }
+      }
+    },
+    "Pre-filled when adding email recipients to new collections." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Preenchido automaticamente ao adicionar destinatários de e-mail a novas coleções."
+          }
+        }
+      }
+    },
+    "Prevents your device from auto-locking during video playback." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Impede que o dispositivo bloqueie sozinho enquanto um vídeo está tocando."
+          }
+        }
+      }
+    },
+    "Privacy Policy" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Política de privacidade"
+          }
+        }
+      }
+    },
+    "Questions? Contact us at" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dúvidas? Fale com a gente em"
+          }
+        }
+      }
+    },
+    "Quick Sign-In" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Entrada rápida"
+          }
+        }
+      }
+    },
+    "Remove" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remover"
+          }
+        }
+      }
+    },
+    "Remove download" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remover download"
+          }
+        }
+      }
+    },
+    "Remove download?" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remover download?"
           }
         }
       }
@@ -131,12 +891,102 @@
         }
       }
     },
+    "Running or walking with the phone in your pocket? Tap the lock icon in the video player to turn on Pocket Lock. The screen goes dark and ignores every touch while the video keeps playing. Press and hold the lock for 2 seconds to unlock." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Correndo ou caminhando com o celular no bolso? Toque no ícone de cadeado no player para ativar o Bloqueio de bolso. A tela escurece e ignora todos os toques enquanto o vídeo continua tocando. Toque e segure o cadeado por 2 segundos para desbloquear."
+          }
+        }
+      }
+    },
+    "SIGNED IN AS" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CONECTADO COMO"
+          }
+        }
+      }
+    },
     "Save" : {
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Salvar"
+          }
+        }
+      }
+    },
+    "Save your login by signing out and signing back in with your password." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Salve seu login saindo e entrando de novo com sua senha."
+          }
+        }
+      }
+    },
+    "Saved for offline" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Salvos para ver offline"
+          }
+        }
+      }
+    },
+    "Settings" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Configurações"
+          }
+        }
+      }
+    },
+    "Settings saved." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Configurações salvas."
+          }
+        }
+      }
+    },
+    "Sign in once with your password, then use %@ next time." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Entre uma vez com sua senha e use %@ da próxima vez."
+          }
+        }
+      }
+    },
+    "Sign out" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sair"
+          }
+        }
+      }
+    },
+    "Sign out and back in with your password to update the saved login." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Saia e entre de novo com sua senha para atualizar o login salvo."
           }
         }
       }
@@ -151,6 +1001,146 @@
         }
       }
     },
+    "Still need help? Contact us at" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ainda precisa de ajuda? Fale com a gente em"
+          }
+        }
+      }
+    },
+    "Support" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Suporte"
+          }
+        }
+      }
+    },
+    "Termination" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Encerramento"
+          }
+        }
+      }
+    },
+    "Terms of Service" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Termos de serviço"
+          }
+        }
+      }
+    },
+    "The app integrates with YouTube and optional AI providers. Your use of those services is governed by their own terms. Any API keys you save must belong to you, and you are responsible for usage and costs incurred under them." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O app se integra ao YouTube e a provedores de IA opcionais. O uso desses serviços segue os termos de cada um. As chaves de API que você salvar devem ser suas, e você é responsável pelo uso e pelos custos gerados por elas."
+          }
+        }
+      }
+    },
+    "The app is not directed to children under 13, and we do not knowingly collect personal information from children." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O app não é destinado a crianças menores de 13 anos, e não coletamos intencionalmente informações pessoais de crianças."
+          }
+        }
+      }
+    },
+    "The app is provided \"as is\" without warranties of any kind. We do not guarantee that collections will discover every relevant video or that the service will be uninterrupted or error-free." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O app é fornecido \"no estado em que se encontra\", sem garantias de qualquer tipo. Não garantimos que as coleções vão encontrar todos os vídeos relevantes nem que o serviço será ininterrupto ou livre de erros."
+          }
+        }
+      }
+    },
+    "The app relies on YouTube for video content and metadata, and on our backend provider for authentication, database, and processing. Videos are played through YouTube's embedded player, which is subject to Google's privacy policy. Optional AI analysis may use the provider configured for your account." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O app depende do YouTube para o conteúdo e os metadados dos vídeos, e do nosso provedor de servidor para autenticação, banco de dados e processamento. Os vídeos são reproduzidos pelo player incorporado do YouTube, sujeito à política de privacidade do Google. A análise opcional com IA pode usar o provedor configurado para sua conta."
+          }
+        }
+      }
+    },
+    "The app, its design, and its software are owned by us or our licensors. Video content and thumbnails belong to their respective creators and platforms." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O app, seu design e seu software pertencem a nós ou aos nossos licenciadores. O conteúdo dos vídeos e as miniaturas pertencem aos respectivos criadores e plataformas."
+          }
+        }
+      }
+    },
+    "Third-Party Services" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Serviços de terceiros"
+          }
+        }
+      }
+    },
+    "Third-Party Services and Credentials" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Serviços de terceiros e credenciais"
+          }
+        }
+      }
+    },
+    "This item" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Este item"
+          }
+        }
+      }
+    },
+    "This will permanently delete your account and all your data, including your collections, feeds, watch history, and saved settings. This cannot be undone." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Isso vai excluir permanentemente sua conta e todos os seus dados, incluindo suas coleções, feeds, histórico e configurações salvas. Não dá para desfazer."
+          }
+        }
+      }
+    },
+    "To the maximum extent permitted by law, we are not liable for any indirect, incidental, or consequential damages arising from your use of the app." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Na máxima extensão permitida por lei, não nos responsabilizamos por danos indiretos, incidentais ou consequenciais decorrentes do uso do app."
+          }
+        }
+      }
+    },
     "Try again" : {
       "localizations" : {
         "pt-BR" : {
@@ -161,12 +1151,282 @@
         }
       }
     },
+    "Untitled" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sem título"
+          }
+        }
+      }
+    },
+    "Use %@ to unlock your saved login instead of typing your password." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Use %@ para desbloquear seu login salvo em vez de digitar a senha."
+          }
+        }
+      }
+    },
     "Use device language" : {
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Usar idioma do dispositivo"
+          }
+        }
+      }
+    },
+    "Use of the App" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uso do app"
+          }
+        }
+      }
+    },
+    "User Content and Conduct" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Conteúdo e conduta do usuário"
+          }
+        }
+      }
+    },
+    "Video Playback" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reprodução de vídeo"
+          }
+        }
+      }
+    },
+    "Videos will start playing at this quality when available. This setting syncs across your devices via iCloud." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Os vídeos começam nessa qualidade quando disponível. Essa opção é sincronizada entre seus dispositivos pelo iCloud."
+          }
+        }
+      }
+    },
+    "We collect the information you provide directly: your account email and password (managed by our authentication provider), the collections, channels, and preferences you configure, and your watch statuses for videos. We also store optional settings such as a default email for digests. If you choose to save API keys, they are stored securely and are write-only — they can never be read back by the app." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Coletamos as informações que você fornece diretamente: o e-mail e a senha da sua conta (gerenciados pelo nosso provedor de autenticação), as coleções, canais e preferências que você configura e o status de visualização dos vídeos. Também guardamos configurações opcionais, como um e-mail padrão para resumos. Se você salvar chaves de API, elas são guardadas com segurança e são somente gravação — o app nunca consegue lê-las de volta."
+          }
+        }
+      }
+    },
+    "We may suspend or terminate access for conduct that violates these terms. You may stop using the app and delete your account at any time from Settings." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Podemos suspender ou encerrar o acesso em caso de conduta que viole estes termos. Você pode parar de usar o app e excluir sua conta a qualquer momento em Configurações."
+          }
+        }
+      }
+    },
+    "We may update these terms from time to time. Continued use of the app after changes take effect constitutes acceptance of the revised terms." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Podemos atualizar estes termos de tempos em tempos. Continuar usando o app depois que as mudanças entrarem em vigor significa aceitar os termos revisados."
+          }
+        }
+      }
+    },
+    "We may update this policy from time to time. Material changes will be reflected by updating the \"Last updated\" date above." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Podemos atualizar esta política de tempos em tempos. Mudanças importantes serão indicadas pela data de \"Última atualização\" acima."
+          }
+        }
+      }
+    },
+    "What does this app do?" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O que este app faz?"
+          }
+        }
+      }
+    },
+    "When you add a GitHub or Reddit account to a collection on People, the app also follows it with your connected account. Instagram, Facebook, LinkedIn, X, TikTok, Spotify and Apple don't let apps follow accounts for you, so those are only added to your feed." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quando você adiciona uma conta do GitHub ou do Reddit a uma coleção em Pessoas, o app também a segue com sua conta conectada. Instagram, Facebook, LinkedIn, X, TikTok, Spotify e Apple não deixam apps seguirem contas por você, então essas são só adicionadas ao seu feed."
+          }
+        }
+      }
+    },
+    "Why do you ask for API keys?" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Por que vocês pedem chaves de API?"
+          }
+        }
+      }
+    },
+    "You agree not to misuse the app, including attempting to access other users' data, circumventing rate limits, or using the app for unlawful purposes." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Você concorda em não usar o app de forma indevida, incluindo tentar acessar dados de outros usuários, burlar limites de uso ou usar o app para fins ilegais."
+          }
+        }
+      }
+    },
+    "You can delete your account at any time from Settings → Delete Account. This permanently removes your account and all your data — your collections, feeds, watch history, and saved settings. The deletion happens immediately within the app and cannot be undone. If you have any trouble, contact us at support@travelone.ca." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Você pode excluir sua conta a qualquer momento em Configurações → Excluir conta. Isso remove permanentemente sua conta e todos os seus dados — coleções, feeds, histórico e configurações salvas. A exclusão acontece na hora, dentro do app, e não pode ser desfeita. Se tiver algum problema, fale com a gente em support@travelone.ca."
+          }
+        }
+      }
+    },
+    "You may use the app to create research collections, monitor YouTube channels, and organize videos for personal, non-commercial research. You are responsible for maintaining the confidentiality of your account credentials and for all activity under your account." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Você pode usar o app para criar coleções de pesquisa, acompanhar canais do YouTube e organizar vídeos para pesquisa pessoal e não comercial. Você é responsável por manter a confidencialidade das credenciais da sua conta e por toda a atividade nela."
+          }
+        }
+      }
+    },
+    "YouTube connected" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "YouTube conectado"
+          }
+        }
+      }
+    },
+    "YouTube disconnected" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "YouTube desconectado"
+          }
+        }
+      }
+    },
+    "Your account data has been deleted." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Os dados da sua conta foram excluídos."
+          }
+        }
+      }
+    },
+    "Your account has been deleted." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sua conta foi excluída."
+          }
+        }
+      }
+    },
+    "Your data is retained while your account is active. You can delete your account and all associated data at any time from Settings → Delete Account. If you have any trouble, contact us at support@travelone.ca and we will complete the deletion within 30 days." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seus dados são mantidos enquanto sua conta estiver ativa. Você pode excluir sua conta e todos os dados associados a qualquer momento em Configurações → Excluir conta. Se tiver algum problema, fale com a gente em support@travelone.ca e concluiremos a exclusão em até 30 dias."
+          }
+        }
+      }
+    },
+    "Your data is stored in our secured backend with row-level access controls, so only your authenticated account can access your records. Session tokens are stored securely on your device." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seus dados ficam no nosso servidor protegido, com controle de acesso por registro, para que só a sua conta autenticada acesse seus registros. Os tokens de sessão ficam guardados com segurança no seu dispositivo."
+          }
+        }
+      }
+    },
+    "Your data is used solely to operate the app: running your collections, building your research feed, tracking your watch progress, and sending email digests you configure. We do not sell your personal information or use it for advertising." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seus dados são usados apenas para o funcionamento do app: atualizar suas coleções, montar seu feed de pesquisa, registrar seu progresso e enviar os resumos por e-mail que você configurar. Não vendemos suas informações pessoais nem as usamos para publicidade."
+          }
+        }
+      }
+    },
+    "Your settings and saved keys are stored securely in our backend. API keys are write-only — once saved, they cannot be read back by the app or displayed on screen." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Suas configurações e chaves salvas ficam guardadas com segurança no nosso servidor. As chaves de API são somente gravação — depois de salvas, o app não consegue lê-las nem mostrá-las na tela."
+          }
+        }
+      }
+    },
+    "biometrics" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "biometria"
+          }
+        }
+      }
+    },
+    "saved %@" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "salvo %@"
+          }
+        }
+      }
+    },
+    "your@email.com" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "seu@email.com"
           }
         }
       }
