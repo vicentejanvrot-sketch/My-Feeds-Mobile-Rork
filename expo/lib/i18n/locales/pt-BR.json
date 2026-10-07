@@ -259,7 +259,7 @@
     "savedItem": "Salvo dentro do My Feeds para ler offline. Veja na aba Configurações > Downloads deste app.",
     "youtubeTitle": "Este vídeo não pode ser baixado",
     "youtubeBody1": "O YouTube só deixa os vídeos dele tocarem no próprio player, então o My Feeds não consegue salvar este vídeo no seu celular.",
-    "youtubeBody2": "Salvar resumo guarda o resumo e os momentos-chave para ler offline. Para assistir ao vídeo offline, abra no app do YouTube e use o botão Baixar de lá (precisa do YouTube Premium).",
+    "youtubeBody2": "Salvar resumo guarda o resumo e os momentos principais para ler offline. Para assistir ao vídeo offline, abra no app do YouTube e use o botão Baixar de lá (precisa do YouTube Premium).",
     "openYouTube": "Abrir o YouTube",
     "saveSummary": "Salvar resumo",
     "removeTitle": "Remover download?",
@@ -898,7 +898,7 @@
     "loadFailed": "Não foi possível carregar este post. Verifique sua conexão.",
     "threadSummary": "RESUMO DA DISCUSSÃO",
     "summary": "RESUMO",
-    "keyMoments": "MOMENTOS-CHAVE",
+    "keyMoments": "MOMENTOS PRINCIPAIS",
     "viewsWord_one": "visualização",
     "viewsWord_other": "visualizações",
     "actions": {
