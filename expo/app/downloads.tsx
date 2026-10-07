@@ -2,6 +2,7 @@
 // connection: the list and the files are read from the phone. Remove one item
 // with the trash icon, or everything with "Delete all".
 import { useEffect, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { Alert, FlatList, Pressable, StyleSheet, Text, View } from "react-native";
 import { router } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -26,6 +27,7 @@ import {
 export default function DownloadsScreen() {
   const insets = useSafeAreaInsets();
   const showToast = useToast();
+  const { t } = useTranslation();
   const loaded = useDownloadsStore((s) => s.loaded);
   const entries = useDownloadsStore((s) => s.entries);
 
@@ -40,23 +42,23 @@ export default function DownloadsScreen() {
   const totalBytes = list.reduce((sum, e) => sum + e.bytes, 0);
 
   const removeOne = (entry: DownloadEntry) => {
-    Alert.alert("Remove download?", entry.title ?? "This item", [
-      { text: "Cancel", style: "cancel" },
+    Alert.alert(t("downloads.removeTitle"), entry.title ?? t("downloads.thisItem"), [
+      { text: t("common.cancel"), style: "cancel" },
       {
-        text: "Remove",
+        text: t("agentDetail.remove"),
         style: "destructive",
-        onPress: () => void deleteDownload(entry.itemId).then(() => showToast("Download removed", "success")),
+        onPress: () => void deleteDownload(entry.itemId).then(() => showToast(t("downloads.removed"), "success")),
       },
     ]);
   };
 
   const removeAll = () => {
-    Alert.alert("Delete all downloads?", `Frees ${formatBytes(totalBytes)} on this phone. Your feeds aren't affected.`, [
-      { text: "Cancel", style: "cancel" },
+    Alert.alert(t("downloads.deleteAllTitle"), t("downloads.deleteAllBody", { size: formatBytes(totalBytes) }), [
+      { text: t("common.cancel"), style: "cancel" },
       {
-        text: "Delete all",
+        text: t("history.deleteAll"),
         style: "destructive",
-        onPress: () => void deleteAllDownloads().then(() => showToast("All downloads deleted", "success")),
+        onPress: () => void deleteAllDownloads().then(() => showToast(t("downloads.allDeleted"), "success")),
       },
     ]);
   };
@@ -64,13 +66,13 @@ export default function DownloadsScreen() {
   return (
     <View style={[styles.screen, { paddingTop: insets.top }]}>
       <View style={styles.header}>
-        <Pressable onPress={() => router.back()} hitSlop={10} style={styles.headerBtn} accessibilityLabel="Back">
+        <Pressable onPress={() => router.back()} hitSlop={10} style={styles.headerBtn} accessibilityLabel={t("common.back")}>
           <ChevronLeft size={24} color={Colors.textPrimary} />
         </Pressable>
-        <Text style={styles.headerTitle}>Downloads</Text>
+        <Text style={styles.headerTitle}>{t("settings.downloads")}</Text>
         {list.length > 0 ? (
           <Pressable onPress={removeAll} hitSlop={8} style={styles.deleteAll} accessibilityRole="button">
-            <Text style={styles.deleteAllText}>Delete all</Text>
+            <Text style={styles.deleteAllText}>{t("history.deleteAll")}</Text>
           </Pressable>
         ) : (
           <View style={styles.headerBtn} />
@@ -79,16 +81,13 @@ export default function DownloadsScreen() {
 
       {!downloadsSupported ? (
         <View style={styles.empty}>
-          <Text style={styles.emptyText}>Downloads work in the iOS and Android apps.</Text>
+          <Text style={styles.emptyText}>{t("downloads.unsupported")}</Text>
         </View>
       ) : loaded && list.length === 0 ? (
         <View style={styles.empty}>
           <Download size={36} color={Colors.textMuted} />
-          <Text style={styles.emptyTitle}>Nothing downloaded yet</Text>
-          <Text style={styles.emptyText}>
-            Open a post, podcast episode or video and tap the download icon at the top. It stays on this phone so you can read or
-            listen with no connection.
-          </Text>
+          <Text style={styles.emptyTitle}>{t("downloads.emptyTitle")}</Text>
+          <Text style={styles.emptyText}>{t("downloads.emptyBody")}</Text>
         </View>
       ) : (
         <FlatList
@@ -97,8 +96,7 @@ export default function DownloadsScreen() {
           contentContainerStyle={{ padding: 16, gap: 10, paddingBottom: insets.bottom + 24 }}
           ListHeaderComponent={
             <Text style={styles.summary}>
-              {list.length} {list.length === 1 ? "item" : "items"} · {formatBytes(totalBytes)} on this phone. Posts are saved
-              with their photos and videos, and podcasts with the episode. YouTube videos still need a connection.
+              {t("downloads.summary", { count: list.length, size: formatBytes(totalBytes) })}
             </Text>
           }
           renderItem={({ item: entry }) => (
@@ -115,13 +113,13 @@ export default function DownloadsScreen() {
                 </View>
               )}
               <View style={{ flex: 1, gap: 4 }}>
-                <Text style={styles.title} numberOfLines={2}>{entry.title ?? "Untitled"}</Text>
+                <Text style={styles.title} numberOfLines={2}>{entry.title ?? t("feed.untitled")}</Text>
                 <View style={styles.metaRow}>
                   <PlatformBadge platform={platformOf(entry.platform)} />
                   {entry.hasAudio ? <Headphones size={13} color={Colors.textSecondary} /> : null}
                   <Text style={styles.meta} numberOfLines={1}>
                     {entry.channelName ? `${entry.channelName} · ` : ""}
-                    {formatBytes(entry.bytes)} · saved {timeAgo(entry.savedAt)}
+                    {t("downloads.sizeSaved", { size: formatBytes(entry.bytes), when: timeAgo(entry.savedAt) })}
                   </Text>
                 </View>
               </View>
@@ -130,7 +128,7 @@ export default function DownloadsScreen() {
                 hitSlop={8}
                 style={styles.trash}
                 accessibilityRole="button"
-                accessibilityLabel="Remove download"
+                accessibilityLabel={t("downloads.removeLabel")}
               >
                 <Trash2 size={18} color={Colors.textSecondary} />
               </Pressable>

@@ -6,6 +6,7 @@ import { useEffect } from "react";
 import { Alert, Pressable, StyleSheet, Text, View } from "react-native";
 import * as Haptics from "expo-haptics";
 import { CircleCheck, Download } from "lucide-react-native";
+import { useTranslation } from "react-i18next";
 import { Colors } from "@/constants/colors";
 import { useToast } from "@/components/Toast";
 import { openExternalLink } from "@/lib/open-link";
@@ -24,6 +25,7 @@ export function DownloadButton({
   size?: number;
 }) {
   const showToast = useToast();
+  const { t } = useTranslation();
   const saved = useDownloadsStore((s) => !!s.entries[itemId]);
   const progress = useDownloadsStore((s) => s.progress[itemId]);
 
@@ -40,14 +42,14 @@ export function DownloadButton({
       // Downloads stay inside My Feeds (not Photos or Files), so say where to find them.
       showToast(
         hasAudio
-          ? "Episode saved inside My Feeds for offline listening. See it in this app's Settings tab > Downloads."
+          ? t("downloads.savedEpisode")
           : youtubeVideoId
-            ? "Summary saved inside My Feeds for offline reading. The video still needs a connection. See it in this app's Settings tab > Downloads."
-            : "Saved inside My Feeds for offline reading. See it in this app's Settings tab > Downloads.",
+            ? t("downloads.savedSummary")
+            : t("downloads.savedItem"),
         "success",
       );
     } catch (e) {
-      showToast(e instanceof Error ? e.message : "Download failed", "error");
+      showToast(e instanceof Error ? e.message : t("downloads.failed"), "error");
     }
   };
 
@@ -55,32 +57,31 @@ export function DownloadButton({
   // the phone. Say so before saving, and point to YouTube's own Download instead.
   const explainYouTube = () => {
     Alert.alert(
-      "This video can't be downloaded",
-      "YouTube only lets its videos play in its own player, so My Feeds can't save this video to your phone.\n\n" +
-        "Save summary keeps the summary and key moments for offline reading. To watch the video offline, open it in the YouTube app and use Download there (needs YouTube Premium).",
+      t("downloads.youtubeTitle"),
+      t("downloads.youtubeBody1") + "\n\n" + t("downloads.youtubeBody2"),
       [
-        { text: "Cancel", style: "cancel" },
+        { text: t("common.cancel"), style: "cancel" },
         {
-          text: "Open YouTube",
+          text: t("downloads.openYouTube"),
           onPress: () => {
             openExternalLink(`https://www.youtube.com/watch?v=${youtubeVideoId}`).catch(() =>
-              showToast("Couldn't open link", "error"),
+              showToast(t("player.openLinkFailed"), "error"),
             );
           },
         },
-        { text: "Save summary", onPress: () => void start() },
+        { text: t("downloads.saveSummary"), onPress: () => void start() },
       ],
     );
   };
 
   const remove = () => {
-    Alert.alert("Remove download?", "It stays in your feed. Only the copy on this phone is deleted.", [
-      { text: "Cancel", style: "cancel" },
+    Alert.alert(t("downloads.removeTitle"), t("downloads.removeBody"), [
+      { text: t("common.cancel"), style: "cancel" },
       {
-        text: "Remove",
+        text: t("agentDetail.remove"),
         style: "destructive",
         onPress: () => {
-          void deleteDownload(itemId).then(() => showToast("Download removed", "success"));
+          void deleteDownload(itemId).then(() => showToast(t("downloads.removed"), "success"));
         },
       },
     ]);
@@ -88,7 +89,7 @@ export function DownloadButton({
 
   if (progress !== undefined) {
     return (
-      <View style={styles.btn} accessibilityLabel={`Downloading, ${Math.round(progress * 100)} percent`}>
+      <View style={styles.btn} accessibilityLabel={t("downloads.progressLabel", { percent: Math.round(progress * 100) })}>
         <Text style={styles.percent}>{Math.round(progress * 100)}%</Text>
       </View>
     );
@@ -100,7 +101,7 @@ export function DownloadButton({
       hitSlop={10}
       style={({ pressed }) => [styles.btn, pressed && { opacity: 0.6 }]}
       accessibilityRole="button"
-      accessibilityLabel={saved ? "Downloaded. Remove download" : "Download for offline"}
+      accessibilityLabel={saved ? t("downloads.savedLabel") : t("downloads.downloadLabel")}
     >
       {saved ? <CircleCheck size={size} color={Colors.success} /> : <Download size={size} color={Colors.textSecondary} />}
     </Pressable>

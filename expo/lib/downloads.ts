@@ -17,7 +17,7 @@ import { create } from "zustand";
 import { supabase } from "@/lib/supabase";
 import { withFreshMedia } from "@/lib/expired-media";
 import type { ItemWithAnalysis } from "@/lib/database";
-import i18n from "@/lib/i18n";
+import i18n, { intlLocale } from "@/lib/i18n";
 
 export interface DownloadEntry {
   itemId: string;
@@ -399,8 +399,15 @@ export async function deleteAllDownloads(): Promise<void> {
 }
 
 export function formatBytes(bytes: number): string {
-  if (bytes >= 1024 * 1024 * 1024) return `${(bytes / 1024 / 1024 / 1024).toFixed(1)} GB`;
-  if (bytes >= 1024 * 1024) return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
+  const one = (n: number) => {
+    try {
+      return n.toLocaleString(intlLocale(), { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+    } catch {
+      return n.toFixed(1);
+    }
+  };
+  if (bytes >= 1024 * 1024 * 1024) return `${one(bytes / 1024 / 1024 / 1024)} GB`;
+  if (bytes >= 1024 * 1024) return `${one(bytes / 1024 / 1024)} MB`;
   if (bytes >= 1024) return `${Math.round(bytes / 1024)} KB`;
   return `${bytes} B`;
 }

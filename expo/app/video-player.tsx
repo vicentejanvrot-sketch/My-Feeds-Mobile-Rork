@@ -71,11 +71,12 @@ import { useYouTubeConnection } from "@/lib/useYouTubeConnection";
 import {
   useVideoQuality,
   QUALITY_KEYS,
-  QUALITY_LABELS,
   QUALITY_YOUTUBE,
   SPEED_KEYS,
   SPEED_LABELS,
+  qualityLabel,
 } from "@/lib/useVideoQuality";
+import { useTranslation } from "react-i18next";
 import type { QualityKey, SpeedKey } from "@/lib/useVideoQuality";
 import type { ItemStatus } from "@/lib/database";
 
@@ -83,12 +84,12 @@ import type { ItemStatus } from "@/lib/database";
 
 const STATUS_ICONS: Record<
   ItemStatus,
-  { icon: typeof Check; color: string; label: string }
+  { icon: typeof Check; color: string }
 > = {
-  not_watched: { icon: Circle, color: Colors.textMuted, label: "New" },
-  watched: { icon: Check, color: Colors.success, label: "Seen" },
-  liked: { icon: Heart, color: Colors.destructive, label: "Liked" },
-  watch_later: { icon: Clock, color: Colors.warning, label: "Later" },
+  not_watched: { icon: Circle, color: Colors.textMuted },
+  watched: { icon: Check, color: Colors.success },
+  liked: { icon: Heart, color: Colors.destructive },
+  watch_later: { icon: Clock, color: Colors.warning },
 };
 
 const STATUS_ENTRIES = Object.entries(STATUS_ICONS) as [
@@ -147,6 +148,7 @@ export default function VideoPlayerScreen() {
   const insets = useSafeAreaInsets();
   const updateStatus = useUpdateItemStatus();
   const showToast = useToast();
+  const { t } = useTranslation();
   const youtubeConn = useYouTubeConnection();
 
   // Summary + key moments written from the transcript (same data the web player shows)
@@ -590,7 +592,7 @@ export default function VideoPlayerScreen() {
       void Haptics.selectionAsync();
 
       // "watched" triggers the same overlay + close flow as video-ended
-      const onError = () => showToast("Couldn't update status", "error");
+      const onError = () => showToast(t("feed.statusFailed"), "error");
 
       if (status === "watched") {
         autoWatchedRef.current = true;
@@ -616,10 +618,10 @@ export default function VideoPlayerScreen() {
         return;
       }
 
-      showToast(`Marked as ${STATUS_ICONS[status].label}`, "success");
+      showToast(t("player.markedAs", { status: t(`itemStatus.${status}` as const) }), "success");
       updateStatus.mutate({ id: itemIdStr, status }, { onError });
     },
-    [itemIdStr, updateStatus, showToast, watchedOverlayOpacity],
+    [itemIdStr, updateStatus, showToast, watchedOverlayOpacity, t],
   );
 
   const handleOpenInYoutube = useCallback(async () => {
@@ -627,9 +629,9 @@ export default function VideoPlayerScreen() {
     try {
       await openExternalLink(`https://www.youtube.com/watch?v=${videoIdStr}`);
     } catch {
-      showToast("Couldn't open link", "error");
+      showToast(t("player.openLinkFailed"), "error");
     }
-  }, [videoIdStr, showToast]);
+  }, [videoIdStr, showToast, t]);
 
   const shareUrl = `https://www.youtube.com/watch?v=${videoIdStr}`;
 
@@ -710,22 +712,22 @@ export default function VideoPlayerScreen() {
     void Haptics.selectionAsync();
     try {
       await youtubeConn.syncAction(videoIdStr, "watch_later");
-      showToast("Saved to \"My Feeds - Watch Later\" on YouTube", "success");
+      showToast(t("player.savedToYouTube"), "success");
     } catch (err: any) {
-      showToast(err?.message ? `Couldn't save: ${err.message}` : "Couldn't save to YouTube", "error");
+      showToast(err?.message ? t("player.saveFailedMessage", { message: err.message }) : t("player.saveFailed"), "error");
     }
-  }, [videoIdStr, youtubeConn, showToast]);
+  }, [videoIdStr, youtubeConn, showToast, t]);
 
   const handleLikeOnYoutube = useCallback(async () => {
     if (!videoIdStr || youtubeConn.status !== "connected") return;
     void Haptics.selectionAsync();
     try {
       await youtubeConn.syncAction(videoIdStr, "rate");
-      showToast("Liked on YouTube", "success");
+      showToast(t("player.likedOnYouTube"), "success");
     } catch (err: any) {
-      showToast(err?.message ? `Couldn't like: ${err.message}` : "Couldn't like on YouTube", "error");
+      showToast(err?.message ? t("player.likeFailedMessage", { message: err.message }) : t("player.likeFailed"), "error");
     }
-  }, [videoIdStr, youtubeConn, showToast]);
+  }, [videoIdStr, youtubeConn, showToast, t]);
 
   // ── Share actions ────────────────────────────────────────────
 
@@ -734,16 +736,16 @@ export default function VideoPlayerScreen() {
     try {
       await Clipboard.setStringAsync(shareUrl);
       setShareOpen(false);
-      showToast("Link copied", "success");
+      showToast(t("player.linkCopied"), "success");
     } catch {
-      showToast("Couldn't copy link", "error");
+      showToast(t("player.copyFailed"), "error");
     }
-  }, [shareUrl, showToast]);
+  }, [shareUrl, showToast, t]);
 
   const handleShareToApp = useCallback(
     async (scheme: string) => {
       void Haptics.selectionAsync();
-      const text = encodeURIComponent(`Check out this video: ${shareUrl}`);
+      const text = encodeURIComponent(t("player.shareText", { url: shareUrl }));
       let url: string;
       switch (scheme) {
         case "whatsapp":
@@ -764,13 +766,13 @@ export default function VideoPlayerScreen() {
           await Linking.openURL(url);
           setShareOpen(false);
         } else {
-          showToast(`${scheme} app not installed`, "error");
+          showToast(t("player.appNotInstalled", { app: scheme }), "error");
         }
       } catch {
-        showToast("Couldn't open app", "error");
+        showToast(t("player.openAppFailed"), "error");
       }
     },
-    [shareUrl, showToast],
+    [shareUrl, showToast, t],
   );
 
   const handleNativeShare = useCallback(async () => {
@@ -900,7 +902,7 @@ export default function VideoPlayerScreen() {
     <View style={styles.countdownPill}>
       <Clock size={14} color={Colors.textMuted} />
       <Text style={styles.countdownText}>
-        {formatTime(Math.max(0, duration - currentTime))} left
+        {t("player.timeLeft", { time: formatTime(Math.max(0, duration - currentTime)) })}
       </Text>
     </View>
   );
@@ -911,23 +913,20 @@ export default function VideoPlayerScreen() {
     return (
       <View style={[styles.root, { paddingTop: insets.top }]}>
         <View style={styles.header}>
-          <Pressable onPress={handleClose} hitSlop={12} style={styles.closeBtn}>
+          <Pressable onPress={handleClose} hitSlop={12} style={styles.closeBtn} accessibilityRole="button" accessibilityLabel={t("common.close")}>
             <X size={24} color={Colors.textPrimary} />
           </Pressable>
-          <Text style={styles.headerTitle}>Video Player</Text>
+          <Text style={styles.headerTitle}>{t("player.title")}</Text>
           <View style={styles.closeBtn} />
         </View>
         <View style={styles.center}>
-          <Text style={styles.errorTitle}>No video available</Text>
-          <Text style={styles.errorSubtitle}>
-            This item doesn&apos;t have a valid video ID. It may not have been
-            fully processed yet.
-          </Text>
+          <Text style={styles.errorTitle}>{t("player.noVideo")}</Text>
+          <Text style={styles.errorSubtitle}>{t("player.noVideoHint")}</Text>
           <Pressable
             style={({ pressed }) => [styles.backBtn, pressed && styles.pressed]}
             onPress={handleClose}
           >
-            <Text style={styles.backBtnText}>Go back</Text>
+            <Text style={styles.backBtnText}>{t("agentDetail.goBack")}</Text>
           </Pressable>
         </View>
       </View>
@@ -940,18 +939,15 @@ export default function VideoPlayerScreen() {
     return (
       <View style={[styles.root, { paddingTop: insets.top }]}>
         <View style={styles.header}>
-          <Pressable onPress={handleClose} hitSlop={12} style={styles.closeBtn}>
+          <Pressable onPress={handleClose} hitSlop={12} style={styles.closeBtn} accessibilityRole="button" accessibilityLabel={t("common.close")}>
             <X size={24} color={Colors.textPrimary} />
           </Pressable>
-          <Text style={styles.headerTitle}>Video Player</Text>
+          <Text style={styles.headerTitle}>{t("player.title")}</Text>
           <View style={styles.closeBtn} />
         </View>
         <View style={styles.center}>
-          <Text style={styles.errorTitle}>Couldn&apos;t load video</Text>
-          <Text style={styles.errorSubtitle}>
-            This video may have embedding disabled by the channel, or it may be
-            unavailable. Try watching it directly in the YouTube app.
-          </Text>
+          <Text style={styles.errorTitle}>{t("player.loadFailed")}</Text>
+          <Text style={styles.errorSubtitle}>{t("player.loadFailedHint")}</Text>
           {videoIdStr ? (
             <Pressable
               style={({ pressed }) => [
@@ -961,7 +957,7 @@ export default function VideoPlayerScreen() {
               onPress={handleOpenInYoutube}
             >
               <ExternalLink size={18} color={Colors.white} />
-              <Text style={styles.openYoutubeBtnText}>Open in YouTube</Text>
+              <Text style={styles.openYoutubeBtnText}>{t("player.openInYouTube")}</Text>
             </Pressable>
           ) : null}
           <Pressable
@@ -971,7 +967,7 @@ export default function VideoPlayerScreen() {
             ]}
             onPress={handleClose}
           >
-            <Text style={styles.backBtnText}>Go back</Text>
+            <Text style={styles.backBtnText}>{t("agentDetail.goBack")}</Text>
           </Pressable>
         </View>
       </View>
@@ -989,11 +985,11 @@ export default function VideoPlayerScreen() {
           {/* Header */}
           <View style={[styles.header, { paddingTop: 12 }]}>
             <Animated.View style={{ opacity: controlsOpacity }}>
-              <Pressable onPress={handleClose} hitSlop={12} style={styles.closeBtn}>
+              <Pressable onPress={handleClose} hitSlop={12} style={styles.closeBtn} accessibilityRole="button" accessibilityLabel={t("common.close")}>
                 <X size={24} color={Colors.textPrimary} />
               </Pressable>
             </Animated.View>
-            <Text style={styles.headerTitle}>Video Player</Text>
+            <Text style={styles.headerTitle}>{t("player.title")}</Text>
             {/* Offline copy: the summary and key moments (the video itself needs a connection) */}
             {itemIdStr ? <DownloadButton itemId={itemIdStr} youtubeVideoId={videoIdStr} size={20} /> : null}
             {/* Pocket Lock */}
@@ -1001,7 +997,7 @@ export default function VideoPlayerScreen() {
               onPress={enablePocketLock}
               hitSlop={12}
               style={styles.closeBtn}
-              accessibilityLabel="Pocket Lock"
+              accessibilityLabel={t("player.pocketLock")}
             >
               <Lock size={20} color={Colors.textSecondary} />
             </Pressable>
@@ -1013,6 +1009,8 @@ export default function VideoPlayerScreen() {
               }}
               hitSlop={12}
               style={styles.closeBtn}
+              accessibilityRole="button"
+              accessibilityLabel={t("player.share")}
             >
               <Share2 size={20} color={Colors.textSecondary} />
             </Pressable>
@@ -1024,6 +1022,8 @@ export default function VideoPlayerScreen() {
               }}
               hitSlop={12}
               style={styles.closeBtn}
+              accessibilityRole="button"
+              accessibilityLabel={t("player.settings")}
             >
               <Settings size={22} color={Colors.textSecondary} />
             </Pressable>
@@ -1060,7 +1060,7 @@ export default function VideoPlayerScreen() {
                     color={cfg.color}
                     fill={key === "liked" ? cfg.color : "transparent"}
                   />
-                  <Text style={styles.actionLabel}>{cfg.label}</Text>
+                  <Text style={styles.actionLabel}>{t(`itemStatus.${key}` as const)}</Text>
                 </Pressable>
               );
             })}
@@ -1077,7 +1077,7 @@ export default function VideoPlayerScreen() {
                 onPress={handleSaveToWatchLater}
               >
                 <Clock size={18} color={Colors.warning} />
-                <Text style={styles.actionLabel}>Save to YouTube</Text>
+                <Text style={styles.actionLabel}>{t("player.saveToYouTube")}</Text>
               </Pressable>
               <Pressable
                 style={({ pressed }) => [
@@ -1087,7 +1087,7 @@ export default function VideoPlayerScreen() {
                 onPress={handleLikeOnYoutube}
               >
                 <Heart size={18} color={Colors.destructive} fill={Colors.destructive} />
-                <Text style={styles.actionLabel}>Like on YouTube</Text>
+                <Text style={styles.actionLabel}>{t("player.likeOnYouTube")}</Text>
               </Pressable>
               <Pressable
                 style={({ pressed }) => [
@@ -1097,7 +1097,7 @@ export default function VideoPlayerScreen() {
                 onPress={handleOpenInYoutube}
               >
                 <ExternalLink size={18} color={Colors.accent} />
-                <Text style={styles.actionLabel}>Open in YouTube</Text>
+                <Text style={styles.actionLabel}>{t("player.openInYouTube")}</Text>
               </Pressable>
             </View>
           )}
@@ -1118,7 +1118,7 @@ export default function VideoPlayerScreen() {
                 ) : (
                   <LogIn size={16} color={Colors.accent} />
                 )}
-                <Text style={styles.openYoutubeInlineText}>Connect YouTube to save & like</Text>
+                <Text style={styles.openYoutubeInlineText}>{t("player.connectToSave")}</Text>
               </Pressable>
               <Pressable
                 style={({ pressed }) => [
@@ -1128,7 +1128,7 @@ export default function VideoPlayerScreen() {
                 onPress={handleOpenInYoutube}
               >
                 <ExternalLink size={16} color={Colors.accent} />
-                <Text style={styles.openYoutubeInlineText}>Open in YouTube</Text>
+                <Text style={styles.openYoutubeInlineText}>{t("player.openInYouTube")}</Text>
               </Pressable>
             </View>
           )}
@@ -1359,7 +1359,7 @@ export default function VideoPlayerScreen() {
       {!isFullscreen && (analysisQ.data?.short_summary || keyMoments.length > 0) ? (
         <ScrollView style={keyMomentStyles.panel} contentContainerStyle={keyMomentStyles.panelContent}>
           <Text style={keyMomentStyles.label}>
-            {analysisQ.data?.summary_source === "transcript" ? "FROM THE TRANSCRIPT" : "SUMMARY"}
+            {analysisQ.data?.summary_source === "transcript" ? t("player.fromTranscript") : t("post.summary")}
           </Text>
           {analysisQ.data?.short_summary ? (
             <Text style={keyMomentStyles.summary}>{analysisQ.data.short_summary}</Text>
@@ -1370,7 +1370,7 @@ export default function VideoPlayerScreen() {
               onPress={() => void seekToMoment(m.seconds)}
               style={({ pressed }) => [keyMomentStyles.row, pressed && { opacity: 0.6 }]}
               accessibilityRole="button"
-              accessibilityLabel={`Jump to ${formatClock(m.seconds)}: ${m.text}`}
+              accessibilityLabel={t("player.jumpTo", { time: formatClock(m.seconds), text: m.text })}
             >
               <Text style={keyMomentStyles.time}>{formatClock(m.seconds)}</Text>
               <Text style={keyMomentStyles.text}>{m.text}</Text>
@@ -1583,7 +1583,7 @@ export default function VideoPlayerScreen() {
             onPress={enablePocketLock}
             style={styles.fullscreenCloseBtnInner}
             hitSlop={12}
-            accessibilityLabel="Pocket Lock"
+            accessibilityLabel={t("player.pocketLock")}
           >
             <Lock size={20} color={Colors.white} />
           </Pressable>
@@ -1620,7 +1620,7 @@ export default function VideoPlayerScreen() {
             showsVerticalScrollIndicator={false}
             keyboardShouldPersistTaps="handled"
           >
-            <Text style={styles.sectionTitle}>Share</Text>
+            <Text style={styles.sectionTitle}>{t("player.share")}</Text>
 
             {/* Video link display */}
             <View style={styles.shareLinkBox}>
@@ -1638,7 +1638,7 @@ export default function VideoPlayerScreen() {
               onPress={handleCopyLink}
             >
               <Copy size={18} color={Colors.textSecondary} />
-              <Text style={styles.shareOptionLabel}>Copy link</Text>
+              <Text style={styles.shareOptionLabel}>{t("player.copyLink")}</Text>
             </Pressable>
 
             <View style={styles.shareDivider} />
@@ -1690,7 +1690,7 @@ export default function VideoPlayerScreen() {
               onPress={handleNativeShare}
             >
               <MoreHorizontal size={18} color={Colors.textSecondary} />
-              <Text style={styles.shareOptionLabel}>More…</Text>
+              <Text style={styles.shareOptionLabel}>{t("player.more")}</Text>
             </Pressable>
           </ScrollView>
         </View>
@@ -1717,17 +1717,15 @@ export default function VideoPlayerScreen() {
             onLongPress={disablePocketLock}
             delayLongPress={2000}
             style={styles.pocketLockButton}
-            accessibilityLabel="Unlock. Press and hold for 2 seconds"
+            accessibilityLabel={t("player.unlockLabel")}
           >
             <Animated.View
               style={[styles.pocketLockFill, { transform: [{ scale: unlockProgress }] }]}
             />
             <Lock size={28} color="rgba(255,255,255,0.85)" />
           </Pressable>
-          <Text style={styles.pocketLockTitle}>Pocket Lock on</Text>
-          <Text style={styles.pocketLockHint}>
-            Press and hold the lock for 2 seconds to unlock
-          </Text>
+          <Text style={styles.pocketLockTitle}>{t("player.pocketLockOn")}</Text>
+          <Text style={styles.pocketLockHint}>{t("player.pocketLockHint")}</Text>
         </View>
       )}
 
@@ -1738,10 +1736,8 @@ export default function VideoPlayerScreen() {
           pointerEvents="none"
         >
           <View style={styles.watchedBox}>
-            <Text style={styles.watchedTitle}>Marked as Seen</Text>
-            <Text style={styles.watchedSubtitle}>
-              Video has been marked as seen in your library.
-            </Text>
+            <Text style={styles.watchedTitle}>{t("player.markedSeen")}</Text>
+            <Text style={styles.watchedSubtitle}>{t("player.markedSeenHint")}</Text>
           </View>
         </Animated.View>
       )}
@@ -1768,7 +1764,7 @@ export default function VideoPlayerScreen() {
             keyboardShouldPersistTaps="handled"
           >
             {/* ── Quality section ────────────────────────── */}
-            <Text style={styles.sectionTitle}>Quality</Text>
+            <Text style={styles.sectionTitle}>{t("player.quality")}</Text>
             {QUALITY_KEYS.map((q) => {
               const isSelected = q === quality;
               return (
@@ -1787,7 +1783,7 @@ export default function VideoPlayerScreen() {
                       isSelected && styles.optionLabelActive,
                     ]}
                   >
-                    {QUALITY_LABELS[q]}
+                    {qualityLabel(q)}
                   </Text>
                   {isSelected && (
                     <Check size={18} color={Colors.accent} />
@@ -1797,7 +1793,7 @@ export default function VideoPlayerScreen() {
             })}
 
             {/* ── Speed section ──────────────────────────── */}
-            <Text style={[styles.sectionTitle, { marginTop: 20 }]}>Speed</Text>
+            <Text style={[styles.sectionTitle, { marginTop: 20 }]}>{t("player.speed")}</Text>
             {SPEED_KEYS.map((s) => {
               const isSelected = s === speed;
               return (
@@ -1816,7 +1812,7 @@ export default function VideoPlayerScreen() {
                       isSelected && styles.optionLabelActive,
                     ]}
                   >
-                    {SPEED_LABELS[s]}
+                    {s === "1" ? t("player.normalSpeed") : SPEED_LABELS[s]}
                   </Text>
                   {isSelected && (
                     <Check size={18} color={Colors.accent} />
