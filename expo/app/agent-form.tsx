@@ -26,7 +26,7 @@ import {
   X,
 } from "lucide-react-native";
 import { PLATFORM_META } from "@/lib/platforms";
-import { CONTENT_TYPE_GROUPS, isContentTypeOn, withContentType, LIVE_NOTE, type ContentTypes } from "@/lib/contentTypes";
+import { CONTENT_TYPE_GROUPS, contentTypeText, isContentTypeOn, withContentType, liveNote, type ContentTypes } from "@/lib/contentTypes";
 import { Colors } from "@/constants/colors";
 import {
   useAgent,
@@ -476,7 +476,7 @@ export default function AgentFormScreen() {
               ))}
             </View>
           ))}
-          <Text style={styles.contentNote}>{LIVE_NOTE}</Text>
+          <Text style={styles.contentNote}>{liveNote()}</Text>
         </FormSection>
 
         {/* ── Email Recipients ─────────────────────────────────────── */}

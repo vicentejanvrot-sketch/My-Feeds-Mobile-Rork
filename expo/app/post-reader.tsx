@@ -39,7 +39,7 @@ import { useToast } from "@/components/Toast";
 import { openExternalLink } from "@/lib/open-link";
 import { timeAgo } from "@/lib/format";
 import { PlatformBadge } from "@/components/PlatformBadge";
-import { PLATFORM_META, platformOf, formatCount, isNewPostsCard } from "@/lib/platforms";
+import { PLATFORM_META, platformOf, platformText, formatCount, isNewPostsCard } from "@/lib/platforms";
 import {
   POSITION_SAVE_INTERVAL_MS,
   minResumeSeconds,
@@ -1407,7 +1407,7 @@ export default function PostReaderScreen() {
             accessibilityRole="link"
           >
             <ExternalLink size={16} color={Colors.textPrimary} />
-            <Text style={styles.openText}>{meta.openLabel}</Text>
+            <Text style={styles.openText}>{platformText(platform).openLabel}</Text>
           </Pressable>
         </View>
       </View>

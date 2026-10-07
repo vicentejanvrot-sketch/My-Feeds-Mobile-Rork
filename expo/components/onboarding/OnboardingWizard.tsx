@@ -21,7 +21,7 @@ import { useAuth } from "@/lib/auth-provider";
 import { extractEdgeFunctionErrorMessage, qk } from "@/lib/hooks";
 import { PlatformBadge } from "@/components/PlatformBadge";
 import { ReadWatchTour } from "@/components/onboarding/ReadWatchTour";
-import { Platform, PLATFORMS, PLATFORM_META, detectPlatform } from "@/lib/platforms";
+import { Platform, PLATFORMS, PLATFORM_META, platformText, detectPlatform } from "@/lib/platforms";
 
 // Onboarding wizard, same flow as the web OnboardingWizard: create an agent
 // (its name is its topic), add its sources, then a per-platform tour of
@@ -94,6 +94,7 @@ export function OnboardingWizard({ visible, onClose, hidden, onHiddenChange }: O
 
   const trimmedName = name.trim();
   const meta = PLATFORM_META[platform];
+  const metaText = platformText(platform);
 
   const goTo = (n: number) => {
     setError(null);
@@ -471,7 +472,7 @@ export function OnboardingWizard({ visible, onClose, hidden, onHiddenChange }: O
               </View>
 
               <View style={{ gap: 8 }}>
-                <Text style={styles.label}>{meta.sourceNoun}</Text>
+                <Text style={styles.label}>{metaText.sourceNoun}</Text>
                 <View style={styles.addRow}>
                   <TextInput
                     value={sourceValue}
@@ -487,14 +488,14 @@ export function OnboardingWizard({ visible, onClose, hidden, onHiddenChange }: O
                         setAutoPlatform(null);
                       }
                     }}
-                    placeholder={meta.addPlaceholder}
+                    placeholder={metaText.addPlaceholder}
                     placeholderTextColor={Colors.textMuted}
                     autoCapitalize="none"
                     autoCorrect={false}
                     returnKeyType="done"
                     onSubmitEditing={() => void addSource()}
                     style={[styles.input, { flex: 1 }]}
-                    accessibilityLabel={meta.sourceNoun}
+                    accessibilityLabel={metaText.sourceNoun}
                   />
                   <Pressable
                     onPress={() => void addSource()}
@@ -514,7 +515,7 @@ export function OnboardingWizard({ visible, onClose, hidden, onHiddenChange }: O
                     That&apos;s a {meta.label} link, so {meta.label} is now selected.
                   </Text>
                 ) : (
-                  <Text style={styles.muted}>{meta.addHelp}</Text>
+                  <Text style={styles.muted}>{metaText.addHelp}</Text>
                 )}
                 {privateOffer ? (
                   <View style={styles.privateBox}>

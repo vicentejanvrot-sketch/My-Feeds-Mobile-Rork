@@ -41,7 +41,7 @@ import { useAgents, useChannelsAll, useDeleteChannel } from "@/lib/hooks";
 import { openExternalLink, openPrivateProfile } from "@/lib/open-link";
 import { useYouTubeConnection } from "@/lib/useYouTubeConnection";
 import { followOnPlatform, isConnectProvider, useConnections } from "@/lib/useConnections";
-import { PLATFORM_META, isFollowableAccount, type Platform } from "@/lib/platforms";
+import { PLATFORM_META, platformText, isFollowableAccount, type Platform } from "@/lib/platforms";
 import {
   buildPeople,
   initials,
@@ -137,10 +137,10 @@ function FollowButton({ account, agentId }: { account: FoundAccount; agentId: st
         onPress={() => void openExternalLink(account.url)}
         style={({ pressed }) => [styles.openBtn, pressed && styles.pressed]}
         accessibilityRole="link"
-        accessibilityLabel={PLATFORM_META[account.platform].openLabel}
+        accessibilityLabel={platformText(account.platform).openLabel}
       >
         <ExternalLink size={13} color={Colors.textPrimary} />
-        <Text style={styles.openBtnText} numberOfLines={1}>{PLATFORM_META[account.platform].openLabel}</Text>
+        <Text style={styles.openBtnText} numberOfLines={1}>{platformText(account.platform).openLabel}</Text>
       </Pressable>
     );
   }

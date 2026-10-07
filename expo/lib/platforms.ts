@@ -2,10 +2,22 @@
 // sources the same way. Keep in sync with src/lib/platforms.ts (web) and
 // ios/MyFeeds/Models/Platform.swift in the mobile repo.
 
+import i18n from "@/lib/i18n";
+
 export type Platform =
   | "youtube" | "x" | "reddit" | "instagram" | "linkedin" | "github" | "tiktok" | "facebook"
   | "apple_music" | "apple_podcasts" | "apple_books" | "youtube_music" | "spotify";
 
+
+/** The platform's UI texts (source noun, add hint, open label) in the active language. */
+export function platformText(p: Platform): { sourceNoun: string; addPlaceholder: string; addHelp: string; openLabel: string } {
+  return {
+    sourceNoun: i18n.t(`platforms.${p}.sourceNoun` as const),
+    addPlaceholder: i18n.t(`platforms.${p}.addPlaceholder` as const),
+    addHelp: i18n.t(`platforms.${p}.addHelp` as const),
+    openLabel: i18n.t(`platforms.${p}.openLabel` as const),
+  };
+}
 
 export const PLATFORMS: Platform[] = [
   "youtube", "x", "reddit", "instagram", "linkedin", "github", "tiktok", "facebook", "apple_music", "apple_podcasts", "apple_books", "youtube_music", "spotify",

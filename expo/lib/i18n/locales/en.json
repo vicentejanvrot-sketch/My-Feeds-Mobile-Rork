@@ -373,5 +373,112 @@
     "setStatusFor_one": "Set status for {{count}} video",
     "setStatusFor_other": "Set status for {{count}} videos",
     "statusLabel": "Status: {{status}}"
+  },
+  "platforms": {
+    "youtube": {
+      "sourceNoun": "Channel",
+      "addPlaceholder": "https://www.youtube.com/@ChannelName",
+      "addHelp": "Paste the channel link.",
+      "openLabel": "Open on YouTube"
+    },
+    "x": {
+      "sourceNoun": "Account",
+      "addPlaceholder": "@handle or https://x.com/handle",
+      "addHelp": "Original posts only. Reposts and replies are skipped.",
+      "openLabel": "Open on X"
+    },
+    "reddit": {
+      "sourceNoun": "Subreddit or user",
+      "addPlaceholder": "r/subreddit, u/username or a reddit.com link",
+      "addHelp": "Top posts from a subreddit, or a user's own posts, from the lookback window.",
+      "openLabel": "Open on Reddit"
+    },
+    "instagram": {
+      "sourceNoun": "Account",
+      "addPlaceholder": "@handle or https://www.instagram.com/handle",
+      "addHelp": "Public accounts only. Posts and reels from the lookback window.",
+      "openLabel": "Open on Instagram"
+    },
+    "linkedin": {
+      "sourceNoun": "Profile or company",
+      "addPlaceholder": "https://www.linkedin.com/in/name or /company/name",
+      "addHelp": "Paste a person's profile link or a company page link.",
+      "openLabel": "Open on LinkedIn"
+    },
+    "github": {
+      "sourceNoun": "User or organization",
+      "addPlaceholder": "@username or https://github.com/username",
+      "addHelp": "New repositories and releases from the lookback window.",
+      "openLabel": "Open on GitHub"
+    },
+    "tiktok": {
+      "sourceNoun": "Account",
+      "addPlaceholder": "@username or https://www.tiktok.com/@username",
+      "addHelp": "Public accounts only. Videos from the lookback window.",
+      "openLabel": "Open on TikTok"
+    },
+    "facebook": {
+      "sourceNoun": "Page",
+      "addPlaceholder": "https://www.facebook.com/PageName",
+      "addHelp": "Public Pages only. Posts from the lookback window.",
+      "openLabel": "Open on Facebook"
+    },
+    "apple_music": {
+      "sourceNoun": "Artist",
+      "addPlaceholder": "Artist name or https://music.apple.com/us/artist/name/123",
+      "addHelp": "New singles and albums. Adding an artist also brings in their latest album.",
+      "openLabel": "Open in Apple Music"
+    },
+    "apple_podcasts": {
+      "sourceNoun": "Show",
+      "addPlaceholder": "Show name or https://podcasts.apple.com/us/podcast/name/id123",
+      "addHelp": "New episodes, played right here. Adding a show also brings in its latest episode.",
+      "openLabel": "Open in Apple Podcasts"
+    },
+    "apple_books": {
+      "sourceNoun": "Author",
+      "addPlaceholder": "Author name or https://books.apple.com/us/author/name/id123",
+      "addHelp": "New audiobooks, with a sample to listen to. Adding an author also brings in their latest audiobook.",
+      "openLabel": "Open in Apple Books"
+    },
+    "spotify": {
+      "sourceNoun": "Artist",
+      "addPlaceholder": "https://open.spotify.com/artist/...",
+      "addHelp": "New singles and albums, played with Spotify's player. Paste the artist's Spotify link. Adding an artist also brings in their latest album.",
+      "openLabel": "Open in Spotify"
+    },
+    "youtube_music": {
+      "sourceNoun": "Artist",
+      "addPlaceholder": "Artist name or https://music.youtube.com/channel/UC...",
+      "addHelp": "New songs, albums and music videos. Adding an artist also brings in their latest album.",
+      "openLabel": "Open in YouTube Music"
+    }
+  },
+  "contentTypes": {
+    "instagram_reels": {
+      "label": "Reels",
+      "help": "Short videos"
+    },
+    "instagram_posts": {
+      "label": "Photo and carousel posts",
+      "help": "Single photos and multi-photo posts"
+    },
+    "tiktok_videos": {
+      "label": "Videos",
+      "help": "Regular TikTok videos"
+    },
+    "tiktok_photos": {
+      "label": "Photo slideshows",
+      "help": "Posts made of photos"
+    },
+    "facebook_videos": {
+      "label": "Videos and reels",
+      "help": "Includes saved live videos"
+    },
+    "facebook_posts": {
+      "label": "Photo and text posts",
+      "help": "Everything without a video"
+    },
+    "liveNote": "Instagram and TikTok live streams can't be included: they leave the account's posts when they end, so there's nothing for My Feeds to collect."
   }
 }

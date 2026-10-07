@@ -373,5 +373,112 @@
     "setStatusFor_one": "Definir status de {{count}} vídeo",
     "setStatusFor_other": "Definir status de {{count}} vídeos",
     "statusLabel": "Status: {{status}}"
+  },
+  "platforms": {
+    "youtube": {
+      "sourceNoun": "Canal",
+      "addPlaceholder": "https://www.youtube.com/@NomeDoCanal",
+      "addHelp": "Cole o link do canal.",
+      "openLabel": "Abrir no YouTube"
+    },
+    "x": {
+      "sourceNoun": "Conta",
+      "addPlaceholder": "@usuario ou https://x.com/usuario",
+      "addHelp": "Só posts originais. Reposts e respostas ficam de fora.",
+      "openLabel": "Abrir no X"
+    },
+    "reddit": {
+      "sourceNoun": "Subreddit ou usuário",
+      "addPlaceholder": "r/subreddit, u/usuario ou um link do reddit.com",
+      "addHelp": "Os principais posts de um subreddit, ou os posts de um usuário, dentro do período de busca.",
+      "openLabel": "Abrir no Reddit"
+    },
+    "instagram": {
+      "sourceNoun": "Conta",
+      "addPlaceholder": "@usuario ou https://www.instagram.com/usuario",
+      "addHelp": "Só contas públicas. Posts e reels dentro do período de busca.",
+      "openLabel": "Abrir no Instagram"
+    },
+    "linkedin": {
+      "sourceNoun": "Perfil ou empresa",
+      "addPlaceholder": "https://www.linkedin.com/in/nome ou /company/nome",
+      "addHelp": "Cole o link do perfil de uma pessoa ou da página de uma empresa.",
+      "openLabel": "Abrir no LinkedIn"
+    },
+    "github": {
+      "sourceNoun": "Usuário ou organização",
+      "addPlaceholder": "@usuario ou https://github.com/usuario",
+      "addHelp": "Novos repositórios e releases dentro do período de busca.",
+      "openLabel": "Abrir no GitHub"
+    },
+    "tiktok": {
+      "sourceNoun": "Conta",
+      "addPlaceholder": "@usuario ou https://www.tiktok.com/@usuario",
+      "addHelp": "Só contas públicas. Vídeos dentro do período de busca.",
+      "openLabel": "Abrir no TikTok"
+    },
+    "facebook": {
+      "sourceNoun": "Página",
+      "addPlaceholder": "https://www.facebook.com/NomeDaPagina",
+      "addHelp": "Só Páginas públicas. Posts dentro do período de busca.",
+      "openLabel": "Abrir no Facebook"
+    },
+    "apple_music": {
+      "sourceNoun": "Artista",
+      "addPlaceholder": "Nome do artista ou https://music.apple.com/br/artist/nome/123",
+      "addHelp": "Novos singles e álbuns. Ao adicionar um artista, o álbum mais recente dele também entra.",
+      "openLabel": "Abrir no Apple Music"
+    },
+    "apple_podcasts": {
+      "sourceNoun": "Programa",
+      "addPlaceholder": "Nome do programa ou https://podcasts.apple.com/br/podcast/nome/id123",
+      "addHelp": "Novos episódios, tocados aqui mesmo. Ao adicionar um programa, o episódio mais recente também entra.",
+      "openLabel": "Abrir no Apple Podcasts"
+    },
+    "apple_books": {
+      "sourceNoun": "Autor",
+      "addPlaceholder": "Nome do autor ou https://books.apple.com/br/author/nome/id123",
+      "addHelp": "Novos audiolivros, com uma amostra para ouvir. Ao adicionar um autor, o audiolivro mais recente dele também entra.",
+      "openLabel": "Abrir no Apple Books"
+    },
+    "spotify": {
+      "sourceNoun": "Artista",
+      "addPlaceholder": "https://open.spotify.com/artist/...",
+      "addHelp": "Novos singles e álbuns, tocados no player do Spotify. Cole o link do artista no Spotify. Ao adicionar um artista, o álbum mais recente dele também entra.",
+      "openLabel": "Abrir no Spotify"
+    },
+    "youtube_music": {
+      "sourceNoun": "Artista",
+      "addPlaceholder": "Nome do artista ou https://music.youtube.com/channel/UC...",
+      "addHelp": "Novas músicas, álbuns e clipes. Ao adicionar um artista, o álbum mais recente dele também entra.",
+      "openLabel": "Abrir no YouTube Music"
+    }
+  },
+  "contentTypes": {
+    "instagram_reels": {
+      "label": "Reels",
+      "help": "Vídeos curtos"
+    },
+    "instagram_posts": {
+      "label": "Posts de foto e carrossel",
+      "help": "Fotos únicas e posts com várias fotos"
+    },
+    "tiktok_videos": {
+      "label": "Vídeos",
+      "help": "Vídeos normais do TikTok"
+    },
+    "tiktok_photos": {
+      "label": "Carrosséis de fotos",
+      "help": "Posts feitos de fotos"
+    },
+    "facebook_videos": {
+      "label": "Vídeos e reels",
+      "help": "Inclui lives salvas"
+    },
+    "facebook_posts": {
+      "label": "Posts de foto e texto",
+      "help": "Tudo o que não tem vídeo"
+    },
+    "liveNote": "Lives do Instagram e do TikTok não podem ser incluídas: elas saem dos posts da conta quando terminam, então não sobra nada para o My Feeds coletar."
   }
 }

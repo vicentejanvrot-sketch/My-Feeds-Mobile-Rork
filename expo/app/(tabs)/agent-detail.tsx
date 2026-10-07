@@ -80,7 +80,7 @@ import {
 import { timeAgo } from "@/lib/format";
 import { openExternalLink, openPrivateProfile } from "@/lib/open-link";
 import { PlatformBadge } from "@/components/PlatformBadge";
-import { PLATFORMS, PLATFORM_META, platformOf, detectPlatform, type Platform } from "@/lib/platforms";
+import { PLATFORMS, PLATFORM_META, platformOf, platformText, detectPlatform, type Platform } from "@/lib/platforms";
 
 // ── Helpers ────────────────────────────────────────────────────────
 
@@ -1483,10 +1483,10 @@ export default function AgentDetailScreen() {
               })}
             </View>
 
-            <Text style={[styles.formLabel, { marginTop: 14 }]}>{PLATFORM_META[newPlatform].sourceNoun}</Text>
+            <Text style={[styles.formLabel, { marginTop: 14 }]}>{platformText(newPlatform).sourceNoun}</Text>
             <TextInput
               style={styles.formInput}
-              placeholder={PLATFORM_META[newPlatform].addPlaceholder}
+              placeholder={platformText(newPlatform).addPlaceholder}
               placeholderTextColor={Colors.textMuted}
               value={newChannelUrl}
               onChangeText={(value) => {
@@ -1509,7 +1509,7 @@ export default function AgentDetailScreen() {
                 That&apos;s a {PLATFORM_META[newPlatform].label} link, so {PLATFORM_META[newPlatform].label} is now selected.
               </Text>
             ) : (
-              <Text style={sourceStyles.help}>{PLATFORM_META[newPlatform].addHelp}</Text>
+              <Text style={sourceStyles.help}>{platformText(newPlatform).addHelp}</Text>
             )}
 
             {privateOffer ? (

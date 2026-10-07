@@ -4,6 +4,7 @@
 // include_live. run-agent applies these. Keep in sync with
 // src/lib/contentTypes.ts (web) and ios/MyFeeds/Models/ContentTypes.swift.
 import type { Platform } from "@/lib/platforms";
+import i18n from "@/lib/i18n";
 
 export interface ContentTypeOption {
   key: string;
@@ -47,5 +48,16 @@ export function withContentType(types: ContentTypes | null | undefined, key: str
   return next;
 }
 
-export const LIVE_NOTE =
-  "Instagram and TikTok live streams can't be included: they leave the account's posts when they end, so there's nothing for My Feeds to collect.";
+/** Label and help for a content type in the active language. */
+export function contentTypeText(option: ContentTypeOption): { label: string; help: string } {
+  const label = `contentTypes.${option.key}.label`;
+  const help = `contentTypes.${option.key}.help`;
+  return {
+    label: i18n.exists(label) ? i18n.t(label as never) : option.label,
+    help: i18n.exists(help) ? i18n.t(help as never) : option.help,
+  };
+}
+
+export function liveNote(): string {
+  return i18n.t("contentTypes.liveNote");
+}
