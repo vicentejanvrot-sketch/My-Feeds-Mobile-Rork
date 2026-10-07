@@ -1,5 +1,5 @@
 import type { Channel } from "@/lib/database";
-import { CONTENT_TYPE_GROUPS, isContentTypeOn } from "@/lib/contentTypes";
+import { CONTENT_TYPE_GROUPS, contentTypeText, isContentTypeOn } from "@/lib/contentTypes";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
@@ -44,6 +44,7 @@ import {
   FolderInput,
 } from "lucide-react-native";
 import { useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { Colors } from "@/constants/colors";
 import { agentAccent } from "@/lib/database";
 import {
@@ -75,9 +76,11 @@ import { useToast } from "@/components/Toast";
 import { StatusPill } from "@/components/StatusPill";
 import {
   CHANNEL_STATUS_FILTERS,
+  channelFilterLabel,
   type ChannelFilterKey,
 } from "@/components/ChannelStatusPill";
 import { timeAgo } from "@/lib/format";
+import i18n, { formatDateTime, frequencyLabel } from "@/lib/i18n";
 import { openExternalLink, openPrivateProfile } from "@/lib/open-link";
 import { PlatformBadge } from "@/components/PlatformBadge";
 import { PLATFORMS, PLATFORM_META, platformOf, platformText, detectPlatform, type Platform } from "@/lib/platforms";
@@ -89,16 +92,16 @@ function durationLabel(start: string | null, end: string | null): string {
   const ms = new Date(end).getTime() - new Date(start).getTime();
   if (Number.isNaN(ms) || ms < 0) return "";
   const sec = Math.round(ms / 1000);
-  if (sec < 60) return `${sec}s`;
-  return `${Math.round(sec / 60)}m`;
+  if (sec < 60) return i18n.t("duration.seconds", { s: sec });
+  return i18n.t("duration.minutes", { m: Math.round(sec / 60) });
 }
 
 const PRIORITY_OPTIONS = [
-  { value: 5, label: "5 - Highest" },
-  { value: 4, label: "4 - High" },
-  { value: 3, label: "3 - Normal" },
-  { value: 2, label: "2 - Low" },
-  { value: 1, label: "1 - Lowest" },
+  { value: 5 },
+  { value: 4 },
+  { value: 3 },
+  { value: 2 },
+  { value: 1 },
 ] as const;
 
 // ── Priority picker for add-channel dialog ─────────────────────────
@@ -167,6 +170,7 @@ function PriorityDropdown({
   onChange: (v: number) => void;
 }) {
   const [open, setOpen] = useState(false);
+  const { t } = useTranslation();
 
   return (
     <>
@@ -178,6 +182,8 @@ function PriorityDropdown({
         ]}
         onPress={() => setOpen(true)}
         hitSlop={4}
+        accessibilityRole="button"
+        accessibilityLabel={t("agentDetail.priorityLabel", { value })}
       >
         <Text style={pdStyles.pillText}>{value}</Text>
         <Star size={12} color={Colors.warning} fill={Colors.warning} />
@@ -196,7 +202,7 @@ function PriorityDropdown({
           onPress={() => setOpen(false)}
         >
           <View style={pdStyles.menuCard}>
-            <Text style={pdStyles.menuTitle}>Priority</Text>
+            <Text style={pdStyles.menuTitle}>{t("agentDetail.priority")}</Text>
             {PRIORITY_ORDER.map((n) => {
               const active = n === value;
               return (
@@ -468,10 +474,10 @@ function RunItemBars({
   const c = counts?.[runId];
   if (!c) return null;
   const entries = [
-    { key: "watched", label: "Seen", color: Colors.success },
-    { key: "not_watched", label: "New", color: Colors.textMuted },
-    { key: "liked", label: "Liked", color: Colors.destructive },
-    { key: "watch_later", label: "Later", color: Colors.warning },
+    { key: "watched", color: Colors.success },
+    { key: "not_watched", color: Colors.textMuted },
+    { key: "liked", color: Colors.destructive },
+    { key: "watch_later", color: Colors.warning },
   ] as const;
   const total = entries.reduce((sum, e) => sum + (c[e.key] ?? 0), 0);
   if (total === 0) return null;
@@ -486,7 +492,7 @@ function RunItemBars({
           <View key={e.key} style={riStyles.barRow}>
             <View style={riStyles.barLabel}>
               <View style={[riStyles.dot, { backgroundColor: e.color }]} />
-              <Text style={riStyles.barName}>{e.label}</Text>
+              <Text style={riStyles.barName}>{i18n.t(`channelFilter.${e.key}` as const)}</Text>
             </View>
             <View style={riStyles.barTrack}>
               <View
@@ -540,6 +546,7 @@ export default function AgentDetailScreen() {
   );
 
   const showToast = useToast();
+  const { t } = useTranslation();
   const overlay = useRunningOverlay();
   const queryClient = useQueryClient();
 
@@ -662,7 +669,7 @@ export default function AgentDetailScreen() {
           const count = (polled.videos_new_count as number) ?? 0;
           overlay.showSuccess(
             aName,
-            count > 0 ? `Found ${count} new videos` : "No new videos found",
+            count > 0 ? t("runs.foundNew", { count }) : t("runs.noNewFound"),
           );
           await new Promise((r) => setTimeout(r, 2000));
           break;
@@ -671,7 +678,7 @@ export default function AgentDetailScreen() {
         if (polled.status === "failed" || polled.status === "cancelled") {
           overlay.showError(
             aName,
-            (polled.error_summary as string) || "An unknown error occurred",
+            (polled.error_summary as string) || t("runs.unknownError"),
           );
           await new Promise((r) => setTimeout(r, 2000));
           break;
@@ -680,7 +687,7 @@ export default function AgentDetailScreen() {
 
       void queryClient.invalidateQueries({ queryKey: qk.runs });
     },
-    [startRun, overlay, queryClient],
+    [startRun, overlay, queryClient, t],
   );
 
   const triggerRun = useCallback(async () => {
@@ -689,10 +696,10 @@ export default function AgentDetailScreen() {
     try {
       await runOne(agentId, agent.name);
     } catch (e) {
-      const msg = e instanceof Error ? e.message : "Failed to start run";
+      const msg = e instanceof Error ? e.message : t("runs.startFailed");
       overlay.showError(agent.name, msg);
     }
-  }, [agentId, agent, runOne, overlay]);
+  }, [agentId, agent, runOne, overlay, t]);
 
   const triggerEdit = useCallback(() => {
     if (!agentId) return;
@@ -706,39 +713,39 @@ export default function AgentDetailScreen() {
   const triggerDelete = useCallback(() => {
     if (!agentId || !agent) return;
     Alert.alert(
-      `Delete ${agent.name}?`,
-      `This deletes the collection, its ${sourceCount} ${sourceCount === 1 ? "source" : "sources"}, its email recipients, its run history and every video and post it found, including ones you saved. It can't be undone. Your accounts on YouTube, X and the other platforms aren't touched.`,
+      t("agentDetail.deleteNamed", { name: agent.name }),
+      t("agentDetail.deleteDetail", { count: sourceCount }),
       [
-        { text: "Cancel", style: "cancel" },
+        { text: t("common.cancel"), style: "cancel" },
         {
-          text: "Delete collection",
+          text: t("agentDetail.deleteCollection"),
           style: "destructive",
           onPress: async () => {
             try {
               await deleteAgent.mutateAsync(agentId);
-              showToast("Collection deleted", "success");
+              showToast(t("dashboard.deleted"), "success");
               router.replace("/(tabs)/agents");
             } catch (e) {
-              showToast(e instanceof Error ? e.message : "Delete failed", "error");
+              showToast(e instanceof Error ? e.message : t("dashboard.deleteFailed"), "error");
             }
           },
         },
       ],
     );
-  }, [agentId, agent, sourceCount, deleteAgent, showToast, router]);
+  }, [agentId, agent, sourceCount, deleteAgent, showToast, router, t]);
 
   // ── Add channel ──────────────────────────────────────────────────
   const handleAddChannel = useCallback(async (asPrivate = false) => {
     const value = newChannelUrl.trim();
     setPrivateOffer(null);
     if (!value) {
-      showToast(`Enter a ${PLATFORM_META[newPlatform].sourceNoun.toLowerCase()}`, "error");
+      showToast(t("agentDetail.enterSource", { noun: platformText(newPlatform).sourceNoun.toLowerCase() }), "error");
       return;
     }
     // The link says one platform but another is selected (picked after pasting).
     const detected = detectPlatform(value);
     if (detected && detected !== newPlatform) {
-      showToast(`That's a ${PLATFORM_META[detected].label} link. Select ${PLATFORM_META[detected].label} or paste a ${PLATFORM_META[newPlatform].label} link.`, "error");
+      showToast(t("agentDetail.wrongPlatform", { detected: PLATFORM_META[detected].label, selected: PLATFORM_META[newPlatform].label }), "error");
       return;
     }
     try {
@@ -747,7 +754,7 @@ export default function AgentDetailScreen() {
           channel_url: value,
           priority: newChannelPriority,
         });
-        showToast("Channel added", "success");
+        showToast(t("agentDetail.channelAdded"), "success");
       } else {
         // X accounts and subreddits are checked and named by the add-source function
         const channel = await addSource.mutateAsync({
@@ -759,8 +766,8 @@ export default function AgentDetailScreen() {
         });
         showToast(
           channel.is_private
-            ? `${channel.channel_name ?? "Account"} added as a private account`
-            : `${channel.channel_name ?? "Source"} added`,
+            ? t("agentDetail.addedPrivate", { name: channel.channel_name ?? t("agentDetail.account") })
+            : t("agentDetail.added", { name: channel.channel_name ?? t("agentDetail.source") }),
           "success",
         );
       }
@@ -770,40 +777,40 @@ export default function AgentDetailScreen() {
       setAutoPlatform(null);
       setShowAddChannel(false);
     } catch (e) {
-      const msg = e instanceof Error ? e.message : "Failed to add source";
+      const msg = e instanceof Error ? e.message : t("errors.addSourceFailed");
       if (!asPrivate && canAddAsPrivate(e)) {
         setPrivateOffer(msg);
         return;
       }
       showToast(msg, "error");
     }
-  }, [newChannelUrl, newChannelPriority, newPlatform, addChannel, addSource, showToast]);
+  }, [newChannelUrl, newChannelPriority, newPlatform, addChannel, addSource, showToast, t]);
 
   // ── Add recipient ────────────────────────────────────────────────
   const handleAddRecipient = useCallback(async () => {
     const email = newRecipientEmail.trim();
     if (!email.includes("@")) {
-      showToast("Enter a valid email", "error");
+      showToast(t("agentDetail.invalidEmail"), "error");
       return;
     }
     try {
       await addRecipient.mutateAsync(email);
-      showToast("Recipient added", "success");
+      showToast(t("agentDetail.recipientAdded"), "success");
       setNewRecipientEmail("");
       setShowAddRecipient(false);
     } catch (e) {
-      const msg = e instanceof Error ? e.message : "Failed to add recipient";
+      const msg = e instanceof Error ? e.message : t("agentDetail.addRecipientFailed");
       showToast(msg, "error");
     }
-  }, [newRecipientEmail, addRecipient, showToast]);
+  }, [newRecipientEmail, addRecipient, showToast, t]);
 
   // ── Delete channel ───────────────────────────────────────────────
   const handleDeleteChannel = useCallback(
     (id: string, name: string) => {
-      Alert.alert("Remove Channel", `Remove "${name}" from this collection?`, [
-        { text: "Cancel", style: "cancel" },
+      Alert.alert(t("agentDetail.removeChannelTitle"), t("agentDetail.removeChannelConfirm", { name }), [
+        { text: t("common.cancel"), style: "cancel" },
         {
-          text: "Remove",
+          text: t("agentDetail.remove"),
           style: "destructive",
           onPress: () => {
             deleteChannel.mutate(id);
@@ -811,16 +818,16 @@ export default function AgentDetailScreen() {
         },
       ]);
     },
-    [deleteChannel],
+    [deleteChannel, t],
   );
 
   // ── Delete recipient ─────────────────────────────────────────────
   const handleDeleteRecipient = useCallback(
     (id: string, email: string) => {
-      Alert.alert("Remove Recipient", `Remove ${email}?`, [
-        { text: "Cancel", style: "cancel" },
+      Alert.alert(t("agentDetail.removeRecipientTitle"), t("agentDetail.removeRecipientConfirm", { email }), [
+        { text: t("common.cancel"), style: "cancel" },
         {
-          text: "Remove",
+          text: t("agentDetail.remove"),
           style: "destructive",
           onPress: () => {
             deleteRecipient.mutate(id);
@@ -828,25 +835,25 @@ export default function AgentDetailScreen() {
         },
       ]);
     },
-    [deleteRecipient],
+    [deleteRecipient, t],
   );
 
   // ── Cancel run ───────────────────────────────────────────────────
   const handleCancelRun = useCallback(
     (runId: string) => {
-      Alert.alert("Cancel Run", "Stop this running collection?", [
-        { text: "No", style: "cancel" },
+      Alert.alert(t("history.cancelRun"), t("agentDetail.cancelRunConfirm"), [
+        { text: t("common.no"), style: "cancel" },
         {
-          text: "Cancel Run",
+          text: t("history.cancelRun"),
           style: "destructive",
           onPress: () => {
             cancelRun.mutate(runId);
-            showToast("Run cancelled", "info");
+            showToast(t("history.cancelled"), "info");
           },
         },
       ]);
     },
-    [cancelRun, showToast],
+    [cancelRun, showToast, t],
   );
 
   const handleOpenUrl = useCallback((url: string | null) => {
@@ -881,9 +888,9 @@ export default function AgentDetailScreen() {
   if (!agent) {
     return (
       <View style={[styles.root, styles.loadingBox, { paddingTop: insets.top }]}>
-        <Text style={styles.errorText}>Collection not found</Text>
+        <Text style={styles.errorText}>{t("agentDetail.notFound")}</Text>
         <Pressable onPress={goBack} style={styles.backBtnInline}>
-          <Text style={styles.backBtnText}>Go back</Text>
+          <Text style={styles.backBtnText}>{t("agentDetail.goBack")}</Text>
         </Pressable>
       </View>
     );
@@ -913,7 +920,7 @@ export default function AgentDetailScreen() {
           hitSlop={8}
         >
           <ArrowLeft size={20} color={Colors.textSecondary} />
-          <Text style={styles.backLabel}>Collections</Text>
+          <Text style={styles.backLabel}>{t("tabs.collections")}</Text>
         </Pressable>
 
         {/* ── HEADER ── */}
@@ -941,7 +948,7 @@ export default function AgentDetailScreen() {
                   style={StyleSheet.absoluteFill}
                 />
                 <Play size={15} color={Colors.white} fill={Colors.white} />
-                <Text style={styles.runNowText}>Run Now</Text>
+                <Text style={styles.runNowText}>{t("collections.runNow")}</Text>
               </Pressable>
               <Pressable
                 style={({ pressed }) => [
@@ -952,7 +959,7 @@ export default function AgentDetailScreen() {
                 onPress={triggerEdit}
               >
                 <Pencil size={15} color={Colors.textSecondary} />
-                <Text style={styles.editText}>Edit</Text>
+                <Text style={styles.editText}>{t("common.edit")}</Text>
               </Pressable>
               <Pressable
                 style={({ pressed }) => [
@@ -963,7 +970,7 @@ export default function AgentDetailScreen() {
                 onPress={triggerDelete}
                 disabled={deleteAgent.isPending}
                 accessibilityRole="button"
-                accessibilityLabel="Delete collection"
+                accessibilityLabel={t("agentDetail.deleteCollection")}
               >
                 <Trash2 size={15} color={Colors.destructive} />
               </Pressable>
@@ -981,10 +988,10 @@ export default function AgentDetailScreen() {
                   })
                 }
                 accessibilityRole="button"
-                accessibilityLabel="View this collection's feed"
+                accessibilityLabel={t("agentDetail.viewFeedHint")}
               >
                 <Rss size={15} color={Colors.textSecondary} />
-                <Text style={styles.editText}>Feed</Text>
+                <Text style={styles.editText}>{t("agentDetail.feed")}</Text>
               </Pressable>
               <Pressable
                 style={({ pressed }) => [styles.editBtn, styles.linkBtn, { borderColor: Colors.border }, pressed && styles.pressed]}
@@ -992,10 +999,10 @@ export default function AgentDetailScreen() {
                   router.push({ pathname: "/following", params: { agentId: agent.id, openedAt: String(Date.now()) } })
                 }
                 accessibilityRole="button"
-                accessibilityLabel="See this collection's people"
+                accessibilityLabel={t("feed.seeCollectionPeople")}
               >
                 <Users size={15} color={Colors.textSecondary} />
-                <Text style={styles.editText}>People</Text>
+                <Text style={styles.editText}>{t("dashboard.people")}</Text>
               </Pressable>
             </View>
           </View>
@@ -1007,11 +1014,11 @@ export default function AgentDetailScreen() {
           title={
             agent.run_time_local
               ? `${agent.run_time_local} (${agent.timezone ?? "UTC"})`
-              : "No schedule set"
+              : t("agentDetail.noSchedule")
           }
           subtitle={
             agent.schedule_frequency || agent.lookback_hours != null
-              ? `${agent.schedule_frequency ?? "Manual"}${agent.lookback_hours != null ? ` • ${agent.lookback_hours}h lookback` : ""}`
+              ? `${frequencyLabel(agent.schedule_frequency)}${agent.lookback_hours != null ? ` • ${t("agentDetail.lookback", { count: agent.lookback_hours })}` : ""}`
               : undefined
           }
         />
@@ -1021,14 +1028,14 @@ export default function AgentDetailScreen() {
             <Star size={20} color={accent} />
           </View>
           <View style={icStyles.body}>
-            <Text style={icStyles.title}>Filters</Text>
-            <FilterBoolRow label="Shorts" active={agent.include_shorts === true} />
-            <FilterBoolRow label="Live/Upcoming" active={agent.include_live === true} />
+            <Text style={icStyles.title}>{t("agentDetail.filters")}</Text>
+            <FilterBoolRow label={t("agentDetail.shorts")} active={agent.include_shorts === true} />
+            <FilterBoolRow label={t("agentDetail.live")} active={agent.include_live === true} />
             {CONTENT_TYPE_GROUPS.flatMap((group) =>
               group.options.map((option) => (
                 <FilterBoolRow
                   key={option.key}
-                  label={`${PLATFORM_META[group.platform].label} ${option.label.toLowerCase()}`}
+                  label={t("agentDetail.platformOption", { platform: PLATFORM_META[group.platform].label, option: contentTypeText(option).label.toLowerCase() })}
                   active={isContentTypeOn(agent.content_types, option.key)}
                 />
               )),
@@ -1040,9 +1047,9 @@ export default function AgentDetailScreen() {
         {recipients.length > 0 ? (
           <>
             <SectionHeader
-              title={`Recipients (${recipients.length})`}
+              title={t("agentDetail.recipientsCount", { count: recipients.length })}
               onAdd={() => setShowAddRecipient((v) => !v)}
-              addLabel="Add"
+              addLabel={t("common.add")}
             />
 
             <View style={styles.recipientChips}>
@@ -1066,12 +1073,12 @@ export default function AgentDetailScreen() {
 
         {/* ── CHANNELS SECTION ── */}
         <SectionHeader
-          title={`Channels (${allChannels.length})`}
+          title={t("history.channelsCount", { count: allChannels.length })}
           onAdd={openAddSource}
-          addLabel="Add Source"
+          addLabel={t("agentDetail.addSource")}
           badge={
             channelFilter !== "all"
-              ? `${filteredChannels.length} of ${allChannels.length}`
+              ? t("agentDetail.xOfY", { shown: filteredChannels.length, total: allChannels.length })
               : undefined
           }
         />
@@ -1079,7 +1086,7 @@ export default function AgentDetailScreen() {
         {/* Channel filter dropdown */}
         <View style={styles.filterRow}>
           <Filter size={14} color={Colors.textSecondary} />
-          <Text style={styles.filterLabel}>Filter by status:</Text>
+          <Text style={styles.filterLabel}>{t("agentDetail.filterByStatusColon")}</Text>
           <Pressable
             style={({ pressed }) => [
               styles.filterDropdownTrigger,
@@ -1088,7 +1095,7 @@ export default function AgentDetailScreen() {
             onPress={() => setFilterModalOpen(true)}
           >
             <Text style={styles.filterDropdownText} numberOfLines={1}>
-              {CHANNEL_STATUS_FILTERS.find((f) => f.key === channelFilter)?.label ?? "All Channels"}
+              {channelFilterLabel(channelFilter)}
             </Text>
             <ChevronDown size={14} color={Colors.textSecondary} />
           </Pressable>
@@ -1107,7 +1114,7 @@ export default function AgentDetailScreen() {
           >
             <View style={styles.filterModalCard}>
               <View style={styles.filterModalHeader}>
-                <Text style={styles.filterModalTitle}>Filter by status</Text>
+                <Text style={styles.filterModalTitle}>{t("agentDetail.filterByStatus")}</Text>
                 <Pressable
                   onPress={() => setFilterModalOpen(false)}
                   hitSlop={8}
@@ -1142,7 +1149,7 @@ export default function AgentDetailScreen() {
                       ]}
                       numberOfLines={1}
                     >
-                      {f.label}
+                      {channelFilterLabel(f.key)}
                     </Text>
                   </Pressable>
                 );
@@ -1161,12 +1168,12 @@ export default function AgentDetailScreen() {
                 onPress={() => setPicked(allPicked ? new Set() : new Set(filteredChannels.map((c) => c.id)))}
                 accessibilityRole="checkbox"
                 accessibilityState={{ checked: allPicked }}
-                accessibilityLabel="Select all sources"
+                accessibilityLabel={t("agentDetail.selectAllSources")}
               >
                 <View style={[moveStyles.box, pickedChannels.length > 0 && moveStyles.boxOn]}>
                   {allPicked ? <Check size={13} color={Colors.white} strokeWidth={3} /> : pickedChannels.length > 0 ? <View style={moveStyles.dash} /> : null}
                 </View>
-                <Text style={moveStyles.barText}>{pickedChannels.length > 0 ? `${pickedChannels.length} selected` : "Select all"}</Text>
+                <Text style={moveStyles.barText}>{pickedChannels.length > 0 ? t("agentDetail.selectedCount", { count: pickedChannels.length }) : t("agentDetail.selectAll")}</Text>
               </Pressable>
               {pickedChannels.length > 0 ? (
                 <View style={moveStyles.barActions}>
@@ -1176,14 +1183,14 @@ export default function AgentDetailScreen() {
                     onPress={() => setMoving(pickedChannels)}
                   >
                     {moveChannels.isPending ? <ActivityIndicator size="small" color={Colors.white} /> : <FolderInput size={15} color={Colors.white} />}
-                    <Text style={moveStyles.moveBtnText}>Move to…</Text>
+                    <Text style={moveStyles.moveBtnText}>{t("agentDetail.moveToEllipsis")}</Text>
                   </Pressable>
                   <Pressable onPress={() => setPicked(new Set())} hitSlop={8}>
-                    <Text style={moveStyles.clearText}>Clear</Text>
+                    <Text style={moveStyles.clearText}>{t("agentDetail.clear")}</Text>
                   </Pressable>
                 </View>
               ) : (
-                <Text style={moveStyles.hint}>Tick accounts to move them</Text>
+                <Text style={moveStyles.hint}>{t("agentDetail.tickToMove")}</Text>
               )}
             </View>
           );
@@ -1197,8 +1204,8 @@ export default function AgentDetailScreen() {
           <View style={styles.emptyCard}>
             <Text style={styles.emptyText}>
               {channelFilter === "all"
-                ? "No channels added yet."
-                : "No channels match this filter."}
+                ? t("agentDetail.noChannels")
+                : t("agentDetail.noChannelsMatch")}
             </Text>
           </View>
         ) : (
@@ -1223,7 +1230,7 @@ export default function AgentDetailScreen() {
               onDelete={() =>
                 handleDeleteChannel(
                   ch.id,
-                  ch.channel_name ?? ch.channel_url ?? "channel",
+                  ch.channel_name ?? ch.channel_url ?? t("agentDetail.channelFallback"),
                 )
               }
               onOpenUrl={() =>
@@ -1247,7 +1254,9 @@ export default function AgentDetailScreen() {
           <Pressable style={moveStyles.backdrop} onPress={() => setMoving(null)}>
             <Pressable style={moveStyles.sheet} onPress={() => {}}>
               <Text style={moveStyles.title}>
-                {moving && moving.length > 1 ? `Move ${moving.length} accounts to` : `Move ${moving?.[0]?.channel_name ?? "this source"} to`}
+                {moving && moving.length > 1
+                  ? t("agentDetail.moveCountTo", { count: moving.length })
+                  : t("agentDetail.moveNameTo", { name: moving?.[0]?.channel_name ?? t("agentDetail.thisSource") })}
               </Text>
               <ScrollView style={{ maxHeight: 420 }}>
                 {[...(allAgentsQ.data ?? [])]
@@ -1266,10 +1275,10 @@ export default function AgentDetailScreen() {
                           {
                             onSuccess: ({ moved, failed }) => {
                               setPicked(new Set());
-                              if (failed.length > 0) showToast(`Couldn't move ${failed.join(", ")}`, "error");
-                              else showToast(moved === 1 ? `Moved to ${a.name}` : `Moved ${moved} accounts to ${a.name}`, "success");
+                              if (failed.length > 0) showToast(t("agentDetail.moveFailedNames", { names: failed.join(", ") }), "error");
+                              else showToast(moved === 1 ? t("agentDetail.movedOne", { name: a.name }) : t("agentDetail.movedMany", { count: moved, name: a.name }), "success");
                             },
-                            onError: (e) => showToast("Couldn't move them: " + (e instanceof Error ? e.message : ""), "error"),
+                            onError: (e) => showToast(t("agentDetail.moveFailed", { message: e instanceof Error ? e.message : "" }), "error"),
                           },
                         );
                       }}
@@ -1279,14 +1288,14 @@ export default function AgentDetailScreen() {
                   ))}
               </ScrollView>
               <Pressable style={moveStyles.cancel} onPress={() => setMoving(null)}>
-                <Text style={moveStyles.cancelText}>Cancel</Text>
+                <Text style={moveStyles.cancelText}>{t("common.cancel")}</Text>
               </Pressable>
             </Pressable>
           </Pressable>
         </Modal>
 
         {/* ── RUN HISTORY SECTION ── */}
-        <SectionHeader title={`Run History (${runs.length})`} />
+        <SectionHeader title={t("agentDetail.runHistoryCount", { count: runs.length })} />
 
         {runsQ.isLoading ? (
           <View style={styles.sectionLoading}>
@@ -1295,7 +1304,7 @@ export default function AgentDetailScreen() {
         ) : runs.length === 0 ? (
           <View style={styles.emptyCard}>
             <Text style={styles.emptyText}>
-              No runs yet. Tap &ldquo;Run Now&rdquo; to start one.
+              {t("agentDetail.noRuns")}
             </Text>
           </View>
         ) : (
@@ -1308,7 +1317,7 @@ export default function AgentDetailScreen() {
 
               <Text style={styles.runDuration}>
                 {run.started_at
-                  ? new Date(run.started_at).toLocaleString()
+                  ? formatDateTime(run.started_at)
                   : "—"}
                 {durationLabel(run.started_at, run.finished_at)
                   ? ` · ${durationLabel(run.started_at, run.finished_at)}`
@@ -1319,11 +1328,11 @@ export default function AgentDetailScreen() {
               <RunItemBars runId={run.id} counts={itemCounts} />
 
               <View style={styles.runStatsRow}>
-                <RunStat label="Found" value={run.videos_found_count ?? 0} />
-                <RunStat label="New" value={run.videos_new_count ?? 0} />
-                <RunStat label="Enriched" value={run.videos_enriched_count ?? 0} />
+                <RunStat label={t("agentDetail.stat.found")} value={run.videos_found_count ?? 0} />
+                <RunStat label={t("agentDetail.stat.new")} value={run.videos_new_count ?? 0} />
+                <RunStat label={t("agentDetail.stat.enriched")} value={run.videos_enriched_count ?? 0} />
                 <RunStat
-                  label="Channels"
+                  label={t("agentDetail.stat.channels")}
                   value={`${run.channels_scanned ?? 0}/${run.channels_total ?? 0}`}
                 />
               </View>
@@ -1332,7 +1341,7 @@ export default function AgentDetailScreen() {
                 <View style={styles.warningRow}>
                   <AlertTriangle size={13} color={Colors.warning} />
                   <View style={styles.warningBody}>
-                    <Text style={styles.warningLabel}>Completed with issues</Text>
+                    <Text style={styles.warningLabel}>{t("history.completedWithIssues")}</Text>
                     <Text style={styles.warningSummary} numberOfLines={3}>
                       {run.error_summary}
                     </Text>
@@ -1367,7 +1376,7 @@ export default function AgentDetailScreen() {
                   onPress={() => handleCancelRun(run.id)}
                 >
                   <X size={14} color={Colors.destructive} />
-                  <Text style={styles.cancelRunText}>Cancel Run</Text>
+                  <Text style={styles.cancelRunText}>{t("history.cancelRun")}</Text>
                 </Pressable>
               ) : null}
             </View>
@@ -1393,7 +1402,7 @@ export default function AgentDetailScreen() {
             onPress={() => {}}
           >
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Add Recipient</Text>
+              <Text style={styles.modalTitle}>{t("agentDetail.addRecipient")}</Text>
               <Pressable
                 onPress={() => setShowAddRecipient(false)}
                 hitSlop={8}
@@ -1404,7 +1413,7 @@ export default function AgentDetailScreen() {
 
             <TextInput
               style={styles.formInput}
-              placeholder="email@example.com"
+              placeholder={t("agentDetail.emailPlaceholder")}
               placeholderTextColor={Colors.textMuted}
               value={newRecipientEmail}
               onChangeText={setNewRecipientEmail}
@@ -1428,7 +1437,7 @@ export default function AgentDetailScreen() {
               {addRecipient.isPending ? (
                 <ActivityIndicator size="small" color={Colors.white} />
               ) : (
-                <Text style={styles.modalConfirmText}>Add Recipient</Text>
+                <Text style={styles.modalConfirmText}>{t("agentDetail.addRecipient")}</Text>
               )}
             </Pressable>
           </Pressable>
@@ -1451,7 +1460,7 @@ export default function AgentDetailScreen() {
             onPress={() => {}}
           >
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Add Source</Text>
+              <Text style={styles.modalTitle}>{t("agentDetail.addSource")}</Text>
               <Pressable
                 onPress={() => setShowAddChannel(false)}
                 hitSlop={8}
@@ -1460,7 +1469,7 @@ export default function AgentDetailScreen() {
               </Pressable>
             </View>
 
-            <Text style={styles.formLabel}>Platform</Text>
+            <Text style={styles.formLabel}>{t("agentDetail.platform")}</Text>
             <View style={sourceStyles.platformRow}>
               {PLATFORMS.map((p) => {
                 const active = newPlatform === p;
@@ -1477,7 +1486,7 @@ export default function AgentDetailScreen() {
                   >
                     <PlatformBadge platform={p} size="md" />
                     <Text style={sourceStyles.platformText}>{PLATFORM_META[p].label}</Text>
-                    {PLATFORM_META[p].beta ? <Text style={sourceStyles.beta}>Beta</Text> : null}
+                    {PLATFORM_META[p].beta ? <Text style={sourceStyles.beta}>{t("agentDetail.beta")}</Text> : null}
                   </Pressable>
                 );
               })}
@@ -1506,7 +1515,7 @@ export default function AgentDetailScreen() {
             />
             {autoPlatform === newPlatform ? (
               <Text style={[sourceStyles.help, { color: Colors.accent }]}>
-                That&apos;s a {PLATFORM_META[newPlatform].label} link, so {PLATFORM_META[newPlatform].label} is now selected.
+                {t("agentDetail.autoSelected", { platform: PLATFORM_META[newPlatform].label })}
               </Text>
             ) : (
               <Text style={sourceStyles.help}>{platformText(newPlatform).addHelp}</Text>
@@ -1519,7 +1528,7 @@ export default function AgentDetailScreen() {
                   <Text style={sourceStyles.privateText}>{privateOffer}</Text>
                 </View>
                 <Text style={sourceStyles.help}>
-                  {`A private account shows up on People with a button to open it in ${PLATFORM_META[newPlatform].label}. Its posts won't appear in your feed.`}
+                  {t("agentDetail.privateExplain", { platform: PLATFORM_META[newPlatform].label })}
                 </Text>
                 <Pressable
                   style={({ pressed }) => [sourceStyles.privateBtn, pressed && styles.pressed]}
@@ -1531,14 +1540,14 @@ export default function AgentDetailScreen() {
                   ) : (
                     <>
                       <Lock size={14} color={Colors.textPrimary} />
-                      <Text style={sourceStyles.privateBtnText}>Add as private account</Text>
+                      <Text style={sourceStyles.privateBtnText}>{t("agentDetail.addPrivate")}</Text>
                     </>
                   )}
                 </Pressable>
               </View>
             ) : null}
 
-            <Text style={[styles.formLabel, { marginTop: 14 }]}>Priority</Text>
+            <Text style={[styles.formLabel, { marginTop: 14 }]}>{t("agentDetail.priority")}</Text>
             <PriorityPicker
               value={newChannelPriority}
               onChange={setNewChannelPriority}
@@ -1557,7 +1566,7 @@ export default function AgentDetailScreen() {
               {addChannel.isPending || addSource.isPending ? (
                 <ActivityIndicator size="small" color={Colors.white} />
               ) : (
-                <Text style={styles.modalConfirmText}>Add Source</Text>
+                <Text style={styles.modalConfirmText}>{t("agentDetail.addSource")}</Text>
               )}
             </Pressable>
           </Pressable>
@@ -1601,6 +1610,7 @@ function ChannelCard({
   selected?: boolean;
   onSelect?: () => void;
 }) {
+  const { t } = useTranslation();
   return (
     <View style={styles.channelCard}>
       {onSelect ? (
@@ -1610,7 +1620,7 @@ function ChannelCard({
           style={moveStyles.cardCheck}
           accessibilityRole="checkbox"
           accessibilityState={{ checked: selected }}
-          accessibilityLabel={`Select ${channel.channel_name ?? "source"}`}
+          accessibilityLabel={t("agentDetail.selectOne", { name: channel.channel_name ?? t("agentDetail.source") })}
         >
           <View style={[moveStyles.box, selected && moveStyles.boxOn]}>
             {selected ? <Check size={13} color={Colors.white} strokeWidth={3} /> : null}
@@ -1640,7 +1650,7 @@ function ChannelCard({
         <View style={styles.channelTop}>
           <Pressable style={styles.channelNameRow} onPress={onOpenUrl}>
             <Text style={styles.channelName} numberOfLines={1}>
-              {channel.channel_name || channel.channel_url || "Unnamed"}
+              {channel.channel_name || channel.channel_url || t("history.unnamed")}
             </Text>
             {channel.channel_url ? (
               <Link2 size={12} color={Colors.textMuted} style={styles.ml4} />
@@ -1648,7 +1658,7 @@ function ChannelCard({
             {channel.is_private ? (
               <View style={sourceStyles.privateBadge}>
                 <Lock size={10} color={Colors.textMuted} />
-                <Text style={sourceStyles.privateBadgeText}>Private</Text>
+                <Text style={sourceStyles.privateBadgeText}>{t("agentDetail.private")}</Text>
               </View>
             ) : null}
           </Pressable>
@@ -1657,7 +1667,7 @@ function ChannelCard({
             onPress={onMove}
             hitSlop={8}
             accessibilityRole="button"
-            accessibilityLabel="Move to another collection"
+            accessibilityLabel={t("agentDetail.moveToAnother")}
           >
             <FolderInput size={14} color={Colors.textSecondary} />
           </Pressable>
@@ -1665,6 +1675,8 @@ function ChannelCard({
             style={({ pressed }) => [styles.iconBtn, pressed && styles.pressed]}
             onPress={onDelete}
             hitSlop={8}
+            accessibilityRole="button"
+            accessibilityLabel={t("agentDetail.removeNamed", { name: channel.channel_name ?? channel.channel_url ?? t("agentDetail.source") })}
           >
             <Trash2 size={14} color={Colors.destructive} />
           </Pressable>
@@ -1692,17 +1704,17 @@ function ChannelCard({
               style={styles.switchControl}
             />
             <Text style={styles.enabledLabel}>
-              {channel.is_enabled ? "On" : "Off"}
+              {channel.is_enabled ? t("agentDetail.on") : t("agentDetail.off")}
             </Text>
           </View>
         </View>
 
         <Text style={styles.channelScanned}>
           {channel.is_private
-            ? "Not scanned (private)"
+            ? t("agentDetail.notScannedPrivate")
             : channel.last_scanned_at
-            ? `Scanned ${timeAgo(channel.last_scanned_at)}`
-            : "Never scanned"}
+            ? t("agentDetail.scanned", { when: timeAgo(channel.last_scanned_at) })
+            : t("agentDetail.neverScanned")}
         </Text>
       </View>
     </View>
