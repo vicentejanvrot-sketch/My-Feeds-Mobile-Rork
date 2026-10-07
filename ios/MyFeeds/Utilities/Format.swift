@@ -59,16 +59,16 @@ nonisolated enum Format {
         return String(localized: "about \(yr) years ago")
     }
 
-    /// Compact count like 1.2K, 3.4M.
+    /// Compact count in the app language: 1.2K / 3.4M in English, 1,2 mil / 3,4 mi in Portuguese.
     static func compactNumber(_ n: Int?) -> String {
         guard let n else { return "—" }
-        if n < 1000 { return String(n) }
-        if n < 1_000_000 {
-            let v = Double(n) / 1000
-            return n < 10_000 ? String(format: "%.1fK", v) : String(format: "%.0fK", v)
-        }
-        let v = Double(n) / 1_000_000
-        return n < 10_000_000 ? String(format: "%.1fM", v) : String(format: "%.0fM", v)
+        if n < 1000 { return n.formatted() }
+        let oneDecimal = n < 10_000 || (n >= 1_000_000 && n < 10_000_000)
+        return n.formatted(
+            .number
+                .notation(.compactName)
+                .precision(.fractionLength(0...(oneDecimal ? 1 : 0)))
+        )
     }
 
     /// Seconds → "12:34" or "1:02:03".
