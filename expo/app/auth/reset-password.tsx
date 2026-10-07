@@ -19,6 +19,7 @@ import * as Haptics from "expo-haptics";
 import { ArrowLeft, Check } from "lucide-react-native";
 import { useAuth } from "@/lib/auth-provider";
 import { Colors } from "@/constants/colors";
+import { useTranslation } from "react-i18next";
 
 const IPAD_BREAKPOINT = 768;
 
@@ -27,6 +28,7 @@ export default function ResetPasswordScreen() {
   const { width: windowWidth } = useWindowDimensions();
   const isWide = windowWidth >= IPAD_BREAKPOINT;
   const { updatePassword } = useAuth();
+  const { t } = useTranslation();
 
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -49,19 +51,19 @@ export default function ResetPasswordScreen() {
   const handleReset = async () => {
     if (!newPassword.trim() || !confirmPassword.trim()) {
       void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-      showToast("Please fill in both password fields.", "error");
+      showToast(t("auth.fillBothPasswords"), "error");
       return;
     }
 
     if (newPassword.length < 6) {
       void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-      showToast("Password must be at least 6 characters.", "error");
+      showToast(t("auth.passwordTooShort", { count: 6 }), "error");
       return;
     }
 
     if (!passwordsMatch) {
       void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-      showToast("Passwords do not match.", "error");
+      showToast(t("auth.passwordsDontMatchDot"), "error");
       return;
     }
 
@@ -76,7 +78,7 @@ export default function ResetPasswordScreen() {
     }
 
     void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    showToast("Password updated! Sign in with your new password.", "success");
+    showToast(t("auth.passwordUpdated"), "success");
     setTimeout(() => {
       router.replace("/auth/login");
     }, 1500);
@@ -109,14 +111,14 @@ export default function ResetPasswordScreen() {
             resizeMode="contain"
           />
 
-          <Text style={styles.title}>Set a new password</Text>
+          <Text style={styles.title}>{t("auth.setNewPassword")}</Text>
 
           <Text style={styles.subtitle}>
-            Choose a strong password for your account. Must be at least 6 characters.
+            {t("auth.setNewPasswordHint", { count: 6 })}
           </Text>
 
           {/* New password */}
-          <Text style={styles.label}>New password</Text>
+          <Text style={styles.label}>{t("auth.newPassword")}</Text>
           <View style={styles.inputRow}>
             <TextInput
               style={[
@@ -125,11 +127,11 @@ export default function ResetPasswordScreen() {
                 pw1Focused && styles.inputFocused,
                 passwordsMatch && newPassword.length > 0 && styles.inputValid,
               ]}
-              placeholder="At least 6 characters"
+              placeholder={t("auth.atLeast", { count: 6 })}
               placeholderTextColor={Colors.textMuted}
               value={newPassword}
-              onChangeText={(t) => {
-                setNewPassword(t);
+              onChangeText={(value) => {
+                setNewPassword(value);
                 setShowPassword(false);
               }}
               onFocus={() => setPw1Focused(true)}
@@ -150,14 +152,14 @@ export default function ResetPasswordScreen() {
           </View>
 
           {/* Confirm password */}
-          <Text style={styles.label}>Confirm password</Text>
+          <Text style={styles.label}>{t("auth.confirmPassword")}</Text>
           <TextInput
             style={[
               styles.input,
               pw2Focused && styles.inputFocused,
               passwordsMatch && confirmPassword.length > 0 && styles.inputValid,
             ]}
-            placeholder="Re-enter your new password"
+            placeholder={t("auth.reenterNewPassword")}
             placeholderTextColor={Colors.textMuted}
             value={confirmPassword}
             onChangeText={setConfirmPassword}
@@ -175,7 +177,7 @@ export default function ResetPasswordScreen() {
 
           {/* Mismatch hint */}
           {confirmPassword.length > 0 && !passwordsMatch && (
-            <Text style={styles.mismatchHint}>Passwords do not match</Text>
+            <Text style={styles.mismatchHint}>{t("auth.passwordsDontMatch")}</Text>
           )}
 
           {/* Update password button */}
@@ -197,7 +199,7 @@ export default function ResetPasswordScreen() {
             {isLoading ? (
               <ActivityIndicator color={Colors.white} size="small" />
             ) : (
-              <Text style={styles.buttonText}>Update password</Text>
+              <Text style={styles.buttonText}>{t("auth.updatePassword")}</Text>
             )}
           </Pressable>
 
@@ -206,7 +208,7 @@ export default function ResetPasswordScreen() {
             style={({ pressed }) => [styles.linkWrap, pressed && { opacity: 0.6 }]}
             onPress={() => router.replace("/auth/login")}
           >
-            <Text style={styles.link}>Back to sign in</Text>
+            <Text style={styles.link}>{t("auth.backToSignIn")}</Text>
           </Pressable>
         </View>
       </ScrollView>

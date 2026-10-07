@@ -18,6 +18,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import * as Haptics from "expo-haptics";
 import { useAuth } from "@/lib/auth-provider";
 import { Colors } from "@/constants/colors";
+import { useTranslation } from "react-i18next";
 
 const IPAD_BREAKPOINT = 768;
 
@@ -26,6 +27,7 @@ export default function SignUpScreen() {
   const { width: windowWidth } = useWindowDimensions();
   const isWide = windowWidth >= IPAD_BREAKPOINT;
   const { signUp } = useAuth();
+  const { t } = useTranslation();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -46,19 +48,19 @@ export default function SignUpScreen() {
   const handleSignUp = async () => {
     if (!email.trim() || !password.trim() || !confirmPassword.trim()) {
       void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-      showToast("Please fill in all fields.", "error");
+      showToast(t("auth.fillAll"), "error");
       return;
     }
 
     if (password !== confirmPassword) {
       void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-      showToast("Passwords do not match.", "error");
+      showToast(t("auth.passwordsDontMatchDot"), "error");
       return;
     }
 
     if (password.length < 6) {
       void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-      showToast("Password must be at least 6 characters.", "error");
+      showToast(t("auth.passwordTooShort", { count: 6 }), "error");
       return;
     }
 
@@ -74,7 +76,7 @@ export default function SignUpScreen() {
     }
 
     void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    showToast("Account created!", "success");
+    showToast(t("auth.accountCreated"), "success");
     // The auth state listener will pick up the new session and the guards
     // will redirect, but navigate explicitly to the main app to be safe.
     setTimeout(() => {
@@ -100,15 +102,15 @@ export default function SignUpScreen() {
             resizeMode="contain"
           />
 
-          <Text style={styles.title}>Create Account</Text>
+          <Text style={styles.title}>{t("auth.createAccount")}</Text>
 
-          <Text style={styles.subtitle}>Sign up to start using My Feeds.</Text>
+          <Text style={styles.subtitle}>{t("auth.signupSubtitle")}</Text>
 
           {/* Email field */}
-          <Text style={styles.label}>Email</Text>
+          <Text style={styles.label}>{t("auth.email")}</Text>
           <TextInput
             style={[styles.input, emailFocused && styles.inputFocused]}
-            placeholder="you@example.com"
+            placeholder={t("auth.emailPlaceholder")}
             placeholderTextColor={Colors.textMuted}
             value={email}
             onChangeText={setEmail}
@@ -124,10 +126,10 @@ export default function SignUpScreen() {
           />
 
           {/* Password field */}
-          <Text style={styles.label}>Password</Text>
+          <Text style={styles.label}>{t("auth.password")}</Text>
           <TextInput
             style={[styles.input, passwordFocused && styles.inputFocused]}
-            placeholder="At least 6 characters"
+            placeholder={t("auth.atLeast", { count: 6 })}
             placeholderTextColor={Colors.textMuted}
             value={password}
             onChangeText={setPassword}
@@ -143,10 +145,10 @@ export default function SignUpScreen() {
           />
 
           {/* Confirm Password field */}
-          <Text style={styles.label}>Confirm Password</Text>
+          <Text style={styles.label}>{t("auth.confirmPassword")}</Text>
           <TextInput
             style={[styles.input, confirmFocused && styles.inputFocused]}
-            placeholder="Re-enter your password"
+            placeholder={t("auth.reenterPassword")}
             placeholderTextColor={Colors.textMuted}
             value={confirmPassword}
             onChangeText={setConfirmPassword}
@@ -181,7 +183,7 @@ export default function SignUpScreen() {
             {isLoading ? (
               <ActivityIndicator color={Colors.white} size="small" />
             ) : (
-              <Text style={styles.buttonText}>Create Account</Text>
+              <Text style={styles.buttonText}>{t("auth.createAccount")}</Text>
             )}
           </Pressable>
 
@@ -190,7 +192,7 @@ export default function SignUpScreen() {
             style={({ pressed }) => [styles.linkWrap, pressed && { opacity: 0.6 }]}
             onPress={() => router.back()}
           >
-            <Text style={styles.link}>Already have an account? Sign in</Text>
+            <Text style={styles.link}>{t("auth.haveAccount")}</Text>
           </Pressable>
         </View>
       </ScrollView>

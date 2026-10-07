@@ -19,6 +19,7 @@ import * as Haptics from "expo-haptics";
 import { ArrowLeft } from "lucide-react-native";
 import { useAuth } from "@/lib/auth-provider";
 import { Colors } from "@/constants/colors";
+import { useTranslation } from "react-i18next";
 
 const IPAD_BREAKPOINT = 768;
 
@@ -27,6 +28,7 @@ export default function ForgotPasswordScreen() {
   const { width: windowWidth } = useWindowDimensions();
   const isWide = windowWidth >= IPAD_BREAKPOINT;
   const { sendPasswordReset } = useAuth();
+  const { t } = useTranslation();
 
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -41,7 +43,7 @@ export default function ForgotPasswordScreen() {
   const handleSendReset = async () => {
     if (!email.trim()) {
       void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-      showToast("Please enter your email address.", "error");
+      showToast(t("auth.enterEmail"), "error");
       return;
     }
 
@@ -56,7 +58,7 @@ export default function ForgotPasswordScreen() {
     }
 
     void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    showToast("Check your inbox — we've sent a password reset link.", "success");
+    showToast(t("auth.resetSent"), "success");
   };
 
   return (
@@ -87,18 +89,17 @@ export default function ForgotPasswordScreen() {
             resizeMode="contain"
           />
 
-          <Text style={styles.title}>Reset your password</Text>
+          <Text style={styles.title}>{t("auth.resetTitle")}</Text>
 
           <Text style={styles.subtitle}>
-            Enter the email address associated with your account and we&apos;ll send you a link to reset
-            your password.
+            {t("auth.resetPrompt")}
           </Text>
 
           {/* Email field */}
-          <Text style={styles.label}>Email</Text>
+          <Text style={styles.label}>{t("auth.email")}</Text>
           <TextInput
             style={[styles.input, emailFocused && styles.inputFocused]}
-            placeholder="you@example.com"
+            placeholder={t("auth.emailPlaceholder")}
             placeholderTextColor={Colors.textMuted}
             value={email}
             onChangeText={setEmail}
@@ -133,7 +134,7 @@ export default function ForgotPasswordScreen() {
             {isLoading ? (
               <ActivityIndicator color={Colors.white} size="small" />
             ) : (
-              <Text style={styles.buttonText}>Send reset link</Text>
+              <Text style={styles.buttonText}>{t("auth.sendResetLink")}</Text>
             )}
           </Pressable>
 
@@ -142,7 +143,7 @@ export default function ForgotPasswordScreen() {
             style={({ pressed }) => [styles.linkWrap, pressed && { opacity: 0.6 }]}
             onPress={() => router.back()}
           >
-            <Text style={styles.link}>Back to sign in</Text>
+            <Text style={styles.link}>{t("auth.backToSignIn")}</Text>
           </Pressable>
         </View>
       </ScrollView>

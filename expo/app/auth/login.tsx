@@ -19,6 +19,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import * as Haptics from "expo-haptics";
 import Svg, { Circle, Defs, Path, RadialGradient, Rect, Stop } from "react-native-svg";
 import { Colors } from "@/constants/colors";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "@/lib/auth-provider";
 
 const IPAD_BREAKPOINT = 768;
@@ -381,6 +382,7 @@ export default function LoginScreen() {
   const { width: windowWidth, height: windowHeight } = useWindowDimensions();
   const isWide = windowWidth >= IPAD_BREAKPOINT;
   const { signIn } = useAuth();
+  const { t } = useTranslation();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -402,7 +404,7 @@ export default function LoginScreen() {
   const handleSignIn = async () => {
     if (!email.trim() || !password.trim()) {
       void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-      showToast("Please fill in both email and password.", "error");
+      showToast(t("auth.fillEmailPassword"), "error");
       return;
     }
 
@@ -417,7 +419,7 @@ export default function LoginScreen() {
     }
 
     void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    showToast("Welcome back!", "success");
+    showToast(t("auth.welcomeBack"), "success");
     // Brief delay so the user sees the toast before navigating
     setTimeout(() => {
       router.replace("/(tabs)");
@@ -435,17 +437,17 @@ export default function LoginScreen() {
           <Image source={require("@/assets/images/adaptive-icon.png")} style={styles.icon} resizeMode="contain" />
         </View>
         <Text style={styles.title}>My Feeds</Text>
-        <Text style={styles.tagline}>Your favorite creators, organized for you.</Text>
+        <Text style={styles.tagline}>{t("auth.tagline")}</Text>
       </View>
 
       <View style={styles.card}>
-        <Text style={styles.cardTitle}>Sign in</Text>
+        <Text style={styles.cardTitle}>{t("auth.signIn")}</Text>
 
         {/* Email field */}
-        <Text style={styles.label}>Email</Text>
+        <Text style={styles.label}>{t("auth.email")}</Text>
         <TextInput
           style={[styles.input, emailFocused && styles.inputFocused]}
-          placeholder="you@example.com"
+          placeholder={t("auth.emailPlaceholder")}
           placeholderTextColor="#7F8DAA"
           value={email}
           onChangeText={setEmail}
@@ -462,19 +464,19 @@ export default function LoginScreen() {
 
         {/* Password field */}
         <View style={styles.labelRow}>
-          <Text style={[styles.label, styles.labelInRow]}>Password</Text>
+          <Text style={[styles.label, styles.labelInRow]}>{t("auth.password")}</Text>
           <Pressable
             hitSlop={10}
             style={({ pressed }) => [pressed && { opacity: 0.6 }]}
             onPress={() => router.push("/auth/forgot-password")}
           >
-            <Text style={styles.link}>Forgot password?</Text>
+            <Text style={styles.link}>{t("auth.forgotPassword")}</Text>
           </Pressable>
         </View>
         <View style={styles.passwordWrap}>
           <TextInput
             style={[styles.input, styles.inputWithToggle, passwordFocused && styles.inputFocused]}
-            placeholder="Your password"
+            placeholder={t("auth.yourPassword")}
             placeholderTextColor="#7F8DAA"
             value={password}
             onChangeText={setPassword}
@@ -493,9 +495,9 @@ export default function LoginScreen() {
             style={styles.toggle}
             onPress={() => setShowPassword((v) => !v)}
             accessibilityRole="button"
-            accessibilityLabel={showPassword ? "Hide password" : "Show password"}
+            accessibilityLabel={showPassword ? t("auth.hidePassword") : t("auth.showPassword")}
           >
-            <Text style={styles.toggleText}>{showPassword ? "Hide" : "Show"}</Text>
+            <Text style={styles.toggleText}>{showPassword ? t("auth.hide") : t("auth.show")}</Text>
           </Pressable>
         </View>
 
@@ -505,7 +507,7 @@ export default function LoginScreen() {
           onPress={handleSignIn}
           disabled={isLoading}
         >
-          {isLoading ? <ActivityIndicator color={Colors.white} size="small" /> : <Text style={styles.buttonText}>Sign in</Text>}
+          {isLoading ? <ActivityIndicator color={Colors.white} size="small" /> : <Text style={styles.buttonText}>{t("auth.signIn")}</Text>}
         </Pressable>
 
         <View style={styles.divider} />
@@ -516,7 +518,7 @@ export default function LoginScreen() {
           onPress={() => router.push("/auth/signup")}
         >
           <Text style={styles.signupText}>
-            New to My Feeds? <Text style={styles.signupLink}>Create an account</Text>
+            {t("auth.newHere")} <Text style={styles.signupLink}>{t("auth.createAnAccount")}</Text>
           </Text>
         </Pressable>
       </View>
@@ -528,14 +530,14 @@ export default function LoginScreen() {
           style={({ pressed }) => [styles.legalLink, pressed && { opacity: 0.6 }]}
           onPress={() => router.push("/support/privacy")}
         >
-          <Text style={styles.legalText}>Privacy Policy</Text>
+          <Text style={styles.legalText}>{t("support.privacy")}</Text>
         </Pressable>
         <Pressable
           hitSlop={8}
           style={({ pressed }) => [styles.legalLink, pressed && { opacity: 0.6 }]}
           onPress={() => router.push("/support/terms")}
         >
-          <Text style={styles.legalText}>Terms of Service</Text>
+          <Text style={styles.legalText}>{t("support.terms")}</Text>
         </Pressable>
       </View>
     </View>
