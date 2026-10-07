@@ -131,6 +131,16 @@
         }
       }
     },
+    "%@ left" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Faltam %@"
+          }
+        }
+      }
+    },
     "%@ long" : {
       "localizations" : {
         "pt-BR" : {
@@ -517,6 +527,16 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "%lld percent" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld por cento"
           }
         }
       }
@@ -1995,6 +2015,16 @@
         }
       }
     },
+    "Check out this video:" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Olha este vídeo:"
+          }
+        }
+      }
+    },
     "Check your inbox — we've sent a password reset link." : {
       "localizations" : {
         "pt-BR" : {
@@ -2345,6 +2375,16 @@
         }
       }
     },
+    "Copy link" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Copiar link"
+          }
+        }
+      }
+    },
     "Couldn't add %@" : {
       "localizations" : {
         "pt-BR" : {
@@ -2441,6 +2481,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Não foi possível carregar este post. Verifique sua conexão."
+          }
+        }
+      }
+    },
+    "Couldn't load video" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Não foi possível carregar o vídeo"
           }
         }
       }
@@ -3195,6 +3245,16 @@
         }
       }
     },
+    "FROM THE TRANSCRIPT" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "DA TRANSCRIÇÃO"
+          }
+        }
+      }
+    },
     "Failed" : {
       "localizations" : {
         "pt-BR" : {
@@ -3321,6 +3381,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Fazer fork no GitHub"
+          }
+        }
+      }
+    },
+    "Forward 15 seconds" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Avançar 15 segundos"
           }
         }
       }
@@ -3521,6 +3591,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Dê um nome à coleção."
+          }
+        }
+      }
+    },
+    "Go back 10 seconds" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Voltar 10 segundos"
+          }
+        }
+      }
+    },
+    "Go forward 10 seconds" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Avançar 10 segundos"
           }
         }
       }
@@ -3815,6 +3905,16 @@
         }
       }
     },
+    "Jump to %@: %@" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ir para %1$@: %2$@"
+          }
+        }
+      }
+    },
     "KEY MOMENTS" : {
       "localizations" : {
         "pt-BR" : {
@@ -3941,6 +4041,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Limitação de responsabilidade"
+          }
+        }
+      }
+    },
+    "Link copied" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Link copiado"
           }
         }
       }
@@ -4105,6 +4215,36 @@
         }
       }
     },
+    "Marked as %@" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Marcado como %@"
+          }
+        }
+      }
+    },
+    "Marked as Seen" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Marcado como visto"
+          }
+        }
+      }
+    },
+    "More…" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mais…"
+          }
+        }
+      }
+    },
     "Move \"%@\" to" : {
       "localizations" : {
         "pt-BR" : {
@@ -4231,6 +4371,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Clipe"
+          }
+        }
+      }
+    },
+    "Mute" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Silenciar"
           }
         }
       }
@@ -4915,6 +5065,16 @@
         }
       }
     },
+    "Open in YouTube" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abrir no YouTube"
+          }
+        }
+      }
+    },
     "Open in YouTube Music" : {
       "localizations" : {
         "pt-BR" : {
@@ -5325,6 +5485,26 @@
         }
       }
     },
+    "Pocket Lock" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bloqueio de bolso"
+          }
+        }
+      }
+    },
+    "Pocket Lock on" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bloqueio de bolso ativado"
+          }
+        }
+      }
+    },
     "Posts made of photos" : {
       "localizations" : {
         "pt-BR" : {
@@ -5341,6 +5521,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Preenchido automaticamente ao adicionar destinatários de e-mail a novas coleções."
+          }
+        }
+      }
+    },
+    "Press and hold the lock for 2 seconds to unlock" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toque e segure o cadeado por 2 segundos para desbloquear"
           }
         }
       }
@@ -5761,6 +5951,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tentar de novo"
+          }
+        }
+      }
+    },
+    "Rewind 15 seconds" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Voltar 15 segundos"
           }
         }
       }
@@ -6351,6 +6551,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Mostrar senha"
+          }
+        }
+      }
+    },
+    "Show video controls" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mostrar controles do vídeo"
           }
         }
       }
@@ -6955,6 +7165,16 @@
         }
       }
     },
+    "This video may have embedding disabled by its owner." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O dono deste vídeo pode ter desativado a reprodução fora do YouTube."
+          }
+        }
+      }
+    },
     "This will permanently delete your account and all your data, including your collections, feeds, watch history, and saved settings. This cannot be undone." : {
       "localizations" : {
         "pt-BR" : {
@@ -7055,6 +7275,16 @@
         }
       }
     },
+    "Turn sound on" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ativar som"
+          }
+        }
+      }
+    },
     "Unknown Channel" : {
       "localizations" : {
         "pt-BR" : {
@@ -7091,6 +7321,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Desbloqueie o My Feeds com seu login salvo."
+          }
+        }
+      }
+    },
+    "Unlock. Press and hold for 2 seconds" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Desbloquear. Toque e segure por 2 segundos"
           }
         }
       }
@@ -7295,12 +7535,52 @@
         }
       }
     },
+    "Video" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vídeo"
+          }
+        }
+      }
+    },
     "Video Playback" : {
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Reprodução de vídeo"
+          }
+        }
+      }
+    },
+    "Video Player" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Player de vídeo"
+          }
+        }
+      }
+    },
+    "Video has been marked as seen in your library." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O vídeo foi marcado como visto na sua biblioteca."
+          }
+        }
+      }
+    },
+    "Video volume" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Volume do vídeo"
           }
         }
       }
