@@ -211,6 +211,46 @@
         }
       }
     },
+    "%lld items" : {
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld item"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld items"
+                }
+              }
+            }
+          }
+        },
+        "pt-BR" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld item"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld itens"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "%lld items · %@ on this phone. Posts are saved with their photos and videos, and podcasts with the episode. YouTube videos still need a connection." : {
       "localizations" : {
         "en" : {
@@ -494,6 +534,46 @@
                 "stringUnit" : {
                   "state" : "translated",
                   "value" : "%lld selecionadas"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "%lld videos" : {
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld video"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld videos"
+                }
+              }
+            }
+          }
+        },
+        "pt-BR" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld vídeo"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld vídeos"
                 }
               }
             }
@@ -1185,6 +1265,26 @@
         }
       }
     },
+    "All Collections" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Todas as coleções"
+          }
+        }
+      }
+    },
+    "All Statuses" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Todos os status"
+          }
+        }
+      }
+    },
     "All caught up" : {
       "localizations" : {
         "pt-BR" : {
@@ -1221,6 +1321,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Desde o início"
+          }
+        }
+      }
+    },
+    "All · %lld" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Todos · %lld"
           }
         }
       }
@@ -1361,6 +1471,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Pelo menos 6 caracteres"
+          }
+        }
+      }
+    },
+    "Audiobook" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Audiolivro"
           }
         }
       }
@@ -1541,6 +1661,46 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Cancelando…"
+          }
+        }
+      }
+    },
+    "Carousel: %lld photos and videos" : {
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Carousel: %lld photo or video"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Carousel: %lld photos and videos"
+                }
+              }
+            }
+          }
+        },
+        "pt-BR" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Carrossel: %lld foto ou vídeo"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Carrossel: %lld fotos e vídeos"
+                }
+              }
+            }
           }
         }
       }
@@ -2065,6 +2225,16 @@
         }
       }
     },
+    "Couldn't load videos: %@" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Não foi possível carregar os vídeos: %@"
+          }
+        }
+      }
+    },
     "Couldn't move %@" : {
       "localizations" : {
         "pt-BR" : {
@@ -2181,6 +2351,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Não foi possível atualizar a prioridade"
+          }
+        }
+      }
+    },
+    "Couldn't update selected videos" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Não foi possível atualizar os vídeos selecionados"
+          }
+        }
+      }
+    },
+    "Couldn't update status" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Não foi possível atualizar o status"
           }
         }
       }
@@ -2455,6 +2645,16 @@
         }
       }
     },
+    "Deselect video" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Desmarcar vídeo"
+          }
+        }
+      }
+    },
     "Detailed Breakdown" : {
       "localizations" : {
         "pt-BR" : {
@@ -2681,6 +2881,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Digite o e-mail da sua conta e enviaremos um link para redefinir sua senha."
+          }
+        }
+      }
+    },
+    "Episode" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Episódio"
           }
         }
       }
@@ -3365,6 +3575,26 @@
         }
       }
     },
+    "Latest album" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Álbum mais recente"
+          }
+        }
+      }
+    },
+    "Latest audiobook" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Audiolivro mais recente"
+          }
+        }
+      }
+    },
     "Liked" : {
       "localizations" : {
         "pt-BR" : {
@@ -3391,6 +3621,76 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Lives e estreias"
+          }
+        }
+      }
+    },
+    "Loading %lld of %lld feeds" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Carregando %1$lld de %#@feeds@"
+          },
+          "substitutions" : {
+            "feeds" : {
+              "argNum" : 2,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "one" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg feed"
+                    }
+                  },
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg feeds"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Loading %1$lld of %#@feeds@"
+          },
+          "substitutions" : {
+            "feeds" : {
+              "argNum" : 2,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "one" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg feed"
+                    }
+                  },
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg feeds"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "Loading feeds…" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Carregando feeds…"
           }
         }
       }
@@ -3575,6 +3875,16 @@
         }
       }
     },
+    "Music video" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Clipe"
+          }
+        }
+      }
+    },
     "My Collections" : {
       "localizations" : {
         "pt-BR" : {
@@ -3715,6 +4025,36 @@
         }
       }
     },
+    "New EP" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Novo EP"
+          }
+        }
+      }
+    },
+    "New album" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Novo álbum"
+          }
+        }
+      }
+    },
+    "New audiobook" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Novo audiolivro"
+          }
+        }
+      }
+    },
     "New audiobooks, with a sample to listen to. Adding an author also brings in their latest audiobook." : {
       "localizations" : {
         "pt-BR" : {
@@ -3765,12 +4105,32 @@
         }
       }
     },
+    "New release" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Novo lançamento"
+          }
+        }
+      }
+    },
     "New repositories and releases from the lookback window." : {
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Novos repositórios e releases dentro do período de busca."
+          }
+        }
+      }
+    },
+    "New single" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Novo single"
           }
         }
       }
@@ -3955,6 +4315,26 @@
         }
       }
     },
+    "No videos match your filters" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nenhum vídeo corresponde aos seus filtros"
+          }
+        }
+      }
+    },
+    "No videos yet" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nenhum vídeo ainda"
+          }
+        }
+      }
+    },
     "Normal" : {
       "localizations" : {
         "pt-BR" : {
@@ -4071,6 +4451,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ligado"
+          }
+        }
+      }
+    },
+    "Open" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abrir"
           }
         }
       }
@@ -4251,6 +4641,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Abrir no YouTube"
+          }
+        }
+      }
+    },
+    "Open this collection" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abrir esta coleção"
           }
         }
       }
@@ -4665,6 +5065,16 @@
         }
       }
     },
+    "Recent" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recentes"
+          }
+        }
+      }
+    },
     "Recent Runs" : {
       "localizations" : {
         "pt-BR" : {
@@ -4895,6 +5305,16 @@
         }
       }
     },
+    "Run a collection to start discovering videos." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Atualize uma coleção para começar a descobrir vídeos."
+          }
+        }
+      }
+    },
     "Run cancelled" : {
       "localizations" : {
         "pt-BR" : {
@@ -5075,6 +5495,26 @@
         }
       }
     },
+    "Search videos, channels, tags..." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Buscar vídeos, canais, tags..."
+          }
+        }
+      }
+    },
+    "See everyone you follow" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ver todos que você segue"
+          }
+        }
+      }
+    },
     "See this collection's people" : {
       "localizations" : {
         "pt-BR" : {
@@ -5185,6 +5625,16 @@
         }
       }
     },
+    "Select video" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Selecionar vídeo"
+          }
+        }
+      }
+    },
     "Send reset link" : {
       "localizations" : {
         "pt-BR" : {
@@ -5195,12 +5645,72 @@
         }
       }
     },
+    "Set Status" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Definir status"
+          }
+        }
+      }
+    },
     "Set a new password" : {
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Criar uma nova senha"
+          }
+        }
+      }
+    },
+    "Set status" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Definir status"
+          }
+        }
+      }
+    },
+    "Set status for %lld videos" : {
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Set status for %lld video"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Set status for %lld videos"
+                }
+              }
+            }
+          }
+        },
+        "pt-BR" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Definir status de %lld vídeo"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Definir status de %lld vídeos"
+                }
+              }
+            }
           }
         }
       }
@@ -5261,6 +5771,66 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Mostrar senha"
+          }
+        }
+      }
+    },
+    "Showing %lld of %lld feeds" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mostrando %1$lld de %#@feeds@"
+          },
+          "substitutions" : {
+            "feeds" : {
+              "argNum" : 2,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "one" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg feed"
+                    }
+                  },
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg feeds"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Showing %1$lld of %#@feeds@"
+          },
+          "substitutions" : {
+            "feeds" : {
+              "argNum" : 2,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "one" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg feed"
+                    }
+                  },
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg feeds"
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -5375,6 +5945,16 @@
         }
       }
     },
+    "Sort" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ordenar por"
+          }
+        }
+      }
+    },
     "Sort it later" : {
       "localizations" : {
         "pt-BR" : {
@@ -5391,6 +5971,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Fonte"
+          }
+        }
+      }
+    },
+    "Status" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Status"
           }
         }
       }
@@ -5805,6 +6395,16 @@
         }
       }
     },
+    "Try adjusting your search or filters." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tente ajustar a busca ou os filtros."
+          }
+        }
+      }
+    },
     "Try again" : {
       "localizations" : {
         "pt-BR" : {
@@ -5851,6 +6451,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Coleção desconhecida"
+          }
+        }
+      }
+    },
+    "Unknown channel" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Canal desconhecido"
           }
         }
       }
@@ -5931,6 +6541,46 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Atualizar senha"
+          }
+        }
+      }
+    },
+    "Updated %lld videos" : {
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Updated %lld video"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Updated %lld videos"
+                }
+              }
+            }
+          }
+        },
+        "pt-BR" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld vídeo atualizado"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld vídeos atualizados"
+                }
+              }
+            }
           }
         }
       }
@@ -6071,6 +6721,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ver o feed desta coleção"
+          }
+        }
+      }
+    },
+    "Views" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Visualizações"
           }
         }
       }
@@ -6717,6 +7377,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "salvo %@"
+          }
+        }
+      }
+    },
+    "sort.account" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Account"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Conta"
           }
         }
       }

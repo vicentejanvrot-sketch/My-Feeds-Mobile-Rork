@@ -1371,7 +1371,7 @@ private struct AudiobookCardView: View {
             .clipShape(.rect(cornerRadius: 8))
 
             VStack(alignment: .leading, spacing: 8) {
-                if let label = media.label, !label.isEmpty {
+                if let label = media.displayLabel {
                     Text(label.uppercased())
                         .font(.system(size: 11, weight: .heavy))
                         .kerning(0.6)

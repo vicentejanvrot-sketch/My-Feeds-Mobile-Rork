@@ -358,6 +358,22 @@ nonisolated struct ItemMedia: Codable, Hashable, Sendable {
         sourceUrl = try? c.decodeIfPresent(String.self, forKey: .sourceUrl)
     }
 
+    /// `label` as shown to the user. The server writes a few fixed English
+    /// labels ("New single", "Latest album", ...); those are shown in the app's
+    /// language, anything else as it is.
+    var displayLabel: String? {
+        guard let label, !label.isEmpty else { return nil }
+        switch label {
+        case "New single": return String(localized: "New single")
+        case "New EP": return String(localized: "New EP")
+        case "New album": return String(localized: "New album")
+        case "Latest album": return String(localized: "Latest album")
+        case "New audiobook": return String(localized: "New audiobook")
+        case "Latest audiobook": return String(localized: "Latest audiobook")
+        default: return label
+        }
+    }
+
     /// HLS first (it has sound for Reddit videos), MP4 otherwise.
     var playableURL: URL? {
         for raw in [hlsUrl, videoUrl] {

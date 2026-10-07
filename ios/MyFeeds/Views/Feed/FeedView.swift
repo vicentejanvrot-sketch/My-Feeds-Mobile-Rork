@@ -45,6 +45,15 @@ struct FeedView: View {
         case priority = "Priority"
         case recent = "Recent"
         case views = "Views"
+
+        var label: String {
+            switch self {
+            case .account: return String(localized: "sort.account", defaultValue: "Account")
+            case .priority: return String(localized: "Priority")
+            case .recent: return String(localized: "Recent")
+            case .views: return String(localized: "Views")
+            }
+        }
     }
 
     enum FilterModal { case agent, channel, status, sort }
@@ -358,9 +367,9 @@ struct FeedView: View {
             }
             .buttonStyle(.plain)
             .padding(.trailing, 10)
-            .accessibilityLabel(agentFilter == nil ? "See everyone you follow" : "See this collection's people")
+            .accessibilityLabel(agentFilter == nil ? String(localized: "See everyone you follow") : String(localized: "See this collection's people"))
             if !isLoading {
-                Text("\(filteredItems.count) \(presentPlatforms.count > 1 ? "items" : "videos")")
+                Text(presentPlatforms.count > 1 ? String(localized: "\(filteredItems.count) items") : String(localized: "\(filteredItems.count) videos"))
                     .font(.system(size: 13, weight: .semibold))
                     .foregroundStyle(Theme.textSecondary)
             }
@@ -376,14 +385,14 @@ struct FeedView: View {
         let total = counts.values.reduce(0, +)
         return ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 8) {
-                platformChip(platform: nil, label: "All · \(total)")
+                platformChip(platform: nil, label: String(localized: "All · \(total)"))
                 ForEach(SourcePlatform.allCases.filter { (counts[$0] ?? 0) > 0 }, id: \.self) { platform in
                     // X's logo is already the letter X, so its chip shows just the count.
                     platformChip(
                         platform: platform,
-                        label: platform == .x ? "\(counts[platform] ?? 0)" : "\(platform.label) · \(counts[platform] ?? 0)"
+                        label: platform == .x ? (counts[platform] ?? 0).formatted() : "\(platform.label) · \((counts[platform] ?? 0).formatted())"
                     )
-                    .accessibilityLabel("\(platform.label), \(counts[platform] ?? 0)")
+                    .accessibilityLabel(Text(verbatim: "\(platform.label), \(counts[platform] ?? 0)"))
                 }
             }
             .padding(.horizontal, 16)
@@ -485,7 +494,7 @@ struct FeedView: View {
             HStack(spacing: 8) {
                 filterTrigger(
                     icon: "cpu",
-                    label: agentFilter.flatMap { id in agents.first { $0.id == id }?.name } ?? "All Collections",
+                    label: agentFilter.flatMap { id in agents.first { $0.id == id }?.name } ?? String(localized: "All Collections"),
                     badge: nil
                 ) { activeFilterModal = .agent }
 
@@ -515,7 +524,7 @@ struct FeedView: View {
             if !allChannelPeople.isEmpty {
                 filterTrigger(
                     icon: "dot.radiowaves.left.and.right",
-                    label: selectedPerson?.name ?? "All Channels",
+                    label: selectedPerson?.name ?? String(localized: "All Channels"),
                     badge: channelTriggerBadge
                 ) { activeFilterModal = .channel }
             }
@@ -523,13 +532,13 @@ struct FeedView: View {
             HStack(spacing: 8) {
                 filterTrigger(
                     icon: "line.3.horizontal.decrease",
-                    label: statusFilter?.label ?? "All Statuses",
+                    label: statusFilter?.label ?? String(localized: "All Statuses"),
                     badge: nil
                 ) { activeFilterModal = .status }
 
                 filterTrigger(
                     icon: "arrow.up.arrow.down",
-                    label: sortMode.rawValue,
+                    label: sortMode.label,
                     badge: nil
                 ) { activeFilterModal = .sort }
             }
@@ -619,7 +628,7 @@ struct FeedView: View {
                             if isLoadingMore { ProgressView().tint(Theme.accent) }
                             Text(isLoadingMore
                                  ? loadingMessage
-                                 : "Showing \(shown.count.formatted()) of \(total.formatted()) feeds")
+                                 : String(localized: "Showing \(shown.count) of \(total) feeds"))
                                 .font(.system(size: 13, weight: .semibold))
                                 .foregroundStyle(Theme.textSecondary)
                         }
@@ -638,10 +647,10 @@ struct FeedView: View {
     private var emptyState: some View {
         let hasFilters = !search.isEmpty || agentFilter != nil || channelFilter != nil || statusFilter != .notWatched
         return VStack(spacing: 6) {
-            Text(hasFilters ? "No videos match your filters" : "No videos yet")
+            Text(hasFilters ? String(localized: "No videos match your filters") : String(localized: "No videos yet"))
                 .font(.system(size: 16, weight: .bold))
                 .foregroundStyle(Theme.textPrimary)
-            Text(hasFilters ? "Try adjusting your search or filters." : "Run a collection to start discovering videos.")
+            Text(hasFilters ? String(localized: "Try adjusting your search or filters.") : String(localized: "Run a collection to start discovering videos."))
                 .font(.system(size: 13))
                 .foregroundStyle(Theme.textSecondary)
                 .lineSpacing(4)
@@ -659,7 +668,7 @@ struct FeedView: View {
             switch modal {
             case .agent:
                 PickerModal(title: "Collection", onDismiss: { activeFilterModal = nil }) {
-                    PickerRow(label: "All Collections", isActive: agentFilter == nil) {
+                    PickerRow(label: String(localized: "All Collections"), isActive: agentFilter == nil) {
                         agentFilter = nil
                         channelFilter = nil
                         activeFilterModal = nil
@@ -677,7 +686,7 @@ struct FeedView: View {
                     // How many people are listed below (each row shows its post count)
                     let people = channelPeople
                     let counts = channelCounts
-                    PickerRow(label: "All Channels", isActive: channelFilter == nil, badge: "\(people.count)") {
+                    PickerRow(label: String(localized: "All Channels"), isActive: channelFilter == nil, badge: people.count.formatted()) {
                         channelFilter = nil
                         activeFilterModal = nil
                     }
@@ -685,7 +694,7 @@ struct FeedView: View {
                         PickerRow(
                             label: person.name,
                             isActive: channelFilter == person.id,
-                            badge: "\(personItemCount(person, counts: counts))"
+                            badge: personItemCount(person, counts: counts).formatted()
                         ) {
                             channelFilter = person.id
                             activeFilterModal = nil
@@ -694,7 +703,7 @@ struct FeedView: View {
                 }
             case .status:
                 PickerModal(title: "Status", onDismiss: { activeFilterModal = nil }) {
-                    PickerRow(label: "All Statuses", isActive: statusFilter == nil) {
+                    PickerRow(label: String(localized: "All Statuses"), isActive: statusFilter == nil) {
                         statusFilter = nil
                         activeFilterModal = nil
                     }
@@ -713,7 +722,7 @@ struct FeedView: View {
             case .sort:
                 PickerModal(title: "Sort", onDismiss: { activeFilterModal = nil }) {
                     ForEach(SortMode.allCases, id: \.self) { mode in
-                        PickerRow(label: mode.rawValue, isActive: sortMode == mode) {
+                        PickerRow(label: mode.label, isActive: sortMode == mode) {
                             sortMode = mode
                             activeFilterModal = nil
                         }
@@ -781,7 +790,7 @@ struct FeedView: View {
         } catch let error where error.isCancellation {
             // The screen went away mid-load (for example a tab switch); not a failure.
         } catch {
-            toasts.show("Couldn't load videos: \(error.localizedDescription)", type: .error)
+            toasts.show(String(localized: "Couldn't load videos: \(error.localizedDescription)"), type: .error)
         }
 
         // These values only enhance filter labels and channel choices. Keep
@@ -836,8 +845,8 @@ struct FeedView: View {
 
     private var loadingMessage: String {
         let total = filteredItems.count
-        guard !items.isEmpty, total > 0 else { return "Loading feeds…" }
-        return "Loading \(min(visibleCount, total).formatted()) of \(total.formatted()) feeds"
+        guard !items.isEmpty, total > 0 else { return String(localized: "Loading feeds…") }
+        return String(localized: "Loading \(min(visibleCount, total)) of \(total) feeds")
     }
 
     /// Changing a filter or the sort starts again from the first 10.
@@ -884,7 +893,7 @@ struct FeedView: View {
                 if let index = items.firstIndex(where: { $0.id == item.id }) {
                     items[index].userStatus = previous
                 }
-                toasts.show("Couldn't update status", type: .error)
+                toasts.show(String(localized: "Couldn't update status"), type: .error)
             }
         }
     }
@@ -901,11 +910,11 @@ struct FeedView: View {
         Task {
             do {
                 try await SupabaseService.shared.bulkUpdateItemStatus(ids: ids, status: status)
-                toasts.show("Updated \(ids.count) video\(ids.count == 1 ? "" : "s")")
+                toasts.show(String(localized: "Updated \(ids.count) videos"))
                 selectedIds.removeAll()
             } catch {
                 items = snapshot
-                toasts.show("Couldn't update selected videos", type: .error)
+                toasts.show(String(localized: "Couldn't update selected videos"), type: .error)
             }
             isBulkUpdating = false
         }
@@ -967,7 +976,7 @@ private struct FeedItemCard: View {
             }
             .buttonStyle(.plain)
             .padding(12)
-            .accessibilityLabel(isSelected ? "Deselect video" : "Select video")
+            .accessibilityLabel(isSelected ? String(localized: "Deselect video") : String(localized: "Select video"))
         }
     }
 
@@ -1020,7 +1029,7 @@ private struct FeedItemCard: View {
                     HStack(spacing: 4) {
                         Image(systemName: "square.on.square")
                             .font(.system(size: 11, weight: .semibold))
-                        Text("\(count)")
+                        Text(count.formatted())
                             .font(.system(size: 12, weight: .semibold))
                     }
                     .foregroundStyle(.white)
@@ -1090,7 +1099,7 @@ private struct FeedItemCard: View {
     private var body12: some View {
         VStack(alignment: .leading, spacing: 0) {
             HStack(alignment: .top, spacing: 6) {
-                Text(item.title ?? "Untitled")
+                Text(item.title ?? String(localized: "Untitled"))
                     .font(.system(size: 15, weight: .bold))
                     .foregroundStyle(Theme.textPrimary)
                     .lineLimit(2)
@@ -1131,7 +1140,7 @@ private struct FeedItemCard: View {
                                 .foregroundStyle(Theme.textSecondary)
                         }
                     }
-                    Text("\(item.channelName ?? "Unknown channel") · \(Format.timeAgo(item.publishedAt))")
+                    Text(verbatim: "\(item.channelName ?? String(localized: "Unknown channel")) · \(Format.timeAgo(item.publishedAt))")
                         .font(.system(size: 12))
                         .foregroundStyle(Theme.textSecondary)
                         .lineLimit(1)
@@ -1213,15 +1222,15 @@ private struct FeedItemCard: View {
             if item.sourcePlatform == .appleBooks {
                 Image(systemName: "book")
                     .font(.system(size: 11))
-                Text(media?.label ?? "Audiobook")
+                Text(media?.displayLabel ?? String(localized: "Audiobook"))
                     .font(.system(size: 12))
             } else if item.sourcePlatform == .applePodcasts {
                 Image(systemName: "headphones")
                     .font(.system(size: 11))
                 if let seconds = media?.duration, seconds > 0 {
                     Text(seconds >= 3600
-                         ? "\(seconds / 3600) h \((seconds % 3600) / 60) min"
-                         : "\(max(1, seconds / 60)) min")
+                         ? String(localized: "\(seconds / 3600)h \((seconds % 3600) / 60)m")
+                         : String(localized: "\(max(1, seconds / 60))m"))
                         .font(.system(size: 12))
                 } else {
                     Text("Episode").font(.system(size: 12))
@@ -1229,7 +1238,7 @@ private struct FeedItemCard: View {
             } else {
                 Image(systemName: media?.type == "video" ? "music.note.tv" : "music.note")
                     .font(.system(size: 11))
-                Text(media?.label ?? (media?.type == "video" ? "Music video" : "New release"))
+                Text(media?.displayLabel ?? (media?.type == "video" ? String(localized: "Music video") : String(localized: "New release")))
                     .font(.system(size: 12))
             }
         }
