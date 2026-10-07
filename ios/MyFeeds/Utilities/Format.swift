@@ -25,42 +25,38 @@ nonisolated enum Format {
         return iso.date(from: patched)
     }
 
-    /// Relative time like "3h ago", "2d ago".
+    /// Relative time like "3h ago", "2d ago" (pt-BR: "há 3 h", "há 2 d").
     static func timeAgo(_ isoString: String?) -> String {
         guard let date = parseDate(isoString) else { return "—" }
         let sec = Int((Date().timeIntervalSince(date)).rounded())
-        if sec < 60 { return "just now" }
+        if sec < 60 { return String(localized: "just now") }
         let min = Int((Double(sec) / 60).rounded())
-        if min < 60 { return "\(min)m ago" }
+        if min < 60 { return String(localized: "\(min)m ago") }
         let hr = Int((Double(min) / 60).rounded())
-        if hr < 24 { return "\(hr)h ago" }
+        if hr < 24 { return String(localized: "\(hr)h ago") }
         let day = Int((Double(hr) / 24).rounded())
-        if day < 30 { return "\(day)d ago" }
+        if day < 30 { return String(localized: "\(day)d ago") }
         let mo = Int((Double(day) / 30).rounded())
-        if mo < 12 { return "\(mo)mo ago" }
-        return "\(Int((Double(mo) / 12).rounded()))y ago"
+        if mo < 12 { return String(localized: "\(mo)mo ago") }
+        return String(localized: "\(Int((Double(mo) / 12).rounded()))y ago")
     }
 
     /// Human relative time like "about 3 hours ago".
     static func relativeTime(_ isoString: String?) -> String {
         guard let date = parseDate(isoString) else { return "—" }
         let sec = Int((Date().timeIntervalSince(date)).rounded())
-        if sec < 10 { return "just now" }
-        if sec < 60 { return "less than a minute ago" }
+        if sec < 10 { return String(localized: "just now") }
+        if sec < 60 { return String(localized: "less than a minute ago") }
         let min = Int((Double(sec) / 60).rounded())
-        if min == 1 { return "about 1 minute ago" }
-        if min < 60 { return "about \(min) minutes ago" }
+        if min < 60 { return String(localized: "about \(min) minutes ago") }
         let hr = Int((Double(min) / 60).rounded())
-        if hr == 1 { return "about 1 hour ago" }
-        if hr < 24 { return "about \(hr) hours ago" }
+        if hr < 24 { return String(localized: "about \(hr) hours ago") }
         let day = Int((Double(hr) / 24).rounded())
-        if day == 1 { return "about 1 day ago" }
-        if day < 30 { return "about \(day) days ago" }
+        if day < 30 { return String(localized: "about \(day) days ago") }
         let mo = Int((Double(day) / 30).rounded())
-        if mo == 1 { return "about 1 month ago" }
-        if mo < 12 { return "about \(mo) months ago" }
+        if mo < 12 { return String(localized: "about \(mo) months ago") }
         let yr = Int((Double(mo) / 12).rounded())
-        return yr == 1 ? "about 1 year ago" : "about \(yr) years ago"
+        return String(localized: "about \(yr) years ago")
     }
 
     /// Compact count like 1.2K, 3.4M.
@@ -101,18 +97,16 @@ nonisolated enum Format {
         duration(Int(seconds.rounded())) == "—" ? "0:00" : duration(Int(seconds.rounded()))
     }
 
-    /// Full run timestamp like "Jun 9, 2026 at 6:21 PM".
+    /// Full run timestamp like "Jun 9, 2026 at 6:21 PM", in the app's language.
     static func runTimestamp(_ isoString: String?) -> String {
         guard let date = parseDate(isoString) else { return "—" }
-        let f = DateFormatter()
-        f.dateFormat = "MMM d, yyyy 'at' h:mm a"
-        return f.string(from: date)
+        return date.formatted(.dateTime.month(.abbreviated).day().year().hour().minute())
     }
 
     /// Run duration between two timestamps: "42s" / "3m 12s" / "In progress".
     static func runDuration(started: String?, finished: String?) -> String {
         guard let start = parseDate(started) else { return "—" }
-        guard let end = parseDate(finished) else { return "In progress" }
+        guard let end = parseDate(finished) else { return String(localized: "In progress") }
         let sec = Int(end.timeIntervalSince(start))
         if sec < 0 { return "—" }
         if sec < 60 { return "\(sec)s" }
