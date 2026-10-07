@@ -82,8 +82,8 @@ struct AuthScaffold<Content: View>: View {
 
 /// Branding block: logo + title + subtitle.
 struct AuthBranding: View {
-    let title: String
-    let subtitle: String
+    let title: LocalizedStringKey
+    let subtitle: LocalizedStringKey
     var titleSize: CGFloat = 22
 
     var body: some View {
@@ -111,11 +111,12 @@ struct AuthBranding: View {
 
 /// Uppercase field label.
 struct AuthFieldLabel: View {
-    let text: String
+    let text: LocalizedStringKey
     var topMargin: CGFloat = 16
 
     var body: some View {
-        Text(text.uppercased())
+        Text(text)
+            .textCase(.uppercase)
             .font(.system(size: 13, weight: .semibold))
             .kerning(0.5)
             .foregroundStyle(Theme.textSecondary)
@@ -147,7 +148,7 @@ struct AuthInputStyle: ViewModifier {
 
 /// Primary gradient button used across the app.
 struct PrimaryButton: View {
-    let title: String
+    let title: LocalizedStringKey
     var isLoading = false
     var isDisabled = false
     var icon: String?

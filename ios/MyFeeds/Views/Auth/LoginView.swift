@@ -96,7 +96,7 @@ fileprivate struct LBVideoCard: View {
             }
             .frame(height: 158)
             .overlay(alignment: .bottomTrailing) {
-                Text("12:48")
+                Text(verbatim: "12:48")
                     .font(.system(size: 11, weight: .semibold))
                     .foregroundStyle(.white)
                     .padding(.horizontal, 6)
@@ -134,7 +134,7 @@ fileprivate struct LBRedditCard: View {
         HStack(alignment: .top, spacing: 10) {
             VStack(spacing: 4) {
                 LBIcon(name: "arrowshape.up", size: 15, color: mfLoginColor(0xFF6A33))
-                Text("2.4k")
+                Text(verbatim: "2.4k")
                     .font(.system(size: 11, weight: .bold))
                     .foregroundStyle(LBColor.label)
                 LBIcon(name: "arrowshape.down", size: 15, color: mfLoginColor(0x5B7BB0))
@@ -206,13 +206,13 @@ fileprivate struct LBSpotifyCard: View {
                 LBIcon(name: "heart.fill", size: 16, color: green)
             }
             HStack(spacing: 8) {
-                Text("1:24").font(.system(size: 10)).foregroundStyle(mfLoginColor(0x7F8DAA))
+                Text(verbatim: "1:24").font(.system(size: 10)).foregroundStyle(mfLoginColor(0x7F8DAA))
                 ZStack(alignment: .leading) {
                     Capsule().fill(LBColor.barDim)
                     Capsule().fill(green).frame(width: 80)
                 }
                 .frame(height: 4)
-                Text("3:51").font(.system(size: 10)).foregroundStyle(mfLoginColor(0x7F8DAA))
+                Text(verbatim: "3:51").font(.system(size: 10)).foregroundStyle(mfLoginColor(0x7F8DAA))
             }
             HStack(spacing: 22) {
                 LBIcon(name: "shuffle", size: 13, color: mfLoginColor(0x6B7FA6))
@@ -248,7 +248,7 @@ fileprivate struct LBGithubCard: View {
             HStack(spacing: 8) {
                 LBIcon(name: "book.closed", size: 13)
                 LBBar(width: 50, color: LBColor.barStrong)
-                Text("/").font(.system(size: 12)).foregroundStyle(mfLoginColor(0x5B7BB0))
+                Text(verbatim: "/").font(.system(size: 12)).foregroundStyle(mfLoginColor(0x5B7BB0))
                 LBBar(width: 70, color: mfLoginColor(0x4A6BA8))
             }
             LBBar(width: 198, height: 7, color: LBColor.barDim)
@@ -267,15 +267,15 @@ fileprivate struct LBGithubCard: View {
             HStack(spacing: 14) {
                 HStack(spacing: 5) {
                     Circle().fill(mfLoginColor(0x3178C6)).frame(width: 10, height: 10)
-                    Text("TS")
+                    Text(verbatim: "TS")
                 }
                 HStack(spacing: 4) {
                     LBIcon(name: "star", size: 11)
-                    Text("1.2k")
+                    Text(verbatim: "1.2k")
                 }
                 HStack(spacing: 4) {
                     LBIcon(name: "arrow.triangle.branch", size: 11)
-                    Text("86")
+                    Text(verbatim: "86")
                 }
             }
             .font(.system(size: 11))
@@ -608,7 +608,7 @@ struct LoginView: View {
                     .clipShape(.rect(cornerRadius: 18))
                     .shadow(color: LBColor.iconGlow.opacity(0.55), radius: 18)
                     .padding(.bottom, 14)
-                Text("My Feeds")
+                Text(verbatim: "My Feeds")
                     .font(.system(size: 30, weight: .bold))
                     .kerning(-0.5)
                     .foregroundStyle(.white)
@@ -648,7 +648,7 @@ struct LoginView: View {
             fieldLabel("Email")
                 .padding(.top, 16)
                 .padding(.bottom, 8)
-            TextField("", text: $email, prompt: Text("you@example.com").foregroundColor(mfLoginColor(0x7F8DAA)))
+            TextField("", text: $email, prompt: Text(verbatim: "you@example.com").foregroundColor(mfLoginColor(0x7F8DAA)))
                 .textContentType(.emailAddress)
                 .keyboardType(.emailAddress)
                 .textInputAutocapitalization(.never)
@@ -694,13 +694,13 @@ struct LoginView: View {
                 Button {
                     showPassword.toggle()
                 } label: {
-                    Text(showPassword ? "Hide" : "Show")
+                    Text(showPassword ? String(localized: "Hide") : String(localized: "password.show", defaultValue: "Show"))
                         .font(.system(size: 13, weight: .semibold))
                         .foregroundStyle(LBColor.placeholderToggle)
                         .frame(minWidth: 56, minHeight: 44)
                 }
                 .padding(.trailing, 4)
-                .accessibilityLabel(showPassword ? "Hide password" : "Show password")
+                .accessibilityLabel(showPassword ? String(localized: "Hide password") : String(localized: "Show password"))
             }
 
             Button {
@@ -746,7 +746,7 @@ struct LoginView: View {
         .shadow(color: .black.opacity(0.55), radius: 30, y: 24)
     }
 
-    private func fieldLabel(_ text: String) -> some View {
+    private func fieldLabel(_ text: LocalizedStringKey) -> some View {
         Text(text)
             .font(.system(size: 14, weight: .semibold))
             .foregroundStyle(LBColor.label)
@@ -791,7 +791,7 @@ struct LoginView: View {
                         Image(systemName: biometryIcon)
                             .font(.system(size: 18, weight: .semibold))
                     }
-                    Text("Sign in with \(biometryName ?? "Biometrics")")
+                    Text("Sign in with \(biometryName ?? String(localized: "biometrics"))")
                         .font(.system(size: 15, weight: .bold))
                 }
                 .foregroundStyle(.white)
@@ -802,7 +802,7 @@ struct LoginView: View {
             }
             .disabled(isBiometricLoading || isLoading)
 
-            Text("Use \(biometryName ?? "biometrics") to unlock your saved login.")
+            Text("Use \(biometryName ?? String(localized: "biometrics")) to unlock your saved login.")
                 .font(.system(size: 12))
                 .foregroundStyle(Theme.textMuted)
                 .multilineTextAlignment(.center)
@@ -838,7 +838,7 @@ struct LoginView: View {
         let trimmedEmail = email.trimmingCharacters(in: .whitespaces)
         guard !trimmedEmail.isEmpty, !password.isEmpty else {
             UINotificationFeedbackGenerator().notificationOccurred(.error)
-            toast = AuthToast(message: "Please fill in both email and password.", isError: true)
+            toast = AuthToast(message: String(localized: "Please fill in both email and password."), isError: true)
             return
         }
         isLoading = true
@@ -853,7 +853,7 @@ struct LoginView: View {
                 // login when the user has opted in (toggle in Settings).
                 auth.persistCredentialsForBiometricLogin(email: trimmedEmail, password: password)
                 UINotificationFeedbackGenerator().notificationOccurred(.success)
-                toast = AuthToast(message: "Welcome back!", isError: false)
+                toast = AuthToast(message: String(localized: "Welcome back!"), isError: false)
             }
         }
     }
@@ -867,7 +867,7 @@ struct LoginView: View {
             toast = AuthToast(message: error, isError: true)
         } else {
             UINotificationFeedbackGenerator().notificationOccurred(.success)
-            toast = AuthToast(message: "Welcome back!", isError: false)
+            toast = AuthToast(message: String(localized: "Welcome back!"), isError: false)
         }
     }
 }

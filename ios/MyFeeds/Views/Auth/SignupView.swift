@@ -18,7 +18,7 @@ struct SignupView: View {
             AuthBranding(title: "Create Account", subtitle: "Sign up to start using My Feeds.")
 
             AuthFieldLabel(text: "Email", topMargin: 0)
-            TextField("you@example.com", text: $email)
+            TextField(text: $email, prompt: Text(verbatim: "you@example.com")) { Text("Email") }
                 .textContentType(.emailAddress)
                 .keyboardType(.emailAddress)
                 .textInputAutocapitalization(.never)
@@ -66,15 +66,15 @@ struct SignupView: View {
     private func submit() {
         let trimmedEmail = email.trimmingCharacters(in: .whitespaces)
         guard !trimmedEmail.isEmpty, !password.isEmpty, !confirmPassword.isEmpty else {
-            showError("Please fill in all fields.")
+            showError(String(localized: "Please fill in all fields."))
             return
         }
         guard password == confirmPassword else {
-            showError("Passwords do not match.")
+            showError(String(localized: "Passwords do not match."))
             return
         }
         guard password.count >= 6 else {
-            showError("Password must be at least 6 characters.")
+            showError(String(localized: "Password must be at least 6 characters."))
             return
         }
         isLoading = true
@@ -85,7 +85,7 @@ struct SignupView: View {
                 showError(error)
             } else {
                 UINotificationFeedbackGenerator().notificationOccurred(.success)
-                toast = AuthToast(message: "Account created!", isError: false)
+                toast = AuthToast(message: String(localized: "Account created!"), isError: false)
             }
         }
     }

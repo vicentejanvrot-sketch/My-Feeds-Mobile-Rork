@@ -315,6 +315,16 @@
         }
       }
     },
+    "Account created!" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Conta criada!"
+          }
+        }
+      }
+    },
     "Add" : {
       "localizations" : {
         "pt-BR" : {
@@ -445,6 +455,16 @@
         }
       }
     },
+    "Already have an account? Sign in" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Já tem uma conta? Entrar"
+          }
+        }
+      }
+    },
     "Already here" : {
       "localizations" : {
         "pt-BR" : {
@@ -535,6 +555,16 @@
         }
       }
     },
+    "At least 6 characters" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pelo menos 6 caracteres"
+          }
+        }
+      }
+    },
     "Author" : {
       "localizations" : {
         "pt-BR" : {
@@ -581,6 +611,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Voltar"
+          }
+        }
+      }
+    },
+    "Back to sign in" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Voltar para entrar"
           }
         }
       }
@@ -685,12 +725,32 @@
         }
       }
     },
+    "Check your inbox — we've sent a password reset link." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Confira sua caixa de entrada — enviamos um link para redefinir a senha."
+          }
+        }
+      }
+    },
     "Children's Privacy" : {
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Privacidade de crianças"
+          }
+        }
+      }
+    },
+    "Choose a strong password for your account. Must be at least 6 characters." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Escolha uma senha forte para sua conta. Ela precisa ter pelo menos 6 caracteres."
           }
         }
       }
@@ -741,6 +801,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Configure a reprodução de vídeo padrão. Essas opções são sincronizadas entre seus dispositivos pelo iCloud."
+          }
+        }
+      }
+    },
+    "Confirm Password" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Confirmar senha"
+          }
+        }
+      }
+    },
+    "Confirm password" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Confirmar senha"
           }
         }
       }
@@ -955,6 +1035,26 @@
         }
       }
     },
+    "Create Account" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Criar conta"
+          }
+        }
+      }
+    },
+    "Create an account" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Criar conta"
+          }
+        }
+      }
+    },
     "Danger Zone" : {
       "localizations" : {
         "pt-BR" : {
@@ -1135,6 +1235,16 @@
         }
       }
     },
+    "Email" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "E-mail"
+          }
+        }
+      }
+    },
     "Embedded YouTube videos automatically pause when your screen locks or the app moves to the background. This is expected behavior on iOS — both the operating system and the official YouTube embedded player enforce this to preserve battery and comply with platform policies. It is not a bug in the app." : {
       "localizations" : {
         "pt-BR" : {
@@ -1151,6 +1261,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ativar entrada com %@"
+          }
+        }
+      }
+    },
+    "Enter the email address associated with your account and we'll send you a link to reset your password." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Digite o e-mail da sua conta e enviaremos um link para redefinir sua senha."
           }
         }
       }
@@ -1201,6 +1321,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Encontrar conta"
+          }
+        }
+      }
+    },
+    "Forgot password?" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Esqueceu a senha?"
           }
         }
       }
@@ -1331,6 +1461,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Dê um nome à coleção."
+          }
+        }
+      }
+    },
+    "Hide" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ocultar"
+          }
+        }
+      }
+    },
+    "Hide password" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ocultar senha"
           }
         }
       }
@@ -1635,6 +1785,16 @@
         }
       }
     },
+    "New password" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nova senha"
+          }
+        }
+      }
+    },
     "New repositories and releases from the lookback window." : {
       "localizations" : {
         "pt-BR" : {
@@ -1671,6 +1831,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Novas músicas, álbuns e clipes. Ao adicionar um artista, o álbum mais recente também vem junto."
+          }
+        }
+      }
+    },
+    "New to My Feeds? " : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Novo no My Feeds? "
           }
         }
       }
@@ -1945,6 +2115,56 @@
         }
       }
     },
+    "Password" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Senha"
+          }
+        }
+      }
+    },
+    "Password must be at least 6 characters." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A senha precisa ter pelo menos 6 caracteres."
+          }
+        }
+      }
+    },
+    "Password updated! Sign in with your new password." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Senha atualizada! Entre com sua nova senha."
+          }
+        }
+      }
+    },
+    "Passwords do not match" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "As senhas não coincidem"
+          }
+        }
+      }
+    },
+    "Passwords do not match." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "As senhas não coincidem."
+          }
+        }
+      }
+    },
     "Paste a person's profile link or a company page link." : {
       "localizations" : {
         "pt-BR" : {
@@ -2031,6 +2251,46 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Digite um endereço de e-mail válido."
+          }
+        }
+      }
+    },
+    "Please enter your email address." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Digite seu e-mail."
+          }
+        }
+      }
+    },
+    "Please fill in all fields." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Preencha todos os campos."
+          }
+        }
+      }
+    },
+    "Please fill in both email and password." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Preencha o e-mail e a senha."
+          }
+        }
+      }
+    },
+    "Please fill in both password fields." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Preencha os dois campos de senha."
           }
         }
       }
@@ -2165,6 +2425,26 @@
         }
       }
     },
+    "Re-enter your new password" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Digite a nova senha de novo"
+          }
+        }
+      }
+    },
+    "Re-enter your password" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Digite a senha de novo"
+          }
+        }
+      }
+    },
     "Reels" : {
       "localizations" : {
         "pt-BR" : {
@@ -2221,6 +2501,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Reabra o My Feeds para aplicar"
+          }
+        }
+      }
+    },
+    "Reset your password" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Redefinir sua senha"
           }
         }
       }
@@ -2345,6 +2635,26 @@
         }
       }
     },
+    "Send reset link" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enviar link de redefinição"
+          }
+        }
+      }
+    },
+    "Set a new password" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Criar uma nova senha"
+          }
+        }
+      }
+    },
     "Settings" : {
       "localizations" : {
         "pt-BR" : {
@@ -2395,12 +2705,42 @@
         }
       }
     },
+    "Show password" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mostrar senha"
+          }
+        }
+      }
+    },
+    "Sign in" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Entrar"
+          }
+        }
+      }
+    },
     "Sign in once with your password, then use %@ next time." : {
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Entre uma vez com sua senha e use %@ da próxima vez."
+          }
+        }
+      }
+    },
+    "Sign in with %@" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Entrar com %@"
           }
         }
       }
@@ -2421,6 +2761,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Saia e entre de novo com sua senha para atualizar o login salvo."
+          }
+        }
+      }
+    },
+    "Sign up to start using My Feeds." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Crie sua conta para começar a usar o My Feeds."
           }
         }
       }
@@ -2815,12 +3165,32 @@
         }
       }
     },
+    "Update password" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Atualizar senha"
+          }
+        }
+      }
+    },
     "Use %@ to unlock your saved login instead of typing your password." : {
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Use %@ para desbloquear seu login salvo em vez de digitar a senha."
+          }
+        }
+      }
+    },
+    "Use %@ to unlock your saved login." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Use %@ para desbloquear seu login salvo."
           }
         }
       }
@@ -2951,6 +3321,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Podemos atualizar esta política de tempos em tempos. Mudanças importantes serão indicadas pela data de \"Última atualização\" acima."
+          }
+        }
+      }
+    },
+    "Welcome back!" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Que bom ver você de novo!"
           }
         }
       }
@@ -3171,6 +3551,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Seus dados são usados apenas para o funcionamento do app: atualizar suas coleções, montar seu feed de pesquisa, registrar seu progresso e enviar os resumos por e-mail que você configurar. Não vendemos suas informações pessoais nem as usamos para publicidade."
+          }
+        }
+      }
+    },
+    "Your favorite creators, organized for you." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seus criadores favoritos, organizados para você."
+          }
+        }
+      }
+    },
+    "Your password" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sua senha"
           }
         }
       }
@@ -3411,6 +3811,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "há menos de um minuto"
+          }
+        }
+      }
+    },
+    "password.show" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Show"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mostrar"
           }
         }
       }
