@@ -15,6 +15,13 @@ struct MyFeedsApp: App {
     @State private var router = AppRouter()
     @State private var prefs = VideoPrefs()
 
+    init() {
+        // Remember the language this launch uses, and pass the choice to the
+        // share extension (it may have been changed in the Settings app).
+        _ = AppLanguage.launchChoice
+        AppLanguage.syncShareExtension()
+    }
+
     var body: some Scene {
         WindowGroup {
             ContentView()

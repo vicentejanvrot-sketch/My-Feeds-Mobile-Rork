@@ -12,6 +12,7 @@ struct SettingsView: View {
     @State private var showQualityOptions = false
     @State private var aboutExpanded = false
     @State private var showDeleteConfirm = false
+    @State private var languageChoice = AppLanguage.choice
 
     var body: some View {
         @Bindable var prefs = prefs
@@ -32,6 +33,7 @@ struct SettingsView: View {
                         .padding(.vertical, 40)
                 } else {
                     defaultEmailCard
+                    languageCard
                     videoPlaybackCard
                     youtubeCard
                     connectionsCard
@@ -109,6 +111,67 @@ struct SettingsView: View {
                     RoundedRectangle(cornerRadius: 8)
                         .stroke(Theme.border, lineWidth: 1)
                 )
+        }
+    }
+
+    /// Language: Automatic follows the device; English and Português (Brasil)
+    /// set this app's language override (kept on this phone). iOS applies it
+    /// when the app starts, so a change shows after My Feeds is reopened.
+    private var languageCard: some View {
+        settingsCard(icon: "globe", iconColor: Theme.accent, title: String(localized: "Language"), description: nil) {
+            VStack(spacing: 0) {
+                ForEach(AppLanguage.Choice.allCases, id: \.self) { choice in
+                    if choice != AppLanguage.Choice.allCases.first {
+                        Rectangle().fill(Theme.border).frame(height: 0.5)
+                    }
+                    Button {
+                        UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                        languageChoice = choice
+                        AppLanguage.set(choice)
+                    } label: {
+                        HStack(spacing: 12) {
+                            VStack(alignment: .leading, spacing: 2) {
+                                switch choice {
+                                case .automatic:
+                                    Text("Automatic")
+                                        .font(.system(size: 15, weight: .semibold))
+                                        .foregroundStyle(Theme.textPrimary)
+                                    Text("Use device language")
+                                        .font(.system(size: 12))
+                                        .foregroundStyle(Theme.textSecondary)
+                                case .english:
+                                    Text(verbatim: "English")
+                                        .font(.system(size: 15, weight: .semibold))
+                                        .foregroundStyle(Theme.textPrimary)
+                                case .portugueseBrazil:
+                                    Text(verbatim: "Português (Brasil)")
+                                        .font(.system(size: 15, weight: .semibold))
+                                        .foregroundStyle(Theme.textPrimary)
+                                }
+                            }
+                            Spacer()
+                            if languageChoice == choice {
+                                Image(systemName: "checkmark")
+                                    .font(.system(size: 14, weight: .semibold))
+                                    .foregroundStyle(Theme.accent)
+                            }
+                        }
+                        .padding(.vertical, 12)
+                        .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+            if languageChoice != AppLanguage.launchChoice {
+                HStack(spacing: 8) {
+                    Image(systemName: "arrow.clockwise")
+                        .font(.system(size: 12, weight: .semibold))
+                    Text("Reopen My Feeds to apply")
+                        .font(.system(size: 12, weight: .medium))
+                }
+                .foregroundStyle(Theme.warning)
+                .padding(.top, 8)
+            }
         }
     }
 

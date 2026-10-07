@@ -11,13 +11,31 @@ final class ShareViewController: UIViewController {
     // Full screen and see-through, so only the card covers the app the user
     // shared from (not the grey sheet iOS puts behind an extension by default).
     override init(nibName nibNameOrNil: String?, bundle nibBundleOrNil: Bundle?) {
+        Self.applyAppLanguage()
         super.init(nibName: nibNameOrNil, bundle: nibBundleOrNil)
         modalPresentationStyle = .overFullScreen
     }
 
     required init?(coder: NSCoder) {
+        Self.applyAppLanguage()
         super.init(coder: coder)
         modalPresentationStyle = .overFullScreen
+    }
+
+    /// The language picked in the app's Settings ("en" / "pt-BR"), shared
+    /// through the app group; nil means Automatic (the device language).
+    private static var appLanguage: String? {
+        UserDefaults(suiteName: SharedAuthStorage.appGroup)?.string(forKey: "appLanguage")
+    }
+
+    /// Uses the app's language choice in the extension too: the same per-app
+    /// override the app uses, set before any text is looked up.
+    private static func applyAppLanguage() {
+        if let language = appLanguage {
+            UserDefaults.standard.set([language], forKey: "AppleLanguages")
+        } else {
+            UserDefaults.standard.removeObject(forKey: "AppleLanguages")
+        }
     }
 
     override func viewDidLoad() {
@@ -27,7 +45,8 @@ final class ShareViewController: UIViewController {
             self?.extensionContext?.completeRequest(returningItems: nil, completionHandler: nil)
         }
 
-        let host = UIHostingController(rootView: ShareCardView(model: model))
+        let locale = Self.appLanguage.map { Locale(identifier: $0) } ?? Locale.autoupdatingCurrent
+        let host = UIHostingController(rootView: ShareCardView(model: model).environment(\.locale, locale))
         host.view.backgroundColor = .clear
         addChild(host)
         host.view.frame = view.bounds
