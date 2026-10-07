@@ -38,6 +38,8 @@ import { useUpdateItemStatus } from "@/lib/hooks";
 import { useToast } from "@/components/Toast";
 import { openExternalLink } from "@/lib/open-link";
 import { timeAgo } from "@/lib/format";
+import i18n, { formatDate, formatTime } from "@/lib/i18n";
+import { useTranslation } from "react-i18next";
 import { PlatformBadge } from "@/components/PlatformBadge";
 import { PLATFORM_META, platformOf, platformText, formatCount, isNewPostsCard } from "@/lib/platforms";
 import {
@@ -289,7 +291,7 @@ function TikTokPlayer({ videoId }: { videoId: string }) {
         mediaPlaybackRequiresUserAction={false}
         javaScriptEnabled
         scrollEnabled={false}
-        accessibilityLabel="TikTok video"
+        accessibilityLabel={i18n.t("post.tiktokVideo")}
       />
     </View>
   );
@@ -350,7 +352,7 @@ function FacebookPlayer({ uri, portrait }: { uri: string; portrait: boolean }) {
         mediaPlaybackRequiresUserAction={false}
         javaScriptEnabled
         scrollEnabled={false}
-        accessibilityLabel="Facebook video"
+        accessibilityLabel={i18n.t("post.facebookVideo")}
       />
     </View>
   );
@@ -381,6 +383,7 @@ const SPOTIFY_NO_DRM_JS =
 // plays 30-second previews), "Open in Spotify" goes to the Spotify app.
 // Nothing shows when Spotify doesn't have the release.
 function SpotifySection({ sourceUrl }: { sourceUrl: string }) {
+  const { t } = useTranslation();
   const [playing, setPlaying] = useState(false);
   const { data } = useQuery({
     queryKey: ["spotify-link", sourceUrl],
@@ -404,7 +407,7 @@ function SpotifySection({ sourceUrl }: { sourceUrl: string }) {
             accessibilityRole="button"
           >
             <SpotifyLogo />
-            <Text style={styles.openText}>{playing ? "Hide player" : "Play on Spotify"}</Text>
+            <Text style={styles.openText}>{playing ? t("post.spotify.hide") : t("post.spotify.play")}</Text>
           </Pressable>
         ) : null}
         <Pressable
@@ -413,7 +416,7 @@ function SpotifySection({ sourceUrl }: { sourceUrl: string }) {
           accessibilityRole="link"
         >
           <ExternalLink size={16} color={Colors.textPrimary} />
-          <Text style={styles.openText}>Open in Spotify</Text>
+          <Text style={styles.openText}>{t("platforms.spotify.openLabel")}</Text>
         </Pressable>
       </View>
       {playing && data.embedUrl ? (
@@ -426,7 +429,7 @@ function SpotifySection({ sourceUrl }: { sourceUrl: string }) {
             javaScriptEnabled
             scrollEnabled={tall}
             injectedJavaScriptBeforeContentLoaded={SPOTIFY_NO_DRM_JS}
-            accessibilityLabel="Spotify player"
+            accessibilityLabel={t("post.spotify.player")}
           />
         </View>
       ) : null}
@@ -444,6 +447,7 @@ function SpotifyPendingRelease({ sourceUrl, title, artistId, artistName }: {
   artistId: string | null;
   artistName: string | null;
 }) {
+  const { t } = useTranslation();
   const { data, isLoading } = useQuery({
     queryKey: ["spotify-link", sourceUrl],
     staleTime: 3600 * 1000,
@@ -468,7 +472,7 @@ function SpotifyPendingRelease({ sourceUrl, title, artistId, artistName }: {
             javaScriptEnabled
             scrollEnabled={!short}
             injectedJavaScriptBeforeContentLoaded={SPOTIFY_NO_DRM_JS}
-            accessibilityLabel="Spotify player"
+            accessibilityLabel={t("post.spotify.player")}
           />
         </View>
         {spotifyUrl ? (
@@ -478,13 +482,13 @@ function SpotifyPendingRelease({ sourceUrl, title, artistId, artistName }: {
             accessibilityRole="link"
           >
             <SpotifyLogo />
-            <Text style={styles.openText}>Open in Spotify</Text>
+            <Text style={styles.openText}>{t("platforms.spotify.openLabel")}</Text>
           </Pressable>
         ) : null}
       </View>
     );
   }
-  if (isLoading) return <Text style={[styles.muted, { textAlign: "center" }]}>Looking for it on Spotify…</Text>;
+  if (isLoading) return <Text style={[styles.muted, { textAlign: "center" }]}>{t("post.spotify.looking")}</Text>;
   if (!artistId) return null;
   // Until Spotify links the release, the artist's own Spotify player: their
   // popular songs, as previews, right here.
@@ -498,11 +502,13 @@ function SpotifyPendingRelease({ sourceUrl, title, artistId, artistName }: {
           mediaPlaybackRequiresUserAction={false}
           javaScriptEnabled
           injectedJavaScriptBeforeContentLoaded={SPOTIFY_NO_DRM_JS}
-          accessibilityLabel={`${artistName ?? "Artist"} on Spotify`}
+          accessibilityLabel={t("post.spotify.onSpotify", { title: artistName ?? t("people.labels.artist") })}
         />
       </View>
       <Text style={[styles.muted, { textAlign: "center" }]}>
-        {`Spotify hasn't linked "${title}" yet (new releases can take a few days), so this plays ${artistName ?? "the artist"}'s popular songs. Open in Spotify searches for the new release.`}
+        {artistName
+          ? t("post.spotify.pending", { title, artist: artistName })
+          : t("post.spotify.pendingNoArtist", { title })}
       </Text>
     </View>
   );
@@ -526,7 +532,7 @@ function AppleMusicPlayer({ embedUrl, single }: { embedUrl: string; single: bool
         mediaPlaybackRequiresUserAction={false}
         javaScriptEnabled
         scrollEnabled={!single}
-        accessibilityLabel="Apple Music player"
+        accessibilityLabel={i18n.t("post.appleMusic.player")}
       />
     </View>
   );
@@ -536,6 +542,7 @@ function AppleMusicPlayer({ embedUrl, single }: { embedUrl: string; single: bool
 // playlist in Apple Music, where they can listen and download them for offline.
 function AddToAppleMusic({ albumId, single }: { albumId: string; single: boolean }) {
   const showToast = useToast();
+  const { t } = useTranslation();
   const [state, setState] = useState<"idle" | "adding" | "added">("idle");
   if (!appleMusicSupported) return null;
 
@@ -545,11 +552,11 @@ function AddToAppleMusic({ albumId, single }: { albumId: string; single: boolean
     try {
       const { added } = await addReleaseToAppleMusic(albumId);
       setState("added");
-      showToast(`Added ${added} ${added === 1 ? "song" : "songs"} to "My Feeds" in Apple Music`, "success");
+      showToast(t("post.appleMusic.added", { count: added }), "success");
     } catch (e) {
       setState("idle");
       if (e instanceof AppleMusicError && e.code === "cancelled") return;
-      showToast(e instanceof Error ? e.message : "Couldn't add to Apple Music", "error");
+      showToast(e instanceof Error ? e.message : t("post.appleMusic.failed"), "error");
     }
   };
 
@@ -569,12 +576,11 @@ function AddToAppleMusic({ albumId, single }: { albumId: string; single: boolean
           <ListPlus size={16} color={APPLE_MUSIC_RED} />
         )}
         <Text style={styles.openText}>
-          {state === "added" ? "Added to Apple Music" : single ? "Add song to Apple Music" : "Add album to Apple Music"}
+          {state === "added" ? t("post.appleMusic.done") : single ? t("post.appleMusic.addSong") : t("post.appleMusic.addAlbum")}
         </Text>
       </Pressable>
       <Text style={[styles.muted, { textAlign: "center", fontSize: 12 }]}>
-        Goes into your "My Feeds" playlist. Needs an Apple Music subscription. Turn on Automatic Downloads in Apple Music to
-        keep the songs offline.
+        {t("post.appleMusic.note")}
       </Text>
     </View>
   );
@@ -603,10 +609,11 @@ function YouTubeMusicPlayer({ videoIds }: { videoIds: string[] }) {
 // playlist, where the songs can be played or downloaded (with Premium).
 function AddToYouTubeMusic({ videoIds, kind }: { videoIds: string[]; kind: string }) {
   const showToast = useToast();
+  const { t } = useTranslation();
   const youtube = useYouTubeConnection();
   const [state, setState] = useState<"idle" | "adding" | "added">("idle");
   const connected = youtube.status === "connected";
-  const what = kind === "video" ? "video" : kind === "single" ? "song" : kind === "ep" ? "EP" : "album";
+  const what = kind === "video" ? "video" : kind === "single" ? "song" : kind === "ep" ? "ep" : "album";
 
   const add = async () => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -620,13 +627,15 @@ function AddToYouTubeMusic({ videoIds, kind }: { videoIds: string[]; kind: strin
       setState("added");
       showToast(
         added > 0
-          ? `Added ${added} ${added === 1 ? (kind === "video" ? "video" : "song") : kind === "video" ? "videos" : "songs"} to "My Feeds" in YouTube Music`
-          : `Already in your "My Feeds" playlist`,
+          ? kind === "video"
+            ? t("post.ytMusic.addedVideos", { count: added })
+            : t("post.ytMusic.addedSongs", { count: added })
+          : t("post.ytMusic.already"),
         "success",
       );
     } catch (e) {
       setState("idle");
-      showToast(e instanceof Error ? e.message : "Couldn't add to YouTube Music", "error");
+      showToast(e instanceof Error ? e.message : t("post.ytMusic.failed"), "error");
     }
   };
 
@@ -646,11 +655,11 @@ function AddToYouTubeMusic({ videoIds, kind }: { videoIds: string[]; kind: strin
           <ListPlus size={16} color={YOUTUBE_MUSIC_RED} />
         )}
         <Text style={styles.openText}>
-          {state === "added" ? "Added to YouTube Music" : connected ? `Add ${what} to YouTube Music` : "Connect YouTube to add it"}
+          {state === "added" ? t("post.ytMusic.done") : connected ? t(`post.ytMusic.add.${what}` as const) : t("post.ytMusic.connectToAdd")}
         </Text>
       </Pressable>
       <Text style={[styles.muted, { textAlign: "center", fontSize: 12 }]}>
-        Goes into your "My Feeds" playlist. With YouTube Music Premium you can download it for offline listening.
+        {t("post.ytMusic.note")}
       </Text>
     </View>
   );
@@ -671,7 +680,7 @@ function AudiobookCard({ media }: { media: PostEmbed }) {
         <View style={{ flex: 1, gap: 4 }}>
           {media.label ? <Text style={styles.audiobookLabel}>{media.label.toUpperCase()}</Text> : null}
           <Text style={styles.muted}>
-            {html ? "Sample from Apple Books. The full book plays in Apple Books." : "No sample for this one. The full book plays in Apple Books."}
+            {html ? i18n.t("post.books.sample") : i18n.t("post.books.noSample")}
           </Text>
         </View>
       </View>
@@ -684,7 +693,7 @@ function AudiobookCard({ media }: { media: PostEmbed }) {
             mediaPlaybackRequiresUserAction
             scrollEnabled={false}
             style={{ backgroundColor: "transparent" }}
-            accessibilityLabel="Audiobook sample"
+            accessibilityLabel={i18n.t("post.books.sampleLabel")}
           />
         </View>
       ) : null}
@@ -728,6 +737,7 @@ function PodcastPlayer({ media, progressId, onFinished }: { media: PostEmbed; pr
   const resumed = useRef(false);
   const [speed, setSpeed] = useState(1);
   const [resumeAt, setResumeAt] = useState<number | null>(null);
+  const { t } = useTranslation();
 
   useEffect(() => {
     resumed.current = false;
@@ -794,8 +804,8 @@ function PodcastPlayer({ media, progressId, onFinished }: { media: PostEmbed; pr
       <View style={styles.podcastTop}>
         {media.url ? <Image source={{ uri: media.url }} style={styles.podcastArt} contentFit="cover" /> : null}
         <View style={{ flex: 1, gap: 2 }}>
-          <Text style={styles.muted}>{media.duration ? `${formatClock(media.duration)} long` : "Full episode"}{localFolder ? " · Downloaded" : ""}</Text>
-          {resumeAt != null ? <Text style={styles.podcastResume}>Resumes at {formatClock(resumeAt)}</Text> : null}
+          <Text style={styles.muted}>{media.duration ? t("post.podcast.length", { time: formatClock(media.duration) }) : t("post.podcast.full")}{localFolder ? " · " + t("post.podcast.downloaded") : ""}</Text>
+          {resumeAt != null ? <Text style={styles.podcastResume}>{t("post.podcast.resumes", { time: formatClock(resumeAt) })}</Text> : null}
         </View>
       </View>
       <View style={styles.podcastAudio}>
@@ -812,17 +822,17 @@ function PodcastPlayer({ media, progressId, onFinished }: { media: PostEmbed; pr
           mediaPlaybackRequiresUserAction
           scrollEnabled={false}
           style={{ backgroundColor: "transparent" }}
-          accessibilityLabel="Podcast player"
+          accessibilityLabel={t("post.podcast.player")}
         />
       </View>
       <View style={styles.podcastControls}>
-        <Pressable onPress={() => skip(-15)} style={styles.podcastBtn} accessibilityRole="button" accessibilityLabel="Back 15 seconds">
-          <Text style={styles.podcastBtnText}>Back 15s</Text>
+        <Pressable onPress={() => skip(-15)} style={styles.podcastBtn} accessibilityRole="button" accessibilityLabel={t("post.podcast.back15Label")}>
+          <Text style={styles.podcastBtnText}>{t("post.podcast.back15")}</Text>
         </Pressable>
-        <Pressable onPress={() => skip(30)} style={styles.podcastBtn} accessibilityRole="button" accessibilityLabel="Forward 30 seconds">
-          <Text style={styles.podcastBtnText}>Forward 30s</Text>
+        <Pressable onPress={() => skip(30)} style={styles.podcastBtn} accessibilityRole="button" accessibilityLabel={t("post.podcast.forward30Label")}>
+          <Text style={styles.podcastBtnText}>{t("post.podcast.forward30")}</Text>
         </Pressable>
-        <Pressable onPress={changeSpeed} style={styles.podcastBtn} accessibilityRole="button" accessibilityLabel="Playback speed">
+        <Pressable onPress={changeSpeed} style={styles.podcastBtn} accessibilityRole="button" accessibilityLabel={t("post.podcast.speed")}>
           <Text style={styles.podcastBtnText}>{speed}×</Text>
         </Pressable>
       </View>
@@ -832,15 +842,14 @@ function PodcastPlayer({ media, progressId, onFinished }: { media: PostEmbed; pr
 
 function formatPostDate(iso: string): string {
   const d = new Date(iso);
-  const time = d.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
-  const date = d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
-  return `${time} · ${date}`;
+  return `${formatTime(d)} · ${formatDate(d)}`;
 }
 
 export default function PostReaderScreen() {
   const { itemId } = useLocalSearchParams<{ itemId?: string }>();
   const insets = useSafeAreaInsets();
   const showToast = useToast();
+  const { t } = useTranslation();
   const updateStatus = useUpdateItemStatus();
 
   const itemQ = useQuery({
@@ -908,7 +917,7 @@ export default function PostReaderScreen() {
       {
         onError: () => {
           setStatus(previous);
-          showToast("Couldn't update status", "error");
+          showToast(t("feed.statusFailed"), "error");
         },
       },
     );
@@ -919,9 +928,9 @@ export default function PostReaderScreen() {
       <View style={[styles.screen, styles.center, { paddingTop: insets.top }]}>
         {itemQ.isError && localChecked ? (
           <>
-            <Text style={styles.muted}>Couldn't load this post. Check your connection.</Text>
+            <Text style={styles.muted}>{t("post.loadFailed")}</Text>
             <Pressable onPress={() => router.back()} style={[styles.openBtn, { paddingHorizontal: 20, marginTop: 16 }]}>
-              <Text style={styles.openText}>Close</Text>
+              <Text style={styles.openText}>{t("common.close")}</Text>
             </Pressable>
           </>
         ) : (
@@ -974,7 +983,7 @@ export default function PostReaderScreen() {
   return (
     <View style={[styles.screen, { paddingTop: insets.top }]}>
       <View style={styles.header}>
-        <Pressable onPress={() => router.back()} hitSlop={10} style={styles.headerBtn} accessibilityLabel="Close">
+        <Pressable onPress={() => router.back()} hitSlop={10} style={styles.headerBtn} accessibilityLabel={t("common.close")}>
           <X size={22} color={Colors.textPrimary} />
         </Pressable>
         <View style={styles.headerMeta}>
@@ -1007,7 +1016,7 @@ export default function PostReaderScreen() {
                 javaScriptEnabled
                 scrollEnabled={!spotifyRelease.embed_url.includes("/track/")}
                 injectedJavaScriptBeforeContentLoaded={SPOTIFY_NO_DRM_JS}
-            accessibilityLabel="Spotify player"
+            accessibilityLabel={t("post.spotify.player")}
               />
             </View>
             {item.url ? (
@@ -1017,7 +1026,7 @@ export default function PostReaderScreen() {
                 accessibilityRole="link"
               >
                 <SpotifyLogo />
-                <Text style={styles.openText}>Open in Spotify</Text>
+                <Text style={styles.openText}>{t("platforms.spotify.openLabel")}</Text>
               </Pressable>
             ) : null}
           </View>
@@ -1057,7 +1066,7 @@ export default function PostReaderScreen() {
               accessibilityRole="link"
             >
               <SpotifyLogo />
-              <Text style={styles.openText}>Find on Spotify</Text>
+              <Text style={styles.openText}>{t("post.spotify.find")}</Text>
             </Pressable>
           </View>
         ) : platform === "tiktok" && tiktokVideoId && photos.length === 0 && !video?.local_player ? (
@@ -1079,7 +1088,7 @@ export default function PostReaderScreen() {
 
         {analysis?.short_summary || keyPoints.length > 0 ? (
           <View style={styles.summaryBox}>
-            <Text style={styles.summaryLabel}>{platform === "reddit" ? "THREAD SUMMARY" : "SUMMARY"}</Text>
+            <Text style={styles.summaryLabel}>{platform === "reddit" ? t("post.threadSummary") : t("post.summary")}</Text>
             {analysis?.short_summary ? <Text style={styles.summaryText}>{analysis.short_summary}</Text> : null}
             {keyPoints.map((p) => (
               <Text key={p} style={styles.summaryPoint}>• {p}</Text>
@@ -1090,7 +1099,7 @@ export default function PostReaderScreen() {
         {/* YouTube videos opened from Downloads: the key moments, to read offline. */}
         {platform === "youtube" && (analysis?.key_moments ?? []).length > 0 ? (
           <View style={styles.summaryBox}>
-            <Text style={styles.summaryLabel}>KEY MOMENTS</Text>
+            <Text style={styles.summaryLabel}>{t("post.keyMoments")}</Text>
             {(analysis?.key_moments ?? []).map((m) => (
               <Text key={`${m.seconds}-${m.text}`} style={styles.summaryPoint}>
                 <Text style={{ color: Colors.accent, fontWeight: "700" }}>{formatClock(m.seconds)}</Text>  {m.text}
@@ -1107,7 +1116,7 @@ export default function PostReaderScreen() {
             {metrics.views || metrics.plays ? (
               <>
                 {" · "}
-                <Text style={styles.dateLineStrong}>{formatCount(metrics.views || metrics.plays)}</Text> Views
+                <Text style={styles.dateLineStrong}>{formatCount(metrics.views || metrics.plays)}</Text>{" " + t("post.viewsWord", { count: metrics.views || metrics.plays || 0 })}
               </>
             ) : null}
           </Text>
@@ -1117,24 +1126,24 @@ export default function PostReaderScreen() {
           <View style={styles.xBar}>
             <View style={styles.xBarEnd}>
               <BarButton
-                label={liked ? "Remove from Saved" : "Like (save in My Feeds)"}
+                label={liked ? t("post.actions.unlike") : t("post.actions.like")}
                 selected={liked}
                 onPress={() => changeStatus(liked ? "watched" : "liked")}
                 icon={<Heart size={22} color={liked ? IG_RED : Colors.textPrimary} fill={liked ? IG_RED : "transparent"} />}
                 value={formatCount((metrics.likes ?? 0) + (liked ? 1 : 0))}
               />
               <BarButton
-                label="Comment on Instagram"
+                label={t("post.actions.commentOn", { platform: "Instagram" })}
                 onPress={() => openExternalLink(item.url)}
                 icon={<MessageCircle size={22} color={Colors.textPrimary} style={{ transform: [{ scaleX: -1 }] }} />}
                 value={formatCount(metrics.comments)}
               />
-              <BarButton label="Share" onPress={share} icon={<Send size={21} color={Colors.textPrimary} />} />
+              <BarButton label={t("post.actions.share")} onPress={share} icon={<Send size={21} color={Colors.textPrimary} />} />
             </View>
             <View style={styles.barGroup}>
               {downloadButton}
               <BarButton
-                label={bookmarked ? "Remove from Read Later" : "Save (Read Later)"}
+                label={bookmarked ? t("post.actions.unsave") : t("post.actions.save")}
                 selected={bookmarked}
                 onPress={() => changeStatus(bookmarked ? "not_watched" : "watch_later")}
                 icon={<Bookmark size={22} color={Colors.textPrimary} fill={bookmarked ? Colors.textPrimary : "transparent"} />}
@@ -1146,20 +1155,20 @@ export default function PostReaderScreen() {
           <View style={styles.xBar}>
             <View style={{ flexDirection: "row", alignItems: "center" }}>
               <BarButton
-                label={liked ? "Remove from Saved" : "Like (save in My Feeds)"}
+                label={liked ? t("post.actions.unlike") : t("post.actions.like")}
                 selected={liked}
                 onPress={() => changeStatus(liked ? "watched" : "liked")}
                 icon={<Heart size={22} color={liked ? TIKTOK_RED : Colors.textPrimary} fill={liked ? TIKTOK_RED : "transparent"} />}
                 value={formatCount((metrics.likes ?? 0) + (liked ? 1 : 0))}
               />
               <BarButton
-                label="Comment on TikTok"
+                label={t("post.actions.commentOn", { platform: "TikTok" })}
                 onPress={() => { if (item.url) openExternalLink(item.url); }}
                 icon={<MessageCircle size={22} color={Colors.textPrimary} style={{ transform: [{ scaleX: -1 }] }} />}
                 value={formatCount(metrics.comments)}
               />
               <BarButton
-                label={bookmarked ? "Remove from Read Later" : "Save (Read Later)"}
+                label={bookmarked ? t("post.actions.unsave") : t("post.actions.save")}
                 selected={bookmarked}
                 onPress={() => changeStatus(bookmarked ? "not_watched" : "watch_later")}
                 icon={<Bookmark size={22} color={bookmarked ? TIKTOK_YELLOW : Colors.textPrimary} fill={bookmarked ? TIKTOK_YELLOW : "transparent"} />}
@@ -1168,7 +1177,7 @@ export default function PostReaderScreen() {
             </View>
             <View style={styles.barGroup}>
               {downloadButton}
-              <BarButton label="Share" onPress={share} icon={<Send size={21} color={Colors.textPrimary} />} value={formatCount(metrics.reposts)} />
+              <BarButton label={t("post.actions.share")} onPress={share} icon={<Send size={21} color={Colors.textPrimary} />} value={formatCount(metrics.reposts)} />
             </View>
           </View>
         ) : platform === "apple_music" || platform === "apple_podcasts" || platform === "apple_books" || platform === "youtube_music" || platform === "spotify" ? (
@@ -1176,7 +1185,7 @@ export default function PostReaderScreen() {
           <View style={styles.xBar}>
             <View style={{ flexDirection: "row", alignItems: "center" }}>
               <BarButton
-                label={liked ? "Remove from Saved" : "Like (save in My Feeds)"}
+                label={liked ? t("post.actions.unlike") : t("post.actions.like")}
                 selected={liked}
                 onPress={() => changeStatus(liked ? "watched" : "liked")}
                 icon={(() => {
@@ -1184,12 +1193,12 @@ export default function PostReaderScreen() {
                   return <Heart size={22} color={liked ? tint : Colors.textPrimary} fill={liked ? tint : "transparent"} />;
                 })()}
               />
-              <BarButton label="Share" onPress={share} icon={<ShareIcon size={21} color={Colors.textPrimary} />} />
+              <BarButton label={t("post.actions.share")} onPress={share} icon={<ShareIcon size={21} color={Colors.textPrimary} />} />
             </View>
             <View style={styles.barGroup}>
               {downloadButton}
               <BarButton
-                label={bookmarked ? "Remove from Later" : "Save for Later"}
+                label={bookmarked ? t("post.actions.unsaveLater") : t("post.actions.saveLater")}
                 selected={bookmarked}
                 onPress={() => changeStatus(bookmarked ? "not_watched" : "watch_later")}
                 icon={<Bookmark size={22} color={Colors.textPrimary} fill={bookmarked ? Colors.textPrimary : "transparent"} />}
@@ -1205,25 +1214,26 @@ export default function PostReaderScreen() {
               </View>
               <Text style={styles.barText}>{formatCount((metrics.likes ?? 0) + (liked ? 1 : 0))}</Text>
               <Text style={[styles.barText, { marginLeft: "auto" }]}>
-                {formatCount(metrics.comments)} comments{metrics.reposts ? ` · ${formatCount(metrics.reposts)} shares` : ""}
+                {t("post.commentsCount", { count: metrics.comments ?? 0, formatted: formatCount(metrics.comments) })}
+                {metrics.reposts ? " · " + t("post.sharesCount", { count: metrics.reposts, formatted: formatCount(metrics.reposts) }) : ""}
               </Text>
             </View>
             <View style={styles.liBar}>
               <LinkedInAction
-                label="Like"
+                label={t("post.actions.likeShort")}
                 active={liked}
                 activeColor={FACEBOOK_BLUE}
                 onPress={() => changeStatus(liked ? "watched" : "liked")}
                 icon={<ThumbsUp size={19} color={liked ? FACEBOOK_BLUE : Colors.textSecondary} fill={liked ? FACEBOOK_BLUE : "transparent"} />}
               />
               <LinkedInAction
-                label="Comment"
+                label={t("post.actions.comment")}
                 onPress={() => { if (item.url) openExternalLink(item.url); }}
                 icon={<MessageCircle size={19} color={Colors.textSecondary} />}
               />
-              <LinkedInAction label="Share" onPress={share} icon={<ShareIcon size={19} color={Colors.textSecondary} />} />
+              <LinkedInAction label={t("post.actions.shareShort")} onPress={share} icon={<ShareIcon size={19} color={Colors.textSecondary} />} />
               <LinkedInAction
-                label="Save"
+                label={t("post.actions.saveShort")}
                 active={bookmarked}
                 activeColor={FACEBOOK_BLUE}
                 onPress={() => changeStatus(bookmarked ? "not_watched" : "watch_later")}
@@ -1241,21 +1251,22 @@ export default function PostReaderScreen() {
               </View>
               <Text style={styles.barText}>{formatCount((metrics.likes ?? 0) + (liked ? 1 : 0))}</Text>
               <Text style={[styles.barText, { marginLeft: "auto" }]}>
-                {formatCount(metrics.comments)} comments · {formatCount(metrics.reposts)} reposts
+                {t("post.commentsCount", { count: metrics.comments ?? 0, formatted: formatCount(metrics.comments) })}
+                {" · " + t("post.repostsCount", { count: metrics.reposts ?? 0, formatted: formatCount(metrics.reposts) })}
               </Text>
             </View>
             <View style={styles.liBar}>
               <LinkedInAction
-                label="Like"
+                label={t("post.actions.likeShort")}
                 active={liked}
                 onPress={() => changeStatus(liked ? "watched" : "liked")}
                 icon={<ThumbsUp size={19} color={liked ? LINKEDIN_BLUE : Colors.textSecondary} fill={liked ? LINKEDIN_BLUE : "transparent"} />}
               />
-              <LinkedInAction label="Comment" onPress={() => openExternalLink(item.url)} icon={<MessageSquare size={19} color={Colors.textSecondary} />} />
-              <LinkedInAction label="Repost" onPress={() => openExternalLink(item.url)} icon={<Repeat2 size={19} color={Colors.textSecondary} />} />
-              <LinkedInAction label="Send" onPress={share} icon={<Send size={19} color={Colors.textSecondary} />} />
+              <LinkedInAction label={t("post.actions.comment")} onPress={() => openExternalLink(item.url)} icon={<MessageSquare size={19} color={Colors.textSecondary} />} />
+              <LinkedInAction label={t("post.actions.repost")} onPress={() => openExternalLink(item.url)} icon={<Repeat2 size={19} color={Colors.textSecondary} />} />
+              <LinkedInAction label={t("post.actions.send")} onPress={share} icon={<Send size={19} color={Colors.textSecondary} />} />
               <LinkedInAction
-                label="Save"
+                label={t("post.actions.saveShort")}
                 active={bookmarked}
                 onPress={() => changeStatus(bookmarked ? "not_watched" : "watch_later")}
                 icon={<Bookmark size={19} color={bookmarked ? LINKEDIN_BLUE : Colors.textSecondary} fill={bookmarked ? LINKEDIN_BLUE : "transparent"} />}
@@ -1268,19 +1279,19 @@ export default function PostReaderScreen() {
           <View style={styles.xBar}>
             <View style={styles.barGroup}>
             <BarButton
-              label="Reply on X"
+              label={t("post.actions.replyOn", { platform: "X" })}
               onPress={xPostId ? () => openExternalLink(`https://x.com/intent/post?in_reply_to=${xPostId}`) : undefined}
               icon={<MessageCircle size={19} color={Colors.textSecondary} />}
               value={formatCount(metrics.replies)}
             />
             <BarButton
-              label="Repost on X"
+              label={t("post.actions.repostOn", { platform: "X" })}
               onPress={xPostId ? () => openExternalLink(`https://x.com/intent/retweet?tweet_id=${xPostId}`) : undefined}
               icon={<Repeat2 size={19} color={Colors.textSecondary} />}
               value={formatCount(metrics.reposts)}
             />
             <BarButton
-              label={liked ? "Remove from Saved" : "Like (save in My Feeds)"}
+              label={liked ? t("post.actions.unlike") : t("post.actions.like")}
               selected={liked}
               onPress={() => changeStatus(liked ? "watched" : "liked")}
               icon={<Heart size={19} color={liked ? X_PINK : Colors.textSecondary} fill={liked ? X_PINK : "transparent"} />}
@@ -1288,7 +1299,7 @@ export default function PostReaderScreen() {
               valueColor={liked ? X_PINK : undefined}
             />
             <BarButton
-              label={bookmarked ? "Remove from Read Later" : "Bookmark (Read Later)"}
+              label={bookmarked ? t("post.actions.unsave") : t("post.actions.bookmark")}
               selected={bookmarked}
               onPress={() => changeStatus(bookmarked ? "not_watched" : "watch_later")}
               icon={<Bookmark size={19} color={bookmarked ? X_BLUE : Colors.textSecondary} fill={bookmarked ? X_BLUE : "transparent"} />}
@@ -1298,7 +1309,7 @@ export default function PostReaderScreen() {
             </View>
             <View style={styles.barGroup}>
               {downloadButton}
-              <BarButton label="Share" onPress={share} icon={<ShareIcon size={19} color={Colors.textSecondary} />} />
+              <BarButton label={t("post.actions.share")} onPress={share} icon={<ShareIcon size={19} color={Colors.textSecondary} />} />
             </View>
           </View>
         ) : platform === "github" ? (
@@ -1306,7 +1317,7 @@ export default function PostReaderScreen() {
           <View style={styles.xBar}>
             <View style={styles.barGroup}>
             <BarButton
-              label={liked ? "Remove from Saved" : "Star (save in My Feeds)"}
+              label={liked ? t("post.actions.unlike") : t("post.actions.star")}
               selected={liked}
               onPress={() => changeStatus(liked ? "watched" : "liked")}
               icon={<Star size={19} color={liked ? GITHUB_STAR : Colors.textSecondary} fill={liked ? GITHUB_STAR : "transparent"} />}
@@ -1314,13 +1325,13 @@ export default function PostReaderScreen() {
               valueColor={liked ? GITHUB_STAR : undefined}
             />
             <BarButton
-              label="Fork on GitHub"
+              label={t("post.actions.forkOn")}
               onPress={() => openExternalLink(item.url)}
               icon={<GitFork size={19} color={Colors.textSecondary} />}
               value={formatCount(metrics.forks)}
             />
             <BarButton
-              label={bookmarked ? "Remove from Read Later" : "Save (Read Later)"}
+              label={bookmarked ? t("post.actions.unsave") : t("post.actions.save")}
               selected={bookmarked}
               onPress={() => changeStatus(bookmarked ? "not_watched" : "watch_later")}
               icon={<Bookmark size={19} color={bookmarked ? X_BLUE : Colors.textSecondary} fill={bookmarked ? X_BLUE : "transparent"} />}
@@ -1328,7 +1339,7 @@ export default function PostReaderScreen() {
             </View>
             <View style={styles.barGroup}>
               {downloadButton}
-              <BarButton label="Share" onPress={share} icon={<ShareIcon size={19} color={Colors.textSecondary} />} />
+              <BarButton label={t("post.actions.share")} onPress={share} icon={<ShareIcon size={19} color={Colors.textSecondary} />} />
             </View>
           </View>
         ) : platform === "reddit" ? (
@@ -1339,7 +1350,7 @@ export default function PostReaderScreen() {
                 style={styles.voteBtn}
                 hitSlop={4}
                 accessibilityRole="button"
-                accessibilityLabel={liked ? "Remove upvote (Saved)" : "Upvote (save in My Feeds)"}
+                accessibilityLabel={liked ? t("post.actions.unupvote") : t("post.actions.upvote")}
                 accessibilityState={{ selected: liked }}
               >
                 <ArrowBigUp size={22} color={liked ? "#FFFFFF" : Colors.textSecondary} fill={liked ? "#FFFFFF" : "transparent"} />
@@ -1352,7 +1363,7 @@ export default function PostReaderScreen() {
                 style={styles.voteBtn}
                 hitSlop={4}
                 accessibilityRole="button"
-                accessibilityLabel="Downvote (mark as read)"
+                accessibilityLabel={t("post.actions.downvote")}
               >
                 <ArrowBigDown size={22} color={liked ? "#FFFFFF" : Colors.textSecondary} />
               </Pressable>
@@ -1361,7 +1372,7 @@ export default function PostReaderScreen() {
               onPress={() => openExternalLink(item.url)}
               style={styles.redditPill}
               accessibilityRole="button"
-              accessibilityLabel="Open comments on Reddit"
+              accessibilityLabel={t("post.actions.redditComments")}
             >
               <MessageSquare size={18} color={Colors.textPrimary} />
               <Text style={styles.redditPillText}>{formatCount(metrics.comments)}</Text>
@@ -1370,15 +1381,15 @@ export default function PostReaderScreen() {
               onPress={() => changeStatus(bookmarked ? "not_watched" : "watch_later")}
               style={styles.redditPill}
               accessibilityRole="button"
-              accessibilityLabel={bookmarked ? "Unsave (Read Later)" : "Save (Read Later)"}
+              accessibilityLabel={bookmarked ? t("post.actions.unsaveReddit") : t("post.actions.save")}
               accessibilityState={{ selected: bookmarked }}
             >
               <Bookmark size={18} color={bookmarked ? X_BLUE : Colors.textPrimary} fill={bookmarked ? X_BLUE : "transparent"} />
-              <Text style={[styles.redditPillText, bookmarked && { color: X_BLUE }]}>{bookmarked ? "Saved" : "Save"}</Text>
+              <Text style={[styles.redditPillText, bookmarked && { color: X_BLUE }]}>{bookmarked ? t("post.actions.savedShort") : t("post.actions.saveShort")}</Text>
             </Pressable>
-            <Pressable onPress={share} style={styles.redditPill} accessibilityRole="button" accessibilityLabel="Share">
+            <Pressable onPress={share} style={styles.redditPill} accessibilityRole="button" accessibilityLabel={t("post.actions.share")}>
               <ShareIcon size={18} color={Colors.textPrimary} />
-              <Text style={styles.redditPillText}>Share</Text>
+              <Text style={styles.redditPillText}>{t("post.actions.shareShort")}</Text>
             </Pressable>
             <View style={{ marginLeft: "auto" }}>{downloadButton}</View>
           </View>
@@ -1399,7 +1410,7 @@ export default function PostReaderScreen() {
             accessibilityState={{ selected: read }}
           >
             <Check size={16} color={read ? Colors.success : Colors.textPrimary} />
-            <Text style={[styles.openText, read && { color: Colors.success }]}>{read ? "Read" : "Mark as read"}</Text>
+            <Text style={[styles.openText, read && { color: Colors.success }]}>{read ? t("post.read") : t("post.markRead")}</Text>
           </Pressable>
           <Pressable
             onPress={() => openExternalLink(item.url)}
@@ -1479,7 +1490,7 @@ function MediaCarousel({ slides, progressId }: { slides: PostEmbed[]; progressId
                 ) : (
                   <>
                     {poster ? (
-                      <Pressable style={styles.carouselImage} onPress={() => setViewerAt(i)} accessibilityLabel="Open full screen">
+                      <Pressable style={styles.carouselImage} onPress={() => setViewerAt(i)} accessibilityLabel={i18n.t("post.openFullScreen")}>
                         <Image source={{ uri: poster }} style={styles.carouselImage} contentFit={isVideo ? "cover" : "contain"} />
                       </Pressable>
                     ) : null}
@@ -1497,7 +1508,7 @@ function MediaCarousel({ slides, progressId }: { slides: PostEmbed[]; progressId
         <View style={styles.carouselCounter} pointerEvents="none">
           <Text style={styles.carouselCounterText}>{page + 1} / {slides.length}</Text>
         </View>
-        <Pressable style={styles.expandBtn} onPress={() => setViewerAt(page)} hitSlop={8} accessibilityLabel="Full screen">
+        <Pressable style={styles.expandBtn} onPress={() => setViewerAt(page)} hitSlop={8} accessibilityLabel={i18n.t("post.fullScreen")}>
           <Maximize2 size={16} color="#fff" />
         </Pressable>
       </View>
@@ -1524,11 +1535,11 @@ function ExpandableMedia({ media, progressId }: { media: PostEmbed; progressId?:
         // Paused (unmounted, position saved) while the full screen player is open
         open ? <View style={styles.video} /> : <PostVideo media={media} progressId={progressId} />
       ) : (
-        <Pressable onPress={() => setOpen(true)} accessibilityLabel="Open photo full screen">
+        <Pressable onPress={() => setOpen(true)} accessibilityLabel={i18n.t("post.openPhotoFullScreen")}>
           <Image source={{ uri: media.url || media.image || "" }} style={styles.image} contentFit="cover" />
         </Pressable>
       )}
-      <Pressable style={styles.expandBtn} onPress={() => setOpen(true)} hitSlop={8} accessibilityLabel="Full screen">
+      <Pressable style={styles.expandBtn} onPress={() => setOpen(true)} hitSlop={8} accessibilityLabel={i18n.t("post.fullScreen")}>
         <Maximize2 size={16} color="#fff" />
       </Pressable>
       {open ? (
@@ -1582,7 +1593,7 @@ function FullscreenViewer({ slides, startIndex, progressId, onClose }: { slides:
               <Text style={styles.carouselCounterText}>{page + 1} / {slides.length}</Text>
             </View>
           ) : null}
-          <Pressable onPress={onClose} style={styles.fullscreenClose} hitSlop={10} accessibilityLabel="Close full screen">
+          <Pressable onPress={onClose} style={styles.fullscreenClose} hitSlop={10} accessibilityLabel={i18n.t("post.closeFullScreen")}>
             <X size={20} color="#fff" />
           </Pressable>
         </View>

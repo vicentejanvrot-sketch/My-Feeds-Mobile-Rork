@@ -252,8 +252,15 @@ export function isNewPostsCard(videoId: string | null | undefined): boolean {
 
 export function formatCount(num: number | null | undefined): string {
   if (num === null || num === undefined) return "0";
-  if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M`;
-  if (num >= 1000) return `${(num / 1000).toFixed(1)}K`;
+  const one = (n: number) => {
+    try {
+      return n.toLocaleString(i18n.language === "pt-BR" ? "pt-BR" : "en-US", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+    } catch {
+      return n.toFixed(1);
+    }
+  };
+  if (num >= 1000000) return i18n.t("format.millions", { value: one(num / 1000000) });
+  if (num >= 1000) return i18n.t("format.thousands", { value: one(num / 1000) });
   return String(num);
 }
 
