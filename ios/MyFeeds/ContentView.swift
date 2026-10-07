@@ -5,6 +5,7 @@ struct ContentView: View {
     @Environment(AuthStore.self) private var auth
     @Environment(AppRouter.self) private var router
     @State private var splashDone = false
+    private let language = AppLanguage.live
 
     private var isSignedIn: Bool {
         if case .authenticated = auth.status { return true }
@@ -23,8 +24,13 @@ struct ContentView: View {
                     .tint(Theme.accent)
             case .unauthenticated:
                 AuthFlowView()
+                    .id(language.code)
             case .authenticated:
+                // Rebuilt when the language changes in Settings, so every
+                // screen redraws in the new language. The selected tab lives
+                // in AppRouter, so the user stays on Settings.
                 MainTabView()
+                    .id(language.code)
             }
 
             // Darker background behind sheets that ask for it (see SheetDimmer).
@@ -67,6 +73,9 @@ struct ContentView: View {
                 router.handleIncoming(url, signedIn: isSignedIn)
             }
         }
+        // Dates and numbers follow the language picked in Settings, including
+        // in the player and post reader presented above.
+        .environment(\.locale, language.locale)
     }
 }
 

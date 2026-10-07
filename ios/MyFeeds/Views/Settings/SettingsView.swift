@@ -115,8 +115,8 @@ struct SettingsView: View {
     }
 
     /// Language: Automatic follows the device; English and Português (Brasil)
-    /// set this app's language override (kept on this phone). iOS applies it
-    /// when the app starts, so a change shows after My Feeds is reopened.
+    /// set this app's language override (kept on this phone). The app switches
+    /// right away (see AppLanguage), no reopen needed.
     private var languageCard: some View {
         settingsCard(icon: "globe", iconColor: Theme.accent, title: String(localized: "Language"), description: nil) {
             VStack(spacing: 0) {
@@ -161,16 +161,6 @@ struct SettingsView: View {
                     }
                     .buttonStyle(.plain)
                 }
-            }
-            if languageChoice != AppLanguage.launchChoice {
-                HStack(spacing: 8) {
-                    Image(systemName: "arrow.clockwise")
-                        .font(.system(size: 12, weight: .semibold))
-                    Text("Reopen My Feeds to apply")
-                        .font(.system(size: 12, weight: .medium))
-                }
-                .foregroundStyle(Theme.warning)
-                .padding(.top, 8)
             }
         }
     }
