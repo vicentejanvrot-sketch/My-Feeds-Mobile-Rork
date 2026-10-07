@@ -73,7 +73,7 @@ async function callYouTubeApi<T = any>(body: Record<string, unknown>): Promise<T
   const { data, error } = await supabase.functions.invoke("youtube-api", { body });
   if (error) {
     // Non-2xx responses carry the real message in the response body.
-    let message = error.message || "YouTube request failed";
+    let message = error.message || i18n.t("youtube.requestFailed");
     try {
       const ctx = (error as any).context;
       if (ctx && typeof ctx.json === "function") {

@@ -139,7 +139,8 @@
     "sessionExpired": "A sessão do YouTube expirou — reconecte o YouTube",
     "disconnected": "YouTube desconectado",
     "notConnected": "O YouTube não está conectado",
-    "connectInSettings": "Conecte o YouTube em Configurações primeiro"
+    "connectInSettings": "Conecte o YouTube em Configurações primeiro",
+    "requestFailed": "O pedido ao YouTube falhou"
   },
   "tabs": {
     "dashboard": "Painel",

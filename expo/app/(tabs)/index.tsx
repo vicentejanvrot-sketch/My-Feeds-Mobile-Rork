@@ -262,14 +262,14 @@ export default function DashboardScreen() {
             return {
               failed: true,
               newCount: 0,
-              error: (polled.error_summary as string) || "An unknown error occurred",
+              error: (polled.error_summary as string) || t("runs.unknownError"),
             };
           }
         }
         await new Promise((r) => setTimeout(r, 1500));
       }
     },
-    [],
+    [t],
   );
 
   const runOne = useCallback(

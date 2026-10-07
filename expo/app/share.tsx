@@ -99,7 +99,7 @@ export default function ShareScreen() {
       setError(e instanceof Error ? e.message : t("share.readLinkFailed"));
       setStep("error");
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     if (status === "authenticated" && shared.trim()) void lookUp(shared);

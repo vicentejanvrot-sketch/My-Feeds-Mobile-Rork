@@ -1,5 +1,4 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import "@/lib/i18n";
 import { Stack, router } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import React, { useEffect, useRef, useState } from "react";
@@ -15,6 +14,7 @@ import { RunningOverlayProvider, RunningOverlay } from "@/lib/running-overlay";
 import { YouTubeConnectionProvider } from "@/lib/useYouTubeConnection";
 import { Colors } from "@/constants/colors";
 import { ShareIntentProvider, useShareIntentContext } from "expo-share-intent";
+// Also sets up i18next before any screen renders.
 import { loadLanguagePreference, syncDeviceLanguage } from "@/lib/i18n";
 
 SplashScreen.preventAutoHideAsync();

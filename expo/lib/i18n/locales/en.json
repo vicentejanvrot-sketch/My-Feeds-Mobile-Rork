@@ -139,7 +139,8 @@
     "sessionExpired": "YouTube session expired — reconnect YouTube",
     "disconnected": "YouTube disconnected",
     "notConnected": "YouTube is not connected",
-    "connectInSettings": "Connect YouTube in Settings first"
+    "connectInSettings": "Connect YouTube in Settings first",
+    "requestFailed": "YouTube request failed"
   },
   "tabs": {
     "dashboard": "Dashboard",
