@@ -6,6 +6,7 @@
 import { supabase } from "@/lib/supabase";
 import { extractEdgeFunctionErrorMessage } from "@/lib/hooks";
 import type { Platform } from "@/lib/platforms";
+import i18n from "@/lib/i18n";
 
 export const UNSORTED_ID = "__unsorted__";
 
@@ -33,7 +34,7 @@ export async function previewShare(shared: string): Promise<SharePreview> {
   const { data, error } = await supabase.functions.invoke("add-source", { body: { preview: true, value: shared } });
   if (data?.preview) return data.preview as SharePreview;
   if (error) throw new Error(await extractEdgeFunctionErrorMessage(error));
-  throw new Error(data?.error ?? "Couldn't read that link.");
+  throw new Error(data?.error ?? i18n.t("share.readLinkFailed"));
 }
 
 export interface AddedChannel {
@@ -69,7 +70,7 @@ export async function addShared(args: {
       // The main account has to go in; their other accounts are best effort.
       if (i === 0 && added.length === 0) {
         if (data?.error) throw new Error(data.error);
-        throw new Error(error ? await extractEdgeFunctionErrorMessage(error) : "Couldn't add that account.");
+        throw new Error(error ? await extractEdgeFunctionErrorMessage(error) : i18n.t("errors.addAccountFailed"));
       }
       return added;
     }),
@@ -87,11 +88,11 @@ export async function undoShared(channels: AddedChannel[]): Promise<void> {
 // Reuses one with the same name instead of making a duplicate.
 export async function createCollection(name: string, existing: { id: string; name: string }[]): Promise<{ id: string; name: string }> {
   const clean = name.trim();
-  if (!clean) throw new Error("Give the collection a name.");
+  if (!clean) throw new Error(i18n.t("share.nameRequired"));
   const same = existing.find((c) => c.name.trim().toLowerCase() === clean.toLowerCase());
   if (same) return same;
   const { data: auth } = await supabase.auth.getUser();
-  if (!auth.user) throw new Error("Please sign in again.");
+  if (!auth.user) throw new Error(i18n.t("errors.signInAgain"));
   const { data, error } = await supabase.from("agents").insert({ name: clean, user_id: auth.user.id }).select("id, name").single();
   if (error) throw error;
   return { id: data.id as string, name: data.name as string };

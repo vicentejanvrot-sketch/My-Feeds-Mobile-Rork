@@ -190,5 +190,78 @@
     "foundNew_other": "<b>{{shown}}</b> vídeos novos encontrados",
     "sectionCollapse": "{{title}}, recolher",
     "sectionExpand": "{{title}}, expandir"
+  },
+  "runStatus": {
+    "running": "atualizando",
+    "success": "concluída",
+    "partial": "parcial",
+    "failed": "falhou",
+    "cancelled": "cancelada"
+  },
+  "itemStatus": {
+    "not_watched": "Novo",
+    "watched": "Visto",
+    "liked": "Curtido",
+    "watch_later": "Depois"
+  },
+  "channelFilter": {
+    "all": "Todos os canais",
+    "not_watched": "Novos",
+    "watched": "Vistos",
+    "liked": "Curtidos",
+    "watch_later": "Depois"
+  },
+  "overlay": {
+    "scanning": "Buscando vídeos novos nos canais…",
+    "foundPartial_one": "{{count}} vídeo novo encontrado (alguns canais não puderam ser verificados)",
+    "foundPartial_other": "{{count}} vídeos novos encontrados (alguns canais não puderam ser verificados)",
+    "partialNone": "Busca concluída — alguns canais não puderam ser verificados.",
+    "checkDetails": "Veja os detalhes da atualização para saber mais",
+    "complete": "Busca concluída",
+    "dismiss": "Toque em qualquer lugar para fechar",
+    "runningTitle": "🚀 Atualizando “{{name}}”",
+    "collectionsFinished": "Coleções concluídas",
+    "scanningChannels": "Verificando canais",
+    "initializing": "Iniciando…",
+    "successTitle": "☑️ “{{name}}” concluída!",
+    "errorTitle": "❌ “{{name}}” falhou"
+  },
+  "appUpdate": {
+    "requiredTitle": "Atualize o My Feeds",
+    "requiredBody": "Esta versão ({{current}}) não é mais suportada. Atualize para a versão {{latest}} para continuar usando o My Feeds.",
+    "updateNow": "Atualizar agora",
+    "availableTitle": "Nova versão disponível",
+    "availableBody": "A versão {{latest}} está pronta para instalar.",
+    "update": "Atualizar",
+    "later": "Depois"
+  },
+  "errors": {
+    "notSignedInRun": "Você não está conectado — entre na sua conta antes de atualizar uma coleção.",
+    "addChannelFailed": "Não foi possível adicionar esse canal.",
+    "notAuthenticated": "Não autenticado",
+    "deleteKeyFailed": "Não foi possível excluir a chave. Tente de novo.",
+    "addSourceFailed": "Não foi possível adicionar essa fonte.",
+    "addAccountFailed": "Não foi possível adicionar essa conta.",
+    "signInAgain": "Entre de novo, por favor.",
+    "signedOut": "Você saiu da conta. Entre de novo e tente outra vez."
+  },
+  "downloads": {
+    "unsupported": "Os downloads funcionam nos apps para iOS e Android.",
+    "already": "Já está baixando.",
+    "loadFailed": "Não foi possível carregar este item. Verifique sua conexão.",
+    "episodeFailed": "Não foi possível baixar o episódio.",
+    "failed": "Falha ao baixar."
+  },
+  "appleMusic": {
+    "requestFailed": "O pedido ao Apple Music falhou.",
+    "nativeOnly": "Use o app para iOS ou Android para isso.",
+    "notAllowed": "O acesso ao Apple Music não foi permitido."
+  },
+  "share": {
+    "readLinkFailed": "Não foi possível ler esse link.",
+    "nameRequired": "Dê um nome à coleção."
+  },
+  "alsoOn": {
+    "cantCombine": "Ainda não dá para juntar esses dois."
   }
 }

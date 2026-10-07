@@ -17,6 +17,7 @@ import { create } from "zustand";
 import { supabase } from "@/lib/supabase";
 import { withFreshMedia } from "@/lib/expired-media";
 import type { ItemWithAnalysis } from "@/lib/database";
+import i18n from "@/lib/i18n";
 
 export interface DownloadEntry {
   itemId: string;
@@ -191,10 +192,10 @@ function setProgress(itemId: string, value: number | null) {
  * episode that fails cancels the download.
  */
 export async function downloadItem(itemId: string): Promise<DownloadEntry> {
-  if (!downloadsSupported) throw new Error("Downloads work in the iOS and Android apps.");
+  if (!downloadsSupported) throw new Error(i18n.t("downloads.unsupported"));
   await loadDownloads();
   if (useDownloadsStore.getState().progress[itemId] !== undefined) {
-    throw new Error("Already downloading.");
+    throw new Error(i18n.t("downloads.already"));
   }
   setProgress(itemId, 0);
   const folder = itemFolder(itemId);
@@ -204,7 +205,7 @@ export async function downloadItem(itemId: string): Promise<DownloadEntry> {
       .select("*, item_analysis(*)")
       .eq("id", itemId)
       .single();
-    if (error || !data) throw new Error("Couldn't load this item. Check your connection.");
+    if (error || !data) throw new Error(i18n.t("downloads.loadFailed"));
     // Instagram's links expire a few days after the post was saved: renewed
     // first, so the photos and video actually download.
     const item = (await withFreshMedia(data as ItemWithAnalysis)) as ItemWithAnalysis;
@@ -263,7 +264,7 @@ export async function downloadItem(itemId: string): Promise<DownloadEntry> {
       });
       const result = await task.downloadAsync();
       if (!result || result.status < 200 || result.status >= 300) {
-        throw new Error("Couldn't download the episode.");
+        throw new Error(i18n.t("downloads.episodeFailed"));
       }
       audio.audio_url = LOCAL + file;
       await FileSystem.writeAsStringAsync(folder + "player.html", podcastPlayerHtml(file));
@@ -348,7 +349,7 @@ export async function downloadItem(itemId: string): Promise<DownloadEntry> {
     return entry;
   } catch (e) {
     await FileSystem.deleteAsync(folder, { idempotent: true }).catch(() => undefined);
-    throw e instanceof Error ? e : new Error("Download failed.");
+    throw e instanceof Error ? e : new Error(i18n.t("downloads.failed"));
   } finally {
     setProgress(itemId, null);
   }

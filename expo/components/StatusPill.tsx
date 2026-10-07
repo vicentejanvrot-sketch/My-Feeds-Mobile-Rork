@@ -1,6 +1,7 @@
 import { StyleSheet, Text, View } from "react-native";
 import { Colors } from "@/constants/colors";
 import type { RunStatus } from "@/lib/database";
+import { useTranslation } from "react-i18next";
 
 const CONFIG: Record<RunStatus, { label: string; color: string }> = {
   running: { label: "running", color: Colors.accent },
@@ -24,6 +25,7 @@ interface StatusPillProps {
 
 export function StatusPill({ status, compact, icon, label }: StatusPillProps) {
   const cfg = CONFIG[status] ?? CONFIG.cancelled;
+  const { t } = useTranslation();
   return (
     <View
       style={[
@@ -39,7 +41,7 @@ export function StatusPill({ status, compact, icon, label }: StatusPillProps) {
       <Text
         style={[styles.label, { color: cfg.color }, compact && styles.labelCompact]}
       >
-        {label ?? cfg.label}
+        {label ?? t(`runStatus.${status in CONFIG ? status : "cancelled"}` as const)}
       </Text>
     </View>
   );

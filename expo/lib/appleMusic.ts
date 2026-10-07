@@ -13,6 +13,7 @@ import * as SecureStore from "expo-secure-store";
 import * as WebBrowser from "expo-web-browser";
 import { Platform } from "react-native";
 import { supabase } from "@/lib/supabase";
+import i18n from "@/lib/i18n";
 
 const CONNECT_PAGE = "https://webapp.myfeeds.ca/apple-music-connect";
 const APP_RETURN_URL = Linking.createURL("apple-music-auth");
@@ -35,7 +36,7 @@ async function errorFrom(error: unknown, data: unknown): Promise<AppleMusicError
   } catch {
     // keep what we have
   }
-  return new AppleMusicError(body?.error || (error instanceof Error ? error.message : "Apple Music request failed."), body?.code);
+  return new AppleMusicError(body?.error || (error instanceof Error ? error.message : i18n.t("appleMusic.requestFailed")), body?.code);
 }
 
 async function getDeveloperToken(): Promise<string> {
@@ -50,14 +51,14 @@ export async function forgetAppleMusic() {
 
 /** Opens Apple's sign-in in the phone's browser and keeps the token it returns. */
 export async function connectAppleMusic(): Promise<string> {
-  if (!appleMusicSupported) throw new AppleMusicError("Use the iOS or Android app for this.");
+  if (!appleMusicSupported) throw new AppleMusicError(i18n.t("appleMusic.nativeOnly"));
   const developerToken = await getDeveloperToken();
   const url = `${CONNECT_PAGE}#dt=${encodeURIComponent(developerToken)}&return=${encodeURIComponent(APP_RETURN_URL)}`;
   const result = await WebBrowser.openAuthSessionAsync(url, APP_RETURN_URL);
-  if (result.type !== "success" || !result.url) throw new AppleMusicError("Apple Music access wasn't allowed.", "cancelled");
+  if (result.type !== "success" || !result.url) throw new AppleMusicError(i18n.t("appleMusic.notAllowed"), "cancelled");
   const { queryParams } = Linking.parse(result.url);
   const token = typeof queryParams?.token === "string" ? queryParams.token : null;
-  if (!token) throw new AppleMusicError("Apple Music access wasn't allowed.", "cancelled");
+  if (!token) throw new AppleMusicError(i18n.t("appleMusic.notAllowed"), "cancelled");
   await SecureStore.setItemAsync(TOKEN_KEY, token);
   return token;
 }

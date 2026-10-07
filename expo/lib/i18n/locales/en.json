@@ -190,5 +190,78 @@
     "foundNew_other": "Found <b>{{shown}}</b> new videos",
     "sectionCollapse": "{{title}}, collapse",
     "sectionExpand": "{{title}}, expand"
+  },
+  "runStatus": {
+    "running": "running",
+    "success": "success",
+    "partial": "partial",
+    "failed": "failed",
+    "cancelled": "cancelled"
+  },
+  "itemStatus": {
+    "not_watched": "New",
+    "watched": "Seen",
+    "liked": "Liked",
+    "watch_later": "Later"
+  },
+  "channelFilter": {
+    "all": "All Channels",
+    "not_watched": "New",
+    "watched": "Seen",
+    "liked": "Liked",
+    "watch_later": "Later"
+  },
+  "overlay": {
+    "scanning": "Scanning channels for new videos…",
+    "foundPartial_one": "Found {{count}} new video (some channels couldn't be scanned)",
+    "foundPartial_other": "Found {{count}} new videos (some channels couldn't be scanned)",
+    "partialNone": "Scan finished — some channels couldn't be scanned.",
+    "checkDetails": "Check run details for more information",
+    "complete": "Scan complete",
+    "dismiss": "Click anywhere to dismiss",
+    "runningTitle": "🚀 Running “{{name}}”",
+    "collectionsFinished": "Collections finished",
+    "scanningChannels": "Scanning channels",
+    "initializing": "Initializing…",
+    "successTitle": "☑️ “{{name}}” Completed!",
+    "errorTitle": "❌ “{{name}}” Failed"
+  },
+  "appUpdate": {
+    "requiredTitle": "Update My Feeds",
+    "requiredBody": "This version ({{current}}) is no longer supported. Update to version {{latest}} to keep using My Feeds.",
+    "updateNow": "Update now",
+    "availableTitle": "New version available",
+    "availableBody": "Version {{latest}} is ready to install.",
+    "update": "Update",
+    "later": "Later"
+  },
+  "errors": {
+    "notSignedInRun": "Not signed in — please sign in before running a collection.",
+    "addChannelFailed": "Couldn't add that channel.",
+    "notAuthenticated": "Not authenticated",
+    "deleteKeyFailed": "Failed to delete key. Please try again.",
+    "addSourceFailed": "Couldn't add that source.",
+    "addAccountFailed": "Couldn't add that account.",
+    "signInAgain": "Please sign in again.",
+    "signedOut": "You're signed out. Sign in again and retry."
+  },
+  "downloads": {
+    "unsupported": "Downloads work in the iOS and Android apps.",
+    "already": "Already downloading.",
+    "loadFailed": "Couldn't load this item. Check your connection.",
+    "episodeFailed": "Couldn't download the episode.",
+    "failed": "Download failed."
+  },
+  "appleMusic": {
+    "requestFailed": "Apple Music request failed.",
+    "nativeOnly": "Use the iOS or Android app for this.",
+    "notAllowed": "Apple Music access wasn't allowed."
+  },
+  "share": {
+    "readLinkFailed": "Couldn't read that link.",
+    "nameRequired": "Give the collection a name."
+  },
+  "alsoOn": {
+    "cantCombine": "These two can't be combined yet."
   }
 }

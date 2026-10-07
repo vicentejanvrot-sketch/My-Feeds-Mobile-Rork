@@ -6,6 +6,7 @@ import { AppState, Linking, Modal, Pressable, StyleSheet, Text, View } from "rea
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Download, X } from "lucide-react-native";
+import { useTranslation } from "react-i18next";
 import { Colors } from "@/constants/colors";
 import { useAuth } from "@/lib/auth-provider";
 import { appVersion, checkForUpdate, reportInstall, type UpdateInfo } from "@/lib/app-version";
@@ -15,6 +16,7 @@ const DISMISSED_KEY = "app.updateDismissed";
 export function AppUpdateGate() {
   const { user } = useAuth();
   const insets = useSafeAreaInsets();
+  const { t } = useTranslation();
   const [update, setUpdate] = useState<UpdateInfo | null>(null);
   const [dismissed, setDismissed] = useState<string | null>(null);
 
@@ -45,12 +47,12 @@ export function AppUpdateGate() {
           <View style={styles.blockerIcon}>
             <Download size={30} color={Colors.accent} />
           </View>
-          <Text style={styles.blockerTitle}>Update My Feeds</Text>
+          <Text style={styles.blockerTitle}>{t("appUpdate.requiredTitle")}</Text>
           <Text style={styles.blockerText}>
-            This version ({appVersion}) is no longer supported. Update to version {update.latestVersion} to keep using My Feeds.
+            {t("appUpdate.requiredBody", { current: appVersion, latest: update.latestVersion })}
           </Text>
           <Pressable onPress={open} style={({ pressed }) => [styles.primary, pressed && { opacity: 0.8 }]} accessibilityRole="button">
-            <Text style={styles.primaryText}>Update now</Text>
+            <Text style={styles.primaryText}>{t("appUpdate.updateNow")}</Text>
           </Pressable>
         </View>
       </Modal>
@@ -68,13 +70,13 @@ export function AppUpdateGate() {
       <View style={styles.banner}>
         <Download size={18} color={Colors.accent} />
         <View style={{ flex: 1 }}>
-          <Text style={styles.bannerTitle}>New version available</Text>
-          <Text style={styles.bannerText}>Version {update.latestVersion} is ready to install.</Text>
+          <Text style={styles.bannerTitle}>{t("appUpdate.availableTitle")}</Text>
+          <Text style={styles.bannerText}>{t("appUpdate.availableBody", { latest: update.latestVersion })}</Text>
         </View>
         <Pressable onPress={open} style={({ pressed }) => [styles.update, pressed && { opacity: 0.8 }]} accessibilityRole="button">
-          <Text style={styles.updateText}>Update</Text>
+          <Text style={styles.updateText}>{t("appUpdate.update")}</Text>
         </Pressable>
-        <Pressable onPress={later} hitSlop={10} accessibilityLabel="Later">
+        <Pressable onPress={later} hitSlop={10} accessibilityLabel={t("appUpdate.later")}>
           <X size={18} color={Colors.textMuted} />
         </Pressable>
       </View>

@@ -11,6 +11,8 @@ import {
 } from "react-native";
 import { BlurView } from "expo-blur";
 import { CheckCircle2, Loader2, Tv } from "lucide-react-native";
+import { useTranslation } from "react-i18next";
+import i18n from "@/lib/i18n";
 import { supabase } from "@/lib/supabase";
 import { Colors } from "@/constants/colors";
 
@@ -78,7 +80,7 @@ function useRunningOverlayState() {
         status: "running",
         agentName,
         runId,
-        message: message ?? "Scanning channels for new videos…",
+        message: message ?? i18n.t("overlay.scanning"),
         progress: { channelsTotal: 0, channelsScanned: 0, currentChannelName: null },
       });
 
@@ -103,7 +105,7 @@ function useRunningOverlayState() {
               setState((prev) => ({
                 ...prev,
                 status: "success",
-                message: count > 0 ? `Found ${count} new videos` : "No new videos found",
+                message: count > 0 ? i18n.t("runs.foundNew", { count }) : i18n.t("runs.noNewFound"),
               }));
             } else if (newStatus === "partial") {
               // Partial completion — some channels scanned, some failed
@@ -115,8 +117,8 @@ function useRunningOverlayState() {
                 status: "success",
                 message:
                   count > 0
-                    ? `Found ${count} new videos (some channels couldn't be scanned)`
-                    : "Scan finished — some channels couldn't be scanned.",
+                    ? i18n.t("overlay.foundPartial", { count })
+                    : i18n.t("overlay.partialNone"),
               }));
             } else if (newStatus === "failed" || newStatus === "cancelled") {
               console.log("[run]", runId, newStatus, row.error_summary);
@@ -125,7 +127,7 @@ function useRunningOverlayState() {
                 ...prev,
                 status: "error",
                 message:
-                  (row.error_summary as string) || "Check run details for more information",
+                  (row.error_summary as string) || i18n.t("overlay.checkDetails"),
               }));
             } else if (newStatus === "running" || newStatus == null) {
               // Still running — update progress
@@ -149,7 +151,7 @@ function useRunningOverlayState() {
               setState((prev) => ({
                 ...prev,
                 status: "success",
-                message: "Scan complete",
+                message: i18n.t("overlay.complete"),
               }));
             }
           },
@@ -257,6 +259,8 @@ export const [RunningOverlayProvider, useRunningOverlay] =
 
 export function RunningOverlay() {
   const { state, hideOverlay } = useRunningOverlay();
+  // Re-render when the language changes so the card text follows it.
+  useTranslation();
 
   // Fade-in animation
   const opacity = useRef(new Animated.Value(0)).current;
@@ -325,7 +329,7 @@ export function RunningOverlay() {
             </Pressable>
 
             {canDismiss ? (
-              <Text style={styles.dismissHint}>Click anywhere to dismiss</Text>
+              <Text style={styles.dismissHint}>{i18n.t("overlay.dismiss")}</Text>
             ) : null}
           </Animated.View>
         </Pressable>
@@ -404,7 +408,7 @@ function RunningCard({ state }: { state: OverlayState }) {
 
       {/* Title */}
       <Text style={cardStyles.title}>
-        {"\uD83D\uDE80"} Running &ldquo;{state.agentName}&rdquo;
+        {i18n.t("overlay.runningTitle", { name: state.agentName })}
       </Text>
       <Text style={cardStyles.message}>{state.message}</Text>
 
@@ -413,7 +417,7 @@ function RunningCard({ state }: { state: OverlayState }) {
         <View style={cardStyles.progressBlock}>
           <View style={cardStyles.progressHeader}>
             <Text style={cardStyles.progressLabel}>
-              {state.runId === null ? "Collections finished" : "Scanning channels"}
+              {state.runId === null ? i18n.t("overlay.collectionsFinished") : i18n.t("overlay.scanningChannels")}
             </Text>
             <Text style={cardStyles.progressCount}>
               {channelsScanned} / {channelsTotal}
@@ -439,7 +443,7 @@ function RunningCard({ state }: { state: OverlayState }) {
       ) : (
         <View style={cardStyles.initRow}>
           <View style={cardStyles.initDot} />
-          <Text style={cardStyles.initText}>Initializing…</Text>
+          <Text style={cardStyles.initText}>{i18n.t("overlay.initializing")}</Text>
         </View>
       )}
     </View>
@@ -455,7 +459,7 @@ function SuccessCard({ state }: { state: OverlayState }) {
         <CheckCircle2 size={36} color={overlayGreen} strokeWidth={2.5} />
       </View>
       <Text style={cardStyles.title}>
-        {"\u2611\uFE0F"} &ldquo;{state.agentName}&rdquo; Completed!
+        {i18n.t("overlay.successTitle", { name: state.agentName })}
       </Text>
       <Text style={cardStyles.message}>{state.message}</Text>
     </View>
@@ -468,9 +472,9 @@ function ErrorCard({ state }: { state: OverlayState }) {
   return (
     <View style={cardStyles.inner}>
       <Text style={cardStyles.title}>
-        {"\u274C"} &ldquo;{state.agentName}&rdquo; Failed
+        {i18n.t("overlay.errorTitle", { name: state.agentName })}
       </Text>
-      <Text style={cardStyles.message}>{state.message || "Check run details for more information"}</Text>
+      <Text style={cardStyles.message}>{state.message || i18n.t("overlay.checkDetails")}</Text>
     </View>
   );
 }

@@ -1,6 +1,8 @@
 import { StyleSheet, Text, View } from "react-native";
 import { Colors } from "@/constants/colors";
 import type { ChannelStatus } from "@/lib/database";
+import { useTranslation } from "react-i18next";
+import i18n from "@/lib/i18n";
 
 const CONFIG: Record<ChannelStatus, { label: string; color: string }> = {
   not_watched: { label: "New", color: Colors.textMuted },
@@ -24,12 +26,20 @@ export const CHANNEL_STATUS_FILTERS = [
 
 export type ChannelFilterKey = (typeof CHANNEL_STATUS_FILTERS)[number]["key"];
 
+/** Filter label in the active language ("New" / "Novos"). */
+export function channelFilterLabel(key: ChannelFilterKey): string {
+  return i18n.t(`channelFilter.${key}` as const);
+}
+
 export function ChannelStatusPill({ status }: { status: ChannelStatus | null }) {
   const cfg = (status && CONFIG[status]) ? CONFIG[status] : CONFIG.not_watched;
+  const { t } = useTranslation();
   return (
     <View style={[styles.pill, { backgroundColor: hsla(cfg.color, 0.15), borderColor: cfg.color, borderWidth: 1 }]}>
       <View style={[styles.dot, { backgroundColor: cfg.color }]} />
-      <Text style={[styles.label, { color: cfg.color }]}>{cfg.label}</Text>
+      <Text style={[styles.label, { color: cfg.color }]}>
+        {t(`itemStatus.${status && CONFIG[status] ? status : "not_watched"}` as const)}
+      </Text>
     </View>
   );
 }

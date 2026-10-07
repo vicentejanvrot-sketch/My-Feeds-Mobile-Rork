@@ -14,6 +14,7 @@ import type {
   UserSettings,
   UserSettingsSafe,
 } from "@/lib/database";
+import i18n from "@/lib/i18n";
 
 
 /** Query keys, centralized so invalidation stays consistent. */
@@ -486,7 +487,7 @@ export function useUpdateSettings() {
       if (error) {
         // Generic message — never echo the raw error, which could
         // contain the key value in a constraint or RLS rejection.
-        throw new Error("Failed to save settings. Please try again.");
+        throw new Error(i18n.t("settings.saveFailed"));
       }
     },
     onSettled: () => {
@@ -534,7 +535,7 @@ export function useRunAgent() {
       // This prevents supabase.functions.invoke from sending an anon-only
       // request (no JWT) that surfaces an opaque HTTP error downstream.
       if (authStatus === "unauthenticated" || !user) {
-        throw new Error("Not signed in — please sign in before running a collection.");
+        throw new Error(i18n.t("errors.notSignedInRun"));
       }
       const now = new Date().toISOString();
 
@@ -842,7 +843,7 @@ export function useAddChannel(agentId: string) {
         body: { agentId, platform: "youtube", value: payload.channel_url, priority: payload.priority ?? 3 },
       });
       if (error) throw new Error(await extractEdgeFunctionErrorMessage(error));
-      if (!data?.channel) throw new Error(data?.error ?? "Couldn't add that channel.");
+      if (!data?.channel) throw new Error(data?.error ?? i18n.t("errors.addChannelFailed"));
     },
     onSettled: () => {
       void queryClient.invalidateQueries({ queryKey: ["channels"] });
@@ -1157,7 +1158,7 @@ export function useDeleteAccount() {
       | { success: true; method: "client_fallback" }
     > => {
       const userId = user?.id;
-      if (!userId) throw new Error("Not authenticated");
+      if (!userId) throw new Error(i18n.t("errors.notAuthenticated"));
 
       // ── Primary: edge function ──────────────────────────────
       const { error: fnError } = await supabase.functions.invoke(
@@ -1224,7 +1225,7 @@ export function useDeleteApiKey() {
           { onConflict: "user_id" },
         );
       if (error) {
-        throw new Error("Failed to delete key. Please try again.");
+        throw new Error(i18n.t("errors.deleteKeyFailed"));
       }
     },
     onSettled: () => {
@@ -1269,7 +1270,7 @@ export function useAddSource(agentId: string) {
         },
       });
       if (error) throw new AddSourceError(await extractEdgeFunctionErrorMessage(error));
-      if (!data?.channel) throw new AddSourceError(data?.error ?? "Couldn't add that source.", typeof data?.code === "string" ? data.code : undefined);
+      if (!data?.channel) throw new AddSourceError(data?.error ?? i18n.t("errors.addSourceFailed"), typeof data?.code === "string" ? data.code : undefined);
       return data.channel as Channel;
     },
     onSettled: () => {

@@ -8,6 +8,7 @@ import { useAuth } from "@/lib/auth-provider";
 import { extractEdgeFunctionErrorMessage } from "@/lib/hooks";
 import type { Platform } from "@/lib/platforms";
 import { MERGE_KEY_PREFIX, mergeLinkRow, type IdentityLink, type IdentityScan, type Person } from "@/lib/alsoOn";
+import i18n from "@/lib/i18n";
 
 export const alsoOnKeys = {
   links: ["also-on", "links"] as const,
@@ -157,9 +158,9 @@ export function useMergePeople() {
   const { user } = useAuth();
   return useMutation({
     mutationFn: async ({ into, other }: { into: Person; other: Person }) => {
-      if (!user) throw new Error("You're signed out. Sign in again and retry.");
+      if (!user) throw new Error(i18n.t("errors.signedOut"));
       const row = mergeLinkRow(into, other, user.id);
-      if (!row) throw new Error("These two can't be combined yet.");
+      if (!row) throw new Error(i18n.t("alsoOn.cantCombine"));
       const { error } = await supabase.from("identity_links").upsert(row, { onConflict: "channel_id,match_key" });
       if (error) throw error;
     },
@@ -197,7 +198,7 @@ export function useFollowAccount() {
         body: { agentId, platform, value: url, priority: 3 },
       });
       if (error) throw new Error(await extractEdgeFunctionErrorMessage(error));
-      if (!data?.channel) throw new Error(data?.error ?? "Couldn't add that account.");
+      if (!data?.channel) throw new Error(data?.error ?? i18n.t("errors.addAccountFailed"));
     },
     onSettled: () => {
       void queryClient.invalidateQueries({ queryKey: ["channels"] });
