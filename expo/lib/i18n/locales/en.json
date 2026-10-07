@@ -152,7 +152,8 @@
     "foundNew_one": "Found {{count}} new video",
     "foundNew_other": "Found {{count}} new videos",
     "noNewFound": "No new videos found",
-    "startFailed": "Failed to start run"
+    "startFailed": "Failed to start run",
+    "failed": "Run failed"
   },
   "dashboard": {
     "settingSaveFailed": "Couldn't save that setting: {{message}}",
@@ -263,5 +264,18 @@
   },
   "alsoOn": {
     "cantCombine": "These two can't be combined yet."
+  },
+  "frequency": {
+    "daily": "daily",
+    "weekly": "weekly",
+    "hourly": "hourly",
+    "manual": "manual"
+  },
+  "collections": {
+    "configured_one": "{{count}} configured",
+    "configured_other": "{{count}} configured",
+    "emptyTitle": "No collections yet",
+    "emptyText": "Create a collection on the web app and it will appear here automatically.",
+    "runNow": "Run Now"
   }
 }

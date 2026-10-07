@@ -15,12 +15,14 @@ import * as Haptics from "expo-haptics";
 import { LinearGradient } from "expo-linear-gradient";
 import { Play, Clock, Mail } from "lucide-react-native";
 import { useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { Colors } from "@/constants/colors";
 import { agentAccent } from "@/lib/database";
 import { useAgents, useStartRun, useRealtimeInvalidation, qk, extractEdgeFunctionErrorMessage } from "@/lib/hooks";
 import { supabase } from "@/lib/supabase";
 import { useRunningOverlay } from "@/lib/running-overlay";
 import { useToast } from "@/components/Toast";
+import { frequencyLabel } from "@/lib/i18n";
 
 const IPAD_BREAKPOINT = 768;
 
@@ -30,6 +32,7 @@ export default function AgentsScreen() {
   const isWide = windowWidth >= IPAD_BREAKPOINT;
   const router = useRouter();
   const showToast = useToast();
+  const { t } = useTranslation();
   const agents = useAgents();
   const startRun = useStartRun();
   const overlay = useRunningOverlay();
@@ -94,7 +97,7 @@ export default function AgentsScreen() {
           const count = (polled.videos_new_count as number) ?? 0;
           overlay.showSuccess(
             agentName,
-            count > 0 ? `Found ${count} new videos` : "No new videos found",
+            count > 0 ? t("runs.foundNew", { count }) : t("runs.noNewFound"),
           );
           await new Promise((r) => setTimeout(r, 2000));
           break;
@@ -103,7 +106,7 @@ export default function AgentsScreen() {
         if (polled.status === "failed" || polled.status === "cancelled") {
           overlay.showError(
             agentName,
-            (polled.error_summary as string) || "An unknown error occurred",
+            (polled.error_summary as string) || t("runs.unknownError"),
           );
           await new Promise((r) => setTimeout(r, 2000));
           break;
@@ -112,25 +115,25 @@ export default function AgentsScreen() {
 
       void queryClient.invalidateQueries({ queryKey: qk.runs });
     },
-    [startRun, overlay, queryClient],
+    [startRun, overlay, queryClient, t],
   );
 
   const triggerRun = useCallback(
     async (agentId: string) => {
       const agent = list.find((a) => a.id === agentId);
-      const agentName = agent?.name ?? "Collection";
+      const agentName = agent?.name ?? t("dashboard.collectionFallback");
       void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
       setPendingId(agentId);
       try {
         await runOne(agentId, agentName);
       } catch (e) {
-        const msg = e instanceof Error ? e.message : "Failed to start run";
+        const msg = e instanceof Error ? e.message : t("runs.startFailed");
         overlay.showError(agentName, msg);
       } finally {
         setPendingId(null);
       }
     },
-    [list, runOne, overlay],
+    [list, runOne, overlay, t],
   );
 
   const triggerRunAll = useCallback(async () => {
@@ -141,11 +144,11 @@ export default function AgentsScreen() {
       try {
         await runOne(agent.id, agent.name);
       } catch (e) {
-        overlay.showError(agent.name, e instanceof Error ? e.message : "Run failed");
+        overlay.showError(agent.name, e instanceof Error ? e.message : t("runs.failed"));
       }
     }
     setPendingId(null);
-  }, [list, runOne, overlay]);
+  }, [list, runOne, overlay, t]);
 
   return (
     <ScrollView
@@ -164,8 +167,8 @@ export default function AgentsScreen() {
     >
       <View style={styles.header}>
         <View>
-          <Text style={styles.heading}>Collections</Text>
-          <Text style={styles.subheading}>{list.length} configured</Text>
+          <Text style={styles.heading}>{t("tabs.collections")}</Text>
+          <Text style={styles.subheading}>{t("collections.configured", { count: list.length })}</Text>
         </View>
         {list.length > 0 ? (
           <Pressable
@@ -180,7 +183,7 @@ export default function AgentsScreen() {
               style={StyleSheet.absoluteFill}
             />
             <Play size={14} color={Colors.white} fill={Colors.white} />
-            <Text style={styles.runAllText}>Run All</Text>
+            <Text style={styles.runAllText}>{t("dashboard.runAll")}</Text>
           </Pressable>
         ) : null}
       </View>
@@ -191,10 +194,8 @@ export default function AgentsScreen() {
         </View>
       ) : list.length === 0 ? (
         <View style={styles.emptyCard}>
-          <Text style={styles.emptyTitle}>No collections yet</Text>
-          <Text style={styles.emptyText}>
-            Create a collection on the web app and it will appear here automatically.
-          </Text>
+          <Text style={styles.emptyTitle}>{t("collections.emptyTitle")}</Text>
+          <Text style={styles.emptyText}>{t("collections.emptyText")}</Text>
         </View>
       ) : (
         list.map((agent, index) => {
@@ -218,7 +219,7 @@ export default function AgentsScreen() {
                 ) : null}
 
                 <View style={styles.metaRow}>
-                  <Meta icon={<Clock size={13} color={Colors.textSecondary} />} text={agent.schedule_frequency ?? "manual"} />
+                  <Meta icon={<Clock size={13} color={Colors.textSecondary} />} text={frequencyLabel(agent.schedule_frequency)} />
                   {agent.run_time_local ? (
                     <Meta icon={<Mail size={13} color={Colors.textSecondary} />} text={agent.run_time_local} />
                   ) : null}
@@ -234,7 +235,7 @@ export default function AgentsScreen() {
                   disabled={pendingId !== null}
                 >
                   <Play size={14} color={busy ? "rgba(255,255,255,0.3)" : accent} fill={busy ? "rgba(255,255,255,0.3)" : accent} />
-                  <Text style={[styles.runText, { color: busy ? "rgba(255,255,255,0.3)" : accent }]}>Run Now</Text>
+                  <Text style={[styles.runText, { color: busy ? "rgba(255,255,255,0.3)" : accent }]}>{t("collections.runNow")}</Text>
                 </Pressable>
               </View>
             </Pressable>

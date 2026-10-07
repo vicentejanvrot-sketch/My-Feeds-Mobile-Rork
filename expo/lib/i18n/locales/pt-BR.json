@@ -152,7 +152,8 @@
     "foundNew_one": "{{count}} vídeo novo encontrado",
     "foundNew_other": "{{count}} vídeos novos encontrados",
     "noNewFound": "Nenhum vídeo novo encontrado",
-    "startFailed": "Não foi possível iniciar a atualização"
+    "startFailed": "Não foi possível iniciar a atualização",
+    "failed": "A atualização falhou"
   },
   "dashboard": {
     "settingSaveFailed": "Não foi possível salvar essa configuração: {{message}}",
@@ -263,5 +264,18 @@
   },
   "alsoOn": {
     "cantCombine": "Ainda não dá para juntar esses dois."
+  },
+  "frequency": {
+    "daily": "diária",
+    "weekly": "semanal",
+    "hourly": "de hora em hora",
+    "manual": "manual"
+  },
+  "collections": {
+    "configured_one": "{{count}} configurada",
+    "configured_other": "{{count}} configuradas",
+    "emptyTitle": "Nenhuma coleção ainda",
+    "emptyText": "Crie uma coleção no app web e ela aparece aqui automaticamente.",
+    "runNow": "Atualizar agora"
   }
 }

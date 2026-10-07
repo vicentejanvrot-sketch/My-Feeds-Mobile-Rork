@@ -139,4 +139,21 @@ export function formatNumber(n: number): string {
   }
 }
 
+/** Schedule frequency stored in the database ("daily") in the active language. */
+export function frequencyLabel(value: string | null | undefined): string {
+  switch ((value ?? "").toLowerCase()) {
+    case "daily":
+      return i18n.t("frequency.daily");
+    case "weekly":
+      return i18n.t("frequency.weekly");
+    case "hourly":
+      return i18n.t("frequency.hourly");
+    case "":
+    case "manual":
+      return i18n.t("frequency.manual");
+    default:
+      return value ?? "";
+  }
+}
+
 export default i18n;
