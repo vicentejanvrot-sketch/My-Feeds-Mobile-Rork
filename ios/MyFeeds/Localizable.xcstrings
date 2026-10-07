@@ -251,6 +251,46 @@
         }
       }
     },
+    "%lld added" : {
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld added"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld added"
+                }
+              }
+            }
+          }
+        },
+        "pt-BR" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld adicionada"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld adicionadas"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "%lld channels" : {
       "localizations" : {
         "en" : {
@@ -1255,6 +1295,16 @@
         }
       }
     },
+    "A collection follows one topic and pulls the best posts from its sources into one stream. Its name is the topic, so name it after what you want to follow." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uma coleção acompanha um assunto e reúne os melhores posts das fontes dela em um só lugar. O nome é o assunto, então dê o nome do que você quer acompanhar."
+          }
+        }
+      }
+    },
     "A private account shows up on People with a button to open it in %@. Its posts won't appear in your feed." : {
       "localizations" : {
         "pt-BR" : {
@@ -1395,6 +1445,16 @@
         }
       }
     },
+    "Add at least one source, or skip for now." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Adicione pelo menos uma fonte, ou pule por enquanto."
+          }
+        }
+      }
+    },
     "Add from link" : {
       "localizations" : {
         "pt-BR" : {
@@ -1421,6 +1481,46 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Adicionar música ao YouTube Music"
+          }
+        }
+      }
+    },
+    "Add source" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Adicionar fonte"
+          }
+        }
+      }
+    },
+    "Add sources to %@" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Adicione fontes a %@"
+          }
+        }
+      }
+    },
+    "Add sources to your collection" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Adicione fontes à sua coleção"
+          }
+        }
+      }
+    },
+    "Add the channels, accounts and communities this collection should watch. You can add more later from the collection page." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Adicione os canais, contas e comunidades que esta coleção deve acompanhar. Você pode adicionar mais depois na página da coleção."
           }
         }
       }
@@ -1521,6 +1621,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Adicionar vídeo ao YouTube Music"
+          }
+        }
+      }
+    },
+    "Added" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Adicionadas"
           }
         }
       }
@@ -1661,6 +1771,16 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "Added (%lld)" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Adicionadas (%lld)"
           }
         }
       }
@@ -2165,6 +2285,16 @@
         }
       }
     },
+    "Build your first collection" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Crie sua primeira coleção"
+          }
+        }
+      }
+    },
     "By Collection" : {
       "localizations" : {
         "pt-BR" : {
@@ -2655,6 +2785,16 @@
         }
       }
     },
+    "Collection name and topic" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nome e assunto da coleção"
+          }
+        }
+      }
+    },
     "Collection name is required" : {
       "localizations" : {
         "pt-BR" : {
@@ -2945,6 +3085,16 @@
         }
       }
     },
+    "Continue" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Continuar"
+          }
+        }
+      }
+    },
     "Copy link" : {
       "localizations" : {
         "pt-BR" : {
@@ -3201,6 +3351,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Não foi possível salvar: %@"
+          }
+        }
+      }
+    },
+    "Couldn't save the collection: %@" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Não foi possível salvar a coleção: %@"
           }
         }
       }
@@ -3605,6 +3765,16 @@
         }
       }
     },
+    "Don't show this again" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Não mostrar de novo"
+          }
+        }
+      }
+    },
     "Done" : {
       "localizations" : {
         "pt-BR" : {
@@ -3735,6 +3905,26 @@
         }
       }
     },
+    "Email digest" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Resumo por e-mail"
+          }
+        }
+      }
+    },
+    "Email me a digest after each run" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Me enviar um resumo por e-mail a cada atualização"
+          }
+        }
+      }
+    },
     "Embedded YouTube videos automatically pause when your screen locks or the app moves to the background. This is expected behavior on iOS — both the operating system and the official YouTube embedded player enforce this to preserve battery and comply with platform policies. It is not a bug in the app." : {
       "localizations" : {
         "pt-BR" : {
@@ -3861,6 +4051,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tudo o que não tem vídeo"
+          }
+        }
+      }
+    },
+    "Everything you follow, in one feed." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tudo o que você segue, em um só feed."
           }
         }
       }
@@ -4095,6 +4295,16 @@
         }
       }
     },
+    "Finish" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Concluir"
+          }
+        }
+      }
+    },
     "Finishing…" : {
       "localizations" : {
         "pt-BR" : {
@@ -4325,6 +4535,26 @@
         }
       }
     },
+    "Get started" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Começar"
+          }
+        }
+      }
+    },
+    "Get started builds a new collection in three quick steps. See how it works only shows how to read and watch." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Começar cria uma nova coleção em três passos rápidos. Ver como funciona só mostra como ler e assistir."
+          }
+        }
+      }
+    },
     "GitHub & Reddit" : {
       "localizations" : {
         "pt-BR" : {
@@ -4341,6 +4571,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Dê um nome à coleção."
+          }
+        }
+      }
+    },
+    "Give your collection a name." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dê um nome à sua coleção."
           }
         }
       }
@@ -4365,6 +4605,16 @@
         }
       }
     },
+    "Go to my feed" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ir para o meu feed"
+          }
+        }
+      }
+    },
     "Goes into your \"My Feeds\" playlist. Needs an Apple Music subscription. Turn on Automatic Downloads in Apple Music to keep the songs offline." : {
       "localizations" : {
         "pt-BR" : {
@@ -4381,6 +4631,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Vai para a sua playlist \"My Feeds\". Com o YouTube Music Premium você pode baixar para ouvir offline."
+          }
+        }
+      }
+    },
+    "HOW IT WORKS" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "COMO FUNCIONA"
           }
         }
       }
@@ -5235,6 +5495,16 @@
         }
       }
     },
+    "My Feeds watches the topics you care about across YouTube, X, Reddit and more, sums up what's new, and lets you watch and read it all right here." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O My Feeds acompanha os assuntos que importam para você no YouTube, X, Reddit e muito mais, resume as novidades e deixa você assistir e ler tudo aqui mesmo."
+          }
+        }
+      }
+    },
     "Name must be 100 characters or fewer" : {
       "localizations" : {
         "pt-BR" : {
@@ -5725,6 +5995,16 @@
         }
       }
     },
+    "None yet" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nenhuma ainda"
+          }
+        }
+      }
+    },
     "Normal" : {
       "localizations" : {
         "pt-BR" : {
@@ -5801,6 +6081,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Nada baixado ainda"
+          }
+        }
+      }
+    },
+    "Nothing yet. Add at least one source so the collection has something to watch." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nada ainda. Adicione pelo menos uma fonte para a coleção ter o que acompanhar."
           }
         }
       }
@@ -6245,6 +6535,16 @@
         }
       }
     },
+    "Paste the channel link, like youtube.com/@ChannelName." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cole o link do canal, como youtube.com/@NomeDoCanal."
+          }
+        }
+      }
+    },
     "Paste the channel link." : {
       "localizations" : {
         "pt-BR" : {
@@ -6351,6 +6651,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Escolha uma coleção"
+          }
+        }
+      }
+    },
+    "Pick a platform to see how its posts work in My Feeds, then tap the numbers." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Escolha uma plataforma para ver como os posts dela funcionam no My Feeds e toque nos números."
           }
         }
       }
@@ -6705,6 +7015,16 @@
         }
       }
     },
+    "Read & watch" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ler e assistir"
+          }
+        }
+      }
+    },
     "Recent" : {
       "localizations" : {
         "pt-BR" : {
@@ -6811,6 +7131,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Remover \"%@\" desta coleção?"
+          }
+        }
+      }
+    },
+    "Remove %@" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remover %@"
           }
         }
       }
@@ -7095,6 +7425,26 @@
         }
       }
     },
+    "Run it now" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Atualizar agora"
+          }
+        }
+      }
+    },
+    "Run the collection now to fill your feed straight away, or let it run on its own every morning." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Atualize a coleção agora para encher seu feed na hora, ou deixe que ela se atualize sozinha toda manhã."
+          }
+        }
+      }
+    },
     "Running" : {
       "localizations" : {
         "pt-BR" : {
@@ -7111,6 +7461,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Correndo ou caminhando com o celular no bolso? Toque no ícone de cadeado no player para ativar o Bloqueio de bolso. A tela escurece e ignora todos os toques enquanto o vídeo continua tocando. Toque e segure o cadeado por 2 segundos para desbloquear."
+          }
+        }
+      }
+    },
+    "Runs daily at 7:00 AM · looks back 36 hours" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Atualiza todo dia às 7:00 · busca as últimas 36 horas"
           }
         }
       }
@@ -7415,6 +7775,16 @@
         }
       }
     },
+    "See how it works" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ver como funciona"
+          }
+        }
+      }
+    },
     "See their posts" : {
       "localizations" : {
         "pt-BR" : {
@@ -7561,6 +7931,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Enviar link de redefinição"
+          }
+        }
+      }
+    },
+    "Sent to your account email. You can change it on the collection later." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enviado para o e-mail da sua conta. Dá para mudar isso na coleção depois."
           }
         }
       }
@@ -7895,6 +8275,26 @@
         }
       }
     },
+    "Skip for now" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pular por enquanto"
+          }
+        }
+      }
+    },
+    "Something went wrong saving your collection. Check it on the Dashboard and try again." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Algo deu errado ao salvar sua coleção. Confira no Painel e tente de novo."
+          }
+        }
+      }
+    },
     "Something went wrong." : {
       "localizations" : {
         "pt-BR" : {
@@ -7955,6 +8355,16 @@
         }
       }
     },
+    "Sources" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fontes"
+          }
+        }
+      }
+    },
     "Speed" : {
       "localizations" : {
         "pt-BR" : {
@@ -8001,6 +8411,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Status"
+          }
+        }
+      }
+    },
+    "Step %lld of %lld · %@" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Passo %1$lld de %2$lld · %3$@"
           }
         }
       }
@@ -8875,6 +9295,16 @@
         }
       }
     },
+    "Watch and read without leaving" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Assista e leia sem sair do app"
+          }
+        }
+      }
+    },
     "We collect the information you provide directly: your account email and password (managed by our authentication provider), the collections, channels, and preferences you configure, and your watch statuses for videos. We also store optional settings such as a default email for digests. If you choose to save API keys, they are stored securely and are write-only — they can never be read back by the app." : {
       "localizations" : {
         "pt-BR" : {
@@ -9021,6 +9451,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Você pode excluir sua conta a qualquer momento em Configurações → Excluir conta. Isso remove permanentemente sua conta e todos os seus dados — coleções, feeds, histórico e configurações salvas. A exclusão acontece na hora, dentro do app, e não pode ser desfeita. Se tiver algum problema, fale com a gente em support@travelone.ca."
+          }
+        }
+      }
+    },
+    "You can open this again any time with the ? button on the Dashboard." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Você pode abrir isto de novo quando quiser no botão ? do Painel."
           }
         }
       }
@@ -9215,6 +9655,16 @@
         }
       }
     },
+    "Your collection" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sua coleção"
+          }
+        }
+      }
+    },
     "Your data is retained while your account is active. You can delete your account and all associated data at any time from Settings → Delete Account. If you have any trouble, contact us at support@travelone.ca and we will complete the deletion within 30 days." : {
       "localizations" : {
         "pt-BR" : {
@@ -9251,6 +9701,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Seus criadores favoritos, organizados para você."
+          }
+        }
+      }
+    },
+    "Your feed is ready" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seu feed está pronto"
           }
         }
       }
@@ -9491,6 +9951,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "coleção"
+          }
+        }
+      }
+    },
+    "e.g. Crypto, AI, Power Apps" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ex.: Cripto, IA, Power Apps"
           }
         }
       }
