@@ -28,6 +28,7 @@ import {
 import { PLATFORM_META } from "@/lib/platforms";
 import { CONTENT_TYPE_GROUPS, contentTypeText, isContentTypeOn, withContentType, liveNote, type ContentTypes } from "@/lib/contentTypes";
 import { Colors } from "@/constants/colors";
+import { useTranslation } from "react-i18next";
 import {
   useAgent,
   useRecipients,
@@ -90,6 +91,7 @@ export default function AgentFormScreen() {
   const isWide = windowWidth >= IPAD_BREAKPOINT;
   const router = useRouter();
   const showToast = useToast();
+  const { t } = useTranslation();
   const { agentId } = useLocalSearchParams<{ agentId?: string }>();
   const isEdit = !!agentId;
 
@@ -191,16 +193,16 @@ export default function AgentFormScreen() {
   const handleSave = useCallback(async () => {
     const trimmedName = name.trim();
     if (!trimmedName) {
-      showToast("Collection name is required", "error");
+      showToast(t("agentForm.nameRequired"), "error");
       return;
     }
     if (trimmedName.length > 100) {
-      showToast("Name must be 100 characters or fewer", "error");
+      showToast(t("agentForm.nameTooLong", { count: 100 }), "error");
       return;
     }
     const desc = description.trim();
     if (desc.length > 500) {
-      showToast("Description must be 500 characters or fewer", "error");
+      showToast(t("agentForm.descriptionTooLong", { count: 500 }), "error");
       return;
     }
     setSaving(true);
@@ -248,7 +250,7 @@ export default function AgentFormScreen() {
           }
         }
 
-        showToast("Collection updated", "success");
+        showToast(t("agentForm.updated"), "success");
       } else {
         savedAgent = await createAgent.mutateAsync(payload);
 
@@ -263,7 +265,7 @@ export default function AgentFormScreen() {
           await supabase.from("agent_recipients").insert(rows);
         }
 
-        showToast("Collection created", "success");
+        showToast(t("agentForm.created"), "success");
       }
 
       // navigate to agent detail
@@ -272,7 +274,7 @@ export default function AgentFormScreen() {
         params: { agentId: savedAgent.id },
       });
     } catch (e) {
-      const msg = e instanceof Error ? e.message : "Save failed";
+      const msg = e instanceof Error ? e.message : t("agentForm.saveFailed");
       showToast(msg, "error");
     } finally {
       setSaving(false);
@@ -280,7 +282,7 @@ export default function AgentFormScreen() {
   }, [
     name, description, runTime, timezone, lookbackHours,
     includeShorts, includeLive, contentTypes, recipients, isEdit, agentId,
-    createAgent, updateAgent, deleteRecipient, showToast, router,
+    createAgent, updateAgent, deleteRecipient, showToast, router, t,
   ]);
 
   // ── recipient helpers ────────────────────────────────────────────
@@ -288,16 +290,16 @@ export default function AgentFormScreen() {
     const email = recipientInput.trim();
     if (!email) return;
     if (!validateEmail(email)) {
-      showToast("Enter a valid email", "error");
+      showToast(t("agentDetail.invalidEmail"), "error");
       return;
     }
     if (recipients.includes(email)) {
-      showToast("Recipient already added", "error");
+      showToast(t("agentForm.recipientExists"), "error");
       return;
     }
     setRecipients((prev) => [...prev, email]);
     setRecipientInput("");
-  }, [recipientInput, recipients, showToast]);
+  }, [recipientInput, recipients, showToast, t]);
 
   const removeRecipient = useCallback((email: string) => {
     setRecipients((prev) => prev.filter((e) => e !== email));
@@ -326,9 +328,9 @@ export default function AgentFormScreen() {
   if (isEdit && !agent) {
     return (
       <View style={[styles.root, styles.centered]}>
-        <Text style={styles.errorText}>Collection not found</Text>
+        <Text style={styles.errorText}>{t("agentDetail.notFound")}</Text>
         <Pressable onPress={handleCancel} style={styles.backBtnInline}>
-          <Text style={styles.backBtnText}>Go back</Text>
+          <Text style={styles.backBtnText}>{t("agentDetail.goBack")}</Text>
         </Pressable>
       </View>
     );
@@ -351,21 +353,27 @@ export default function AgentFormScreen() {
       >
         {/* ── Header ──────────────────────────────────────────────── */}
         <View style={styles.header}>
-          <Pressable onPress={handleCancel} hitSlop={8} style={styles.backBtn}>
+          <Pressable
+            onPress={handleCancel}
+            hitSlop={8}
+            style={styles.backBtn}
+            accessibilityRole="button"
+            accessibilityLabel={t("common.back")}
+          >
             <ArrowLeft size={20} color={Colors.textSecondary} />
           </Pressable>
           <Text style={styles.heading}>
-            {isEdit ? "Edit Collection" : "New Collection"}
+            {isEdit ? t("agentForm.editTitle") : t("agentForm.newTitle")}
           </Text>
           <View style={{ width: 36 }} />
         </View>
 
         {/* ── Basic Information ────────────────────────────────────── */}
-        <FormSection title="Basic Information">
-          <FormLabel required>Collection Name</FormLabel>
+        <FormSection title={t("agentForm.basicTitle")}>
+          <FormLabel required>{t("agentForm.name")}</FormLabel>
           <TextInput
             style={styles.input}
-            placeholder="e.g., Crypto, AI, Power Apps"
+            placeholder={t("agentForm.namePlaceholder")}
             placeholderTextColor={Colors.textMuted}
             value={name}
             onChangeText={setName}
@@ -377,10 +385,10 @@ export default function AgentFormScreen() {
             <Text style={styles.charCount}>{name.trim().length}/100</Text>
           ) : null}
 
-          <FormLabel>Description</FormLabel>
+          <FormLabel>{t("agentForm.description")}</FormLabel>
           <TextInput
             style={[styles.input, styles.textarea]}
-            placeholder="What topics does this collection cover?"
+            placeholder={t("agentForm.descriptionPlaceholder")}
             placeholderTextColor={Colors.textMuted}
             value={description}
             onChangeText={setDescription}
@@ -395,10 +403,10 @@ export default function AgentFormScreen() {
         </FormSection>
 
         {/* ── Schedule ─────────────────────────────────────────────── */}
-        <FormSection title='Schedule — "When should this collection run?"'>
+        <FormSection title={t("agentForm.scheduleTitle")}>
           <View style={styles.row}>
             <View style={styles.halfField}>
-              <FormLabel>Run Time</FormLabel>
+              <FormLabel>{t("agentForm.runTime")}</FormLabel>
               <View style={styles.timeRow}>
                 <TimeSelect
                   value={runHour}
@@ -419,14 +427,14 @@ export default function AgentFormScreen() {
               </View>
             </View>
             <View style={styles.halfField}>
-              <FormLabel>Lookback Hours</FormLabel>
+              <FormLabel>{t("agentForm.lookback")}</FormLabel>
               <TextInput
                 style={styles.input}
                 value={lookbackHours}
-                onChangeText={(t) => {
-                  const num = Number(t);
-                  if (t === "" || (!Number.isNaN(num) && num >= 1 && num <= 168)) {
-                    setLookbackHours(t);
+                onChangeText={(text) => {
+                  const num = Number(text);
+                  if (text === "" || (!Number.isNaN(num) && num >= 1 && num <= 168)) {
+                    setLookbackHours(text);
                   }
                 }}
                 placeholder="36"
@@ -437,7 +445,7 @@ export default function AgentFormScreen() {
             </View>
           </View>
 
-          <FormLabel>Timezone</FormLabel>
+          <FormLabel>{t("agentForm.timezone")}</FormLabel>
           <Dropdown
             value={timezone}
             options={[...TIMEZONES]}
@@ -448,17 +456,17 @@ export default function AgentFormScreen() {
         </FormSection>
 
         {/* ── Video Filters ────────────────────────────────────────── */}
-        <FormSection title='Content Filters — "What kinds of posts should be included?"'>
+        <FormSection title={t("agentForm.filtersTitle")}>
           <Text style={styles.contentGroup}>YouTube</Text>
           <ToggleRow
-            label="Include Shorts"
-            subtitle="Include YouTube Shorts in results"
+            label={t("agentForm.shorts")}
+            subtitle={t("agentForm.shortsHint")}
             value={includeShorts}
             onToggle={setIncludeShorts}
           />
           <ToggleRow
-            label="Include Live/Upcoming"
-            subtitle="Include live streams and premieres"
+            label={t("agentForm.live")}
+            subtitle={t("agentForm.liveHint")}
             value={includeLive}
             onToggle={setIncludeLive}
           />
@@ -468,8 +476,8 @@ export default function AgentFormScreen() {
               {group.options.map((option) => (
                 <ToggleRow
                   key={option.key}
-                  label={"Include " + option.label}
-                  subtitle={option.help}
+                  label={t("agentForm.include", { label: contentTypeText(option).label })}
+                  subtitle={contentTypeText(option).help}
                   value={isContentTypeOn(contentTypes, option.key)}
                   onToggle={(on) => setContentTypes((cur) => withContentType(cur, option.key, on))}
                 />
@@ -480,11 +488,11 @@ export default function AgentFormScreen() {
         </FormSection>
 
         {/* ── Email Recipients ─────────────────────────────────────── */}
-        <FormSection title='Email Recipients — "Who should receive the daily digest?"'>
+        <FormSection title={t("agentForm.recipientsTitle")}>
           <View style={styles.chipInputRow}>
             <TextInput
               style={[styles.input, styles.flex1]}
-              placeholder="email@example.com"
+              placeholder={t("agentDetail.emailPlaceholder")}
               placeholderTextColor={Colors.textMuted}
               value={recipientInput}
               onChangeText={setRecipientInput}
@@ -501,6 +509,8 @@ export default function AgentFormScreen() {
                 pressed && styles.btnPressed,
               ]}
               onPress={addRecipientEmail}
+              accessibilityRole="button"
+              accessibilityLabel={t("agentDetail.addRecipient")}
             >
               <Plus size={18} color={Colors.white} />
             </Pressable>
@@ -533,7 +543,7 @@ export default function AgentFormScreen() {
               <ActivityIndicator size="small" color={Colors.white} />
             ) : (
               <Text style={styles.submitText}>
-                {isEdit ? "Save Changes" : "Create Collection"}
+                {isEdit ? t("agentForm.saveChanges") : t("agentForm.create")}
               </Text>
             )}
           </Pressable>
@@ -544,7 +554,7 @@ export default function AgentFormScreen() {
             ]}
             onPress={handleCancel}
           >
-            <Text style={styles.cancelText}>Cancel</Text>
+            <Text style={styles.cancelText}>{t("common.cancel")}</Text>
           </Pressable>
         </View>
       </ScrollView>
