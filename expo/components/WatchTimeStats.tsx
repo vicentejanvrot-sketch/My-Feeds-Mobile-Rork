@@ -20,6 +20,7 @@ import {
   Calendar,
   PieChart,
 } from "lucide-react-native";
+import { useTranslation } from "react-i18next";
 import { Colors } from "@/constants/colors";
 import { getAgentColor } from "@/lib/hooks";
 import {
@@ -37,10 +38,10 @@ type ChartMode = "bar" | "area";
 const chartWatched = Colors.success; // green
 const chartUnwatched = Colors.warning; // orange
 
-const PERIOD_OPTIONS: { label: string; value: TimePeriod }[] = [
-  { label: "7 days", value: "7d" },
-  { label: "30 days", value: "30d" },
-  { label: "All time", value: "all" },
+const PERIOD_OPTIONS: { value: TimePeriod }[] = [
+  { value: "7d" },
+  { value: "30d" },
+  { value: "all" },
 ];
 
 export default function WatchTimeStats() {
@@ -48,6 +49,7 @@ export default function WatchTimeStats() {
   const [period, setPeriod] = useState<TimePeriod>("7d");
   const [chartMode, setChartMode] = useState<ChartMode>("bar");
   const [expandedAgents, setExpandedAgents] = useState<Set<string>>(new Set());
+  const { t } = useTranslation();
 
   const stats = useWatchTimeStats(period);
 
@@ -80,10 +82,15 @@ export default function WatchTimeStats() {
   return (
     <View>
       {/* ── Collapsible header ──────────────────────────────── */}
-      <Pressable style={styles.header} onPress={() => setOpen((v) => !v)}>
+      <Pressable
+        style={styles.header}
+        onPress={() => setOpen((v) => !v)}
+        accessibilityRole="button"
+        accessibilityState={{ expanded: open }}
+      >
         <View style={styles.headerLeft}>
           <BarChart3 size={16} color={Colors.accent} />
-          <Text style={styles.headerTitle}>Watch Time Statistics</Text>
+          <Text style={styles.headerTitle}>{t("watchTime.title")}</Text>
         </View>
         {open ? (
           <ChevronDown size={18} color={Colors.textSecondary} />
@@ -99,7 +106,7 @@ export default function WatchTimeStats() {
       ) : !data || data.totalCount === 0 ? (
         <View style={styles.emptyBox}>
           <Text style={styles.emptyText}>
-            Detailed watch-time analytics will appear here as data accumulates.
+            {t("watchTime.empty")}
           </Text>
         </View>
       ) : (
@@ -120,7 +127,7 @@ export default function WatchTimeStats() {
                       active && styles.periodChipTextActive,
                     ]}
                   >
-                    {opt.label}
+                    {t(`watchTime.period.${opt.value}` as const)}
                   </Text>
                 </Pressable>
               );
@@ -129,9 +136,9 @@ export default function WatchTimeStats() {
 
           {/* ── Total Content card ───────────────────────────── */}
           <View style={styles.card}>
-            <Text style={styles.cardTitle}>Total Content</Text>
+            <Text style={styles.cardTitle}>{t("watchTime.totalContent")}</Text>
             <Text style={styles.totalCountLabel}>
-              {data.totalWatchedCount} of {data.totalCount} videos
+              {t("watchTime.xOfY", { done: data.totalWatchedCount, count: data.totalCount })}
             </Text>
             <Text style={styles.totalDuration}>
               {formatDuration(data.totalWatchedSeconds + data.totalUnwatchedSeconds)}
@@ -150,18 +157,18 @@ export default function WatchTimeStats() {
             <View style={styles.statRow}>
               <View style={styles.statItem}>
                 <Eye size={14} color={Colors.success} />
-                <Text style={styles.statLabel}>Seen</Text>
+                <Text style={styles.statLabel}>{t("channelFilter.watched")}</Text>
                 <Text style={[styles.statValue, { color: Colors.success }]}>
-                  {formatDuration(data.totalWatchedSeconds)} ({data.totalWatchedCount} videos)
+                  {t("watchTime.durationCount", { duration: formatDuration(data.totalWatchedSeconds), count: data.totalWatchedCount })}
                 </Text>
               </View>
             </View>
             <View style={styles.statRow}>
               <View style={styles.statItem}>
                 <EyeOff size={14} color={Colors.textMuted} />
-                <Text style={styles.statLabel}>New</Text>
+                <Text style={styles.statLabel}>{t("channelFilter.not_watched")}</Text>
                 <Text style={[styles.statValue, { color: Colors.textMuted }]}>
-                  {formatDuration(data.totalUnwatchedSeconds)} ({data.totalCount - data.totalWatchedCount} videos)
+                  {t("watchTime.durationCount", { duration: formatDuration(data.totalUnwatchedSeconds), count: data.totalCount - data.totalWatchedCount })}
                 </Text>
               </View>
             </View>
@@ -175,7 +182,7 @@ export default function WatchTimeStats() {
             <View style={styles.chartHeader}>
               <View style={styles.chartTitleRow}>
                 <TrendingUp size={16} color={Colors.accent} />
-                <Text style={styles.cardTitle}>Daily Trend</Text>
+                <Text style={styles.cardTitle}>{t("watchTime.daily")}</Text>
               </View>
               <View style={styles.chartToggleRow}>
                 <Pressable
@@ -183,7 +190,7 @@ export default function WatchTimeStats() {
                   onPress={() => setChartMode("bar")}
                 >
                   <Text style={[styles.chartToggleText, chartMode === "bar" && styles.chartToggleTextActive]}>
-                    Bar
+                    {t("watchTime.bar")}
                   </Text>
                 </Pressable>
                 <Pressable
@@ -191,7 +198,7 @@ export default function WatchTimeStats() {
                   onPress={() => setChartMode("area")}
                 >
                   <Text style={[styles.chartToggleText, chartMode === "area" && styles.chartToggleTextActive]}>
-                    Area
+                    {t("watchTime.area")}
                   </Text>
                 </Pressable>
               </View>
@@ -200,11 +207,11 @@ export default function WatchTimeStats() {
             <View style={styles.legendRow}>
               <View style={styles.legendItem}>
                 <View style={[styles.legendDot, { backgroundColor: chartWatched }]} />
-                <Text style={styles.legendText}>Seen</Text>
+                <Text style={styles.legendText}>{t("channelFilter.watched")}</Text>
               </View>
               <View style={styles.legendItem}>
                 <View style={[styles.legendDot, { backgroundColor: chartUnwatched }]} />
-                <Text style={styles.legendText}>New</Text>
+                <Text style={styles.legendText}>{t("channelFilter.not_watched")}</Text>
               </View>
             </View>
             {data.dailyTrend.length > 0 ? (
@@ -214,7 +221,7 @@ export default function WatchTimeStats() {
                 <DailyAreaChart data={data.dailyTrend} />
               )
             ) : (
-              <Text style={styles.noDataText}>No daily data for this period.</Text>
+              <Text style={styles.noDataText}>{t("watchTime.noDaily")}</Text>
             )}
           </View>
 
@@ -223,7 +230,7 @@ export default function WatchTimeStats() {
             <View style={styles.card}>
               <View style={styles.chartTitleRow}>
                 <PieChart size={16} color={Colors.accent} />
-                <Text style={styles.cardTitle}>By Collection</Text>
+                <Text style={styles.cardTitle}>{t("watchTime.byCollection")}</Text>
               </View>
               <AgentDonut agents={data.byAgent} colorMap={agentColorMap} />
             </View>
@@ -232,7 +239,7 @@ export default function WatchTimeStats() {
           {/* ── Detailed Breakdown ────────────────────────────── */}
           {data.byAgent.length > 0 && (
             <View style={styles.card}>
-              <Text style={styles.cardTitle}>Detailed Breakdown</Text>
+              <Text style={styles.cardTitle}>{t("watchTime.breakdown")}</Text>
               {[...data.byAgent]
                 .sort((a, b) =>
                   a.agentName.localeCompare(b.agentName, undefined, { sensitivity: "base" }),
@@ -267,22 +274,23 @@ function WeeklyCard({ wc }: { wc: WeeklyComparison }) {
     : 0;
 
   const diffIsPositive = watchedTimeDiff >= 0;
+  const { t } = useTranslation();
 
   return (
     <View style={styles.card}>
       <View style={styles.chartTitleRow}>
         <Calendar size={16} color={Colors.accent} />
-        <Text style={styles.cardTitle}>Weekly Comparison</Text>
+        <Text style={styles.cardTitle}>{t("watchTime.weekly")}</Text>
       </View>
       <View style={styles.weeklyColumns}>
         {/* This Week */}
         <View style={styles.weeklyCol}>
-          <Text style={styles.weeklyColLabel}>This Week</Text>
+          <Text style={styles.weeklyColLabel}>{t("watchTime.thisWeek")}</Text>
           <Text style={[styles.weeklyColValue, { color: Colors.success }]}>
             {formatDuration(thisWeek.watchedSeconds)}
           </Text>
           <Text style={styles.weeklyColSub}>
-            {thisWeek.watchedCount} of {thisWeek.totalCount} videos watched
+            {t("watchTime.watchedOf", { done: thisWeek.watchedCount, count: thisWeek.totalCount })}
           </Text>
           <View style={styles.progressBarBg}>
             <View
@@ -295,12 +303,12 @@ function WeeklyCard({ wc }: { wc: WeeklyComparison }) {
         </View>
         {/* Last Week */}
         <View style={styles.weeklyCol}>
-          <Text style={styles.weeklyColLabel}>Last Week</Text>
+          <Text style={styles.weeklyColLabel}>{t("watchTime.lastWeek")}</Text>
           <Text style={[styles.weeklyColValue, { color: Colors.textMuted }]}>
             {formatDuration(lastWeek.watchedSeconds)}
           </Text>
           <Text style={styles.weeklyColSub}>
-            {lastWeek.watchedCount} of {lastWeek.totalCount} videos watched
+            {t("watchTime.watchedOf", { done: lastWeek.watchedCount, count: lastWeek.totalCount })}
           </Text>
           <View style={styles.progressBarBg}>
             <View
@@ -685,10 +693,16 @@ function AgentBreakdownRow({
   // Bar fill = share of time watched, same as the web app
   const agentTotalSeconds = agent.watchedSeconds + agent.unwatchedSeconds;
   const pct = agentTotalSeconds > 0 ? Math.round((agent.watchedSeconds / agentTotalSeconds) * 100) : 0;
+  const { t } = useTranslation();
 
   return (
     <View style={[styles.breakdownAgent, { borderLeftColor: color, borderLeftWidth: 3 }]}>
-      <Pressable style={styles.breakdownAgentHeader} onPress={onToggle}>
+      <Pressable
+        style={styles.breakdownAgentHeader}
+        onPress={onToggle}
+        accessibilityRole="button"
+        accessibilityState={{ expanded }}
+      >
         {expanded ? (
           <ChevronDown size={14} color={Colors.textSecondary} />
         ) : (
@@ -698,7 +712,7 @@ function AgentBreakdownRow({
           {agent.agentName}
         </Text>
         <Text style={styles.breakdownAgentCount}>
-          ({agent.watchedCount}/{agent.totalCount} videos)
+          ({t("watchTime.fraction", { done: agent.watchedCount, count: agent.totalCount })})
         </Text>
       </Pressable>
       {/* collapsed stats */}

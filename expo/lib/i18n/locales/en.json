@@ -934,5 +934,38 @@
     "quality": "Quality",
     "speed": "Speed",
     "normalSpeed": "Normal (1×)"
+  },
+  "watchTime": {
+    "duration": {
+      "hoursMinutes": "{{hours}}h {{minutes}}m",
+      "hours": "{{hours}}h",
+      "minutes": "{{minutes}}m"
+    },
+    "unknownChannel": "Unknown Channel",
+    "title": "Watch Time Statistics",
+    "empty": "Detailed watch-time analytics will appear here as data accumulates.",
+    "period": {
+      "7d": "7 days",
+      "30d": "30 days",
+      "all": "All time"
+    },
+    "totalContent": "Total Content",
+    "xOfY_one": "{{done}} of {{count}} video",
+    "xOfY_other": "{{done}} of {{count}} videos",
+    "durationCount_one": "{{duration}} ({{count}} video)",
+    "durationCount_other": "{{duration}} ({{count}} videos)",
+    "daily": "Daily Trend",
+    "bar": "Bar",
+    "area": "Area",
+    "noDaily": "No daily data for this period.",
+    "byCollection": "By Collection",
+    "breakdown": "Detailed Breakdown",
+    "weekly": "Weekly Comparison",
+    "thisWeek": "This Week",
+    "lastWeek": "Last Week",
+    "watchedOf_one": "{{done}} of {{count}} video watched",
+    "watchedOf_other": "{{done}} of {{count}} videos watched",
+    "fraction_one": "{{done}}/{{count}} video",
+    "fraction_other": "{{done}}/{{count}} videos"
   }
 }

@@ -934,5 +934,38 @@
     "quality": "Qualidade",
     "speed": "Velocidade",
     "normalSpeed": "Normal (1×)"
+  },
+  "watchTime": {
+    "duration": {
+      "hoursMinutes": "{{hours}}h {{minutes}}min",
+      "hours": "{{hours}}h",
+      "minutes": "{{minutes}}min"
+    },
+    "unknownChannel": "Canal desconhecido",
+    "title": "Estatísticas de tempo assistido",
+    "empty": "As estatísticas detalhadas de tempo assistido aparecem aqui conforme os dados chegam.",
+    "period": {
+      "7d": "7 dias",
+      "30d": "30 dias",
+      "all": "Desde o início"
+    },
+    "totalContent": "Conteúdo total",
+    "xOfY_one": "{{done}} de {{count}} vídeo",
+    "xOfY_other": "{{done}} de {{count}} vídeos",
+    "durationCount_one": "{{duration}} ({{count}} vídeo)",
+    "durationCount_other": "{{duration}} ({{count}} vídeos)",
+    "daily": "Tendência diária",
+    "bar": "Barras",
+    "area": "Área",
+    "noDaily": "Sem dados diários para este período.",
+    "byCollection": "Por coleção",
+    "breakdown": "Detalhamento",
+    "weekly": "Comparação semanal",
+    "thisWeek": "Esta semana",
+    "lastWeek": "Semana passada",
+    "watchedOf_one": "{{done}} de {{count}} vídeo assistido",
+    "watchedOf_other": "{{done}} de {{count}} vídeos assistidos",
+    "fraction_one": "{{done}}/{{count}} vídeo",
+    "fraction_other": "{{done}}/{{count}} vídeos"
   }
 }

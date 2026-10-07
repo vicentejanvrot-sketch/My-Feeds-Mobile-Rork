@@ -1,6 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/lib/auth-provider";
+import { useTranslation } from "react-i18next";
+import i18n, { dateLocale } from "@/lib/i18n";
 import {
   startOfWeek,
   subDays,
@@ -74,12 +76,16 @@ export interface WatchTimeStatsData {
  * Under an hour returns "Ym", zero returns "0m".
  */
 export function formatDuration(totalSeconds: number): string {
-  if (totalSeconds <= 0) return "0m";
+  if (totalSeconds <= 0) return i18n.t("watchTime.duration.minutes", { minutes: 0 });
   const h = Math.floor(totalSeconds / 3600);
   const m = Math.floor((totalSeconds % 3600) / 60);
   // Same format as the web app: "3h", "3h 5m", "5m".
-  if (h > 0) return m > 0 ? `${h}h ${m}m` : `${h}h`;
-  return `${m}m`;
+  if (h > 0) {
+    return m > 0
+      ? i18n.t("watchTime.duration.hoursMinutes", { hours: h, minutes: m })
+      : i18n.t("watchTime.duration.hours", { hours: h });
+  }
+  return i18n.t("watchTime.duration.minutes", { minutes: m });
 }
 
 /** Compute percentage change of this vs last. Returns null if last is 0. */
@@ -96,9 +102,12 @@ function isWatched(status: string | null): boolean {
 
 export function useWatchTimeStats(period: TimePeriod = "all") {
   const { user } = useAuth();
+  // Day labels and fallback names are built in the query, so a language
+  // change builds them again.
+  const { i18n: i18nInstance } = useTranslation();
 
   return useQuery({
-    queryKey: ["watch-time-stats", period] as const,
+    queryKey: ["watch-time-stats", period, i18nInstance.language] as const,
     enabled: !!user,
     queryFn: async (): Promise<WatchTimeStatsData> => {
       // ── Compute date boundaries ──────────────────────────────
@@ -218,7 +227,7 @@ export function useWatchTimeStats(period: TimePeriod = "all") {
           const key = format(day, "yyyy-MM-dd");
           dailyMap.set(key, {
             date: key,
-            dateLabel: format(day, "MMM d"),
+            dateLabel: format(day, i18n.language === "pt-BR" ? "d MMM" : "MMM d", { locale: dateLocale() }),
             watchedSeconds: 0,
             unwatchedSeconds: 0,
             watchedHours: 0,
@@ -267,7 +276,7 @@ export function useWatchTimeStats(period: TimePeriod = "all") {
         const itemDate = bucketDate(item);
         const agentId = item.agent_id;
         const channelId = item.channel_id ?? "unknown";
-        const channelName = item.channel_name ?? "Unknown Channel";
+        const channelName = item.channel_name ?? i18n.t("watchTime.unknownChannel");
 
         // Totals
         if (watched) {
@@ -296,7 +305,7 @@ export function useWatchTimeStats(period: TimePeriod = "all") {
         let agent = agentAgg.get(agentId);
         if (!agent) {
           agent = {
-            agentName: agentMap.get(agentId) ?? "Unknown Collection",
+            agentName: agentMap.get(agentId) ?? i18n.t("history.unknownCollection"),
             watchedSeconds: 0,
             unwatchedSeconds: 0,
             watchedCount: 0,
