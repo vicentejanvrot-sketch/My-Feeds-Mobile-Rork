@@ -11,13 +11,13 @@ final class ShareViewController: UIViewController {
     // Full screen and see-through, so only the card covers the app the user
     // shared from (not the grey sheet iOS puts behind an extension by default).
     override init(nibName nibNameOrNil: String?, bundle nibBundleOrNil: Bundle?) {
-        Self.applyAppLanguage()
+        ShareViewController.applyAppLanguage()
         super.init(nibName: nibNameOrNil, bundle: nibBundleOrNil)
         modalPresentationStyle = .overFullScreen
     }
 
     required init?(coder: NSCoder) {
-        Self.applyAppLanguage()
+        ShareViewController.applyAppLanguage()
         super.init(coder: coder)
         modalPresentationStyle = .overFullScreen
     }
