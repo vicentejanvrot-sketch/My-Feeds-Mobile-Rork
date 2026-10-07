@@ -59,7 +59,7 @@ nonisolated enum ShareAPIError: LocalizedError {
 
     var errorDescription: String? {
         switch self {
-        case .notSignedIn: return "Open My Feeds and sign in first, then share again."
+        case .notSignedIn: return String(localized: "Open My Feeds and sign in first, then share again.")
         case .message(let text): return text
         }
     }
@@ -109,7 +109,7 @@ nonisolated final class ShareAPI: @unchecked Sendable {
             let data = try JSONSerialization.data(withJSONObject: raw)
             return try JSONDecoder().decode(SharePreview.self, from: data)
         }
-        throw ShareAPIError.message(json["error"] as? String ?? "Couldn't read that link.")
+        throw ShareAPIError.message(json["error"] as? String ?? String(localized: "Couldn't read that link."))
     }
 
     /// Adds the account (and, when asked, their other accounts) to every chosen
@@ -134,7 +134,7 @@ nonisolated final class ShareAPI: @unchecked Sendable {
             }
             // The main account has to go in; their other accounts are best effort.
             if index == 0 && rows.isEmpty {
-                throw ShareAPIError.message(json["error"] as? String ?? "Couldn't add that account.")
+                throw ShareAPIError.message(json["error"] as? String ?? String(localized: "Couldn't add that account."))
             }
             added += rows
         }
@@ -145,7 +145,7 @@ nonisolated final class ShareAPI: @unchecked Sendable {
     /// Reuses one with the same name instead of making a duplicate.
     func createCollection(name: String, existing: [SharePreview.Collection]) async throws -> SharePreview.Collection {
         let clean = name.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !clean.isEmpty else { throw ShareAPIError.message("Give the collection a name.") }
+        guard !clean.isEmpty else { throw ShareAPIError.message(String(localized: "Give the collection a name.")) }
         if let same = existing.first(where: { $0.name.trimmingCharacters(in: .whitespaces).lowercased() == clean.lowercased() }) {
             return same
         }

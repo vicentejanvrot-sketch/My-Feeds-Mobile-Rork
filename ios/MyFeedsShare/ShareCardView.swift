@@ -69,7 +69,7 @@ final class ShareModel {
             if allowTyping {
                 step = .input
             } else {
-                error = "There was no link in what you shared. Share a profile or a post."
+                error = String(localized: "There was no link in what you shared. Share a profile or a post.")
                 step = .error
             }
             return
@@ -129,14 +129,19 @@ final class ShareModel {
     }
 
     func name(of id: String) -> String {
-        id == ShareAPI.unsortedId ? "Unsorted" : preview?.collections.first { $0.id == id }?.name ?? ""
+        id == ShareAPI.unsortedId ? String(localized: "Unsorted") : Self.displayName(preview?.collections.first { $0.id == id }?.name ?? "")
+    }
+
+    /// The server names the catch-all collection "Unsorted"; show it in the app's language.
+    static func displayName(_ name: String) -> String {
+        name == "Unsorted" ? String(localized: "Unsorted") : name
     }
 
     /// Collections A to Z, with Unsorted kept at the bottom.
     var pickerRows: [SharePreview.Collection] {
         var list = preview?.collections ?? []
         if !list.contains(where: { $0.name == "Unsorted" }) {
-            list.append(SharePreview.Collection(id: ShareAPI.unsortedId, name: "Unsorted"))
+            list.append(SharePreview.Collection(id: ShareAPI.unsortedId, name: String(localized: "Unsorted")))
         }
         return list.sorted { a, b in
             let au = a.id == ShareAPI.unsortedId || a.name == "Unsorted"
@@ -182,9 +187,9 @@ final class ShareModel {
 
     var addLabel: String {
         switch selected.count {
-        case 0: return "Pick a collection"
-        case 1: return selected[0] == ShareAPI.unsortedId ? "Save to Unsorted" : "Add to \(name(of: selected[0]))"
-        default: return "Add to \(selected.count) collections"
+        case 0: return String(localized: "Pick a collection")
+        case 1: return selected[0] == ShareAPI.unsortedId ? String(localized: "Save to Unsorted") : String(localized: "Add to \(name(of: selected[0]))")
+        default: return String(localized: "Add to \(selected.count) collections")
         }
     }
 
@@ -210,12 +215,9 @@ final class ShareModel {
         }
     }
 
+    /// "A, B and C" in the app's language ("A, B e C").
     static func join(_ names: [String]) -> String {
-        switch names.count {
-        case 0, 1: return names.joined()
-        case 2: return "\(names[0]) and \(names[1])"
-        default: return names.dropLast().joined(separator: ", ") + " and " + names.last!
-        }
+        names.formatted(.list(type: .and))
     }
 
     static func platformLabel(_ platform: String) -> String {
@@ -369,7 +371,7 @@ struct QuickAccount {
 struct ShareCardView: View {
     @Bindable var model: ShareModel
 
-    private let priorityNames = [1: "Lowest", 2: "Low", 3: "Normal", 4: "High", 5: "Highest"]
+    private let priorityNames = [1: String(localized: "Lowest"), 2: String(localized: "Low"), 3: String(localized: "Normal"), 4: String(localized: "High"), 5: String(localized: "Highest")]
 
     var body: some View {
         ZStack(alignment: model.inSheet ? .top : .bottom) {
@@ -422,7 +424,7 @@ struct ShareCardView: View {
                     .frame(width: 32, height: 32)
                     .background(Palette.input, in: RoundedRectangle(cornerRadius: 8))
             }
-            Text(model.step == .picker ? "Choose collections" : "Add to My Feeds")
+            Text(model.step == .picker ? String(localized: "Choose collections") : String(localized: "Add to My Feeds"))
                 .font(.system(size: 17, weight: .bold))
                 .foregroundStyle(Palette.textPrimary)
             Spacer()
@@ -463,7 +465,7 @@ struct ShareCardView: View {
                 .font(.system(size: 14))
                 .foregroundStyle(Palette.textSecondary)
             HStack(spacing: 8) {
-                TextField("", text: $model.inputText, prompt: Text("https://www.instagram.com/name").foregroundStyle(Palette.textMuted))
+                TextField("", text: $model.inputText, prompt: Text(verbatim: "https://www.instagram.com/name").foregroundStyle(Palette.textMuted))
                     .textInputAutocapitalization(.never)
                     .autocorrectionDisabled()
                     .keyboardType(.URL)
@@ -541,7 +543,7 @@ struct ShareCardView: View {
 
     private var errorView: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Text(model.error ?? "Something went wrong.")
+            Text(model.error ?? String(localized: "Something went wrong."))
                 .font(.system(size: 15))
                 .foregroundStyle(Palette.textPrimary)
                 .padding(12)
@@ -578,7 +580,7 @@ struct ShareCardView: View {
                     .font(.system(size: 14))
                     .foregroundStyle(Palette.textSecondary)
                     .lineLimit(1)
-                Text(preview.kind == "post" ? "From a post you shared. This is who posted it." : "From the profile you shared.")
+                Text(preview.kind == "post" ? String(localized: "From a post you shared. This is who posted it.") : String(localized: "From the profile you shared."))
                     .font(.system(size: 12))
                     .foregroundStyle(Palette.textMuted)
             }
@@ -649,7 +651,7 @@ struct ShareCardView: View {
 
             VStack(alignment: .leading, spacing: 10) {
                 HStack {
-                    sectionLabel("Collection")
+                    sectionLabel(String(localized: "Collection"))
                     Spacer()
                     Button("Change") { model.step = .picker }
                         .font(.system(size: 14, weight: .semibold))
@@ -694,9 +696,9 @@ struct ShareCardView: View {
 
             VStack(alignment: .leading, spacing: 10) {
                 HStack {
-                    sectionLabel("Priority")
+                    sectionLabel(String(localized: "Priority"))
                     Spacer()
-                    Text("\(model.priority) · \(priorityNames[model.priority] ?? "")")
+                    Text(verbatim: "\(model.priority) · \(priorityNames[model.priority] ?? "")")
                         .font(.system(size: 13))
                         .foregroundStyle(Palette.textSecondary)
                 }
@@ -787,7 +789,7 @@ struct ShareCardView: View {
                 ForEach(Array(model.pickerRows.enumerated()), id: \.element.id) { index, row in
                     let locked = model.already.contains { $0.agentId == row.id }
                     let checked = locked || model.selected.contains(row.id)
-                    let note = locked ? "Already here" : row.id == ShareAPI.unsortedId ? "Sort it later" : row.id == preview.suggestion?.agentId ? "Suggested" : ""
+                    let note = locked ? String(localized: "Already here") : row.id == ShareAPI.unsortedId ? String(localized: "Sort it later") : row.id == preview.suggestion?.agentId ? String(localized: "Suggested") : ""
                     Button { model.toggle(row.id) } label: {
                         HStack(spacing: 12) {
                             ZStack {
@@ -800,7 +802,7 @@ struct ShareCardView: View {
                                 }
                             }
                             .frame(width: 22, height: 22)
-                            Text(row.name).font(.system(size: 15)).foregroundStyle(Palette.textPrimary).lineLimit(1)
+                            Text(ShareModel.displayName(row.name)).font(.system(size: 15)).foregroundStyle(Palette.textPrimary).lineLimit(1)
                             Spacer()
                             if !note.isEmpty {
                                 Text(note).font(.system(size: 12)).foregroundStyle(Palette.textSecondary)
@@ -861,7 +863,7 @@ struct ShareCardView: View {
             .foregroundStyle(Palette.textSecondary)
     }
 
-    private func roundButton(systemImage: String, label: String, action: @escaping () -> Void) -> some View {
+    private func roundButton(systemImage: String, label: LocalizedStringKey, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             Image(systemName: systemImage)
                 .font(.system(size: 14, weight: .semibold))
@@ -872,7 +874,7 @@ struct ShareCardView: View {
         .accessibilityLabel(label)
     }
 
-    private func primaryButton(_ title: String, action: @escaping () -> Void) -> some View {
+    private func primaryButton(_ title: LocalizedStringKey, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             Text(title)
                 .font(.system(size: 15, weight: .bold))
@@ -882,7 +884,7 @@ struct ShareCardView: View {
         }
     }
 
-    private func secondaryButton(_ title: String, action: @escaping () -> Void) -> some View {
+    private func secondaryButton(_ title: LocalizedStringKey, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             Text(title)
                 .font(.system(size: 15, weight: .semibold))

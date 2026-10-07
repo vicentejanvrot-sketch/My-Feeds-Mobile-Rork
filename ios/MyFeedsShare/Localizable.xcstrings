@@ -1,12 +1,112 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
-    "Add" : {
+    "Add to %@" : {
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Adicionar"
+            "value" : "Adicionar a %@"
+          }
+        }
+      }
+    },
+    "Add to %lld collections" : {
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Add to %lld collection"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Add to %lld collections"
+                }
+              }
+            }
+          }
+        },
+        "pt-BR" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Adicionar a %lld coleção"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Adicionar a %lld coleções"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "Add to My Feeds" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Adicionar ao My Feeds"
+          }
+        }
+      }
+    },
+    "Add to another" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Adicionar a outra"
+          }
+        }
+      }
+    },
+    "Added %@" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ adicionado"
+          }
+        }
+      }
+    },
+    "Already here" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Já está aqui"
+          }
+        }
+      }
+    },
+    "Already in %@" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Já está em %@"
+          }
+        }
+      }
+    },
+    "Also on %@" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Também em %@"
           }
         }
       }
@@ -21,12 +121,32 @@
         }
       }
     },
-    "Cancel" : {
+    "Cancel new collection" : {
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Cancelar"
+            "value" : "Cancelar nova coleção"
+          }
+        }
+      }
+    },
+    "Change" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alterar"
+          }
+        }
+      }
+    },
+    "Choose collections" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Escolha as coleções"
           }
         }
       }
@@ -41,12 +161,42 @@
         }
       }
     },
-    "Delete" : {
+    "Collection" : {
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Excluir"
+            "value" : "Coleção"
+          }
+        }
+      }
+    },
+    "Couldn't add that account." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Não foi possível adicionar essa conta."
+          }
+        }
+      }
+    },
+    "Couldn't read that link." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Não foi possível ler esse link."
+          }
+        }
+      }
+    },
+    "Create" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Criar"
           }
         }
       }
@@ -61,62 +211,272 @@
         }
       }
     },
-    "Edit" : {
+    "Find account" : {
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Editar"
+            "value" : "Encontrar conta"
           }
         }
       }
     },
-    "Next" : {
+    "From a post you shared. This is who posted it." : {
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Avançar"
+            "value" : "De um post que você compartilhou. Esta é a pessoa que publicou."
           }
         }
       }
     },
-    "OK" : {
+    "From the profile you shared." : {
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "OK"
+            "value" : "Do perfil que você compartilhou."
           }
         }
       }
     },
-    "Retry" : {
+    "Give the collection a name." : {
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tentar de novo"
+            "value" : "Dê um nome à coleção."
           }
         }
       }
     },
-    "Save" : {
+    "High" : {
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Salvar"
+            "value" : "Alta"
           }
         }
       }
     },
-    "Skip" : {
+    "Highest" : {
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Pular"
+            "value" : "Máxima"
+          }
+        }
+      }
+    },
+    "It's added as a private account: it shows on People with a button to open it in %@. Its posts won't appear in your feed." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ela entra como conta privada: aparece em Pessoas com um botão para abri-la no %@. Os posts dela não vão aparecer no seu feed."
+          }
+        }
+      }
+    },
+    "Looking up the account…" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Buscando a conta…"
+          }
+        }
+      }
+    },
+    "Low" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Baixa"
+          }
+        }
+      }
+    },
+    "Lowest" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mínima"
+          }
+        }
+      }
+    },
+    "New collection" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nova coleção"
+          }
+        }
+      }
+    },
+    "New collection name" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nome da nova coleção"
+          }
+        }
+      }
+    },
+    "Normal" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Normal"
+          }
+        }
+      }
+    },
+    "Open My Feeds and sign in first, then share again." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abra o My Feeds e entre na sua conta primeiro. Depois compartilhe de novo."
+          }
+        }
+      }
+    },
+    "Paste a profile or post link from YouTube, X, Instagram, LinkedIn, TikTok, Facebook or Reddit." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cole o link de um perfil ou post do YouTube, X, Instagram, LinkedIn, TikTok, Facebook ou Reddit."
+          }
+        }
+      }
+    },
+    "Pick a collection" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Escolha uma coleção"
+          }
+        }
+      }
+    },
+    "Priority" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prioridade"
+          }
+        }
+      }
+    },
+    "Private account" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Conta privada"
+          }
+        }
+      }
+    },
+    "Profile or post link" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Link do perfil ou do post"
+          }
+        }
+      }
+    },
+    "Same person, matched from their profile links. Add those too?" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A mesma pessoa, identificada pelos links do perfil. Adicionar essas também?"
+          }
+        }
+      }
+    },
+    "Save to Unsorted" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Salvar em Sem coleção"
+          }
+        }
+      }
+    },
+    "Something went wrong." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Algo deu errado."
+          }
+        }
+      }
+    },
+    "Sort it later" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Organizar depois"
+          }
+        }
+      }
+    },
+    "Suggested" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sugerida"
+          }
+        }
+      }
+    },
+    "Suggested. %@" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sugestão. %@"
+          }
+        }
+      }
+    },
+    "Their %@ accounts were added too." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "As contas de %@ também foram adicionadas."
+          }
+        }
+      }
+    },
+    "There was no link in what you shared. Share a profile or a post." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Não havia um link no que você compartilhou. Compartilhe um perfil ou um post."
           }
         }
       }
@@ -127,6 +487,46 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tentar de novo"
+          }
+        }
+      }
+    },
+    "Try another link" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tentar outro link"
+          }
+        }
+      }
+    },
+    "Unsorted" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sem coleção"
+          }
+        }
+      }
+    },
+    "You already get their posts in My Feeds." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Você já recebe os posts dessa pessoa no My Feeds."
+          }
+        }
+      }
+    },
+    "to %@" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "a %@"
           }
         }
       }

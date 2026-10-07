@@ -325,6 +325,86 @@
         }
       }
     },
+    "Add to %@" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Adicionar a %@"
+          }
+        }
+      }
+    },
+    "Add to %lld collections" : {
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Add to %lld collection"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Add to %lld collections"
+                }
+              }
+            }
+          }
+        },
+        "pt-BR" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Adicionar a %lld coleção"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Adicionar a %lld coleções"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "Add to My Feeds" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Adicionar ao My Feeds"
+          }
+        }
+      }
+    },
+    "Add to another" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Adicionar a outra"
+          }
+        }
+      }
+    },
+    "Added %@" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ adicionado"
+          }
+        }
+      }
+    },
     "Adding songs to your library needs an Apple Music subscription." : {
       "localizations" : {
         "pt-BR" : {
@@ -361,6 +441,36 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Permita que o My Feeds use o Apple Music no app Ajustes (Ajustes > My Feeds)."
+          }
+        }
+      }
+    },
+    "Already here" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Já está aqui"
+          }
+        }
+      }
+    },
+    "Already in %@" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Já está em %@"
+          }
+        }
+      }
+    },
+    "Also on %@" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Também em %@"
           }
         }
       }
@@ -515,12 +625,32 @@
         }
       }
     },
+    "Cancel new collection" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cancelar nova coleção"
+          }
+        }
+      }
+    },
     "Cancelled" : {
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Cancelada"
+          }
+        }
+      }
+    },
+    "Change" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alterar"
           }
         }
       }
@@ -565,12 +695,32 @@
         }
       }
     },
+    "Choose collections" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Escolha as coleções"
+          }
+        }
+      }
+    },
     "Close" : {
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Fechar"
+          }
+        }
+      }
+    },
+    "Collection" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Coleção"
           }
         }
       }
@@ -685,6 +835,16 @@
         }
       }
     },
+    "Couldn't add that account." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Não foi possível adicionar essa conta."
+          }
+        }
+      }
+    },
     "Couldn't add this %@." : {
       "localizations" : {
         "pt-BR" : {
@@ -765,12 +925,32 @@
         }
       }
     },
+    "Couldn't read that link." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Não foi possível ler esse link."
+          }
+        }
+      }
+    },
     "Couldn't start YouTube sign-in." : {
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Não foi possível iniciar a entrada no YouTube."
+          }
+        }
+      }
+    },
+    "Create" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Criar"
           }
         }
       }
@@ -1015,6 +1195,16 @@
         }
       }
     },
+    "Find account" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Encontrar conta"
+          }
+        }
+      }
+    },
     "Found %lld new videos" : {
       "localizations" : {
         "en" : {
@@ -1105,12 +1295,62 @@
         }
       }
     },
+    "From a post you shared. This is who posted it." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "De um post que você compartilhou. Esta é a pessoa que publicou."
+          }
+        }
+      }
+    },
+    "From the profile you shared." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Do perfil que você compartilhou."
+          }
+        }
+      }
+    },
     "GitHub & Reddit" : {
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "GitHub e Reddit"
+          }
+        }
+      }
+    },
+    "Give the collection a name." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dê um nome à coleção."
+          }
+        }
+      }
+    },
+    "High" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alta"
+          }
+        }
+      }
+    },
+    "Highest" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Máxima"
           }
         }
       }
@@ -1225,6 +1465,16 @@
         }
       }
     },
+    "It's added as a private account: it shows on People with a button to open it in %@. Its posts won't appear in your feed." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ela entra como conta privada: aparece em Pessoas com um botão para abri-la no %@. Os posts dela não vão aparecer no seu feed."
+          }
+        }
+      }
+    },
     "Keep screen on while playing" : {
       "localizations" : {
         "pt-BR" : {
@@ -1285,6 +1535,36 @@
         }
       }
     },
+    "Looking up the account…" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Buscando a conta…"
+          }
+        }
+      }
+    },
+    "Low" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Baixa"
+          }
+        }
+      }
+    },
+    "Lowest" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mínima"
+          }
+        }
+      }
+    },
     "My Feeds (\"the app\") helps you monitor YouTube channels with research collections and organize the videos they discover. This policy explains what information we collect, how we use it, and the choices you have." : {
       "localizations" : {
         "pt-BR" : {
@@ -1321,6 +1601,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Novos audiolivros, com uma amostra para ouvir. Ao adicionar um autor, o audiolivro mais recente também vem junto."
+          }
+        }
+      }
+    },
+    "New collection" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nova coleção"
+          }
+        }
+      }
+    },
+    "New collection name" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nome da nova coleção"
           }
         }
       }
@@ -1415,6 +1715,16 @@
         }
       }
     },
+    "Normal" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Normal"
+          }
+        }
+      }
+    },
     "Normal (1×)" : {
       "localizations" : {
         "pt-BR" : {
@@ -1451,6 +1761,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "OK"
+          }
+        }
+      }
+    },
+    "Open My Feeds and sign in first, then share again." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abra o My Feeds e entre na sua conta primeiro. Depois compartilhe de novo."
           }
         }
       }
@@ -1635,6 +1955,16 @@
         }
       }
     },
+    "Paste a profile or post link from YouTube, X, Instagram, LinkedIn, TikTok, Facebook or Reddit." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cole o link de um perfil ou post do YouTube, X, Instagram, LinkedIn, TikTok, Facebook ou Reddit."
+          }
+        }
+      }
+    },
     "Paste the channel link." : {
       "localizations" : {
         "pt-BR" : {
@@ -1685,6 +2015,16 @@
         }
       }
     },
+    "Pick a collection" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Escolha uma coleção"
+          }
+        }
+      }
+    },
     "Please enter a valid email address." : {
       "localizations" : {
         "pt-BR" : {
@@ -1725,6 +2065,16 @@
         }
       }
     },
+    "Priority" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prioridade"
+          }
+        }
+      }
+    },
     "Privacy Policy" : {
       "localizations" : {
         "pt-BR" : {
@@ -1735,12 +2085,32 @@
         }
       }
     },
+    "Private account" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Conta privada"
+          }
+        }
+      }
+    },
     "Profile or company" : {
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Perfil ou empresa"
+          }
+        }
+      }
+    },
+    "Profile or post link" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Link do perfil ou do post"
           }
         }
       }
@@ -1895,12 +2265,32 @@
         }
       }
     },
+    "Same person, matched from their profile links. Add those too?" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A mesma pessoa, identificada pelos links do perfil. Adicionar essas também?"
+          }
+        }
+      }
+    },
     "Save" : {
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Salvar"
+          }
+        }
+      }
+    },
+    "Save to Unsorted" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Salvar em Sem coleção"
           }
         }
       }
@@ -2055,6 +2445,16 @@
         }
       }
     },
+    "Something went wrong." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Algo deu errado."
+          }
+        }
+      }
+    },
     "Something went wrong. Try again." : {
       "localizations" : {
         "pt-BR" : {
@@ -2071,6 +2471,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Músicas adicionadas pelo My Feeds."
+          }
+        }
+      }
+    },
+    "Sort it later" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Organizar depois"
           }
         }
       }
@@ -2111,6 +2521,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Concluída"
+          }
+        }
+      }
+    },
+    "Suggested" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sugerida"
+          }
+        }
+      }
+    },
+    "Suggested. %@" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sugestão. %@"
           }
         }
       }
@@ -2215,6 +2645,26 @@
         }
       }
     },
+    "Their %@ accounts were added too." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "As contas de %@ também foram adicionadas."
+          }
+        }
+      }
+    },
+    "There was no link in what you shared. Share a profile or a post." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Não havia um link no que você compartilhou. Compartilhe um perfil ou um post."
+          }
+        }
+      }
+    },
     "These two can't be combined yet." : {
       "localizations" : {
         "pt-BR" : {
@@ -2305,6 +2755,16 @@
         }
       }
     },
+    "Try another link" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tentar outro link"
+          }
+        }
+      }
+    },
     "Turn on Sync Library in Settings > Music to add songs to your library." : {
       "localizations" : {
         "pt-BR" : {
@@ -2331,6 +2791,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Sem nome"
+          }
+        }
+      }
+    },
+    "Unsorted" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sem coleção"
           }
         }
       }
@@ -2521,6 +2991,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Você concorda em não usar o app de forma indevida, incluindo tentar acessar dados de outros usuários, burlar limites de uso ou usar o app para fins ilegais."
+          }
+        }
+      }
+    },
+    "You already get their posts in My Feeds." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Você já recebe os posts dessa pessoa no My Feeds."
           }
         }
       }
@@ -3015,6 +3495,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Visto"
+          }
+        }
+      }
+    },
+    "to %@" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "a %@"
           }
         }
       }
