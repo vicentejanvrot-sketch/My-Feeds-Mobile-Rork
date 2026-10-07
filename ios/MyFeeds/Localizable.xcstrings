@@ -5937,6 +5937,16 @@
         }
       }
     },
+    "N/A" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "N/D"
+          }
+        }
+      }
+    },
     "Name must be 100 characters or fewer" : {
       "localizations" : {
         "pt-BR" : {

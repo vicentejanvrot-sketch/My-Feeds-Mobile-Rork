@@ -56,6 +56,13 @@ final class SupabaseService {
             .limit(limit).execute().value
     }
 
+    /// Recent Runs and Success Rate for the dashboard (see RunStats).
+    func fetchRunStats(days: Int = RunStats.days) async throws -> RunStats {
+        let rows: [RunStats] = try await db.rpc("dashboard_run_stats", params: ["p_days": days])
+            .execute().value
+        return rows.first ?? .empty
+    }
+
     func fetchAgentRuns(agentId: String, limit: Int = 30) async throws -> [Run] {
         try await db.from("runs").select().eq("agent_id", value: agentId)
             .order("started_at", ascending: false).limit(limit).execute().value

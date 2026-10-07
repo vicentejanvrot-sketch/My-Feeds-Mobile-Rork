@@ -7,6 +7,9 @@ struct DashboardView: View {
 
     @State private var agents: [Agent] = []
     @State private var runs: [Run] = []
+    // Recent Runs and Success Rate come from the database (last 7 days), the
+    // same numbers the web app and Android show.
+    @State private var runStats: RunStats = .empty
     @State private var channels: [Channel] = []
     @State private var counts: [String: AgentItemCounts] = [:]
     @State private var isLoading = true
@@ -26,10 +29,9 @@ struct DashboardView: View {
         agents.sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
     }
 
-    private var successRate: Int {
-        guard !runs.isEmpty else { return 0 }
-        let successCount = runs.filter { $0.runStatus == .success }.count
-        return Int((Double(successCount) / Double(runs.count) * 100).rounded())
+    private var successRateText: String {
+        guard let rate = runStats.successRate else { return String(localized: "N/A", bundle: .appStrings) }
+        return (Double(rate) / 100).formatted(.percent.precision(.fractionLength(0)))
     }
 
     var body: some View {
@@ -199,8 +201,8 @@ struct DashboardView: View {
         LazyVGrid(columns: [GridItem(.flexible(), spacing: 12), GridItem(.flexible(), spacing: 12)], spacing: 12) {
             StatCard(icon: "cpu", label: "Active Collections", value: agents.count.formatted())
             StatCard(icon: "video", label: "Channels Tracked", value: channels.count.formatted())
-            StatCard(icon: "waveform.path.ecg", label: "Recent Runs", value: runs.count.formatted())
-            StatCard(icon: "chart.line.uptrend.xyaxis", label: "Success Rate", value: (Double(successRate) / 100).formatted(.percent.precision(.fractionLength(0))))
+            StatCard(icon: "waveform.path.ecg", label: "Recent Runs", value: runStats.runs.formatted())
+            StatCard(icon: "chart.line.uptrend.xyaxis", label: "Success Rate", value: successRateText)
         }
     }
 
@@ -342,6 +344,7 @@ struct DashboardView: View {
             channels = loadedChannels
             isLoading = false
             isOffline = false
+            if let stats = try? await service.fetchRunStats() { runStats = stats }
             counts = (try? await service.fetchAgentItemCounts(agentIds: loadedAgents.map(\.id))) ?? [:]
         } catch {
             // A cancelled load (tab switch) isn't being offline.
