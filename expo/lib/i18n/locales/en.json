@@ -177,7 +177,8 @@
       "collections": "Active Collections",
       "channels": "Monitored Channels",
       "runs": "Recent Runs",
-      "successRate": "Success Rate"
+      "successRate": "Success Rate",
+      "notAvailable": "N/A"
     },
     "peopleLabel": "People: everyone you follow, and where else they are",
     "people": "People",

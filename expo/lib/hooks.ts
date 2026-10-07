@@ -218,6 +218,52 @@ export function useRuns(limit = 50) {
   });
 }
 
+/** Days counted by the dashboard's Recent Runs and Success Rate. */
+export const RUN_STATS_DAYS = 7;
+
+export interface RunStats {
+  runs: number;
+  finished: number;
+  succeeded: number;
+  partial: number;
+  failed: number;
+  /** Whole percent, null when no run has finished in the period. */
+  success_rate: number | null;
+}
+
+/**
+ * Dashboard "Recent Runs" and "Success Rate", from the dashboard_run_stats()
+ * database function. The web app and iOS call the same function, so all
+ * three apps always show the same numbers.
+ *
+ * Last 7 days. Success Rate = runs that finished with no errors / runs that
+ * finished (success, partial or failed); running and cancelled runs are left out.
+ * The key sits under qk.runs, so everything that refreshes the runs after a
+ * run starts, finishes or is deleted refreshes this too.
+ */
+export function useRunStats() {
+  const { user } = useAuth();
+  return useQuery({
+    queryKey: [...qk.runs, "stats", RUN_STATS_DAYS] as const,
+    enabled: !!user,
+    queryFn: async (): Promise<RunStats> => {
+      const { data, error } = await supabase.rpc("dashboard_run_stats", { p_days: RUN_STATS_DAYS });
+      if (error) throw error;
+      const row = (Array.isArray(data) ? data[0] : data) as Partial<RunStats> | undefined;
+      return {
+        runs: Number(row?.runs ?? 0),
+        finished: Number(row?.finished ?? 0),
+        succeeded: Number(row?.succeeded ?? 0),
+        partial: Number(row?.partial ?? 0),
+        failed: Number(row?.failed ?? 0),
+        success_rate: row?.success_rate ?? null,
+      };
+    },
+    refetchInterval: 60_000,
+    staleTime: 30_000,
+  });
+}
+
 /**
  * Feed items joined with their analysis.
  * `filter` is one of: "all" | ItemStatus.

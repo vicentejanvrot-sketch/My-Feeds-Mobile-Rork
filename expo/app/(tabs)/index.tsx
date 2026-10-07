@@ -44,6 +44,7 @@ const statIconBg = "hsla(199, 89%, 55%, 0.16)" as const;
 import {
   useAgents,
   useRuns,
+  useRunStats,
   useItems,
   useChannelsAll,
   useStartRun,
@@ -111,6 +112,9 @@ export default function DashboardScreen() {
 
   const agents = useAgents();
   const runs = useRuns(50);
+  // Recent Runs and Success Rate come from the database (last 7 days), the
+  // same numbers the web app and iOS show.
+  const runStats = useRunStats();
   const items = useItems("all");
   const channels = useChannelsAll();
   const runAgent = useStartRun();
@@ -159,13 +163,18 @@ export default function DashboardScreen() {
   );
 
   const refreshing =
-    agents.isRefetching || runs.isRefetching || items.isRefetching || channels.isRefetching;
+    agents.isRefetching ||
+    runs.isRefetching ||
+    runStats.isRefetching ||
+    items.isRefetching ||
+    channels.isRefetching;
   const onRefresh = useCallback(() => {
     void agents.refetch();
     void runs.refetch();
+    void runStats.refetch();
     void items.refetch();
     void channels.refetch();
-  }, [agents, runs, items, channels]);
+  }, [agents, runs, runStats, items, channels]);
 
   // ── derived stats ──────────────────────────────────────────────
   const listUnsorted = agents.data ?? [];
@@ -214,11 +223,8 @@ export default function DashboardScreen() {
     return map;
   }, [runList]);
 
-  const successRate = useMemo(() => {
-    if (runList.length === 0) return 0;
-    const ok = runList.filter((r) => r.status === "success").length;
-    return Math.round((ok / runList.length) * 100);
-  }, [runList]);
+  const recentRuns = runStats.data?.runs ?? 0;
+  const successRate = runStats.data?.success_rate ?? null;
 
   // ── run triggers ────────────────────────────────────────────────
   type RunResult = { failed: boolean; newCount: number; error?: string };
@@ -479,14 +485,14 @@ export default function DashboardScreen() {
             <StatCard
               icon={<Activity size={20} color={statIconBlue} strokeWidth={1.75} />}
               label={t("dashboard.stats.runs")}
-              value={runList.length}
+              value={recentRuns}
               isWide={isWide}
             />
             <StatCard
               icon={<TrendingUp size={20} color={statIconBlue} strokeWidth={1.75} />}
               label={t("dashboard.stats.successRate")}
-              value={successRate}
-              suffix="%"
+              value={successRate ?? t("dashboard.stats.notAvailable")}
+              suffix={successRate !== null ? "%" : undefined}
               isWide={isWide}
             />
           </View>
@@ -619,7 +625,7 @@ function StatCard({
 }: {
   icon: React.ReactNode;
   label: string;
-  value: number;
+  value: number | string;
   suffix?: string;
   isWide?: boolean;
 }) {
