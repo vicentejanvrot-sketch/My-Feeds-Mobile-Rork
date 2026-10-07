@@ -1,8 +1,10 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import "@/lib/i18n";
 import { Stack, router } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import React, { useEffect, useRef, useState } from "react";
-import { ActivityIndicator, Animated, Image, Platform, Pressable, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, Animated, AppState, Image, Platform, Pressable, StyleSheet, Text, View } from "react-native";
+import { useTranslation } from "react-i18next";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { ChevronLeft } from "lucide-react-native";
 import { AuthProvider, useAuth } from "@/lib/auth-provider";
@@ -13,6 +15,7 @@ import { RunningOverlayProvider, RunningOverlay } from "@/lib/running-overlay";
 import { YouTubeConnectionProvider } from "@/lib/useYouTubeConnection";
 import { Colors } from "@/constants/colors";
 import { ShareIntentProvider, useShareIntentContext } from "expo-share-intent";
+import { loadLanguagePreference, syncDeviceLanguage } from "@/lib/i18n";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -92,8 +95,23 @@ function ShareIntentRouter() {
   return null;
 }
 
+/**
+ * Applies the language saved in Settings, and follows the device language
+ * when the user comes back to the app after changing it.
+ */
+function useAppLanguage(): void {
+  useEffect(() => {
+    void loadLanguagePreference();
+    const sub = AppState.addEventListener("change", (state) => {
+      if (state === "active") syncDeviceLanguage();
+    });
+    return () => sub.remove();
+  }, []);
+}
+
 function AuthGate() {
   const { status } = useAuth();
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (status !== "loading") {
@@ -146,7 +164,7 @@ function AuthGate() {
           name="support/faq"
           options={{
             headerShown: true,
-            title: "FAQ",
+            title: t("support.faq"),
             headerStyle: { backgroundColor: Colors.background },
             headerTintColor: Colors.textPrimary,
             headerShadowVisible: false,
@@ -158,7 +176,7 @@ function AuthGate() {
                 hitSlop={8}
               >
                 <ChevronLeft size={22} color={Colors.textPrimary} />
-                <Text style={styles.backLabel}>Back</Text>
+                <Text style={styles.backLabel}>{t("common.back")}</Text>
               </Pressable>
             ),
           }}
@@ -167,7 +185,7 @@ function AuthGate() {
           name="support/privacy"
           options={{
             headerShown: true,
-            title: "Privacy Policy",
+            title: t("support.privacy"),
             headerStyle: { backgroundColor: Colors.background },
             headerTintColor: Colors.textPrimary,
             headerShadowVisible: false,
@@ -179,7 +197,7 @@ function AuthGate() {
                 hitSlop={8}
               >
                 <ChevronLeft size={22} color={Colors.textPrimary} />
-                <Text style={styles.backLabel}>Back</Text>
+                <Text style={styles.backLabel}>{t("common.back")}</Text>
               </Pressable>
             ),
           }}
@@ -188,7 +206,7 @@ function AuthGate() {
           name="support/terms"
           options={{
             headerShown: true,
-            title: "Terms of Service",
+            title: t("support.terms"),
             headerStyle: { backgroundColor: Colors.background },
             headerTintColor: Colors.textPrimary,
             headerShadowVisible: false,
@@ -200,7 +218,7 @@ function AuthGate() {
                 hitSlop={8}
               >
                 <ChevronLeft size={22} color={Colors.textPrimary} />
-                <Text style={styles.backLabel}>Back</Text>
+                <Text style={styles.backLabel}>{t("common.back")}</Text>
               </Pressable>
             ),
           }}
@@ -234,6 +252,7 @@ export default function RootLayout() {
 
 function RootContent() {
   useWebGlobalStyles();
+  useAppLanguage();
   const { hasShareIntent } = useShareIntentContext();
   const [splashDone, setSplashDone] = useState<boolean>(false);
   // Opened from another app's share sheet: skip the 3-second splash.

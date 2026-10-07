@@ -1,0 +1,64 @@
+{
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "add": "Add",
+    "done": "Done",
+    "back": "Back",
+    "next": "Next",
+    "skip": "Skip",
+    "close": "Close",
+    "ok": "OK",
+    "retry": "Retry",
+    "tryAgain": "Try again",
+    "loading": "Loading…",
+    "search": "Search",
+    "error": "Error"
+  },
+  "time": {
+    "justNow": "just now",
+    "short": {
+      "minutes_one": "{{count}}m ago",
+      "minutes_other": "{{count}}m ago",
+      "hours_one": "{{count}}h ago",
+      "hours_other": "{{count}}h ago",
+      "days_one": "{{count}}d ago",
+      "days_other": "{{count}}d ago",
+      "months_one": "{{count}}mo ago",
+      "months_other": "{{count}}mo ago",
+      "years_one": "{{count}}y ago",
+      "years_other": "{{count}}y ago"
+    },
+    "long": {
+      "lessThanMinute": "less than a minute ago",
+      "minutes_one": "about 1 minute ago",
+      "minutes_other": "about {{count}} minutes ago",
+      "hours_one": "about 1 hour ago",
+      "hours_other": "about {{count}} hours ago",
+      "days_one": "about 1 day ago",
+      "days_other": "about {{count}} days ago",
+      "months_one": "about 1 month ago",
+      "months_other": "about {{count}} months ago",
+      "years_one": "about 1 year ago",
+      "years_other": "about {{count}} years ago"
+    }
+  },
+  "format": {
+    "thousands": "{{value}}K",
+    "millions": "{{value}}M"
+  },
+  "language": {
+    "title": "Language",
+    "automatic": "Automatic",
+    "automaticHint": "Use device language",
+    "en": "English",
+    "ptBR": "Português (Brasil)"
+  },
+  "support": {
+    "faq": "FAQ",
+    "privacy": "Privacy Policy",
+    "terms": "Terms of Service"
+  }
+}

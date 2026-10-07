@@ -66,6 +66,15 @@
       "expo-web-browser",
       "expo-secure-store",
       [
+        "expo-localization",
+        {
+          "supportedLocales": {
+            "ios": ["en", "pt-BR"]
+          },
+          "allowDynamicLocaleChangesAndroid": true
+        }
+      ],
+      [
         "expo-share-intent",
         {
           "disableIOS": true,

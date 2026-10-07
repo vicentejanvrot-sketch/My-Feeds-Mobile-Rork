@@ -1,0 +1,64 @@
+{
+  "common": {
+    "save": "Salvar",
+    "cancel": "Cancelar",
+    "delete": "Excluir",
+    "edit": "Editar",
+    "add": "Adicionar",
+    "done": "Concluído",
+    "back": "Voltar",
+    "next": "Avançar",
+    "skip": "Pular",
+    "close": "Fechar",
+    "ok": "OK",
+    "retry": "Tentar de novo",
+    "tryAgain": "Tentar de novo",
+    "loading": "Carregando…",
+    "search": "Buscar",
+    "error": "Erro"
+  },
+  "time": {
+    "justNow": "agora mesmo",
+    "short": {
+      "minutes_one": "há {{count}} min",
+      "minutes_other": "há {{count}} min",
+      "hours_one": "há {{count}} h",
+      "hours_other": "há {{count}} h",
+      "days_one": "há {{count}} d",
+      "days_other": "há {{count}} d",
+      "months_one": "há {{count}} mês",
+      "months_other": "há {{count}} meses",
+      "years_one": "há {{count}} ano",
+      "years_other": "há {{count}} anos"
+    },
+    "long": {
+      "lessThanMinute": "há menos de um minuto",
+      "minutes_one": "há cerca de 1 minuto",
+      "minutes_other": "há cerca de {{count}} minutos",
+      "hours_one": "há cerca de 1 hora",
+      "hours_other": "há cerca de {{count}} horas",
+      "days_one": "há cerca de 1 dia",
+      "days_other": "há cerca de {{count}} dias",
+      "months_one": "há cerca de 1 mês",
+      "months_other": "há cerca de {{count}} meses",
+      "years_one": "há cerca de 1 ano",
+      "years_other": "há cerca de {{count}} anos"
+    }
+  },
+  "format": {
+    "thousands": "{{value}} mil",
+    "millions": "{{value}} mi"
+  },
+  "language": {
+    "title": "Idioma",
+    "automatic": "Automático",
+    "automaticHint": "Usar idioma do dispositivo",
+    "en": "English",
+    "ptBR": "Português (Brasil)"
+  },
+  "support": {
+    "faq": "Perguntas frequentes",
+    "privacy": "Política de Privacidade",
+    "terms": "Termos de Serviço"
+  }
+}

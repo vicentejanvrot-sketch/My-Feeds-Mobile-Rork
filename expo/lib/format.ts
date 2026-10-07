@@ -1,53 +1,60 @@
-/** Relative time like "3h ago", "2d ago". */
+import i18n, { formatNumber, intlLocale } from "@/lib/i18n";
+
+/** Relative time like "3h ago", "2d ago" ("há 3 h", "há 2 d"). */
 export function timeAgo(iso: string | null): string {
   if (!iso) return "—";
   const then = new Date(iso).getTime();
   if (Number.isNaN(then)) return "—";
   const diff = Date.now() - then;
   const sec = Math.round(diff / 1000);
-  if (sec < 60) return "just now";
+  if (sec < 60) return i18n.t("time.justNow");
   const min = Math.round(sec / 60);
-  if (min < 60) return `${min}m ago`;
+  if (min < 60) return i18n.t("time.short.minutes", { count: min });
   const hr = Math.round(min / 60);
-  if (hr < 24) return `${hr}h ago`;
+  if (hr < 24) return i18n.t("time.short.hours", { count: hr });
   const day = Math.round(hr / 24);
-  if (day < 30) return `${day}d ago`;
+  if (day < 30) return i18n.t("time.short.days", { count: day });
   const mo = Math.round(day / 30);
-  if (mo < 12) return `${mo}mo ago`;
-  return `${Math.round(mo / 12)}y ago`;
+  if (mo < 12) return i18n.t("time.short.months", { count: mo });
+  return i18n.t("time.short.years", { count: Math.round(mo / 12) });
 }
 
-/** Human relative time like "about 3 hours ago". */
+/** Human relative time like "about 3 hours ago" ("há cerca de 3 horas"). */
 export function relativeTime(iso: string | null): string {
   if (!iso) return "—";
   const then = new Date(iso).getTime();
   if (Number.isNaN(then)) return "—";
   const diff = Date.now() - then;
   const sec = Math.round(diff / 1000);
-  if (sec < 10) return "just now";
-  if (sec < 60) return "less than a minute ago";
+  if (sec < 10) return i18n.t("time.justNow");
+  if (sec < 60) return i18n.t("time.long.lessThanMinute");
   const min = Math.round(sec / 60);
-  if (min === 1) return "about 1 minute ago";
-  if (min < 60) return `about ${min} minutes ago`;
+  if (min < 60) return i18n.t("time.long.minutes", { count: min });
   const hr = Math.round(min / 60);
-  if (hr === 1) return "about 1 hour ago";
-  if (hr < 24) return `about ${hr} hours ago`;
+  if (hr < 24) return i18n.t("time.long.hours", { count: hr });
   const day = Math.round(hr / 24);
-  if (day === 1) return "about 1 day ago";
-  if (day < 30) return `about ${day} days ago`;
+  if (day < 30) return i18n.t("time.long.days", { count: day });
   const mo = Math.round(day / 30);
-  if (mo === 1) return "about 1 month ago";
-  if (mo < 12) return `about ${mo} months ago`;
-  const yr = Math.round(mo / 12);
-  return yr === 1 ? "about 1 year ago" : `about ${yr} years ago`;
+  if (mo < 12) return i18n.t("time.long.months", { count: mo });
+  return i18n.t("time.long.years", { count: Math.round(mo / 12) });
 }
 
-/** Compact count like 1.2K, 3.4M. */
+function decimal(n: number, digits: number): string {
+  try {
+    return n.toLocaleString(intlLocale(), { minimumFractionDigits: digits, maximumFractionDigits: digits });
+  } catch {
+    return n.toFixed(digits);
+  }
+}
+
+/** Compact count like 1.2K, 3.4M (1,2 mil, 3,4 mi). */
 export function compactNumber(n: number | null | undefined): string {
   if (n == null) return "—";
-  if (n < 1000) return String(n);
-  if (n < 1_000_000) return `${(n / 1000).toFixed(n < 10_000 ? 1 : 0)}K`;
-  return `${(n / 1_000_000).toFixed(n < 10_000_000 ? 1 : 0)}M`;
+  if (n < 1000) return formatNumber(n);
+  if (n < 1_000_000) {
+    return i18n.t("format.thousands", { value: decimal(n / 1000, n < 10_000 ? 1 : 0) });
+  }
+  return i18n.t("format.millions", { value: decimal(n / 1_000_000, n < 10_000_000 ? 1 : 0) });
 }
 
 /** Seconds → "12:34" or "1:02:03". */
