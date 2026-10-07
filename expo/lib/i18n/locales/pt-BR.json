@@ -139,5 +139,56 @@
     "disconnected": "YouTube desconectado",
     "notConnected": "O YouTube não está conectado",
     "connectInSettings": "Conecte o YouTube em Configurações primeiro"
+  },
+  "tabs": {
+    "dashboard": "Painel",
+    "collections": "Coleções",
+    "feeds": "Feeds",
+    "history": "Histórico",
+    "settings": "Configurações"
+  },
+  "runs": {
+    "unknownError": "Ocorreu um erro desconhecido",
+    "foundNew_one": "{{count}} vídeo novo encontrado",
+    "foundNew_other": "{{count}} vídeos novos encontrados",
+    "noNewFound": "Nenhum vídeo novo encontrado",
+    "startFailed": "Não foi possível iniciar a atualização"
+  },
+  "dashboard": {
+    "settingSaveFailed": "Não foi possível salvar essa configuração: {{message}}",
+    "collectionFallback": "Coleção",
+    "allCollectionsCount_one": "Todas as coleções ({{count}})",
+    "allCollectionsCount_other": "Todas as coleções ({{count}})",
+    "runningAll": "Atualizando todas as coleções ao mesmo tempo…",
+    "collectionFinished": "{{name}} concluída",
+    "foundWithFailures": "{{found}}. Falharam: {{names}}",
+    "deleteTitle": "Excluir coleção",
+    "deleteConfirm": "Excluir \"{{name}}\"? Não dá para desfazer.",
+    "deleted": "Coleção excluída",
+    "deleteFailed": "Não foi possível excluir",
+    "setUp": "{{name}} está pronta",
+    "howItWorks": "Como funciona",
+    "newCollection": "+ Nova coleção",
+    "runAll": "Atualizar todas",
+    "stats": {
+      "collections": "Coleções ativas",
+      "channels": "Canais acompanhados",
+      "runs": "Atualizações recentes",
+      "successRate": "Taxa de sucesso"
+    },
+    "peopleLabel": "Pessoas: todo mundo que você segue e onde mais eles estão",
+    "people": "Pessoas",
+    "peopleSub": "Todo mundo que você segue e onde mais eles estão",
+    "viewAll": "Ver tudo",
+    "empty": "Nenhuma coleção ainda. Crie uma no app web.",
+    "myCollections": "Minhas coleções",
+    "allCaughtUp": "Tudo em dia",
+    "noItems": "Nenhum item ainda",
+    "channelCount_one": "{{count}} canal",
+    "channelCount_other": "{{count}} canais",
+    "foundNew_one": "<b>{{shown}}</b> vídeo novo encontrado",
+    "foundNew_other": "<b>{{shown}}</b> vídeos novos encontrados",
+    "sectionCollapse": "{{title}}, recolher",
+    "sectionExpand": "{{title}}, expandir"
   }
 }

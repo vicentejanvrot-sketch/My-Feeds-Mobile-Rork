@@ -34,6 +34,7 @@ import {
   ChevronDown,
 } from "lucide-react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Trans, useTranslation } from "react-i18next";
 import { Colors } from "@/constants/colors";
 
 const statIconBlue = "hsl(199, 89%, 55%)" as const;
@@ -106,6 +107,7 @@ export default function DashboardScreen() {
   const isWide = windowWidth >= IPAD_BREAKPOINT;
   const router = useRouter();
   const showToast = useToast();
+  const { t } = useTranslation();
 
   const agents = useAgents();
   const runs = useRuns(50);
@@ -145,9 +147,9 @@ export default function DashboardScreen() {
   const handleHiddenChange = useCallback(
     async (hidden: boolean) => {
       const message = await setOnboardingHidden(hidden);
-      if (message) showToast("Couldn't save that setting: " + message, "error");
+      if (message) showToast(t("dashboard.settingSaveFailed", { message }), "error");
     },
-    [showToast],
+    [showToast, t],
   );
 
   useFocusEffect(
@@ -279,34 +281,34 @@ export default function DashboardScreen() {
 
       const result = await executeRun(agentId, run.id);
       if (result.failed) {
-        overlay.showError(agentName, result.error ?? "An unknown error occurred");
+        overlay.showError(agentName, result.error ?? t("runs.unknownError"));
       } else {
         overlay.showSuccess(
           agentName,
-          result.newCount > 0 ? `Found ${result.newCount} new videos` : "No new videos found",
+          result.newCount > 0 ? t("runs.foundNew", { count: result.newCount }) : t("runs.noNewFound"),
         );
       }
       void queryClient.invalidateQueries({ queryKey: qk.runs });
     },
-    [runAgent, overlay, queryClient, executeRun],
+    [runAgent, overlay, queryClient, executeRun, t],
   );
 
   const triggerRun = useCallback(
     async (agentId: string) => {
       const agent = list.find((a) => a.id === agentId);
-      const agentName = agent?.name ?? "Collection";
+      const agentName = agent?.name ?? t("dashboard.collectionFallback");
       void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
       setPendingId(agentId);
       try {
         await runOne(agentId, agentName);
       } catch (e) {
-        const msg = e instanceof Error ? e.message : "Failed to start run";
+        const msg = e instanceof Error ? e.message : t("runs.startFailed");
         overlay.showError(agentName, msg);
       } finally {
         setPendingId(null);
       }
     },
-    [list, runOne, overlay],
+    [list, runOne, overlay, t],
   );
 
   const triggerRunAll = useCallback(async () => {
@@ -317,11 +319,11 @@ export default function DashboardScreen() {
     // Start every agent at the same time, like the web app. Running them one
     // after another made Run All take the sum of every agent's duration.
     const total = list.length;
-    const label = `All collections (${total})`;
+    const label = t("dashboard.allCollectionsCount", { count: total });
     let done = 0;
     let newTotal = 0;
     const failedNames: string[] = [];
-    overlay.showBatchProgress(label, 0, total, "Running every collection at once…");
+    overlay.showBatchProgress(label, 0, total, t("dashboard.runningAll"));
 
     await Promise.all(
       list.map(async (agent) => {
@@ -334,39 +336,39 @@ export default function DashboardScreen() {
           failedNames.push(agent.name);
         }
         done += 1;
-        overlay.showBatchProgress(label, done, total, `${agent.name} finished`);
+        overlay.showBatchProgress(label, done, total, t("dashboard.collectionFinished", { name: agent.name }));
       }),
     );
 
     void queryClient.invalidateQueries({ queryKey: qk.runs });
-    const found = newTotal > 0 ? `Found ${newTotal} new videos` : "No new videos found";
+    const found = newTotal > 0 ? t("runs.foundNew", { count: newTotal }) : t("runs.noNewFound");
     if (failedNames.length > 0) {
-      overlay.showError(label, `${found}. Failed: ${failedNames.join(", ")}`);
+      overlay.showError(label, t("dashboard.foundWithFailures", { found, names: failedNames.join(", ") }));
     } else {
       overlay.showSuccess(label, found);
     }
     setPendingId(null);
-  }, [list, runAgent, executeRun, overlay, queryClient]);
+  }, [list, runAgent, executeRun, overlay, queryClient, t]);
 
   const handleDelete = useCallback(
     (agentId: string, agentName: string) => {
-      Alert.alert("Delete Collection", `Delete "${agentName}"? This cannot be undone.`, [
-        { text: "Cancel", style: "cancel" },
+      Alert.alert(t("dashboard.deleteTitle"), t("dashboard.deleteConfirm", { name: agentName }), [
+        { text: t("common.cancel"), style: "cancel" },
         {
-          text: "Delete",
+          text: t("common.delete"),
           style: "destructive",
           onPress: async () => {
             try {
               await deleteAgent.mutateAsync(agentId);
-              showToast("Collection deleted", "success");
+              showToast(t("dashboard.deleted"), "success");
             } catch (e) {
-              showToast(e instanceof Error ? e.message : "Delete failed", "error");
+              showToast(e instanceof Error ? e.message : t("dashboard.deleteFailed"), "error");
             }
           },
         },
       ]);
     },
-    [deleteAgent, showToast],
+    [deleteAgent, showToast, t],
   );
 
   // The wizard closes from its last screen with the new agent: say it worked,
@@ -375,18 +377,18 @@ export default function DashboardScreen() {
     async (result?: OnboardingResult) => {
       setWizardOpen(false);
       if (!result) return;
-      showToast(`${result.agentName} is set up`, "success");
+      showToast(t("dashboard.setUp", { name: result.agentName }), "success");
       if (!result.runNow) return;
       setPendingId(result.agentId);
       try {
         await runOne(result.agentId, result.agentName);
       } catch (e) {
-        overlay.showError(result.agentName, e instanceof Error ? e.message : "Failed to start run");
+        overlay.showError(result.agentName, e instanceof Error ? e.message : t("runs.startFailed"));
       } finally {
         setPendingId(null);
       }
     },
-    [showToast, runOne, overlay],
+    [showToast, runOne, overlay, t],
   );
 
   const loading =
@@ -411,11 +413,11 @@ export default function DashboardScreen() {
         {/* ── Header ──────────────────────────────────────────────── */}
       <View style={styles.header}>
         <View style={styles.titleRow}>
-          <Text style={styles.heading}>Dashboard</Text>
+          <Text style={styles.heading}>{t("tabs.dashboard")}</Text>
           <Pressable
             onPress={openWizard}
             accessibilityRole="button"
-            accessibilityLabel="How it works"
+            accessibilityLabel={t("dashboard.howItWorks")}
             hitSlop={8}
             style={({ pressed }) => [styles.helpBtn, pressed && styles.pressed]}
           >
@@ -427,7 +429,7 @@ export default function DashboardScreen() {
             style={({ pressed }) => [styles.newAgentBtn, pressed && styles.pressed]}
             onPress={() => router.push("/agent-form")}
           >
-            <Text style={styles.newAgentText}>+ New Collection</Text>
+            <Text style={styles.newAgentText}>{t("dashboard.newCollection")}</Text>
           </Pressable>
           {list.length > 0 ? (
             <Pressable
@@ -446,7 +448,7 @@ export default function DashboardScreen() {
               ) : (
                 <>
                   <Play size={14} color={Colors.white} fill={Colors.white} />
-                  <Text style={styles.runAllText}>Run All</Text>
+                  <Text style={styles.runAllText}>{t("dashboard.runAll")}</Text>
                 </>
               )}
             </Pressable>
@@ -464,25 +466,25 @@ export default function DashboardScreen() {
           <View style={[styles.grid, isWide && styles.gridWide]}>
             <StatCard
               icon={<Bot size={20} color={statIconBlue} strokeWidth={1.75} />}
-              label="Active Collections"
+              label={t("dashboard.stats.collections")}
               value={list.length}
               isWide={isWide}
             />
             <StatCard
               icon={<Video size={20} color={statIconBlue} strokeWidth={1.75} />}
-              label="Channels Tracked"
+              label={t("dashboard.stats.channels")}
               value={channelList.length}
               isWide={isWide}
             />
             <StatCard
               icon={<Activity size={20} color={statIconBlue} strokeWidth={1.75} />}
-              label="Recent Runs"
+              label={t("dashboard.stats.runs")}
               value={runList.length}
               isWide={isWide}
             />
             <StatCard
               icon={<TrendingUp size={20} color={statIconBlue} strokeWidth={1.75} />}
-              label="Success Rate"
+              label={t("dashboard.stats.successRate")}
               value={successRate}
               suffix="%"
               isWide={isWide}
@@ -494,29 +496,29 @@ export default function DashboardScreen() {
             style={({ pressed }) => [followingStyles.card, pressed && styles.pressed]}
             onPress={() => router.push("/following")}
             accessibilityRole="button"
-            accessibilityLabel="People: everyone you follow, and where else they are"
+            accessibilityLabel={t("dashboard.peopleLabel")}
           >
             <View style={followingStyles.iconBox}>
               <Users size={18} color={statIconBlue} strokeWidth={1.75} />
             </View>
             <View style={followingStyles.body}>
-              <Text style={followingStyles.title}>People</Text>
-              <Text style={followingStyles.sub} numberOfLines={1}>Everyone you follow, and where else they are</Text>
+              <Text style={followingStyles.title}>{t("dashboard.people")}</Text>
+              <Text style={followingStyles.sub} numberOfLines={1}>{t("dashboard.peopleSub")}</Text>
             </View>
             <ChevronRight size={18} color={Colors.textMuted} />
           </Pressable>
 
           {/* ── Feeds ─────────────────────────────────────────────── */}
           <SectionHeader
-            title="Feeds"
+            title={t("tabs.feeds")}
             count={list.length}
             open={sections.feeds}
             onToggle={() => toggleSection("feeds")}
-            action={list.length > 0 ? "View All" : undefined}
+            action={list.length > 0 ? t("dashboard.viewAll") : undefined}
             onAction={() => router.push("/(tabs)/feed")}
           />
           {!sections.feeds ? null : list.length === 0 ? (
-            <EmptyCard text="No collections yet. Create one on the web app." />
+            <EmptyCard text={t("dashboard.empty")} />
           ) : (
             list.map((agent, i) => {
               const accent = getAgentColor(i);
@@ -556,13 +558,13 @@ export default function DashboardScreen() {
           {/* ── My Agents ────────────────────────────────────────── */}
           <View style={styles.sectionSpacer} />
           <SectionHeader
-            title="My Collections"
+            title={t("dashboard.myCollections")}
             count={list.length}
             open={sections.collections}
             onToggle={() => toggleSection("collections")}
           />
           {!sections.collections ? null : list.length === 0 ? (
-            <EmptyCard text="No collections yet. Create one on the web app." />
+            <EmptyCard text={t("dashboard.empty")} />
           ) : (
             list.map((agent, i) => {
               const accent = getAgentColor(i);
@@ -679,6 +681,7 @@ function FeedCard({
   allCaughtUp: boolean;
   onPress: () => void;
 }) {
+  const { t } = useTranslation();
   return (
     <Pressable style={({ pressed }) => [feedStyles.card, pressed && styles.pressed]} onPress={onPress}>
       <View style={[feedStyles.accentBar, { backgroundColor: accent }]} />
@@ -691,7 +694,7 @@ function FeedCard({
             {allCaughtUp ? (
               <View style={[feedStyles.caughtUpPill, { borderColor: Colors.success }]}>
                 <Sparkles size={11} color={Colors.success} />
-                <Text style={[feedStyles.caughtUpText, { color: Colors.success }]}>All caught up</Text>
+                <Text style={[feedStyles.caughtUpText, { color: Colors.success }]}>{t("dashboard.allCaughtUp")}</Text>
               </View>
             ) : null}
           </View>
@@ -708,7 +711,7 @@ function FeedCard({
             <Text style={feedStyles.progressPct}>{watchedPct}%</Text>
           </View>
         ) : (
-          <Text style={feedStyles.noItems}>No items yet</Text>
+          <Text style={feedStyles.noItems}>{t("dashboard.noItems")}</Text>
         )}
 
         {/* stat counts */}
@@ -820,6 +823,7 @@ function AgentCard({
   onTap: () => void;
 }) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const { t } = useTranslation();
 
   return (
     <Pressable style={({ pressed }) => [agentStyles.card, pressed && styles.pressed]} onPress={onTap}>
@@ -865,14 +869,14 @@ function AgentCard({
               style={agentStyles.menuItem}
               onPress={(e) => { e.stopPropagation?.(); setMenuOpen(false); onEdit(); }}
             >
-              <Text style={agentStyles.menuText}>Edit</Text>
+              <Text style={agentStyles.menuText}>{t("common.edit")}</Text>
             </Pressable>
             <View style={agentStyles.menuDivider} />
             <Pressable
               style={agentStyles.menuItem}
               onPress={(e) => { e.stopPropagation?.(); setMenuOpen(false); onDelete(); }}
             >
-              <Text style={[agentStyles.menuText, { color: Colors.destructive }]}>Delete</Text>
+              <Text style={[agentStyles.menuText, { color: Colors.destructive }]}>{t("common.delete")}</Text>
             </Pressable>
           </View>
         ) : null}
@@ -881,7 +885,7 @@ function AgentCard({
         <View style={agentStyles.metaRow}>
           <View style={agentStyles.metaChip}>
             <Video size={12} color={Colors.textSecondary} />
-            <Text style={agentStyles.metaText}>{channelCount} channels</Text>
+            <Text style={agentStyles.metaText}>{t("dashboard.channelCount", { count: channelCount })}</Text>
           </View>
           {agent.run_time_local ? (
             <View style={agentStyles.metaChip}>
@@ -904,7 +908,12 @@ function AgentCard({
         {/* new videos */}
         {newVideos > 0 ? (
           <Text style={agentStyles.foundText}>
-            Found <Text style={agentStyles.foundHighlight}>{compactNumber(newVideos)}</Text> new videos
+            <Trans
+              i18nKey="dashboard.foundNew"
+              count={newVideos}
+              values={{ shown: compactNumber(newVideos) }}
+              components={{ b: <Text style={agentStyles.foundHighlight} /> }}
+            />
           </Text>
         ) : null}
       </View>
@@ -989,6 +998,7 @@ function SectionHeader({
   action?: string;
   onAction?: () => void;
 }) {
+  const { t } = useTranslation();
   return (
     <View style={sectStyles.row}>
       {onToggle ? (
@@ -998,7 +1008,7 @@ function SectionHeader({
           style={sectStyles.toggle}
           accessibilityRole="button"
           accessibilityState={{ expanded: !!open }}
-          accessibilityLabel={`${title}, ${open ? "collapse" : "expand"}`}
+          accessibilityLabel={t(open ? "dashboard.sectionCollapse" : "dashboard.sectionExpand", { title })}
         >
           {open ? <ChevronDown size={16} color={Colors.textSecondary} /> : <ChevronRight size={16} color={Colors.textSecondary} />}
           <Text style={sectStyles.title}>{title}</Text>

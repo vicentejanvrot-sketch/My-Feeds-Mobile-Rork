@@ -139,5 +139,56 @@
     "disconnected": "YouTube disconnected",
     "notConnected": "YouTube is not connected",
     "connectInSettings": "Connect YouTube in Settings first"
+  },
+  "tabs": {
+    "dashboard": "Dashboard",
+    "collections": "Collections",
+    "feeds": "Feeds",
+    "history": "History",
+    "settings": "Settings"
+  },
+  "runs": {
+    "unknownError": "An unknown error occurred",
+    "foundNew_one": "Found {{count}} new video",
+    "foundNew_other": "Found {{count}} new videos",
+    "noNewFound": "No new videos found",
+    "startFailed": "Failed to start run"
+  },
+  "dashboard": {
+    "settingSaveFailed": "Couldn't save that setting: {{message}}",
+    "collectionFallback": "Collection",
+    "allCollectionsCount_one": "All collections ({{count}})",
+    "allCollectionsCount_other": "All collections ({{count}})",
+    "runningAll": "Running every collection at once…",
+    "collectionFinished": "{{name}} finished",
+    "foundWithFailures": "{{found}}. Failed: {{names}}",
+    "deleteTitle": "Delete Collection",
+    "deleteConfirm": "Delete \"{{name}}\"? This cannot be undone.",
+    "deleted": "Collection deleted",
+    "deleteFailed": "Delete failed",
+    "setUp": "{{name}} is set up",
+    "howItWorks": "How it works",
+    "newCollection": "+ New Collection",
+    "runAll": "Run All",
+    "stats": {
+      "collections": "Active Collections",
+      "channels": "Channels Tracked",
+      "runs": "Recent Runs",
+      "successRate": "Success Rate"
+    },
+    "peopleLabel": "People: everyone you follow, and where else they are",
+    "people": "People",
+    "peopleSub": "Everyone you follow, and where else they are",
+    "viewAll": "View All",
+    "empty": "No collections yet. Create one on the web app.",
+    "myCollections": "My Collections",
+    "allCaughtUp": "All caught up",
+    "noItems": "No items yet",
+    "channelCount_one": "{{count}} channel",
+    "channelCount_other": "{{count}} channels",
+    "foundNew_one": "Found <b>{{shown}}</b> new video",
+    "foundNew_other": "Found <b>{{shown}}</b> new videos",
+    "sectionCollapse": "{{title}}, collapse",
+    "sectionExpand": "{{title}}, expand"
   }
 }

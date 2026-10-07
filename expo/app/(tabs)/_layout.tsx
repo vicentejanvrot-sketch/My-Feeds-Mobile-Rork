@@ -2,6 +2,7 @@ import { Tabs, useSegments, useRouter } from "expo-router";
 import React, { useEffect } from "react";
 import { StyleSheet } from "react-native";
 import { LayoutDashboard, Bot, Rss, Clock, Settings } from "lucide-react-native";
+import { useTranslation } from "react-i18next";
 import { Colors } from "@/constants/colors";
 import { useAuth } from "@/lib/auth-provider";
 
@@ -9,6 +10,7 @@ export default function TabLayout() {
   const { user, status } = useAuth();
   const segments = useSegments();
   const router = useRouter();
+  const { t } = useTranslation();
 
   // Guard: kick unauthenticated visitors back to Login.
   // Placed here (not in the root) so the root can always register both groups.
@@ -34,35 +36,35 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: "Dashboard",
+          title: t("tabs.dashboard"),
           tabBarIcon: ({ color }) => <LayoutDashboard size={22} color={color} />,
         }}
       />
       <Tabs.Screen
         name="agents"
         options={{
-          title: "Collections",
+          title: t("tabs.collections"),
           tabBarIcon: ({ color }) => <Bot size={22} color={color} />,
         }}
       />
       <Tabs.Screen
         name="feed"
         options={{
-          title: "Feeds",
+          title: t("tabs.feeds"),
           tabBarIcon: ({ color }) => <Rss size={22} color={color} />,
         }}
       />
       <Tabs.Screen
         name="history"
         options={{
-          title: "History",
+          title: t("tabs.history"),
           tabBarIcon: ({ color }) => <Clock size={22} color={color} />,
         }}
       />
       <Tabs.Screen
         name="settings"
         options={{
-          title: "Settings",
+          title: t("tabs.settings"),
           tabBarIcon: ({ color }) => <Settings size={22} color={color} />,
         }}
       />
