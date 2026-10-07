@@ -151,9 +151,9 @@
   },
   "runs": {
     "unknownError": "An unknown error occurred",
-    "foundNew_one": "Found {{count}} new video",
-    "foundNew_other": "Found {{count}} new videos",
-    "noNewFound": "No new videos found",
+    "foundNew_one": "Found {{count}} new feed",
+    "foundNew_other": "Found {{count}} new feeds",
+    "noNewFound": "No new feeds found",
     "startFailed": "Failed to start run",
     "failed": "Run failed"
   },
@@ -189,8 +189,8 @@
     "noItems": "No items yet",
     "channelCount_one": "{{count}} channel",
     "channelCount_other": "{{count}} channels",
-    "foundNew_one": "Found <b>{{shown}}</b> new video",
-    "foundNew_other": "Found <b>{{shown}}</b> new videos",
+    "foundNew_one": "Found <b>{{shown}}</b> new feed",
+    "foundNew_other": "Found <b>{{shown}}</b> new feeds",
     "sectionCollapse": "{{title}}, collapse",
     "sectionExpand": "{{title}}, expand"
   },
@@ -215,9 +215,9 @@
     "watch_later": "Later"
   },
   "overlay": {
-    "scanning": "Scanning channels for new videos…",
-    "foundPartial_one": "Found {{count}} new video (some channels couldn't be scanned)",
-    "foundPartial_other": "Found {{count}} new videos (some channels couldn't be scanned)",
+    "scanning": "Scanning channels for new feeds…",
+    "foundPartial_one": "Found {{count}} new feed (some channels couldn't be scanned)",
+    "foundPartial_other": "Found {{count}} new feeds (some channels couldn't be scanned)",
     "partialNone": "Scan finished — some channels couldn't be scanned.",
     "checkDetails": "Check run details for more information",
     "complete": "Scan complete",
@@ -360,7 +360,7 @@
   "history": {
     "inProgress": "In progress",
     "deleteAllTitle": "Delete Run History",
-    "deleteAllConfirm": "This clears the Run History list only. Your videos, feed, and statistics are kept. This cannot be undone.",
+    "deleteAllConfirm": "This clears the Run History list only. Your feeds and statistics are kept. This cannot be undone.",
     "deleteAll": "Delete All",
     "deleted": "Run history deleted",
     "deleteFailed": "Failed to delete run history",
@@ -411,15 +411,15 @@
     "loadingCount_one": "Loading {{shown}} of {{total}} feed",
     "loadingCount_other": "Loading {{shown}} of {{total}} feeds",
     "statusFailed": "Couldn't update status",
-    "bulkUpdated_one": "Updated {{count}} video",
-    "bulkUpdated_other": "Updated {{count}} videos",
-    "bulkFailed": "Couldn't update selected videos",
+    "bulkUpdated_one": "Updated {{count}} feed",
+    "bulkUpdated_other": "Updated {{count}} feeds",
+    "bulkFailed": "Couldn't update selected feeds",
     "seeCollectionPeople": "See this collection's people",
     "seeEveryone": "See everyone you follow",
     "select": "Select",
-    "videoCount_one": "{{formatted}} video",
-    "videoCount_other": "{{formatted}} videos",
-    "searchPlaceholder": "Search videos, channels, tags...",
+    "videoCount_one": "{{formatted}} feed",
+    "videoCount_other": "{{formatted}} feeds",
+    "searchPlaceholder": "Search feeds, channels, tags...",
     "collection": "Collection",
     "allCollections": "All Collections",
     "openCollectionHint": "Open this collection",
@@ -430,10 +430,10 @@
     "allCount": "All · {{count}}",
     "showingCount_one": "Showing {{shown}} of {{total}} feed",
     "showingCount_other": "Showing {{shown}} of {{total}} feeds",
-    "emptyFilteredTitle": "No videos match your filters",
-    "emptyTitle": "No videos yet",
+    "emptyFilteredTitle": "No feeds match your filters",
+    "emptyTitle": "No feeds yet",
     "emptyFilteredHint": "Try adjusting your search or filters.",
-    "emptyHint": "Run a collection to start discovering videos.",
+    "emptyHint": "Run a collection to start discovering feeds.",
     "carouselLabel_one": "Carousel: {{count}} photo or video",
     "carouselLabel_other": "Carousel: {{count}} photos and videos",
     "untitled": "Untitled",
@@ -441,8 +441,8 @@
     "selectedCount_one": "{{count}} selected",
     "selectedCount_other": "{{count}} selected",
     "setStatus": "Set status",
-    "setStatusFor_one": "Set status for {{count}} video",
-    "setStatusFor_other": "Set status for {{count}} videos",
+    "setStatusFor_one": "Set status for {{count}} feed",
+    "setStatusFor_other": "Set status for {{count}} feeds",
     "statusLabel": "Status: {{status}}"
   },
   "platforms": {
@@ -556,8 +556,8 @@
     "priority": "Priority",
     "priorityLabel": "Priority {{value}}",
     "deleteNamed": "Delete {{name}}?",
-    "deleteDetail_one": "This deletes the collection, its {{count}} source, its email recipients, its run history and every video and post it found, including ones you saved. It can't be undone. Your accounts on YouTube, X and the other platforms aren't touched.",
-    "deleteDetail_other": "This deletes the collection, its {{count}} sources, its email recipients, its run history and every video and post it found, including ones you saved. It can't be undone. Your accounts on YouTube, X and the other platforms aren't touched.",
+    "deleteDetail_one": "This deletes the collection, its {{count}} source, its email recipients, its run history and every feed it found, including ones you saved. It can't be undone. Your accounts on YouTube, X and the other platforms aren't touched.",
+    "deleteDetail_other": "This deletes the collection, its {{count}} sources, its email recipients, its run history and every feed it found, including ones you saved. It can't be undone. Your accounts on YouTube, X and the other platforms aren't touched.",
     "deleteCollection": "Delete collection",
     "enterSource": "Enter a {{noun}}",
     "wrongPlatform": "That's a {{detected}} link. Select {{detected}} or paste a {{selected}} link.",
@@ -996,10 +996,10 @@
       "all": "All time"
     },
     "totalContent": "Total Content",
-    "xOfY_one": "{{done}} of {{count}} video",
-    "xOfY_other": "{{done}} of {{count}} videos",
-    "durationCount_one": "{{duration}} ({{count}} video)",
-    "durationCount_other": "{{duration}} ({{count}} videos)",
+    "xOfY_one": "{{done}} of {{count}} feed",
+    "xOfY_other": "{{done}} of {{count}} feeds",
+    "durationCount_one": "{{duration}} ({{count}} feed)",
+    "durationCount_other": "{{duration}} ({{count}} feeds)",
     "daily": "Daily Trend",
     "bar": "Bar",
     "area": "Area",
@@ -1009,10 +1009,10 @@
     "weekly": "Weekly Comparison",
     "thisWeek": "This Week",
     "lastWeek": "Last Week",
-    "watchedOf_one": "{{done}} of {{count}} video watched",
-    "watchedOf_other": "{{done}} of {{count}} videos watched",
-    "fraction_one": "{{done}}/{{count}} video",
-    "fraction_other": "{{done}}/{{count}} videos"
+    "watchedOf_one": "{{done}} of {{count}} feed watched",
+    "watchedOf_other": "{{done}} of {{count}} feeds watched",
+    "fraction_one": "{{done}}/{{count}} feed",
+    "fraction_other": "{{done}}/{{count}} feeds"
   },
   "onboarding": {
     "errors": {
@@ -1438,7 +1438,7 @@
   "faq": {
     "what": {
       "q": "What does this app do?",
-      "a": "My Feeds lets you create collections that follow YouTube channels and other accounts, automatically surface new videos and posts into your Feed, and track which videos you've watched."
+      "a": "My Feeds lets you create collections that follow YouTube channels and other accounts, automatically surface new feeds into your Feeds, and track which feeds you've watched."
     },
     "youtube": {
       "q": "Do I need a YouTube account?",

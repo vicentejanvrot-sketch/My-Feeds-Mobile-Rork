@@ -151,9 +151,9 @@
   },
   "runs": {
     "unknownError": "Ocorreu um erro desconhecido",
-    "foundNew_one": "{{count}} vídeo novo encontrado",
-    "foundNew_other": "{{count}} vídeos novos encontrados",
-    "noNewFound": "Nenhum vídeo novo encontrado",
+    "foundNew_one": "{{count}} feed novo encontrado",
+    "foundNew_other": "{{count}} feeds novos encontrados",
+    "noNewFound": "Nenhum feed novo encontrado",
     "startFailed": "Não foi possível iniciar a atualização",
     "failed": "A atualização falhou"
   },
@@ -189,8 +189,8 @@
     "noItems": "Nenhum item ainda",
     "channelCount_one": "{{count}} canal",
     "channelCount_other": "{{count}} canais",
-    "foundNew_one": "<b>{{shown}}</b> vídeo novo encontrado",
-    "foundNew_other": "<b>{{shown}}</b> vídeos novos encontrados",
+    "foundNew_one": "<b>{{shown}}</b> feed novo encontrado",
+    "foundNew_other": "<b>{{shown}}</b> feeds novos encontrados",
     "sectionCollapse": "{{title}}, recolher",
     "sectionExpand": "{{title}}, expandir"
   },
@@ -215,9 +215,9 @@
     "watch_later": "Depois"
   },
   "overlay": {
-    "scanning": "Buscando vídeos novos nos canais…",
-    "foundPartial_one": "{{count}} vídeo novo encontrado (alguns canais não puderam ser verificados)",
-    "foundPartial_other": "{{count}} vídeos novos encontrados (alguns canais não puderam ser verificados)",
+    "scanning": "Buscando feeds novos nos canais…",
+    "foundPartial_one": "{{count}} feed novo encontrado (alguns canais não puderam ser verificados)",
+    "foundPartial_other": "{{count}} feeds novos encontrados (alguns canais não puderam ser verificados)",
     "partialNone": "Busca concluída — alguns canais não puderam ser verificados.",
     "checkDetails": "Veja os detalhes da atualização para saber mais",
     "complete": "Busca concluída",
@@ -360,7 +360,7 @@
   "history": {
     "inProgress": "Em andamento",
     "deleteAllTitle": "Excluir histórico de atualizações",
-    "deleteAllConfirm": "Isso limpa só a lista do Histórico de atualizações. Seus vídeos, feed e estatísticas são mantidos. Não dá para desfazer.",
+    "deleteAllConfirm": "Isso limpa só a lista do Histórico de atualizações. Seus feeds e estatísticas são mantidos. Não dá para desfazer.",
     "deleteAll": "Excluir tudo",
     "deleted": "Histórico de atualizações excluído",
     "deleteFailed": "Não foi possível excluir o histórico de atualizações",
@@ -411,15 +411,15 @@
     "loadingCount_one": "Carregando {{shown}} de {{total}} feed",
     "loadingCount_other": "Carregando {{shown}} de {{total}} feeds",
     "statusFailed": "Não foi possível atualizar o status",
-    "bulkUpdated_one": "{{count}} vídeo atualizado",
-    "bulkUpdated_other": "{{count}} vídeos atualizados",
-    "bulkFailed": "Não foi possível atualizar os vídeos selecionados",
+    "bulkUpdated_one": "{{count}} feed atualizado",
+    "bulkUpdated_other": "{{count}} feeds atualizados",
+    "bulkFailed": "Não foi possível atualizar os feeds selecionados",
     "seeCollectionPeople": "Ver as pessoas desta coleção",
     "seeEveryone": "Ver todos que você segue",
     "select": "Selecionar",
-    "videoCount_one": "{{formatted}} vídeo",
-    "videoCount_other": "{{formatted}} vídeos",
-    "searchPlaceholder": "Buscar vídeos, canais, tags...",
+    "videoCount_one": "{{formatted}} feed",
+    "videoCount_other": "{{formatted}} feeds",
+    "searchPlaceholder": "Buscar feeds, canais, tags...",
     "collection": "Coleção",
     "allCollections": "Todas as coleções",
     "openCollectionHint": "Abrir esta coleção",
@@ -430,10 +430,10 @@
     "allCount": "Todos · {{count}}",
     "showingCount_one": "Mostrando {{shown}} de {{total}} feed",
     "showingCount_other": "Mostrando {{shown}} de {{total}} feeds",
-    "emptyFilteredTitle": "Nenhum vídeo com esses filtros",
-    "emptyTitle": "Nenhum vídeo ainda",
+    "emptyFilteredTitle": "Nenhum feed com esses filtros",
+    "emptyTitle": "Nenhum feed ainda",
     "emptyFilteredHint": "Tente ajustar a busca ou os filtros.",
-    "emptyHint": "Atualize uma coleção para começar a descobrir vídeos.",
+    "emptyHint": "Atualize uma coleção para começar a descobrir feeds.",
     "carouselLabel_one": "Carrossel: {{count}} foto ou vídeo",
     "carouselLabel_other": "Carrossel: {{count}} fotos e vídeos",
     "untitled": "Sem título",
@@ -441,8 +441,8 @@
     "selectedCount_one": "{{count}} selecionado",
     "selectedCount_other": "{{count}} selecionados",
     "setStatus": "Definir status",
-    "setStatusFor_one": "Definir status de {{count}} vídeo",
-    "setStatusFor_other": "Definir status de {{count}} vídeos",
+    "setStatusFor_one": "Definir status de {{count}} feed",
+    "setStatusFor_other": "Definir status de {{count}} feeds",
     "statusLabel": "Status: {{status}}"
   },
   "platforms": {
@@ -556,8 +556,8 @@
     "priority": "Prioridade",
     "priorityLabel": "Prioridade {{value}}",
     "deleteNamed": "Excluir {{name}}?",
-    "deleteDetail_one": "Isso exclui a coleção, a {{count}} fonte dela, os destinatários de e-mail, o histórico de atualizações e todos os vídeos e posts que ela encontrou, inclusive os que você salvou. Não dá para desfazer. Suas contas no YouTube, X e nas outras plataformas não são afetadas.",
-    "deleteDetail_other": "Isso exclui a coleção, as {{count}} fontes dela, os destinatários de e-mail, o histórico de atualizações e todos os vídeos e posts que ela encontrou, inclusive os que você salvou. Não dá para desfazer. Suas contas no YouTube, X e nas outras plataformas não são afetadas.",
+    "deleteDetail_one": "Isso exclui a coleção, a {{count}} fonte dela, os destinatários de e-mail, o histórico de atualizações e todos os feeds que ela encontrou, inclusive os que você salvou. Não dá para desfazer. Suas contas no YouTube, X e nas outras plataformas não são afetadas.",
+    "deleteDetail_other": "Isso exclui a coleção, as {{count}} fontes dela, os destinatários de e-mail, o histórico de atualizações e todos os feeds que ela encontrou, inclusive os que você salvou. Não dá para desfazer. Suas contas no YouTube, X e nas outras plataformas não são afetadas.",
     "deleteCollection": "Excluir coleção",
     "enterSource": "Preencha o campo {{noun}}",
     "wrongPlatform": "Esse é um link do {{detected}}. Escolha {{detected}} ou cole um link do {{selected}}.",
@@ -996,10 +996,10 @@
       "all": "Desde o início"
     },
     "totalContent": "Conteúdo total",
-    "xOfY_one": "{{done}} de {{count}} vídeo",
-    "xOfY_other": "{{done}} de {{count}} vídeos",
-    "durationCount_one": "{{duration}} ({{count}} vídeo)",
-    "durationCount_other": "{{duration}} ({{count}} vídeos)",
+    "xOfY_one": "{{done}} de {{count}} feed",
+    "xOfY_other": "{{done}} de {{count}} feeds",
+    "durationCount_one": "{{duration}} ({{count}} feed)",
+    "durationCount_other": "{{duration}} ({{count}} feeds)",
     "daily": "Tendência diária",
     "bar": "Barras",
     "area": "Área",
@@ -1009,10 +1009,10 @@
     "weekly": "Comparação semanal",
     "thisWeek": "Esta semana",
     "lastWeek": "Semana passada",
-    "watchedOf_one": "{{done}} de {{count}} vídeo assistido",
-    "watchedOf_other": "{{done}} de {{count}} vídeos assistidos",
-    "fraction_one": "{{done}}/{{count}} vídeo",
-    "fraction_other": "{{done}}/{{count}} vídeos"
+    "watchedOf_one": "{{done}} de {{count}} feed assistido",
+    "watchedOf_other": "{{done}} de {{count}} feeds assistidos",
+    "fraction_one": "{{done}}/{{count}} feed",
+    "fraction_other": "{{done}}/{{count}} feeds"
   },
   "onboarding": {
     "errors": {
@@ -1438,7 +1438,7 @@
   "faq": {
     "what": {
       "q": "O que este app faz?",
-      "a": "O My Feeds permite criar coleções que acompanham canais do YouTube e outras contas, trazem automaticamente vídeos e posts novos para o seu Feed e registram quais vídeos você já assistiu."
+      "a": "O My Feeds permite criar coleções que acompanham canais do YouTube e outras contas, trazem automaticamente feeds novos para os seus Feeds e registram quais feeds você já assistiu."
     },
     "youtube": {
       "q": "Preciso de uma conta do YouTube?",
