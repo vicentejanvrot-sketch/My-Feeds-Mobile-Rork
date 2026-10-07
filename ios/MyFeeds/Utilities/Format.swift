@@ -84,12 +84,12 @@ nonisolated enum Format {
 
     /// Seconds → "Xh Ym" / "Ym" for watch-time stats.
     static func watchDuration(_ seconds: Int) -> String {
-        if seconds <= 0 { return "0m" }
+        if seconds <= 0 { return String(localized: "\(0)m") }
         let h = seconds / 3600
         let m = (seconds % 3600) / 60
         // Same format as the web app: "3h", "3h 5m", "5m".
-        if h > 0 { return m > 0 ? "\(h)h \(m)m" : "\(h)h" }
-        return "\(m)m"
+        if h > 0 { return m > 0 ? String(localized: "\(h)h \(m)m") : String(localized: "\(h)h") }
+        return String(localized: "\(m)m")
     }
 
     /// Player time "m:ss" / "h:mm:ss".

@@ -14,6 +14,13 @@ struct WatchTimeStatsSection: View {
     enum ChartMode: String, CaseIterable {
         case bar = "Bar"
         case area = "Area"
+
+        var label: String {
+            switch self {
+            case .bar: return String(localized: "Bar")
+            case .area: return String(localized: "Area")
+            }
+        }
     }
 
     var body: some View {
@@ -82,7 +89,7 @@ struct WatchTimeStatsSection: View {
                 Button {
                     period = option
                 } label: {
-                    Text(option.rawValue)
+                    Text(option.label)
                         .font(.system(size: 12, weight: .semibold))
                         .foregroundStyle(period == option ? .white : Theme.textSecondary)
                         .padding(.horizontal, 12)
@@ -169,7 +176,7 @@ struct WatchTimeStatsSection: View {
 
             if stats.weekly.watchedTimeDiffPct != 0 {
                 let up = stats.weekly.watchedTimeDiffPct > 0
-                Text("\(up ? "↑" : "↓") \(abs(stats.weekly.watchedTimeDiffPct))%")
+                Text(verbatim: "\(up ? "↑" : "↓") \((Double(abs(stats.weekly.watchedTimeDiffPct)) / 100).formatted(.percent.precision(.fractionLength(0))))")
                     .font(.system(size: 13, weight: .bold))
                     .foregroundStyle(up ? Theme.success : Theme.destructive)
                     .frame(maxWidth: .infinity)
@@ -180,7 +187,7 @@ struct WatchTimeStatsSection: View {
         .clipShape(.rect(cornerRadius: 8))
     }
 
-    private func weekColumn(title: String, seconds: Int, watched: Int, total: Int, valueColor: Color) -> some View {
+    private func weekColumn(title: LocalizedStringKey, seconds: Int, watched: Int, total: Int, valueColor: Color) -> some View {
         VStack(alignment: .leading, spacing: 4) {
             Text(title)
                 .font(.system(size: 10, weight: .bold))
@@ -221,7 +228,7 @@ struct WatchTimeStatsSection: View {
                         Button {
                             chartMode = mode
                         } label: {
-                            Text(mode.rawValue)
+                            Text(mode.label)
                                 .font(.system(size: 11, weight: .semibold))
                                 .foregroundStyle(chartMode == mode ? .white : Theme.textSecondary)
                                 .padding(.horizontal, 10)
@@ -306,7 +313,7 @@ struct WatchTimeStatsSection: View {
         }
     }
 
-    private func legendDot(color: Color, label: String) -> some View {
+    private func legendDot(color: Color, label: LocalizedStringKey) -> some View {
         HStack(spacing: 5) {
             Circle().fill(color).frame(width: 7, height: 7)
             Text(label)
@@ -423,14 +430,14 @@ struct WatchTimeStatsSection: View {
                                             .foregroundStyle(Theme.textPrimary)
                                             .lineLimit(1)
                                         Spacer()
-                                        Text("(\(channel.watchedCount)/\(channel.totalCount))")
+                                        Text(verbatim: "(\(channel.watchedCount)/\(channel.totalCount))")
                                             .font(.system(size: 10))
                                             .foregroundStyle(Theme.textMuted)
                                     }
                                     HStack(spacing: 4) {
                                         Text(Format.watchDuration(channel.watchedSeconds))
                                             .foregroundStyle(Theme.success)
-                                        Text("/")
+                                        Text(verbatim: "/")
                                             .foregroundStyle(Theme.textMuted)
                                         Text(Format.watchDuration(channel.unwatchedSeconds))
                                             .foregroundStyle(Theme.textMuted)

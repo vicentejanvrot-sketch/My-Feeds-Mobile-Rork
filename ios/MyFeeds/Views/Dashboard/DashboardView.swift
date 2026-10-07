@@ -49,10 +49,10 @@ struct DashboardView: View {
                     followingCard
 
                     CollapsibleSectionHeader(
-                        title: "Feeds",
+                        title: String(localized: "Feeds"),
                         count: sortedAgents.count,
                         isOpen: $feedsOpen,
-                        actionLabel: agents.isEmpty ? nil : "View All"
+                        actionLabel: agents.isEmpty ? nil : String(localized: "View All")
                     ) {
                         router.openFeed(agentId: nil, status: nil)
                     }
@@ -81,7 +81,7 @@ struct DashboardView: View {
                     WatchTimeStatsSection()
 
                     CollapsibleSectionHeader(
-                        title: "My Collections",
+                        title: String(localized: "My Collections"),
                         count: sortedAgents.count,
                         isOpen: $collectionsOpen
                     )
@@ -197,10 +197,10 @@ struct DashboardView: View {
 
     private var statGrid: some View {
         LazyVGrid(columns: [GridItem(.flexible(), spacing: 12), GridItem(.flexible(), spacing: 12)], spacing: 12) {
-            StatCard(icon: "cpu", label: "Active Collections", value: "\(agents.count)")
-            StatCard(icon: "video", label: "Channels Tracked", value: "\(channels.count)")
-            StatCard(icon: "waveform.path.ecg", label: "Recent Runs", value: "\(runs.count)")
-            StatCard(icon: "chart.line.uptrend.xyaxis", label: "Success Rate", value: "\(successRate)%")
+            StatCard(icon: "cpu", label: "Active Collections", value: agents.count.formatted())
+            StatCard(icon: "video", label: "Channels Tracked", value: channels.count.formatted())
+            StatCard(icon: "waveform.path.ecg", label: "Recent Runs", value: runs.count.formatted())
+            StatCard(icon: "chart.line.uptrend.xyaxis", label: "Success Rate", value: (Double(successRate) / 100).formatted(.percent.precision(.fractionLength(0))))
         }
     }
 
@@ -244,7 +244,7 @@ struct DashboardView: View {
         .accessibilityLabel("People: everyone you follow, and where else they are")
     }
 
-    private func emptyCard(text: String) -> some View {
+    private func emptyCard(text: LocalizedStringKey) -> some View {
         Text(text)
             .font(.system(size: 13))
             .foregroundStyle(Theme.textSecondary)
@@ -310,7 +310,7 @@ struct DashboardView: View {
     private func saveOnboardingHidden(_ hidden: Bool) {
         Task {
             if let message = await OnboardingPrefs.setHidden(hidden) {
-                toasts.show("Couldn't save that setting: \(message)", type: .error)
+                toasts.show(String(localized: "Couldn't save that setting: \(message)"), type: .error)
             }
         }
     }
@@ -319,7 +319,7 @@ struct DashboardView: View {
     private func handleWizardClose(_ result: OnboardingResult?) {
         wizardOpen = false
         guard let result else { return }
-        toasts.show("\(result.agent.name) is set up")
+        toasts.show(String(localized: "\(result.agent.name) is set up"))
         Task {
             await load()
             if result.runNow {
@@ -354,7 +354,7 @@ struct DashboardView: View {
         Task {
             do {
                 try await SupabaseService.shared.deleteAgent(id: agent.id)
-                toasts.show("Collection deleted")
+                toasts.show(String(localized: "Collection deleted"))
                 await load()
             } catch {
                 toasts.show(error.localizedDescription, type: .error)
@@ -368,7 +368,7 @@ struct DashboardView: View {
 
 private struct StatCard: View {
     let icon: String
-    let label: String
+    let label: LocalizedStringKey
     let value: String
 
     var body: some View {
@@ -467,7 +467,7 @@ private struct FeedCardView: View {
                                 }
                             }
                             .frame(height: 5)
-                            Text("\(watchedPct)%")
+                            Text((Double(watchedPct) / 100).formatted(.percent.precision(.fractionLength(0))))
                                 .font(.system(size: 12, weight: .bold))
                                 .foregroundStyle(Theme.success)
                                 .frame(minWidth: 32, alignment: .trailing)
@@ -503,7 +503,7 @@ private struct FeedCardView: View {
             Image(systemName: icon)
                 .font(.system(size: 12))
                 .foregroundStyle(iconColor)
-            Text("\(value)")
+            Text(verbatim: "\(value)")
                 .font(.system(size: 13, weight: .bold))
                 .foregroundStyle(valueColor)
                 .monospacedDigit()
@@ -614,9 +614,8 @@ private struct DashboardAgentCard: View {
                         .padding(.top, 10)
 
                         if let newCount = lastRun.videosNewCount, newCount > 0 {
-                            (Text("Found ")
-                             + Text(Format.compactNumber(newCount)).fontWeight(.bold)
-                             + Text(" new videos"))
+                            let number = Text(Format.compactNumber(newCount)).fontWeight(.bold)
+                            (newCount == 1 ? Text("Found \(number) new video") : Text("Found \(number) new videos"))
                                 .font(.system(size: 13))
                                 .foregroundStyle(Theme.textSecondary)
                                 .padding(.top, 8)
@@ -656,7 +655,7 @@ private struct CollapsibleSectionHeader: View {
                         .font(.system(size: 13, weight: .bold))
                         .kerning(0.6)
                     if let count {
-                        Text("(\(count))")
+                        Text(verbatim: "(\(count))")
                             .font(.system(size: 13))
                             .foregroundStyle(Theme.textMuted)
                     }
@@ -666,8 +665,8 @@ private struct CollapsibleSectionHeader: View {
             }
             .buttonStyle(.plain)
             .accessibilityLabel(title)
-            .accessibilityValue(isOpen ? "Expanded" : "Collapsed")
-            .accessibilityHint(isOpen ? "Collapses the section" : "Expands the section")
+            .accessibilityValue(isOpen ? String(localized: "Expanded") : String(localized: "Collapsed"))
+            .accessibilityHint(isOpen ? String(localized: "Collapses the section") : String(localized: "Expands the section"))
             Spacer()
             if let actionLabel, let action {
                 Button(action: action) {
