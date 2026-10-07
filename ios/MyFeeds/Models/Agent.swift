@@ -46,3 +46,16 @@ nonisolated struct AgentPayload: Codable, Sendable {
     var keywords: [String]?
     var userId: String?
 }
+
+extension Agent {
+    /// schedule_frequency ("daily", "weekly", "hourly", none) as shown to the user.
+    static func frequencyLabel(_ value: String?) -> String {
+        switch value?.lowercased() {
+        case "daily": return String(localized: "Daily")
+        case "weekly": return String(localized: "Weekly")
+        case "hourly": return String(localized: "Hourly")
+        case nil, "", "manual": return String(localized: "Manual")
+        default: return value ?? ""
+        }
+    }
+}

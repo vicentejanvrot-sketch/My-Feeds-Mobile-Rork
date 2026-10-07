@@ -166,7 +166,7 @@ private struct AgentListCard: View {
                     }
 
                     HStack(spacing: 14) {
-                        metaItem(icon: "clock", text: agent.scheduleFrequency ?? "manual")
+                        metaItem(icon: "clock", text: Agent.frequencyLabel(agent.scheduleFrequency))
                         if let time = agent.runTimeLocal, !time.isEmpty {
                             metaItem(icon: "envelope", text: time)
                         }

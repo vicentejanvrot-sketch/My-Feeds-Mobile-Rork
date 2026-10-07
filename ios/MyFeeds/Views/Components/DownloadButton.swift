@@ -21,7 +21,7 @@ struct DownloadButton: View {
     var body: some View {
         Group {
             if let progress = store.progress[itemId] {
-                Text("\(Int((progress * 100).rounded()))%")
+                Text((progress).formatted(.percent.precision(.fractionLength(0))))
                     .font(.system(size: 12, weight: .bold))
                     .monospacedDigit()
                     .foregroundStyle(Theme.accent)
@@ -73,7 +73,7 @@ struct DownloadButton: View {
             Button("Cancel", role: .cancel) {}
             Button("Remove", role: .destructive) {
                 store.delete(itemId: itemId)
-                toasts.show("Download removed")
+                toasts.show(String(localized: "Download removed"))
             }
         } message: {
             Text("It stays in your feed. Only the copy on this phone is deleted.")
@@ -87,10 +87,10 @@ struct DownloadButton: View {
                 try await store.download(itemId: itemId)
                 // Downloads stay inside My Feeds (not Photos or Files), so say where to find them.
                 toasts.show(hasAudio
-                    ? "Episode saved inside My Feeds for offline listening. See it in this app's Settings tab > Downloads."
+                    ? String(localized: "Episode saved inside My Feeds for offline listening. See it in this app's Settings tab > Downloads.")
                     : youtubeVideoId != nil
-                        ? "Summary saved inside My Feeds for offline reading. The video still needs a connection. See it in this app's Settings tab > Downloads."
-                        : "Saved inside My Feeds for offline reading. See it in this app's Settings tab > Downloads.")
+                        ? String(localized: "Summary saved inside My Feeds for offline reading. The video still needs a connection. See it in this app's Settings tab > Downloads.")
+                        : String(localized: "Saved inside My Feeds for offline reading. See it in this app's Settings tab > Downloads."))
             } catch {
                 toasts.show(error.localizedDescription, type: .error)
             }

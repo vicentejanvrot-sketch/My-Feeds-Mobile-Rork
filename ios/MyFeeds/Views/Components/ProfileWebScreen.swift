@@ -23,7 +23,7 @@ struct ProfileWebScreen: View {
                     circleButton("chevron.left", label: "Back") { model.webView?.goBack() }
                 }
                 VStack(alignment: .leading, spacing: 1) {
-                    Text(name.isEmpty ? "Profile" : name)
+                    Text(name.isEmpty ? String(localized: "Profile") : name)
                         .font(.system(size: 16, weight: .bold))
                         .foregroundStyle(Theme.textPrimary)
                         .lineLimit(1)
@@ -37,7 +37,7 @@ struct ProfileWebScreen: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.horizontal, 4)
                 circleButton("arrow.clockwise", label: "Reload") { model.webView?.reload() }
-                circleButton("arrow.up.right.square", label: "Open in \(platformLabel.isEmpty ? "the app" : platformLabel)") {
+                circleButton("arrow.up.right.square", label: platformLabel.isEmpty ? "Open in the app" : "Open in \(platformLabel)") {
                     openURL(url)
                 }
             }
@@ -55,7 +55,7 @@ struct ProfileWebScreen: View {
         .background(Theme.background.ignoresSafeArea())
     }
 
-    private func circleButton(_ systemImage: String, label: String, action: @escaping () -> Void) -> some View {
+    private func circleButton(_ systemImage: String, label: LocalizedStringKey, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             Image(systemName: systemImage)
                 .font(.system(size: 14, weight: .semibold))

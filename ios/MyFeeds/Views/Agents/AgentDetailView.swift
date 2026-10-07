@@ -338,7 +338,7 @@ struct AgentDetailView: View {
             return "No schedule set"
         }()
         let subtitle: String? = {
-            let frequency = agent.scheduleFrequency ?? "Manual"
+            let frequency = Agent.frequencyLabel(agent.scheduleFrequency)
             if let lookback = agent.lookbackHours {
                 return "\(frequency) • \(lookback)h lookback"
             }

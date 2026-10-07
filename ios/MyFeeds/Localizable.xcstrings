@@ -81,12 +81,62 @@
         }
       }
     },
+    "%@ · signed in on this phone only" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ · conectado só neste celular"
+          }
+        }
+      }
+    },
     "%@. Failed: %@" : {
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "%1$@. Falharam: %2$@"
+          }
+        }
+      }
+    },
+    "%lld configured" : {
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld configured"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld configured"
+                }
+              }
+            }
+          }
+        },
+        "pt-BR" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld configurada"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld configuradas"
+                }
+              }
+            }
           }
         }
       }
@@ -335,6 +385,56 @@
         }
       }
     },
+    "Add EP to YouTube Music" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Adicionar EP ao YouTube Music"
+          }
+        }
+      }
+    },
+    "Add album to Apple Music" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Adicionar álbum ao Apple Music"
+          }
+        }
+      }
+    },
+    "Add album to YouTube Music" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Adicionar álbum ao YouTube Music"
+          }
+        }
+      }
+    },
+    "Add song to Apple Music" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Adicionar música ao Apple Music"
+          }
+        }
+      }
+    },
+    "Add song to YouTube Music" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Adicionar música ao YouTube Music"
+          }
+        }
+      }
+    },
     "Add to %@" : {
       "localizations" : {
         "pt-BR" : {
@@ -405,12 +505,162 @@
         }
       }
     },
+    "Add video to YouTube Music" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Adicionar vídeo ao YouTube Music"
+          }
+        }
+      }
+    },
     "Added %@" : {
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "%@ adicionado"
+          }
+        }
+      }
+    },
+    "Added %lld songs to \"My Feeds\" in Apple Music" : {
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Added %lld song to \"My Feeds\" in Apple Music"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Added %lld songs to \"My Feeds\" in Apple Music"
+                }
+              }
+            }
+          }
+        },
+        "pt-BR" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld música adicionada a \"My Feeds\" no Apple Music"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld músicas adicionadas a \"My Feeds\" no Apple Music"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "Added %lld songs to \"My Feeds\" in YouTube Music" : {
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Added %lld song to \"My Feeds\" in YouTube Music"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Added %lld songs to \"My Feeds\" in YouTube Music"
+                }
+              }
+            }
+          }
+        },
+        "pt-BR" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld música adicionada a \"My Feeds\" no YouTube Music"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld músicas adicionadas a \"My Feeds\" no YouTube Music"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "Added %lld videos to \"My Feeds\" in YouTube Music" : {
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Added %lld video to \"My Feeds\" in YouTube Music"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Added %lld videos to \"My Feeds\" in YouTube Music"
+                }
+              }
+            }
+          }
+        },
+        "pt-BR" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld vídeo adicionado a \"My Feeds\" no YouTube Music"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld vídeos adicionados a \"My Feeds\" no YouTube Music"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "Added to Apple Music" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Adicionado ao Apple Music"
+          }
+        }
+      }
+    },
+    "Added to YouTube Music" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Adicionado ao YouTube Music"
           }
         }
       }
@@ -481,6 +731,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Já está em %@"
+          }
+        }
+      }
+    },
+    "Already in your \"My Feeds\" playlist" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Já está na sua playlist \"My Feeds\""
           }
         }
       }
@@ -785,6 +1045,16 @@
         }
       }
     },
+    "Collections" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Coleções"
+          }
+        }
+      }
+    },
     "Collections finished" : {
       "localizations" : {
         "pt-BR" : {
@@ -841,6 +1111,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Conecte o YouTube primeiro."
+          }
+        }
+      }
+    },
+    "Connect YouTube to add it" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Conecte o YouTube para adicionar"
           }
         }
       }
@@ -1045,6 +1325,16 @@
         }
       }
     },
+    "Create a collection and it will appear here automatically." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Crie uma coleção e ela vai aparecer aqui automaticamente."
+          }
+        }
+      }
+    },
     "Create an account" : {
       "localizations" : {
         "pt-BR" : {
@@ -1055,12 +1345,32 @@
         }
       }
     },
+    "Daily" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Diária"
+          }
+        }
+      }
+    },
     "Danger Zone" : {
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Zona de perigo"
+          }
+        }
+      }
+    },
+    "Dashboard" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Painel"
           }
         }
       }
@@ -1205,12 +1515,42 @@
         }
       }
     },
+    "Download for offline" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Baixar para ver offline"
+          }
+        }
+      }
+    },
     "Download removed" : {
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Download removido"
+          }
+        }
+      }
+    },
+    "Downloaded. Remove download" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Baixado. Remover download"
+          }
+        }
+      }
+    },
+    "Downloading, %lld percent" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Baixando, %lld por cento"
           }
         }
       }
@@ -1275,6 +1615,16 @@
         }
       }
     },
+    "Episode saved inside My Feeds for offline listening. See it in this app's Settings tab > Downloads." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Episódio salvo no My Feeds para ouvir offline. Veja na aba Configurações deste app > Downloads."
+          }
+        }
+      }
+    },
     "Everything without a video" : {
       "localizations" : {
         "pt-BR" : {
@@ -1311,6 +1661,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Não foi possível salvar as configurações. Tente de novo."
+          }
+        }
+      }
+    },
+    "Feeds" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Feeds"
           }
         }
       }
@@ -1465,6 +1825,26 @@
         }
       }
     },
+    "Goes into your \"My Feeds\" playlist. Needs an Apple Music subscription. Turn on Automatic Downloads in Apple Music to keep the songs offline." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vai para a sua playlist \"My Feeds\". Precisa de uma assinatura do Apple Music. Ative Downloads Automáticos no Apple Music para manter as músicas offline."
+          }
+        }
+      }
+    },
+    "Goes into your \"My Feeds\" playlist. With YouTube Music Premium you can download it for offline listening." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vai para a sua playlist \"My Feeds\". Com o YouTube Music Premium você pode baixar para ouvir offline."
+          }
+        }
+      }
+    },
     "Hide" : {
       "localizations" : {
         "pt-BR" : {
@@ -1511,6 +1891,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Máxima disponível"
+          }
+        }
+      }
+    },
+    "History" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Histórico"
+          }
+        }
+      }
+    },
+    "Hourly" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "De hora em hora"
           }
         }
       }
@@ -1615,6 +2015,16 @@
         }
       }
     },
+    "It stays in your feed. Only the copy on this phone is deleted." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ele continua no seu feed. Só a cópia neste celular é excluída."
+          }
+        }
+      }
+    },
     "It's added as a private account: it shows on People with a button to open it in %@. Its posts won't appear in your feed." : {
       "localizations" : {
         "pt-BR" : {
@@ -1711,6 +2121,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Mínima"
+          }
+        }
+      }
+    },
+    "Manual" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Manual"
           }
         }
       }
@@ -1845,12 +2265,32 @@
         }
       }
     },
+    "New version available" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nova versão disponível"
+          }
+        }
+      }
+    },
     "Next" : {
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Avançar"
+          }
+        }
+      }
+    },
+    "No collections yet" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nenhuma coleção ainda"
           }
         }
       }
@@ -1935,6 +2375,16 @@
         }
       }
     },
+    "Offline — couldn't load latest collections." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Offline — não foi possível carregar as coleções mais recentes."
+          }
+        }
+      }
+    },
     "Open My Feeds and sign in first, then share again." : {
       "localizations" : {
         "pt-BR" : {
@@ -1945,12 +2395,32 @@
         }
       }
     },
+    "Open YouTube" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abrir o YouTube"
+          }
+        }
+      }
+    },
     "Open a post, podcast episode or video and tap the download icon at the top. It stays on this phone so you can read or listen with no connection." : {
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Abra um post, episódio de podcast ou vídeo e toque no ícone de download no topo. Ele fica neste celular para você ler ou ouvir sem conexão."
+          }
+        }
+      }
+    },
+    "Open in %@" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abrir no %@"
           }
         }
       }
@@ -2001,6 +2471,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Abrir no YouTube Music"
+          }
+        }
+      }
+    },
+    "Open in the app" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abrir no app"
           }
         }
       }
@@ -2355,6 +2835,16 @@
         }
       }
     },
+    "Profile" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Perfil"
+          }
+        }
+      }
+    },
     "Profile or company" : {
       "localizations" : {
         "pt-BR" : {
@@ -2465,6 +2955,16 @@
         }
       }
     },
+    "Reload" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recarregar"
+          }
+        }
+      }
+    },
     "Remove" : {
       "localizations" : {
         "pt-BR" : {
@@ -2525,6 +3025,26 @@
         }
       }
     },
+    "Run All" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Atualizar todas"
+          }
+        }
+      }
+    },
+    "Run Now" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Atualizar agora"
+          }
+        }
+      }
+    },
     "Running" : {
       "localizations" : {
         "pt-BR" : {
@@ -2575,6 +3095,16 @@
         }
       }
     },
+    "Save summary" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Salvar resumo"
+          }
+        }
+      }
+    },
     "Save to Unsorted" : {
       "localizations" : {
         "pt-BR" : {
@@ -2601,6 +3131,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Salvos para ver offline"
+          }
+        }
+      }
+    },
+    "Saved inside My Feeds for offline reading. See it in this app's Settings tab > Downloads." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Salvo no My Feeds para ler offline. Veja na aba Configurações deste app > Downloads."
           }
         }
       }
@@ -2895,6 +3435,16 @@
         }
       }
     },
+    "Summary saved inside My Feeds for offline reading. The video still needs a connection. See it in this app's Settings tab > Downloads." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Resumo salvo no My Feeds para ler offline. O vídeo ainda precisa de conexão. Veja na aba Configurações deste app > Downloads."
+          }
+        }
+      }
+    },
     "Support" : {
       "localizations" : {
         "pt-BR" : {
@@ -3065,6 +3615,26 @@
         }
       }
     },
+    "This version (%@) is no longer supported. Update to version %@ to keep using My Feeds." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Esta versão (%1$@) não é mais compatível. Atualize para a versão %2$@ para continuar usando o My Feeds."
+          }
+        }
+      }
+    },
+    "This video can't be downloaded" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Este vídeo não pode ser baixado"
+          }
+        }
+      }
+    },
     "This will permanently delete your account and all your data, including your collections, feeds, watch history, and saved settings. This cannot be undone." : {
       "localizations" : {
         "pt-BR" : {
@@ -3165,6 +3735,36 @@
         }
       }
     },
+    "Update" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Atualizar"
+          }
+        }
+      }
+    },
+    "Update My Feeds" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Atualize o My Feeds"
+          }
+        }
+      }
+    },
+    "Update now" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Atualizar agora"
+          }
+        }
+      }
+    },
     "Update password" : {
       "localizations" : {
         "pt-BR" : {
@@ -3245,6 +3845,16 @@
         }
       }
     },
+    "Version %@ is ready to install." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A versão %@ está pronta para instalar."
+          }
+        }
+      }
+    },
     "Video Playback" : {
       "localizations" : {
         "pt-BR" : {
@@ -3321,6 +3931,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Podemos atualizar esta política de tempos em tempos. Mudanças importantes serão indicadas pela data de \"Última atualização\" acima."
+          }
+        }
+      }
+    },
+    "Weekly" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Semanal"
           }
         }
       }
@@ -3451,6 +4071,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "YouTube desconectado"
+          }
+        }
+      }
+    },
+    "YouTube only lets its videos play in its own player, so My Feeds can't save this video to your phone.\n\nSave summary keeps the summary and key moments for offline reading. To watch the video offline, open it in the YouTube app and use Download there (needs YouTube Premium)." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O YouTube só deixa seus vídeos tocarem no próprio player, então o My Feeds não consegue salvar este vídeo no seu celular.\n\nSalvar resumo guarda o resumo e os momentos principais para ler offline. Para assistir ao vídeo offline, abra no app do YouTube e use Baixar por lá (precisa do YouTube Premium)."
           }
         }
       }
