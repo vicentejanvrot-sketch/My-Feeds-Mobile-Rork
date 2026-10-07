@@ -11,6 +11,36 @@
         }
       }
     },
+    "\"Add album to Apple Music\" puts the songs in your My Feeds playlist there, ready to download for offline." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "\"Adicionar álbum ao Apple Music\" coloca as músicas na sua playlist My Feeds de lá, prontas para baixar e ouvir offline."
+          }
+        }
+      }
+    },
+    "\"Add to YouTube Music\" puts the songs in your My Feeds playlist there, using your connected YouTube account." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "\"Adicionar ao YouTube Music\" coloca as músicas na sua playlist My Feeds de lá, usando sua conta do YouTube conectada."
+          }
+        }
+      }
+    },
+    "\"Open in Spotify\" plays the full release in the Spotify app, where you can like it or add it to a playlist." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "\"Abrir no Spotify\" toca o lançamento completo no app do Spotify, onde dá para curtir ou adicionar a uma playlist."
+          }
+        }
+      }
+    },
     "%@ %@" : {
       "localizations" : {
         "pt-BR" : {
@@ -1031,6 +1061,16 @@
         }
       }
     },
+    "%lldd" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld d"
+          }
+        }
+      }
+    },
     "%lldd ago" : {
       "localizations" : {
         "pt-BR" : {
@@ -1461,6 +1501,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Adicionar por link"
+          }
+        }
+      }
+    },
+    "Add it to Apple Music" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Adicione ao Apple Music"
+          }
+        }
+      }
+    },
+    "Add it to YouTube Music" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Adicione ao YouTube Music"
           }
         }
       }
@@ -2275,6 +2335,16 @@
         }
       }
     },
+    "Bookmark" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Salvar"
+          }
+        }
+      }
+    },
     "Bookmark (Read Later)" : {
       "localizations" : {
         "pt-BR" : {
@@ -2291,6 +2361,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Crie sua primeira coleção"
+          }
+        }
+      }
+    },
+    "Buying and listening to the whole book opens Apple Books." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Comprar e ouvir o livro inteiro abre o Apple Books."
           }
         }
       }
@@ -2915,6 +2995,16 @@
         }
       }
     },
+    "Comment and repost on LinkedIn" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Comentar e repostar no LinkedIn"
+          }
+        }
+      }
+    },
     "Comment on Instagram" : {
       "localizations" : {
         "pt-BR" : {
@@ -2931,6 +3021,86 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Comentar no TikTok"
+          }
+        }
+      }
+    },
+    "Commenting opens Facebook, because it posts from your account." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Comentar abre o Facebook, porque publica pela sua conta."
+          }
+        }
+      }
+    },
+    "Commenting opens Instagram, because it posts from your account." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Comentar abre o Instagram, porque publica pela sua conta."
+          }
+        }
+      }
+    },
+    "Commenting opens TikTok, because it posts from your account." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Comentar abre o TikTok, porque publica pela sua conta."
+          }
+        }
+      }
+    },
+    "Comments" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Comentários"
+          }
+        }
+      }
+    },
+    "Comments open on Facebook" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Comentários abrem no Facebook"
+          }
+        }
+      }
+    },
+    "Comments open on Instagram" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Comentários abrem no Instagram"
+          }
+        }
+      }
+    },
+    "Comments open on Reddit" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Comentários abrem no Reddit"
+          }
+        }
+      }
+    },
+    "Comments open on TikTok" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Comentários abrem no TikTok"
           }
         }
       }
@@ -3475,6 +3645,16 @@
         }
       }
     },
+    "Crispy rice in 60 seconds." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Arroz crocante em 60 segundos."
+          }
+        }
+      }
+    },
     "Daily" : {
       "localizations" : {
         "pt-BR" : {
@@ -3845,6 +4025,16 @@
         }
       }
     },
+    "Downvote" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Downvote"
+          }
+        }
+      }
+    },
     "Downvote (mark as read)" : {
       "localizations" : {
         "pt-BR" : {
@@ -3991,6 +4181,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Episódio"
+          }
+        }
+      }
+    },
+    "Episode 212: Training through the winter" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Episódio 212: Treinando durante o inverno"
           }
         }
       }
@@ -4315,6 +4515,26 @@
         }
       }
     },
+    "Follow the show on Apple Podcasts" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Siga o programa no Apple Podcasts"
+          }
+        }
+      }
+    },
+    "Following or rating the show opens Apple Podcasts." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seguir ou avaliar o programa abre o Apple Podcasts."
+          }
+        }
+      }
+    },
     "Forgot password?" : {
       "localizations" : {
         "pt-BR" : {
@@ -4325,12 +4545,32 @@
         }
       }
     },
+    "Fork" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fork"
+          }
+        }
+      }
+    },
     "Fork on GitHub" : {
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Fazer fork no GitHub"
+          }
+        }
+      }
+    },
+    "Forking opens GitHub, since it happens in your GitHub account." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fazer fork abre o GitHub, já que acontece na sua conta do GitHub."
           }
         }
       }
@@ -4515,6 +4755,16 @@
         }
       }
     },
+    "Full episode, played inside My Feeds." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Episódio completo, tocado dentro do My Feeds."
+          }
+        }
+      }
+    },
     "Full screen" : {
       "localizations" : {
         "pt-BR" : {
@@ -4641,6 +4891,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "COMO FUNCIONA"
+          }
+        }
+      }
+    },
+    "Hear a sample" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ouça uma amostra"
+          }
+        }
+      }
+    },
+    "Heart to save" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Coração para salvar"
           }
         }
       }
@@ -4781,6 +5051,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Como funciona"
+          }
+        }
+      }
+    },
+    "I've got a gallery over 2,000 rows and Patch keeps complaining. What's the cleanest way around it?" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tenho uma galeria com mais de 2.000 linhas e o Patch não para de reclamar. Qual é o jeito mais limpo de contornar isso?"
           }
         }
       }
@@ -4935,6 +5215,16 @@
         }
       }
     },
+    "Jump to the good parts" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vá direto ao que interessa"
+          }
+        }
+      }
+    },
     "KEY MOMENTS" : {
       "localizations" : {
         "pt-BR" : {
@@ -4961,6 +5251,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Manter a tela ligada durante a reprodução"
+          }
+        }
+      }
+    },
+    "Keep track" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Organize"
           }
         }
       }
@@ -5065,6 +5365,46 @@
         }
       }
     },
+    "Like or bookmark" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Curtir ou salvar"
+          }
+        }
+      }
+    },
+    "Like saves it in My Feeds. Bookmark adds it to Read later." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Curtir salva no My Feeds. Salvar nos favoritos adiciona em Ler depois."
+          }
+        }
+      }
+    },
+    "Like saves it in My Feeds. Save adds it to Read later." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Curtir salva no My Feeds. Salvar adiciona em Ler depois."
+          }
+        }
+      }
+    },
+    "Like to save" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Curtir para salvar"
+          }
+        }
+      }
+    },
     "Liked" : {
       "localizations" : {
         "pt-BR" : {
@@ -5091,6 +5431,36 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Link copiado"
+          }
+        }
+      }
+    },
+    "Listen here" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ouça aqui"
+          }
+        }
+      }
+    },
+    "Listen in Apple Books" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ouça no Apple Books"
+          }
+        }
+      }
+    },
+    "Listen to the whole episode" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ouça o episódio inteiro"
           }
         }
       }
@@ -5251,6 +5621,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Marcar como lido"
+          }
+        }
+      }
+    },
+    "Mark it Seen, Later or Liked from the card so your feed stays tidy." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Marque como Visto, Depois ou Curtido no próprio card para manter seu feed em ordem."
           }
         }
       }
@@ -5655,12 +6035,32 @@
         }
       }
     },
+    "New album by Nova Lane · 10 tracks" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Novo álbum de Nova Lane · 10 faixas"
+          }
+        }
+      }
+    },
     "New audiobook" : {
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Novo audiolivro"
+          }
+        }
+      }
+    },
+    "New audiobook by Maya Ortiz · Fiction" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Novo audiolivro de Maya Ortiz · Ficção"
           }
         }
       }
@@ -5745,6 +6145,16 @@
         }
       }
     },
+    "New single by Nova Lane · 1 track · Pop" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Novo single de Nova Lane · 1 faixa · Pop"
+          }
+        }
+      }
+    },
     "New singles and albums, played with Spotify's player. Paste the artist's Spotify link. Adding an artist also brings in their latest album." : {
       "localizations" : {
         "pt-BR" : {
@@ -5801,16 +6211,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Novos:"
-          }
-        }
-      }
-    },
-    "Next" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Avançar"
           }
         }
       }
@@ -6095,16 +6495,6 @@
         }
       }
     },
-    "OK" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "OK"
-          }
-        }
-      }
-    },
     "Off" : {
       "localizations" : {
         "pt-BR" : {
@@ -6201,6 +6591,16 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "Onboarding rewrite is live. A thread on what we cut and why." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A nova versão do onboarding está no ar. Uma thread sobre o que cortamos e por quê."
           }
         }
       }
@@ -6425,12 +6825,142 @@
         }
       }
     },
+    "Open the post" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abra o post"
+          }
+        }
+      }
+    },
     "Open this collection" : {
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Abrir esta coleção"
+          }
+        }
+      }
+    },
+    "Opens Apple Books" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abre o Apple Books"
+          }
+        }
+      }
+    },
+    "Opens Apple Music" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abre o Apple Music"
+          }
+        }
+      }
+    },
+    "Opens Apple Podcasts" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abre o Apple Podcasts"
+          }
+        }
+      }
+    },
+    "Opens Facebook" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abre o Facebook"
+          }
+        }
+      }
+    },
+    "Opens GitHub" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abre o GitHub"
+          }
+        }
+      }
+    },
+    "Opens Instagram" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abre o Instagram"
+          }
+        }
+      }
+    },
+    "Opens LinkedIn" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abre o LinkedIn"
+          }
+        }
+      }
+    },
+    "Opens Reddit" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abre o Reddit"
+          }
+        }
+      }
+    },
+    "Opens Spotify" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abre o Spotify"
+          }
+        }
+      }
+    },
+    "Opens TikTok" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abre o TikTok"
+          }
+        }
+      }
+    },
+    "Opens X" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abre o X"
+          }
+        }
+      }
+    },
+    "Opens YouTube Music" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abre o YouTube Music"
           }
         }
       }
@@ -6555,6 +7085,16 @@
         }
       }
     },
+    "Patching a collection without the delegation warning?" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Como fazer Patch numa coleção sem o aviso de delegação?"
+          }
+        }
+      }
+    },
     "Pause" : {
       "localizations" : {
         "pt-BR" : {
@@ -6645,6 +7185,16 @@
         }
       }
     },
+    "Photos and reels play here" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fotos e reels tocam aqui"
+          }
+        }
+      }
+    },
     "Pick a collection" : {
       "localizations" : {
         "pt-BR" : {
@@ -6691,6 +7241,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tocar"
+          }
+        }
+      }
+    },
+    "Play it here" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Assista aqui"
+          }
+        }
+      }
+    },
+    "Play it in Spotify" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ouça no Spotify"
           }
         }
       }
@@ -6795,6 +7365,16 @@
         }
       }
     },
+    "Podcast" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Podcast"
+          }
+        }
+      }
+    },
     "Possible match" : {
       "localizations" : {
         "pt-BR" : {
@@ -6891,6 +7471,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Conta privada. Os posts dela não estão no seu feed."
+          }
+        }
+      }
+    },
+    "Product lead" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Líder de produto"
           }
         }
       }
@@ -7025,6 +7615,36 @@
         }
       }
     },
+    "Read and watch here" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Leia e assista aqui"
+          }
+        }
+      }
+    },
+    "Read the full post" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Leia o post completo"
+          }
+        }
+      }
+    },
+    "Read the whole post" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Leia o post inteiro"
+          }
+        }
+      }
+    },
     "Recent" : {
       "localizations" : {
         "pt-BR" : {
@@ -7101,6 +7721,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Vídeos normais do TikTok"
+          }
+        }
+      }
+    },
+    "Release notes for the parser, with a short summary of what changed." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Notas da release do parser, com um resumo curto do que mudou."
           }
         }
       }
@@ -7285,12 +7915,42 @@
         }
       }
     },
+    "Reply" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Responder"
+          }
+        }
+      }
+    },
     "Reply on X" : {
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Responder no X"
+          }
+        }
+      }
+    },
+    "Reply or repost on X" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Responder ou repostar no X"
+          }
+        }
+      }
+    },
+    "Replying and reposting open X, because they post from your X account." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Responder e repostar abrem o X, porque publicam pela sua conta do X."
           }
         }
       }
@@ -7805,6 +8465,16 @@
         }
       }
     },
+    "See what's new" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Veja as novidades"
+          }
+        }
+      }
+    },
     "Seen" : {
       "localizations" : {
         "pt-BR" : {
@@ -8265,16 +8935,6 @@
         }
       }
     },
-    "Skip" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pular"
-          }
-        }
-      }
-    },
     "Skip for now" : {
       "localizations" : {
         "pt-BR" : {
@@ -8395,12 +9055,42 @@
         }
       }
     },
+    "Star" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Estrela"
+          }
+        }
+      }
+    },
     "Star (save in My Feeds)" : {
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Dar estrela (salvar no My Feeds)"
+          }
+        }
+      }
+    },
+    "Star saves it in My Feeds. Save adds it to Read later." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A estrela salva no My Feeds. Salvar adiciona em Ler depois."
+          }
+        }
+      }
+    },
+    "Star to save" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Estrela para salvar"
           }
         }
       }
@@ -8535,12 +9225,152 @@
         }
       }
     },
+    "Tap a new repository or release to read what it is, with a short summary." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toque em um novo repositório ou release para ler do que se trata, com um resumo curto."
+          }
+        }
+      }
+    },
     "Tap anywhere to dismiss" : {
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Toque em qualquer lugar para fechar"
+          }
+        }
+      }
+    },
+    "Tap it to open Apple Music's player. You hear a preview, or the full songs if you're signed in to Apple Music." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toque para abrir o player do Apple Music. Você ouve uma prévia, ou as músicas completas se tiver entrado no Apple Music."
+          }
+        }
+      }
+    },
+    "Tap it to open Spotify's player and hear a preview right inside My Feeds." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toque para abrir o player do Spotify e ouvir uma prévia dentro do My Feeds."
+          }
+        }
+      }
+    },
+    "Tap it to play the full episode here. It remembers where you stopped, on every device." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toque para tocar o episódio completo aqui. Ele lembra onde você parou, em qualquer dispositivo."
+          }
+        }
+      }
+    },
+    "Tap it to play the songs, or the music video, right inside My Feeds." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toque para tocar as músicas, ou o clipe, dentro do My Feeds."
+          }
+        }
+      }
+    },
+    "Tap it to read the full post with its photos or video, plus a summary of the thread." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toque nele para ler o post completo com fotos ou vídeo, mais um resumo da discussão."
+          }
+        }
+      }
+    },
+    "Tap it to read the whole post and see its images inside My Feeds." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toque nele para ler o post inteiro e ver as imagens dentro do My Feeds."
+          }
+        }
+      }
+    },
+    "Tap it to see the cover and description, and play Apple's sample right here." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toque para ver a capa e a descrição, e tocar a amostra da Apple aqui mesmo."
+          }
+        }
+      }
+    },
+    "Tap the comment count to join the conversation on Reddit." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toque no número de comentários para entrar na conversa no Reddit."
+          }
+        }
+      }
+    },
+    "Tap the post to open it. Photos, videos and quoted posts show in full inside My Feeds." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toque no post para abri-lo. Fotos, vídeos e posts citados aparecem completos dentro do My Feeds."
+          }
+        }
+      }
+    },
+    "Tap the post to open it. Swipe through carousels and play reels without leaving." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toque no post para abri-lo. Passe pelos carrosséis e assista aos reels sem sair."
+          }
+        }
+      }
+    },
+    "Tap the post to read it in full. Photos open large and videos play inside My Feeds." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toque no post para ler tudo. As fotos abrem em tamanho grande e os vídeos tocam dentro do My Feeds."
+          }
+        }
+      }
+    },
+    "Tap the video to play it inside My Feeds with TikTok's own player." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toque no vídeo para assistir dentro do My Feeds com o player do próprio TikTok."
+          }
+        }
+      }
+    },
+    "Tap the video to watch it inside My Feeds. It remembers where you stopped." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toque no vídeo para assistir dentro do My Feeds. Ele lembra onde você parou."
           }
         }
       }
@@ -8635,6 +9465,16 @@
         }
       }
     },
+    "The best onboarding asks for one decision per screen." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O melhor onboarding pede uma decisão por tela."
+          }
+        }
+      }
+    },
     "The cards you combined go back to being separate cards. Nothing is removed from your collections." : {
       "localizations" : {
         "pt-BR" : {
@@ -8651,6 +9491,36 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "A conexão foi cancelada."
+          }
+        }
+      }
+    },
+    "The heart saves it in My Feeds, and the bookmark adds it to Read later." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O coração salva no My Feeds, e o marcador adiciona em Ler depois."
+          }
+        }
+      }
+    },
+    "The heart saves it in My Feeds. Save adds it to Later." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O coração salva no My Feeds. Salvar adiciona em Depois."
+          }
+        }
+      }
+    },
+    "The riverside trail reopens Saturday. Here's what changed." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A trilha da beira do rio reabre no sábado. Veja o que mudou."
           }
         }
       }
@@ -8825,6 +9695,26 @@
         }
       }
     },
+    "Those open LinkedIn, since they post from your account." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Essas ações abrem o LinkedIn, já que publicam pela sua conta."
+          }
+        }
+      }
+    },
+    "Three ways to use up leftover rice this week." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Três jeitos de aproveitar o arroz que sobrou esta semana."
+          }
+        }
+      }
+    },
     "Tick accounts to move them" : {
       "localizations" : {
         "pt-BR" : {
@@ -8921,6 +9811,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ativar som"
+          }
+        }
+      }
+    },
+    "Under the player, the summary lists the key moments. Tap a time to jump straight there." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abaixo do player, o resumo lista os momentos principais. Toque em um horário para ir direto até ele."
           }
         }
       }
@@ -9085,12 +9985,42 @@
         }
       }
     },
+    "Upvote" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Upvote"
+          }
+        }
+      }
+    },
     "Upvote (save in My Feeds)" : {
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Upvote (salvar no My Feeds)"
+          }
+        }
+      }
+    },
+    "Upvote saves it in My Feeds, downvote marks it as read, and Save adds it to Read later." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O upvote salva no My Feeds, o downvote marca como lido e Salvar adiciona em Ler depois."
+          }
+        }
+      }
+    },
+    "Upvote to save" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Upvote para salvar"
           }
         }
       }
@@ -9305,12 +10235,32 @@
         }
       }
     },
+    "Watch it here" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Assista aqui"
+          }
+        }
+      }
+    },
     "We collect the information you provide directly: your account email and password (managed by our authentication provider), the collections, channels, and preferences you configure, and your watch statuses for videos. We also store optional settings such as a default email for digests. If you choose to save API keys, they are stored securely and are write-only — they can never be read back by the app." : {
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Coletamos as informações que você fornece diretamente: o e-mail e a senha da sua conta (gerenciados pelo nosso provedor de autenticação), as coleções, canais e preferências que você configura e o status de visualização dos vídeos. Também guardamos configurações opcionais, como um e-mail padrão para resumos. Se você salvar chaves de API, elas são guardadas com segurança e são somente gravação — o app nunca consegue lê-las de volta."
+          }
+        }
+      }
+    },
+    "We cut our onboarding from nine screens to three. Here's what we learned about asking for less up front." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reduzimos nosso onboarding de nove telas para três. Veja o que aprendemos sobre pedir menos logo de cara."
           }
         }
       }
@@ -9395,6 +10345,26 @@
         }
       }
     },
+    "What would change his view" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O que o faria mudar de ideia"
+          }
+        }
+      }
+    },
+    "When small-cap loans reset" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quando os empréstimos das small caps são reajustados"
+          }
+        }
+      }
+    },
     "When you add a GitHub or Reddit account to a collection on People, the app also follows it with your connected account. Instagram, Facebook, LinkedIn, X, TikTok, Spotify and Apple don't let apps follow accounts for you, so those are only added to your feed." : {
       "localizations" : {
         "pt-BR" : {
@@ -9421,6 +10391,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Por que vocês pedem chaves de API?"
+          }
+        }
+      }
+    },
+    "Why small caps lag when rates rise" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Por que as small caps ficam para trás quando os juros sobem"
           }
         }
       }
