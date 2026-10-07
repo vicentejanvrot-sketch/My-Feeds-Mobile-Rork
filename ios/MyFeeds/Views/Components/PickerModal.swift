@@ -3,7 +3,7 @@ import SwiftUI
 /// Centered picker modal used for feed filters and status selection —
 /// matches the companion apps' dimmed centered sheets.
 struct PickerModal<Content: View>: View {
-    let title: String
+    let title: LocalizedStringKey
     let onDismiss: () -> Void
     @ViewBuilder let content: Content
 
@@ -17,7 +17,8 @@ struct PickerModal<Content: View>: View {
                 .onTapGesture { onDismiss() }
 
             VStack(alignment: .leading, spacing: 0) {
-                Text(title.uppercased())
+                Text(title)
+                    .textCase(.uppercase)
                     .font(.system(size: 14, weight: .bold))
                     .kerning(0.5)
                     .foregroundStyle(Theme.textSecondary)

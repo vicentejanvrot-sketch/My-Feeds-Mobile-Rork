@@ -1285,6 +1285,16 @@
         }
       }
     },
+    "Basic Information" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Informações básicas"
+          }
+        }
+      }
+    },
     "Biometric authentication was canceled." : {
       "localizations" : {
         "pt-BR" : {
@@ -1525,12 +1535,52 @@
         }
       }
     },
+    "Collection Name" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nome da coleção"
+          }
+        }
+      }
+    },
+    "Collection created" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Coleção criada"
+          }
+        }
+      }
+    },
     "Collection deleted" : {
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Coleção excluída"
+          }
+        }
+      }
+    },
+    "Collection name is required" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O nome da coleção é obrigatório"
+          }
+        }
+      }
+    },
+    "Collection updated" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Coleção atualizada"
           }
         }
       }
@@ -1695,6 +1745,16 @@
         }
       }
     },
+    "Content Filters — \"What kinds of posts should be included?\"" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Filtros de conteúdo — \"Que tipos de post devem entrar?\""
+          }
+        }
+      }
+    },
     "Couldn't add that account." : {
       "localizations" : {
         "pt-BR" : {
@@ -1751,6 +1811,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Não foi possível concluir a conexão com o YouTube."
+          }
+        }
+      }
+    },
+    "Couldn't load collection" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Não foi possível carregar a coleção"
           }
         }
       }
@@ -1831,6 +1901,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Criar conta"
+          }
+        }
+      }
+    },
+    "Create Collection" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Criar coleção"
           }
         }
       }
@@ -2035,6 +2115,26 @@
         }
       }
     },
+    "Description" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Descrição"
+          }
+        }
+      }
+    },
+    "Description must be 500 characters or fewer" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A descrição precisa ter no máximo 500 caracteres"
+          }
+        }
+      }
+    },
     "Detailed Breakdown" : {
       "localizations" : {
         "pt-BR" : {
@@ -2175,12 +2275,32 @@
         }
       }
     },
+    "Edit Collection" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Editar coleção"
+          }
+        }
+      }
+    },
     "Email" : {
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "E-mail"
+          }
+        }
+      }
+    },
+    "Email Recipients — \"Who should receive the daily digest?\"" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Destinatários de e-mail — \"Quem deve receber o resumo diário?\""
           }
         }
       }
@@ -2211,6 +2331,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Analisados:"
+          }
+        }
+      }
+    },
+    "Enter a valid email" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Digite um e-mail válido"
           }
         }
       }
@@ -2675,6 +2805,56 @@
         }
       }
     },
+    "Include %@" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Incluir %@"
+          }
+        }
+      }
+    },
+    "Include Live/Upcoming" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Incluir lives e estreias"
+          }
+        }
+      }
+    },
+    "Include Shorts" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Incluir Shorts"
+          }
+        }
+      }
+    },
+    "Include YouTube Shorts in results" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Incluir Shorts do YouTube nos resultados"
+          }
+        }
+      }
+    },
+    "Include live streams and premieres" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Incluir transmissões ao vivo e estreias"
+          }
+        }
+      }
+    },
     "Includes saved live videos" : {
       "localizations" : {
         "pt-BR" : {
@@ -2825,6 +3005,16 @@
         }
       }
     },
+    "Lookback Hours" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Horas de busca"
+          }
+        }
+      }
+    },
     "Looking up the account…" : {
       "localizations" : {
         "pt-BR" : {
@@ -2891,6 +3081,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "O My Feeds permite criar coleções que seguem canais do YouTube e outras contas, trazem automaticamente novos vídeos e posts para o seu feed e registram quais vídeos você já assistiu."
+          }
+        }
+      }
+    },
+    "Name must be 100 characters or fewer" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O nome precisa ter no máximo 100 caracteres"
           }
         }
       }
@@ -2971,6 +3171,16 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "New Collection" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nova coleção"
           }
         }
       }
@@ -3835,6 +4045,16 @@
         }
       }
     },
+    "Recipient already added" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Destinatário já adicionado"
+          }
+        }
+      }
+    },
     "Reels" : {
       "localizations" : {
         "pt-BR" : {
@@ -3955,6 +4175,16 @@
         }
       }
     },
+    "Run Time" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Horário da atualização"
+          }
+        }
+      }
+    },
     "Run cancelled" : {
       "localizations" : {
         "pt-BR" : {
@@ -4025,6 +4255,16 @@
         }
       }
     },
+    "Save Changes" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Salvar alterações"
+          }
+        }
+      }
+    },
     "Save summary" : {
       "localizations" : {
         "pt-BR" : {
@@ -4091,6 +4331,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Verificando canais"
+          }
+        }
+      }
+    },
+    "Schedule — \"When should this collection run?\"" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Agenda — \"Quando esta coleção deve ser atualizada?\""
           }
         }
       }
@@ -4675,6 +4925,16 @@
         }
       }
     },
+    "Timezone" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fuso horário"
+          }
+        }
+      }
+    },
     "To the maximum extent permitted by law, we are not liable for any indirect, incidental, or consequential damages arising from your use of the app." : {
       "localizations" : {
         "pt-BR" : {
@@ -5041,6 +5301,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "O que este app faz?"
+          }
+        }
+      }
+    },
+    "What topics does this collection cover?" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quais assuntos esta coleção cobre?"
           }
         }
       }
@@ -5511,6 +5781,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "biometria"
+          }
+        }
+      }
+    },
+    "e.g., Crypto, AI, Power Apps" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ex.: Cripto, IA, Power Apps"
           }
         }
       }

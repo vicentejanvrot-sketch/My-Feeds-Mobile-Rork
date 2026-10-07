@@ -93,7 +93,7 @@ struct AgentFormView: View {
             }
         }
         .background(Theme.background)
-        .navigationTitle(isEdit ? "Edit Collection" : "New Collection")
+        .navigationTitle(isEdit ? String(localized: "Edit Collection") : String(localized: "New Collection"))
         .navigationBarTitleDisplayMode(.inline)
         .toolbarBackground(Theme.background, for: .navigationBar)
         .task { await populate() }
@@ -111,7 +111,7 @@ struct AgentFormView: View {
                     if newValue.count > 100 { name = String(newValue.prefix(100)) }
                 }
             if trimmedName.count >= 95 {
-                Text("\(trimmedName.count)/100")
+                Text(verbatim: "\(trimmedName.count)/100")
                     .font(.system(size: 11))
                     .foregroundStyle(Theme.textMuted)
                     .frame(maxWidth: .infinity, alignment: .trailing)
@@ -125,7 +125,7 @@ struct AgentFormView: View {
                     if newValue.count > 500 { descriptionText = String(newValue.prefix(500)) }
                 }
             if descriptionText.count > 400 {
-                Text("\(descriptionText.count)/500")
+                Text(verbatim: "\(descriptionText.count)/500")
                     .font(.system(size: 11))
                     .foregroundStyle(Theme.textMuted)
                     .frame(maxWidth: .infinity, alignment: .trailing)
@@ -147,7 +147,7 @@ struct AgentFormView: View {
 
                 VStack(alignment: .leading, spacing: 0) {
                     fieldLabel("Lookback Hours")
-                    TextField("36", text: $lookbackHours)
+                    TextField(text: $lookbackHours, prompt: Text(verbatim: "36")) { Text("Lookback Hours") }
                         .keyboardType(.numberPad)
                         .modifier(FormInputStyle())
                         .onChange(of: lookbackHours) { _, newValue in
@@ -193,13 +193,13 @@ struct AgentFormView: View {
     private var videoFiltersSection: some View {
         formSection(title: "Content Filters — \"What kinds of posts should be included?\"") {
             contentGroupLabel("YouTube")
-            toggleRow(title: "Include Shorts", subtitle: "Include YouTube Shorts in results", isOn: $includeShorts)
-            toggleRow(title: "Include Live/Upcoming", subtitle: "Include live streams and premieres", isOn: $includeLive)
+            toggleRow(title: String(localized: "Include Shorts"), subtitle: String(localized: "Include YouTube Shorts in results"), isOn: $includeShorts)
+            toggleRow(title: String(localized: "Include Live/Upcoming"), subtitle: String(localized: "Include live streams and premieres"), isOn: $includeLive)
             ForEach(ContentTypes.groups) { group in
                 contentGroupLabel(group.platform.label)
                 ForEach(group.options) { option in
                     toggleRow(
-                        title: "Include " + option.label,
+                        title: String(localized: "Include \(option.label)"),
                         subtitle: option.help,
                         isOn: Binding(
                             get: { contentTypes[option.key] != false },
@@ -222,7 +222,7 @@ struct AgentFormView: View {
     private var recipientsSection: some View {
         formSection(title: "Email Recipients — \"Who should receive the daily digest?\"") {
             HStack(spacing: 10) {
-                TextField("email@example.com", text: $newRecipientEmail)
+                TextField(text: $newRecipientEmail, prompt: Text(verbatim: "email@example.com")) { Text("Email") }
                     .keyboardType(.emailAddress)
                     .textInputAutocapitalization(.never)
                     .autocorrectionDisabled()
@@ -277,7 +277,7 @@ struct AgentFormView: View {
                     if isSaving {
                         ProgressView().tint(.white)
                     } else {
-                        Text(isEdit ? "Save Changes" : "Create Collection")
+                        Text(isEdit ? String(localized: "Save Changes") : String(localized: "Create Collection"))
                             .font(.system(size: 16, weight: .bold))
                     }
                 }
@@ -309,9 +309,10 @@ struct AgentFormView: View {
 
     // MARK: - Helpers
 
-    private func formSection<Content: View>(title: String, @ViewBuilder content: () -> Content) -> some View {
+    private func formSection<Content: View>(title: LocalizedStringKey, @ViewBuilder content: () -> Content) -> some View {
         VStack(alignment: .leading, spacing: 0) {
-            Text(title.uppercased())
+            Text(title)
+                .textCase(.uppercase)
                 .font(.system(size: 11, weight: .bold))
                 .kerning(0.5)
                 .foregroundStyle(Theme.textSecondary)
@@ -331,8 +332,8 @@ struct AgentFormView: View {
         .padding(.bottom, 24)
     }
 
-    private func fieldLabel(_ text: String, required: Bool = false) -> some View {
-        (Text(text) + (required ? Text(" *").foregroundColor(Theme.destructive) : Text("")))
+    private func fieldLabel(_ text: LocalizedStringKey, required: Bool = false) -> some View {
+        (Text(text) + (required ? Text(verbatim: " *").foregroundColor(Theme.destructive) : Text(verbatim: "")))
             .font(.system(size: 12, weight: .semibold))
             .foregroundStyle(Theme.textSecondary)
             .padding(.top, 12)
@@ -364,14 +365,14 @@ struct AgentFormView: View {
         }
     }
 
-    private func sliderField(label: String, value: Binding<Double>) -> some View {
+    private func sliderField(label: LocalizedStringKey, value: Binding<Double>) -> some View {
         VStack(alignment: .leading, spacing: 4) {
             HStack {
                 Text(label)
                     .font(.system(size: 13, weight: .medium))
                     .foregroundStyle(Theme.textPrimary)
                 Spacer()
-                Text(String(format: "%.1f", value.wrappedValue))
+                Text(value.wrappedValue.formatted(.number.precision(.fractionLength(1))))
                     .font(.system(size: 13, weight: .bold))
                     .foregroundStyle(Theme.accent)
                     .monospacedDigit()
@@ -385,11 +386,11 @@ struct AgentFormView: View {
     private func addRecipientEmail() {
         let email = newRecipientEmail.trimmingCharacters(in: .whitespaces)
         guard isValidEmail(email) else {
-            toasts.show("Enter a valid email", type: .error)
+            toasts.show(String(localized: "Enter a valid email"), type: .error)
             return
         }
         guard !recipientEmails.contains(email) else {
-            toasts.show("Recipient already added", type: .error)
+            toasts.show(String(localized: "Recipient already added"), type: .error)
             return
         }
         recipientEmails.append(email)
@@ -443,7 +444,7 @@ struct AgentFormView: View {
                 recipientEmails = loadedRecipients.map(\.email)
                 recipientIdMap = Dictionary(uniqueKeysWithValues: loadedRecipients.map { ($0.email, $0.id) })
             } catch {
-                toasts.show("Couldn't load collection", type: .error)
+                toasts.show(String(localized: "Couldn't load collection"), type: .error)
             }
         } else {
             runTime = date(fromTimeString: "07:00")
@@ -466,16 +467,16 @@ struct AgentFormView: View {
 
     private func save() {
         guard !trimmedName.isEmpty else {
-            toasts.show("Collection name is required", type: .error)
+            toasts.show(String(localized: "Collection name is required"), type: .error)
             return
         }
         guard trimmedName.count <= 100 else {
-            toasts.show("Name must be 100 characters or fewer", type: .error)
+            toasts.show(String(localized: "Name must be 100 characters or fewer"), type: .error)
             return
         }
         let trimmedDescription = descriptionText.trimmingCharacters(in: .whitespacesAndNewlines)
         guard trimmedDescription.count <= 500 else {
-            toasts.show("Description must be 500 characters or fewer", type: .error)
+            toasts.show(String(localized: "Description must be 500 characters or fewer"), type: .error)
             return
         }
 
@@ -517,14 +518,14 @@ struct AgentFormView: View {
                     for email in validEmails where recipientIdMap[email] == nil {
                         try? await service.addRecipient(agentId: agentId, email: email)
                     }
-                    toasts.show("Collection updated")
+                    toasts.show(String(localized: "Collection updated"))
                 } else {
                     payload.userId = auth.userId
                     let created = try await service.createAgent(payload)
                     for email in validEmails {
                         try? await service.addRecipient(agentId: created.id, email: email)
                     }
-                    toasts.show("Collection created")
+                    toasts.show(String(localized: "Collection created"))
                 }
                 dismiss()
             } catch {
