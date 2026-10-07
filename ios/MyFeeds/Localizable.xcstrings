@@ -351,6 +351,46 @@
         }
       }
     },
+    "%lld runs across all collections" : {
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld run across all collections"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld runs across all collections"
+                }
+              }
+            }
+          }
+        },
+        "pt-BR" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld atualização em todas as coleções"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld atualizações em todas as coleções"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "%lld saved · %@" : {
       "localizations" : {
         "en" : {
@@ -441,6 +481,16 @@
         }
       }
     },
+    "%lldm %llds" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld min %2$lld s"
+          }
+        }
+      }
+    },
     "%lldm ago" : {
       "localizations" : {
         "pt-BR" : {
@@ -469,6 +519,16 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "%llds" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld s"
           }
         }
       }
@@ -1275,6 +1335,16 @@
         }
       }
     },
+    "Cancel Run" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cancelar atualização"
+          }
+        }
+      }
+    },
     "Cancel new collection" : {
       "localizations" : {
         "pt-BR" : {
@@ -1291,6 +1361,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Cancelada"
+          }
+        }
+      }
+    },
+    "Cancelling…" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cancelando…"
           }
         }
       }
@@ -1335,12 +1415,32 @@
         }
       }
     },
+    "Channels (%lld)" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Canais (%lld)"
+          }
+        }
+      }
+    },
     "Channels Tracked" : {
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Canais acompanhados"
+          }
+        }
+      }
+    },
+    "Channels:" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Canais:"
           }
         }
       }
@@ -1451,6 +1551,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Coleções concluídas"
+          }
+        }
+      }
+    },
+    "Completed with issues" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Concluída com problemas"
           }
         }
       }
@@ -1865,12 +1975,32 @@
         }
       }
     },
+    "Delete All" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Excluir tudo"
+          }
+        }
+      }
+    },
     "Delete Collection" : {
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Excluir coleção"
+          }
+        }
+      }
+    },
+    "Delete Run History" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Excluir histórico de atualizações"
           }
         }
       }
@@ -1891,6 +2021,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Excluir todos os downloads?"
+          }
+        }
+      }
+    },
+    "Deleting…" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Excluindo…"
           }
         }
       }
@@ -2015,6 +2155,16 @@
         }
       }
     },
+    "Duration:" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Duração:"
+          }
+        }
+      }
+    },
     "Edit" : {
       "localizations" : {
         "pt-BR" : {
@@ -2051,6 +2201,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ativar entrada com %@"
+          }
+        }
+      }
+    },
+    "Enriched:" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Analisados:"
           }
         }
       }
@@ -2131,6 +2291,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Falhou"
+          }
+        }
+      }
+    },
+    "Failed to cancel run" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Não foi possível cancelar a atualização"
+          }
+        }
+      }
+    },
+    "Failed to delete run history" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Não foi possível excluir o histórico de atualizações"
           }
         }
       }
@@ -2275,6 +2455,16 @@
         }
       }
     },
+    "Found:" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Encontrados:"
+          }
+        }
+      }
+    },
     "Frees %@ on this phone. Your feeds aren't affected." : {
       "localizations" : {
         "pt-BR" : {
@@ -2351,6 +2541,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ocultar"
+          }
+        }
+      }
+    },
+    "Hide channels" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ocultar canais"
           }
         }
       }
@@ -2615,6 +2815,16 @@
         }
       }
     },
+    "Loading runs…" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Carregando atualizações…"
+          }
+        }
+      }
+    },
     "Looking up the account…" : {
       "localizations" : {
         "pt-BR" : {
@@ -2681,6 +2891,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "O My Feeds permite criar coleções que seguem canais do YouTube e outras contas, trazem automaticamente novos vídeos e posts para o seu feed e registram quais vídeos você já assistiu."
+          }
+        }
+      }
+    },
+    "Never" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nunca"
           }
         }
       }
@@ -2865,6 +3085,16 @@
         }
       }
     },
+    "New:" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Novos:"
+          }
+        }
+      }
+    },
     "Next" : {
       "localizations" : {
         "pt-BR" : {
@@ -2911,6 +3141,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Nenhum vídeo novo encontrado"
+          }
+        }
+      }
+    },
+    "No runs yet" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nenhuma atualização ainda"
           }
         }
       }
@@ -3001,6 +3241,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Offline — não foi possível carregar os dados mais recentes."
+          }
+        }
+      }
+    },
+    "Offline — couldn't load latest run history." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Offline — não foi possível carregar o histórico de atualizações mais recente."
           }
         }
       }
@@ -3685,12 +3935,42 @@
         }
       }
     },
+    "Run History" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Histórico de atualizações"
+          }
+        }
+      }
+    },
     "Run Now" : {
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Atualizar agora"
+          }
+        }
+      }
+    },
+    "Run cancelled" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Atualização cancelada"
+          }
+        }
+      }
+    },
+    "Run history deleted" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Histórico de atualizações excluído"
           }
         }
       }
@@ -4325,6 +4605,16 @@
         }
       }
     },
+    "This clears the Run History list only. Your videos, feed, and statistics are kept. This cannot be undone." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Isso limpa só a lista do Histórico de atualizações. Seus vídeos, feed e estatísticas são mantidos. Não dá para desfazer."
+          }
+        }
+      }
+    },
     "This item" : {
       "localizations" : {
         "pt-BR" : {
@@ -4371,6 +4661,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Isso vai excluir permanentemente sua conta e todos os seus dados, incluindo suas coleções, feeds, histórico e configurações salvas. Não dá para desfazer."
+          }
+        }
+      }
+    },
+    "Timeline of collection activity" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Linha do tempo das suas coleções"
           }
         }
       }
@@ -4751,6 +5051,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Quando você adiciona uma conta do GitHub ou do Reddit a uma coleção em Pessoas, o app também a segue com sua conta conectada. Instagram, Facebook, LinkedIn, X, TikTok, Spotify e Apple não deixam apps seguirem contas por você, então essas são só adicionadas ao seu feed."
+          }
+        }
+      }
+    },
+    "When you run a collection, its results will appear here." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quando você atualizar uma coleção, os resultados vão aparecer aqui."
           }
         }
       }

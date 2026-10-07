@@ -101,8 +101,8 @@ struct HistoryView: View {
                     .font(.system(size: 24, weight: .heavy))
                     .foregroundStyle(Theme.textPrimary)
                 Text(runs.isEmpty
-                     ? "Timeline of collection activity"
-                     : "\(runs.count) run\(runs.count == 1 ? "" : "s") across all collections")
+                     ? String(localized: "Timeline of collection activity")
+                     : String(localized: "\(runs.count) runs across all collections"))
                     .font(.system(size: 13))
                     .foregroundStyle(Theme.textSecondary)
             }
@@ -114,7 +114,7 @@ struct HistoryView: View {
                     HStack(spacing: 6) {
                         Image(systemName: "trash")
                             .font(.system(size: 14))
-                        Text(isDeletingAll ? "Deleting…" : "Delete All")
+                        Text(isDeletingAll ? String(localized: "Deleting…") : String(localized: "Delete All"))
                             .font(.system(size: 13, weight: .semibold))
                     }
                     .foregroundStyle(Theme.destructive)
@@ -180,10 +180,10 @@ struct HistoryView: View {
         Task {
             do {
                 try await SupabaseService.shared.cancelRun(runId: run.id)
-                toasts.show("Run cancelled", type: .info)
+                toasts.show(String(localized: "Run cancelled"), type: .info)
                 await load()
             } catch {
-                toasts.show("Failed to cancel run", type: .error)
+                toasts.show(String(localized: "Failed to cancel run"), type: .error)
             }
             cancellingRunId = nil
         }
@@ -195,10 +195,10 @@ struct HistoryView: View {
         Task {
             do {
                 try await SupabaseService.shared.clearRuns(ids: ids)
-                toasts.show("Run history deleted")
+                toasts.show(String(localized: "Run history deleted"))
                 await load()
             } catch {
-                toasts.show("Failed to delete run history", type: .error)
+                toasts.show(String(localized: "Failed to delete run history"), type: .error)
             }
             isDeletingAll = false
         }
@@ -224,7 +224,7 @@ private struct RunCard: View {
         VStack(alignment: .leading, spacing: 0) {
             HStack(spacing: 10) {
                 NavigationLink(value: AppRoute.agentDetail(run.agentId)) {
-                    Text(agent?.name ?? "Unknown Collection")
+                    Text(agent?.name ?? String(localized: "Unknown Collection"))
                         .font(.system(size: 16, weight: .bold))
                         .foregroundStyle(Theme.textPrimary)
                         .lineLimit(1)
@@ -249,7 +249,7 @@ private struct RunCard: View {
                     HStack(spacing: 6) {
                         Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
                             .font(.system(size: 12, weight: .semibold))
-                        Text(isExpanded ? "Hide channels" : "Channels (\(channels.count))")
+                        Text(isExpanded ? String(localized: "Hide channels") : String(localized: "Channels (\(channels.count))"))
                             .font(.system(size: 12, weight: .semibold))
                     }
                     .foregroundStyle(Theme.textSecondary)
@@ -312,14 +312,14 @@ private struct RunCard: View {
         HStack(alignment: .top, spacing: 16) {
             VStack(alignment: .leading, spacing: 6) {
                 statRow(label: "Duration:", value: Format.runDuration(started: run.startedAt, finished: run.finishedAt))
-                statRow(label: "New:", value: run.videosNewCount.map(String.init) ?? "—")
-                statRow(label: "Channels:", value: "\(run.channelsScanned ?? 0) / \(run.channelsTotal ?? 0)")
+                statRow(label: "New:", value: run.videosNewCount.map { $0.formatted() } ?? "—")
+                statRow(label: "Channels:", value: "\((run.channelsScanned ?? 0).formatted()) / \((run.channelsTotal ?? 0).formatted())")
             }
             .frame(maxWidth: .infinity, alignment: .leading)
 
             VStack(alignment: .leading, spacing: 6) {
-                statRow(label: "Found:", value: run.videosFoundCount.map(String.init) ?? "—")
-                statRow(label: "Enriched:", value: run.videosEnrichedCount.map(String.init) ?? "—")
+                statRow(label: "Found:", value: run.videosFoundCount.map { $0.formatted() } ?? "—")
+                statRow(label: "Enriched:", value: run.videosEnrichedCount.map { $0.formatted() } ?? "—")
             }
             .frame(maxWidth: .infinity, alignment: .leading)
         }
@@ -329,7 +329,7 @@ private struct RunCard: View {
         }
     }
 
-    private func statRow(label: String, value: String) -> some View {
+    private func statRow(label: LocalizedStringKey, value: String) -> some View {
         HStack(spacing: 6) {
             Text(label)
                 .font(.system(size: 12))
@@ -418,7 +418,7 @@ private struct RunCard: View {
                 .foregroundStyle(Theme.textPrimary)
                 .lineLimit(1)
             Spacer()
-            Text(channel.lastScannedAt != nil ? Format.timeAgo(channel.lastScannedAt) : "Never")
+            Text(channel.lastScannedAt != nil ? Format.timeAgo(channel.lastScannedAt) : String(localized: "Never"))
                 .font(.system(size: 11))
                 .foregroundStyle(Theme.textMuted)
         }

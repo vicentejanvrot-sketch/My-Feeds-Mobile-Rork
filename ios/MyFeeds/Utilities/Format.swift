@@ -109,9 +109,9 @@ nonisolated enum Format {
         guard let end = parseDate(finished) else { return String(localized: "In progress") }
         let sec = Int(end.timeIntervalSince(start))
         if sec < 0 { return "—" }
-        if sec < 60 { return "\(sec)s" }
+        if sec < 60 { return String(localized: "\(sec)s") }
         let m = sec / 60
         let rem = sec % 60
-        return rem == 0 ? "\(m)m" : "\(m)m \(rem)s"
+        return rem == 0 ? String(localized: "\(m)m") : String(localized: "\(m)m \(rem)s")
     }
 }
