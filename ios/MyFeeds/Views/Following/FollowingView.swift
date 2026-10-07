@@ -114,7 +114,7 @@ struct FollowingView: View {
                 if let progress { progressBox(progress) }
 
                 if let loadError {
-                    Text("Couldn't load this screen: " + loadError)
+                    Text("Couldn't load this screen: \(loadError)")
                         .font(.system(size: 13, weight: .medium))
                         .foregroundStyle(Theme.destructive)
                         .frame(maxWidth: .infinity, alignment: .leading)
@@ -148,7 +148,7 @@ struct FollowingView: View {
         }
         .scrollDismissesKeyboard(.interactively)
         .background(Theme.background)
-        .navigationTitle("People")
+        .navigationTitle(String(localized: "People"))
         .navigationBarTitleDisplayMode(.inline)
         .toolbarBackground(Theme.background, for: .navigationBar)
         .toolbar {
@@ -226,21 +226,21 @@ struct FollowingView: View {
                     Image(systemName: "magnifyingglass")
                         .font(.system(size: 13, weight: .semibold))
                 }
-                Text(isScanning ? "Searching" : "Find more (\(toScan.count))")
+                Text(isScanning ? String(localized: "Searching") : String(localized: "Find more (\(toScan.count))"))
                     .font(.system(size: 14, weight: .semibold))
             }
             .foregroundStyle(Theme.accent)
         }
         .disabled(isScanning)
-        .accessibilityLabel(isScanning ? "Searching" : "Find more accounts for \(toScan.count) " + (toScan.count == 1 ? "person" : "people"))
+        .accessibilityLabel(isScanning ? String(localized: "Searching") : String(localized: "Find more accounts for \(toScan.count) people"))
     }
 
     /// Everyone / Gaps switch, styled like the web tabs: a muted track with
     /// the active tab set in the page background colour.
     private var tabSwitcher: some View {
         HStack(spacing: 0) {
-            tabButton("Everyone", value: .everyone)
-            tabButton("Gaps · \(gapCount)", value: .gaps)
+            tabButton(String(localized: "Everyone"), value: .everyone)
+            tabButton(String(localized: "Gaps · \(gapCount)"), value: .gaps)
         }
         .padding(3)
         .background(Theme.input)
@@ -273,7 +273,7 @@ struct FollowingView: View {
         if agents.count > 1 {
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 6) {
-                    agentChip("All collections", id: nil)
+                    agentChip(String(localized: "All collections"), id: nil)
                     ForEach(sortedAgents) { agent in
                         agentChip(agent.name, id: agent.id)
                     }
@@ -335,7 +335,7 @@ struct FollowingView: View {
         VStack(alignment: .leading, spacing: 6) {
             ProgressView(value: Double(progress.done), total: Double(max(progress.total, 1)))
                 .tint(Theme.accent)
-            Text(progress.status + (progress.failed > 0 ? " · \(progress.failed) couldn't be searched" : ""))
+            Text(progress.failed > 0 ? "\(progress.status) · \(String(localized: "\(progress.failed) couldn't be searched"))" : progress.status)
                 .font(.system(size: 12))
                 .foregroundStyle(Theme.textSecondary)
         }
@@ -347,7 +347,7 @@ struct FollowingView: View {
             Text("Find where the people you follow also post")
                 .font(.system(size: 15, weight: .bold))
                 .foregroundStyle(Theme.textPrimary)
-            Text("Checks each of your \(people.count) people and companies once: the links on their profile, their link-in-bio page and website, and handles like theirs on other platforms. Each person is searched once, across all the places you follow them, using at most \(AlsoOn.maxLookupsPerPerson) to 30 AIsa lookups, so up to about $" + maxCost + " for this first check.")
+            Text("Checks each of your \(people.count) people and companies once: the links on their profile, their link-in-bio page and website, and handles like theirs on other platforms. Each person is searched once, across all the places you follow them, using at most \(AlsoOn.maxLookupsPerPerson) to 30 lookups, so up to about $\(maxCost) for this first check.")
                 .font(.system(size: 13))
                 .foregroundStyle(Theme.textSecondary)
                 .fixedSize(horizontal: false, vertical: true)
@@ -357,7 +357,7 @@ struct FollowingView: View {
                 HStack(spacing: 6) {
                     Image(systemName: "magnifyingglass")
                         .font(.system(size: 13, weight: .bold))
-                    Text("Check \(toScan.count) " + (toScan.count == 1 ? "person" : "people"))
+                    Text("Check \(toScan.count) people")
                         .font(.system(size: 14, weight: .bold))
                 }
                 .foregroundStyle(.white)
@@ -387,7 +387,7 @@ struct FollowingView: View {
 
             VStack(spacing: 0) {
                 if filtered.isEmpty {
-                    Text(people.isEmpty ? "No people or companies in your collections yet." : "Nobody matches that search.")
+                    Text(people.isEmpty ? String(localized: "No people or companies in your collections yet.") : String(localized: "Nobody matches that search."))
                         .font(.system(size: 13))
                         .foregroundStyle(Theme.textSecondary)
                         .frame(maxWidth: .infinity)
@@ -406,7 +406,7 @@ struct FollowingView: View {
             .cardStyle(radius: 12)
 
             if skippedCount > 0 {
-                Text("\(skippedCount)" + (skippedCount == 1 ? " subreddit isn't" : " subreddits aren't") + " listed here, since they aren't people or companies.")
+                Text("\(skippedCount) subreddits aren't listed here, since they aren't people or companies.")
                     .font(.system(size: 12))
                     .foregroundStyle(Theme.textMuted)
                     .padding(.top, 4)
@@ -414,7 +414,7 @@ struct FollowingView: View {
         }
     }
 
-    private func legendItem(_ label: String, variant: ChipVariant) -> some View {
+    private func legendItem(_ label: LocalizedStringKey, variant: ChipVariant) -> some View {
         HStack(spacing: 6) {
             Circle()
                 .fill(variant == .following ? Theme.input : Color.clear)
@@ -427,7 +427,7 @@ struct FollowingView: View {
     }
 
     private func rowAgentNames(_ person: AlsoOnPerson) -> String {
-        person.agentIds.compactMap { agentNames[$0] }.joined(separator: ", ")
+        person.agentIds.compactMap { agentNames[$0] }.formatted(.list(type: .and))
     }
 
     // MARK: - Gaps
@@ -479,7 +479,7 @@ struct FollowingView: View {
                             VStack(alignment: .leading, spacing: 4) {
                                 AccountLine(platform: account.platform, label: account.label, url: account.url)
                                 if let evidence = account.link.evidence, !evidence.isEmpty {
-                                    Text(evidence)
+                                    Text(AlsoOn.displayEvidence(evidence))
                                         .font(.system(size: 12))
                                         .foregroundStyle(Theme.textSecondary)
                                         .fixedSize(horizontal: false, vertical: true)
@@ -523,9 +523,9 @@ struct FollowingView: View {
     }
 
     private func gapSubtitle(_ person: AlsoOnPerson) -> String {
-        let platforms: String = person.following.map { $0.platform.label }.joined(separator: " and ")
-        let agent: String = person.agentIds.first.flatMap { agentNames[$0] } ?? "agent"
-        return "You follow on " + platforms + " · adds to " + agent
+        let platforms: String = person.following.map { $0.platform.label }.formatted(.list(type: .and))
+        let agent: String = person.agentIds.first.flatMap { agentNames[$0] } ?? String(localized: "your collection")
+        return String(localized: "You follow on \(platforms) · adds to \(agent)")
     }
 
     // MARK: - Data
@@ -539,11 +539,11 @@ struct FollowingView: View {
         Task {
             do {
                 try await SupabaseService.shared.deleteChannel(id: removed.id)
-                toasts.show("Removed. You no longer follow them on \(account.platform.label) here.")
+                toasts.show(String(localized: "Removed. You no longer follow them on \(account.platform.label) here."))
             } catch {
                 channels.append(removed)
                 rebuild()
-                toasts.show("Couldn't remove it: \(error.localizedDescription)", type: .error)
+                toasts.show(String(localized: "Couldn't remove it: \(error.localizedDescription)"), type: .error)
             }
         }
     }
@@ -619,9 +619,9 @@ struct FollowingView: View {
 
         progress = nil
         if failed > 0 {
-            toasts.show("\(failed) of \(total) couldn't be checked. " + (firstError ?? ""), type: .error)
+            toasts.show(String(localized: "\(failed) of \(total) couldn't be checked. \(firstError ?? "")"), type: .error)
         } else {
-            toasts.show(total == 1 ? "Searched other platforms for \(list[0].name)" : "Searched other platforms for \(total) people")
+            toasts.show(total == 1 ? String(localized: "Searched other platforms for \(list[0].name)") : String(localized: "Searched other platforms for \(total) people"))
         }
     }
 
@@ -659,20 +659,20 @@ struct FollowingView: View {
             if account.platform == .youtube, YouTubeAccount.shared.isConnected {
                 do {
                     let already = try await YouTubeAccount.shared.subscribe(channelURL: account.url)
-                    toasts.show(already ? "Added. You were already subscribed on YouTube" : "Added and subscribed on YouTube")
+                    toasts.show(already ? String(localized: "Added. You were already subscribed on YouTube") : String(localized: "Added and subscribed on YouTube"))
                 } catch {
-                    toasts.show("Added, but couldn't subscribe on YouTube: " + error.localizedDescription, type: .error)
+                    toasts.show(String(localized: "Added, but couldn't subscribe on YouTube: \(error.localizedDescription)"), type: .error)
                 }
             } else if let provider = AccountConnections.Provider(platform: account.platform),
                       AccountConnections.shared.isConnected(provider) {
                 do {
                     let already = try await AccountConnections.shared.follow(provider, url: account.url)
-                    toasts.show(already ? "Added. You already follow them on \(label)" : "Added and following on \(label)")
+                    toasts.show(already ? String(localized: "Added. You already follow them on \(label)") : String(localized: "Added and following on \(label)"))
                 } catch {
-                    toasts.show("Added, but couldn't follow on \(label): " + error.localizedDescription, type: .error)
+                    toasts.show(String(localized: "Added, but couldn't follow on \(label): \(error.localizedDescription)"), type: .error)
                 }
             } else {
-                toasts.show("Added to your collection")
+                toasts.show(String(localized: "Added to your collection"))
             }
         }
     }
@@ -697,9 +697,9 @@ struct FollowingView: View {
                 try await SupabaseService.shared.combinePeople(person, with: other)
                 await reloadIdentity()
                 reselect(sourceId: person.sources.first?.id)
-                toasts.show("Combined with \(other.name)")
+                toasts.show(String(localized: "Combined with \(other.name)"))
             } catch {
-                toasts.show("Couldn't combine them: " + error.localizedDescription, type: .error)
+                toasts.show(String(localized: "Couldn't combine them: \(error.localizedDescription)"), type: .error)
             }
         }
     }
@@ -714,9 +714,9 @@ struct FollowingView: View {
                 try await SupabaseService.shared.separatePerson(person)
                 await reloadIdentity()
                 reselect(sourceId: person.sources.first?.id)
-                toasts.show("Separated into their own cards again")
+                toasts.show(String(localized: "Separated into their own cards again"))
             } catch {
-                toasts.show("Couldn't separate them: " + error.localizedDescription, type: .error)
+                toasts.show(String(localized: "Couldn't separate them: \(error.localizedDescription)"), type: .error)
             }
         }
     }
@@ -732,10 +732,10 @@ struct FollowingView: View {
                     person.sources.contains { $0.id == account.link.channelId }
                 }?.sources.map(\.id) ?? [account.link.channelId]
                 try await SupabaseService.shared.decideIdentityLink(account.link, channelIds: channelIds, same: same)
-                toasts.show(same ? "Marked as the same person" : "Removed that match")
+                toasts.show(same ? String(localized: "Marked as the same person") : String(localized: "Removed that match"))
                 await reloadIdentity()
             } catch {
-                toasts.show("Couldn't save that: " + error.localizedDescription, type: .error)
+                toasts.show(String(localized: "Couldn't save that: \(error.localizedDescription)"), type: .error)
             }
             busyKeys.remove(busyKey)
         }
@@ -748,14 +748,14 @@ private extension AlsoOnPerson {
     var summary: String {
         var parts: [String] = []
         if lastScannedAt == nil {
-            parts.append("Not searched yet")
+            parts.append(String(localized: "Not searched yet"))
         } else if platformCount == 1, let only = following.first {
-            parts.append("Only on " + only.platform.label)
+            parts.append(String(localized: "Only on \(only.platform.label)"))
         } else {
-            parts.append("On \(platformCount) platforms")
+            parts.append(String(localized: "On \(platformCount) platforms"))
         }
-        if !also.isEmpty { parts.append("\(also.count) you don't follow") }
-        if !possible.isEmpty { parts.append("\(possible.count) to check") }
+        if !also.isEmpty { parts.append(String(localized: "\(also.count) you don't follow")) }
+        if !possible.isEmpty { parts.append(String(localized: "\(possible.count) to check")) }
         return parts.joined(separator: " · ")
     }
 }
@@ -773,7 +773,7 @@ private struct GapCheck: Identifiable {
 
     var question: String {
         let platform: String = account.platform.label
-        return "Is \(account.label) on \(platform) the same \(person.name) you follow?"
+        return String(localized: "Is \(account.label) on \(platform) the same \(person.name) you follow?")
     }
 }
 
@@ -795,11 +795,10 @@ private struct ScanProgress: Equatable {
     var status: String {
         let now: String
         switch current.count {
-        case 0: now = "Finishing…"
-        case 1: now = "Checking \(current[0])…"
-        default: now = "Checking " + current.dropLast().joined(separator: ", ") + " and " + (current.last ?? "") + "…"
+        case 0: now = String(localized: "Finishing…")
+        default: now = String(localized: "Checking \(current.formatted(.list(type: .and)))…")
         }
-        return total > 1 ? now + " · \(done) of \(total) people done" : now
+        return total > 1 ? "\(now) · \(String(localized: "\(done) of \(total) people done"))" : now
     }
 }
 
@@ -875,7 +874,7 @@ private struct PlatformChip: View {
     var body: some View {
         HStack(spacing: 5) {
             PlatformBadge(platform: platform, size: 14)
-            Text(platform.label + (variant == .possible ? "?" : ""))
+            Text(verbatim: platform.label + (variant == .possible ? "?" : ""))
                 .font(.system(size: 12, weight: .semibold))
                 .foregroundStyle(variant == .possible ? Theme.textSecondary : Theme.textPrimary)
         }
@@ -949,7 +948,7 @@ private struct AccountLine: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .accessibilityLabel(platform.label + " " + label)
+        .accessibilityLabel(Text(verbatim: platform.label + " " + label))
         .accessibilityAddTraits(.isLink)
     }
 }
@@ -1073,12 +1072,12 @@ private struct PossibleMatchCard: View {
             }
             AccountLine(platform: account.platform, label: account.label, url: account.url)
             if let name = account.link.displayName, !name.isEmpty {
-                Text("Name on that profile: " + name)
+                Text("Name on that profile: \(name)")
                     .font(.system(size: 12))
                     .foregroundStyle(Theme.textSecondary)
             }
             if let evidence = account.link.evidence, !evidence.isEmpty {
-                Text(evidence)
+                Text(AlsoOn.displayEvidence(evidence))
                     .font(.system(size: 12))
                     .foregroundStyle(Theme.warning)
                     .fixedSize(horizontal: false, vertical: true)
@@ -1137,10 +1136,10 @@ private struct PersonSheet: View {
 
     private var removeMessage: String {
         guard let account = toRemove else { return "" }
-        let collection = agentNames[account.channel.agentId] ?? "your collection"
-        var text = "\(account.label) is removed from \(collection), so new posts from it stop coming in. What's already in your feed stays."
+        let collection = agentNames[account.channel.agentId] ?? String(localized: "your collection")
+        var text = String(localized: "\(account.label) is removed from \(collection), so new posts from it stop coming in. What's already in your feed stays.")
         if person.following.count == 1 {
-            text += " This is the only account you follow for them, so they'll leave your People list."
+            text += " " + String(localized: "This is the only account you follow for them, so they'll leave your People list.")
         }
         return text
     }
@@ -1212,7 +1211,9 @@ private struct PersonSheet: View {
 
                 if !twins.isEmpty {
                     VStack(alignment: .leading, spacing: 10) {
-                        Text("\(twins.count == 1 ? "Another card is" : "\(twins.count) other cards are") also called \(Text(person.name).bold()). If it's the same person, combine them so all their accounts are on one card.")
+                        (twins.count == 1
+                         ? Text("Another card is also called \(Text(person.name).bold()). If it's the same person, combine them so all their accounts are on one card.")
+                         : Text("\(twins.count) other cards are also called \(Text(person.name).bold()). If it's the same person, combine them so all their accounts are on one card."))
                             .font(.system(size: 14))
                             .foregroundStyle(Theme.textPrimary)
                             .fixedSize(horizontal: false, vertical: true)
@@ -1220,7 +1221,7 @@ private struct PersonSheet: View {
                             HStack(spacing: 6) {
                                 Image(systemName: "arrow.triangle.merge")
                                     .font(.system(size: 13, weight: .bold))
-                                Text(twins.count == 1 ? "Combine with that card" : "Choose which to combine")
+                                Text(twins.count == 1 ? String(localized: "Combine with that card") : String(localized: "Choose which to combine"))
                                     .font(.system(size: 14, weight: .bold))
                             }
                             .foregroundStyle(.white)
@@ -1250,7 +1251,7 @@ private struct PersonSheet: View {
                         HStack(spacing: 10) {
                             VStack(alignment: .leading, spacing: 4) {
                                 AccountLine(platform: account.platform, label: account.label, url: account.url)
-                                Text(agentNames[account.channel.agentId] ?? "Collection")
+                                Text(agentNames[account.channel.agentId] ?? String(localized: "Collection"))
                                     .font(.system(size: 11, weight: .semibold))
                                     .foregroundStyle(Theme.textSecondary)
                                     .padding(.horizontal, 8)
@@ -1552,7 +1553,7 @@ private struct PersonSheet: View {
                         }
                     } label: {
                         HStack(spacing: 4) {
-                            Text(agents.first { $0.id == agentId }?.name ?? "Choose a collection")
+                            Text(agents.first { $0.id == agentId }?.name ?? String(localized: "Choose a collection"))
                                 .font(.system(size: 13, weight: .semibold))
                                 .lineLimit(1)
                                 .truncationMode(.tail)
@@ -1584,7 +1585,7 @@ private struct PersonSheet: View {
                                 HStack(alignment: .top, spacing: 5) {
                                     Image(systemName: "link")
                                         .font(.system(size: 11))
-                                    Text(evidence)
+                                    Text(AlsoOn.displayEvidence(evidence))
                                         .font(.system(size: 12))
                                         .fixedSize(horizontal: false, vertical: true)
                                 }
@@ -1628,7 +1629,7 @@ private struct PersonSheet: View {
         VStack(alignment: .leading, spacing: 10) {
             Rectangle().fill(Theme.border).frame(height: 0.5)
             HStack(spacing: 10) {
-                Text(person.lastScannedAt.map { "Last searched " + Format.relativeTime($0) } ?? "Not searched yet")
+                Text(person.lastScannedAt.map { String(localized: "Last searched \(Format.relativeTime($0))") } ?? String(localized: "Not searched yet"))
                     .font(.system(size: 12))
                     .foregroundStyle(Theme.textSecondary)
                 Spacer(minLength: 0)
@@ -1640,7 +1641,7 @@ private struct PersonSheet: View {
                             Image(systemName: "arrow.clockwise")
                                 .font(.system(size: 12, weight: .bold))
                         }
-                        Text(person.lastScannedAt == nil ? "Find accounts" : "Find more accounts")
+                        Text(person.lastScannedAt == nil ? String(localized: "Find accounts") : String(localized: "Find more accounts"))
                             .font(.system(size: 13, weight: .bold))
                     }
                     .foregroundStyle(Theme.textPrimary)
@@ -1659,7 +1660,7 @@ private struct PersonSheet: View {
                     .foregroundStyle(Theme.textSecondary)
             }
             if let problem = person.scanErrors.first {
-                Text("Last check had a problem: " + problem)
+                Text("Last check had a problem: \(problem)")
                     .font(.system(size: 12))
                     .foregroundStyle(Theme.warning)
                     .fixedSize(horizontal: false, vertical: true)
@@ -1672,8 +1673,9 @@ private struct PersonSheet: View {
         .padding(.top, 20)
     }
 
-    private func sectionTitle(_ title: String) -> some View {
-        Text(title.uppercased())
+    private func sectionTitle(_ title: LocalizedStringKey) -> some View {
+        Text(title)
+            .textCase(.uppercase)
             .font(.system(size: 12, weight: .bold))
             .kerning(0.6)
             .foregroundStyle(Theme.textSecondary)

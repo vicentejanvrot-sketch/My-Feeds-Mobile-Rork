@@ -255,6 +255,17 @@ nonisolated enum AlsoOn {
         return value.isEmpty ? fallback : value
     }
 
+    /// identity_links.evidence as shown to the user. The two notes the apps
+    /// write themselves are shown in the app's language; text from the
+    /// server's search is shown as it is.
+    static func displayEvidence(_ evidence: String) -> String {
+        switch evidence {
+        case "You confirmed this match.": return String(localized: "You confirmed this match.")
+        case "You combined these cards.": return String(localized: "You combined these cards.")
+        default: return evidence
+        }
+    }
+
     static func accountLabel(platform: SourcePlatform, handle: String?, url: String) -> String {
         if platform == .appleMusic { return String(localized: "Artist page") }
         if platform == .applePodcasts { return String(localized: "Show") }
