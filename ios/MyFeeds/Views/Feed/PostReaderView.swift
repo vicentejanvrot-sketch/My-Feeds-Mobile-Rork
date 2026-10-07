@@ -75,13 +75,13 @@ struct PostReaderView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 14) {
                     if platform == .github {
-                        Text(item.title ?? "Untitled")
+                        Text(item.title ?? String(localized: "Untitled"))
                             .font(.system(size: 19, weight: .heavy))
                             .foregroundStyle(Theme.textPrimary)
                             .lineSpacing(3)
                     }
                     if platform == .reddit {
-                        Text(item.title ?? "Untitled")
+                        Text(item.title ?? String(localized: "Untitled"))
                             .font(.system(size: 19, weight: .heavy))
                             .foregroundStyle(Theme.textPrimary)
                             .lineSpacing(3)
@@ -340,16 +340,15 @@ struct PostReaderView: View {
         parser.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
         let date = parser.date(from: raw) ?? ISO8601DateFormatter().date(from: raw)
         guard let date else { return nil }
-        let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: "en_US")
-        formatter.dateFormat = platform == .x ? "h:mm a · MMM d, yyyy" : "MMM d, yyyy"
-        var line = Text(formatter.string(from: date)).foregroundColor(Theme.textSecondary)
+        let day = date.formatted(.dateTime.month(.abbreviated).day().year())
+        let stamp = platform == .x ? "\(date.formatted(date: .omitted, time: .shortened)) · \(day)" : day
+        var line = Text(verbatim: stamp).foregroundColor(Theme.textSecondary)
         let views = (item.metrics?.views ?? 0) > 0 ? item.metrics?.views : item.metrics?.plays
         if let views, views > 0 {
+            let count = Text(Format.compactNumber(views)).bold().foregroundColor(Theme.textPrimary)
             line = line
-                + Text(" · ").foregroundColor(Theme.textSecondary)
-                + Text(Format.compactNumber(views)).bold().foregroundColor(Theme.textPrimary)
-                + Text(" Views").foregroundColor(Theme.textSecondary)
+                + Text(verbatim: " · ").foregroundColor(Theme.textSecondary)
+                + (views == 1 ? Text("\(count) View") : Text("\(count) Views")).foregroundColor(Theme.textSecondary)
         }
         return line
     }
@@ -360,7 +359,7 @@ struct PostReaderView: View {
         let points = item.analysis?.keyPoints ?? []
         if !summary.isEmpty || !points.isEmpty {
             VStack(alignment: .leading, spacing: 6) {
-                Text(platform == .reddit ? "THREAD SUMMARY" : "SUMMARY")
+                Text(platform == .reddit ? String(localized: "THREAD SUMMARY") : String(localized: "SUMMARY"))
                     .font(.system(size: 11, weight: .heavy))
                     .kerning(0.8)
                     .foregroundStyle(Theme.accent)
@@ -371,7 +370,7 @@ struct PostReaderView: View {
                         .lineSpacing(4)
                 }
                 ForEach(points, id: \.self) { point in
-                    Text("• \(point)")
+                    Text(verbatim: "• \(point)")
                         .font(.system(size: 14))
                         .foregroundStyle(Theme.textPrimary)
                         .lineSpacing(4)
@@ -399,7 +398,7 @@ struct PostReaderView: View {
                     .foregroundStyle(Theme.accent)
                 ForEach(moments, id: \.self) { moment in
                     (Text(Self.clock(moment.seconds)).foregroundColor(Theme.accent).bold()
-                        + Text("  \(moment.text)").foregroundColor(Theme.textPrimary))
+                        + Text(verbatim: "  \(moment.text)").foregroundColor(Theme.textPrimary))
                         .font(.system(size: 14))
                         .lineSpacing(4)
                 }
@@ -413,6 +412,22 @@ struct PostReaderView: View {
                     .stroke(Theme.accent.opacity(0.25), lineWidth: 1)
             )
         }
+    }
+
+    /// "1.2K comments" with the right plural in the app's language.
+    private static func commentsLabel(_ count: Int) -> String {
+        let value = Format.compactNumber(count)
+        return count == 1 ? String(localized: "\(value) comment") : String(localized: "\(value) comments")
+    }
+
+    private static func sharesLabel(_ count: Int) -> String {
+        let value = Format.compactNumber(count)
+        return count == 1 ? String(localized: "\(value) share") : String(localized: "\(value) shares")
+    }
+
+    private static func repostsLabel(_ count: Int) -> String {
+        let value = Format.compactNumber(count)
+        return count == 1 ? String(localized: "\(value) repost") : String(localized: "\(value) reposts")
     }
 
     private static func clock(_ seconds: Int) -> String {
@@ -456,7 +471,7 @@ struct PostReaderView: View {
                     HStack(spacing: 8) {
                         Image(systemName: "checkmark")
                             .font(.system(size: 14, weight: .semibold))
-                        Text(read ? "Read" : "Mark as read")
+                        Text(read ? String(localized: "Read") : String(localized: "Mark as read"))
                             .font(.system(size: 14, weight: .bold))
                     }
                     .foregroundStyle(read ? Theme.success : Theme.textPrimary)
@@ -516,7 +531,7 @@ struct PostReaderView: View {
                 icon: "bubble.left",
                 value: metrics?.replies ?? 0,
                 color: Theme.textSecondary,
-                label: "Reply on X"
+                label: String(localized: "Reply on X")
             ) {
                 if let postId { openExternal("https://x.com/intent/post?in_reply_to=\(postId)") }
             }
@@ -524,7 +539,7 @@ struct PostReaderView: View {
                 icon: "arrow.2.squarepath",
                 value: metrics?.reposts ?? 0,
                 color: Theme.textSecondary,
-                label: "Repost on X"
+                label: String(localized: "Repost on X")
             ) {
                 if let postId { openExternal("https://x.com/intent/retweet?tweet_id=\(postId)") }
             }
@@ -532,7 +547,7 @@ struct PostReaderView: View {
                 icon: liked ? "heart.fill" : "heart",
                 value: (metrics?.likes ?? 0) + (liked ? 1 : 0),
                 color: liked ? Self.xPink : Theme.textSecondary,
-                label: liked ? "Remove from Saved" : "Like (save in My Feeds)"
+                label: liked ? String(localized: "Remove from Saved") : String(localized: "Like (save in My Feeds)")
             ) {
                 changeStatus(liked ? .watched : .liked, item: item)
             }
@@ -540,7 +555,7 @@ struct PostReaderView: View {
                 icon: bookmarked ? "bookmark.fill" : "bookmark",
                 value: (metrics?.bookmarks ?? 0) + (bookmarked ? 1 : 0),
                 color: bookmarked ? Self.xBlue : Theme.textSecondary,
-                label: bookmarked ? "Remove from Read Later" : "Bookmark (Read Later)"
+                label: bookmarked ? String(localized: "Remove from Read Later") : String(localized: "Bookmark (Read Later)")
             ) {
                 changeStatus(bookmarked ? .notWatched : .watchLater, item: item)
             }
@@ -561,7 +576,7 @@ struct PostReaderView: View {
                 icon: liked ? "heart.fill" : "heart",
                 value: (metrics?.likes ?? 0) + (liked ? 1 : 0),
                 color: liked ? Self.igRed : Theme.textPrimary,
-                label: liked ? "Remove from Saved" : "Like (save in My Feeds)"
+                label: liked ? String(localized: "Remove from Saved") : String(localized: "Like (save in My Feeds)")
             ) {
                 changeStatus(liked ? .watched : .liked, item: item)
             }
@@ -569,7 +584,7 @@ struct PostReaderView: View {
                 icon: "bubble.right",
                 value: metrics?.comments,
                 color: Theme.textPrimary,
-                label: "Comment on Instagram"
+                label: String(localized: "Comment on Instagram")
             ) {
                 if let raw = item.url { openExternal(raw) }
             }
@@ -588,7 +603,7 @@ struct PostReaderView: View {
                 icon: bookmarked ? "bookmark.fill" : "bookmark",
                 value: nil,
                 color: Theme.textPrimary,
-                label: bookmarked ? "Remove from Read Later" : "Save (Read Later)"
+                label: bookmarked ? String(localized: "Remove from Read Later") : String(localized: "Save (Read Later)")
             ) {
                 changeStatus(bookmarked ? .notWatched : .watchLater, item: item)
             }
@@ -605,7 +620,7 @@ struct PostReaderView: View {
                 icon: liked ? "heart.fill" : "heart",
                 value: (metrics?.likes ?? 0) + (liked ? 1 : 0),
                 color: liked ? Self.tikTokRed : Theme.textPrimary,
-                label: liked ? "Remove from Saved" : "Like (save in My Feeds)"
+                label: liked ? String(localized: "Remove from Saved") : String(localized: "Like (save in My Feeds)")
             ) {
                 changeStatus(liked ? .watched : .liked, item: item)
             }
@@ -613,7 +628,7 @@ struct PostReaderView: View {
                 icon: "bubble.right",
                 value: metrics?.comments,
                 color: Theme.textPrimary,
-                label: "Comment on TikTok"
+                label: String(localized: "Comment on TikTok")
             ) {
                 if let raw = item.url { openExternal(raw) }
             }
@@ -621,7 +636,7 @@ struct PostReaderView: View {
                 icon: bookmarked ? "bookmark.fill" : "bookmark",
                 value: nil,
                 color: bookmarked ? Self.tikTokYellow : Theme.textPrimary,
-                label: bookmarked ? "Remove from Read Later" : "Save (Read Later)"
+                label: bookmarked ? String(localized: "Remove from Read Later") : String(localized: "Save (Read Later)")
             ) {
                 changeStatus(bookmarked ? .notWatched : .watchLater, item: item)
             }
@@ -672,7 +687,7 @@ struct PostReaderView: View {
                 icon: liked ? "heart.fill" : "heart",
                 value: nil,
                 color: liked ? tint : Theme.textPrimary,
-                label: liked ? "Remove from Saved" : "Like (save in My Feeds)"
+                label: liked ? String(localized: "Remove from Saved") : String(localized: "Like (save in My Feeds)")
             ) {
                 changeStatus(liked ? .watched : .liked, item: item)
             }
@@ -683,7 +698,7 @@ struct PostReaderView: View {
                 icon: bookmarked ? "bookmark.fill" : "bookmark",
                 value: nil,
                 color: Theme.textPrimary,
-                label: bookmarked ? "Remove from Later" : "Save for Later"
+                label: bookmarked ? String(localized: "Remove from Later") : String(localized: "Save for Later")
             ) {
                 changeStatus(bookmarked ? .notWatched : .watchLater, item: item)
             }
@@ -707,8 +722,8 @@ struct PostReaderView: View {
                 Text(Format.compactNumber((metrics?.likes ?? 0) + (liked ? 1 : 0)))
                 Spacer(minLength: 0)
                 Text(shares > 0
-                     ? "\(Format.compactNumber(metrics?.comments ?? 0)) comments · \(Format.compactNumber(shares)) shares"
-                     : "\(Format.compactNumber(metrics?.comments ?? 0)) comments")
+                     ? "\(Self.commentsLabel(metrics?.comments ?? 0)) · \(Self.sharesLabel(shares))"
+                     : Self.commentsLabel(metrics?.comments ?? 0))
             }
             .font(.system(size: 13))
             .foregroundStyle(Theme.textSecondary)
@@ -717,27 +732,27 @@ struct PostReaderView: View {
             HStack(spacing: 0) {
                 linkedInAction(
                     icon: liked ? "hand.thumbsup.fill" : "hand.thumbsup",
-                    title: "Like",
+                    title: String(localized: "Like"),
                     active: liked,
                     activeColor: Self.facebookBlue
                 ) {
                     changeStatus(liked ? .watched : .liked, item: item)
                 }
-                linkedInAction(icon: "bubble.left", title: "Comment", active: false) {
+                linkedInAction(icon: "bubble.left", title: String(localized: "Comment"), active: false) {
                     if let raw = item.url { openExternal(raw) }
                 }
                 if let raw = item.url, let url = URL(string: raw) {
                     ShareLink(item: url) {
-                        linkedInLabel(icon: "arrowshape.turn.up.right", title: "Share", active: false)
+                        linkedInLabel(icon: "arrowshape.turn.up.right", title: String(localized: "Share"), active: false)
                     }
                     .buttonStyle(.plain)
                 } else {
-                    linkedInLabel(icon: "arrowshape.turn.up.right", title: "Share", active: false)
+                    linkedInLabel(icon: "arrowshape.turn.up.right", title: String(localized: "Share"), active: false)
                         .opacity(0.4)
                 }
                 linkedInAction(
                     icon: bookmarked ? "bookmark.fill" : "bookmark",
-                    title: "Save",
+                    title: String(localized: "Save"),
                     active: bookmarked,
                     activeColor: Self.facebookBlue
                 ) {
@@ -767,7 +782,7 @@ struct PostReaderView: View {
                     .clipShape(Circle())
                 Text(Format.compactNumber((metrics?.likes ?? 0) + (liked ? 1 : 0)))
                 Spacer(minLength: 0)
-                Text("\(Format.compactNumber(metrics?.comments ?? 0)) comments · \(Format.compactNumber(metrics?.reposts ?? 0)) reposts")
+                Text(verbatim: "\(Self.commentsLabel(metrics?.comments ?? 0)) · \(Self.repostsLabel(metrics?.reposts ?? 0))")
             }
             .font(.system(size: 13))
             .foregroundStyle(Theme.textSecondary)
@@ -776,29 +791,29 @@ struct PostReaderView: View {
             HStack(spacing: 0) {
                 linkedInAction(
                     icon: liked ? "hand.thumbsup.fill" : "hand.thumbsup",
-                    title: "Like",
+                    title: String(localized: "Like"),
                     active: liked
                 ) {
                     changeStatus(liked ? .watched : .liked, item: item)
                 }
-                linkedInAction(icon: "text.bubble", title: "Comment", active: false) {
+                linkedInAction(icon: "text.bubble", title: String(localized: "Comment"), active: false) {
                     if let raw = item.url { openExternal(raw) }
                 }
-                linkedInAction(icon: "arrow.2.squarepath", title: "Repost", active: false) {
+                linkedInAction(icon: "arrow.2.squarepath", title: String(localized: "Repost"), active: false) {
                     if let raw = item.url { openExternal(raw) }
                 }
                 if let raw = item.url, let url = URL(string: raw) {
                     ShareLink(item: url) {
-                        linkedInLabel(icon: "paperplane.fill", title: "Send", active: false)
+                        linkedInLabel(icon: "paperplane.fill", title: String(localized: "Send"), active: false)
                     }
                     .buttonStyle(.plain)
                 } else {
-                    linkedInLabel(icon: "paperplane.fill", title: "Send", active: false)
+                    linkedInLabel(icon: "paperplane.fill", title: String(localized: "Send"), active: false)
                         .opacity(0.4)
                 }
                 linkedInAction(
                     icon: bookmarked ? "bookmark.fill" : "bookmark",
-                    title: "Save",
+                    title: String(localized: "Save"),
                     active: bookmarked
                 ) {
                     changeStatus(bookmarked ? .notWatched : .watchLater, item: item)
@@ -854,7 +869,7 @@ struct PostReaderView: View {
                 icon: liked ? "star.fill" : "star",
                 value: (metrics?.stars ?? 0) + (liked ? 1 : 0),
                 color: liked ? Self.gitHubStar : Theme.textSecondary,
-                label: liked ? "Remove from Saved" : "Star (save in My Feeds)"
+                label: liked ? String(localized: "Remove from Saved") : String(localized: "Star (save in My Feeds)")
             ) {
                 changeStatus(liked ? .watched : .liked, item: item)
             }
@@ -862,7 +877,7 @@ struct PostReaderView: View {
                 icon: "arrow.triangle.branch",
                 value: metrics?.forks ?? 0,
                 color: Theme.textSecondary,
-                label: "Fork on GitHub"
+                label: String(localized: "Fork on GitHub")
             ) {
                 if let raw = item.url { openExternal(raw) }
             }
@@ -876,7 +891,7 @@ struct PostReaderView: View {
                     .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
-            .accessibilityLabel(bookmarked ? "Remove from Read Later" : "Save (Read Later)")
+            .accessibilityLabel(bookmarked ? String(localized: "Remove from Read Later") : String(localized: "Save (Read Later)"))
             Spacer(minLength: 0)
             downloadButton(item)
             shareButton(item, color: Theme.textSecondary)
@@ -897,7 +912,7 @@ struct PostReaderView: View {
                         .font(.system(size: 16, weight: .semibold))
                         .frame(width: 40, height: 40)
                 }
-                .accessibilityLabel(upvoted ? "Remove upvote (Saved)" : "Upvote (save in My Feeds)")
+                .accessibilityLabel(upvoted ? String(localized: "Remove upvote (Saved)") : String(localized: "Upvote (save in My Feeds)"))
                 Text(Format.compactNumber((metrics?.score ?? 0) + (upvoted ? 1 : 0)))
                     .font(.system(size: 13, weight: .bold))
                     .monospacedDigit()
@@ -922,7 +937,7 @@ struct PostReaderView: View {
 
             redditPill(
                 icon: bookmarked ? "bookmark.fill" : "bookmark",
-                text: bookmarked ? "Saved" : "Save",
+                text: bookmarked ? String(localized: "Saved") : String(localized: "Save"),
                 color: bookmarked ? Self.xBlue : Theme.textPrimary
             ) {
                 changeStatus(bookmarked ? .notWatched : .watchLater, item: item)
@@ -1031,7 +1046,7 @@ struct PostReaderView: View {
             } catch {
                 status = previous
                 router.reportStatusChange(itemId: item.id, status: previous)
-                toasts.show("Couldn't update status", type: .error)
+                toasts.show(String(localized: "Couldn't update status"), type: .error)
             }
             router.settleStatusChange(itemId: item.id)
         }
@@ -1075,7 +1090,7 @@ private struct MediaCarousel: View {
             .background(Color.black)
             .clipShape(.rect(cornerRadius: 12))
             .overlay(alignment: .topTrailing) {
-                Text("\(index + 1) / \(slides.count)")
+                Text(verbatim: "\(index + 1) / \(slides.count)")
                     .font(.system(size: 12, weight: .semibold))
                     .foregroundStyle(.white)
                     .padding(.horizontal, 8)
@@ -1209,7 +1224,7 @@ private struct PhotoViewer: View {
 
             HStack(spacing: 10) {
                 if urls.count > 1 {
-                    Text("\(index + 1) / \(urls.count)")
+                    Text(verbatim: "\(index + 1) / \(urls.count)")
                         .font(.system(size: 13, weight: .semibold))
                         .foregroundStyle(.white)
                         .padding(.horizontal, 10)
@@ -1381,7 +1396,7 @@ private struct AudiobookCardView: View {
                     Button {
                         toggle()
                     } label: {
-                        Label(isPlaying ? "Pause sample" : "Play sample", systemImage: isPlaying ? "pause.fill" : "play.fill")
+                        Label(isPlaying ? String(localized: "Pause sample") : String(localized: "Play sample"), systemImage: isPlaying ? "pause.fill" : "play.fill")
                             .font(.system(size: 14, weight: .bold))
                             .foregroundStyle(.white)
                             .padding(.horizontal, 14)
@@ -1504,12 +1519,12 @@ private struct SpotifySection: View {
                 HStack(spacing: 10) {
                     if link.embedUrl != nil {
                         Button { playing.toggle() } label: {
-                            spotifyButtonLabel(playing ? "Hide player" : "Play on Spotify", showLogo: true)
+                            spotifyButtonLabel(playing ? String(localized: "Hide player") : String(localized: "Play on Spotify"), showLogo: true)
                         }
                         .buttonStyle(.plain)
                     }
                     Button { openURL(spotifyURL) } label: {
-                        spotifyButtonLabel("Open in Spotify", showLogo: false)
+                        spotifyButtonLabel(String(localized: "Open in Spotify"), showLogo: false)
                     }
                     .buttonStyle(.plain)
                 }
@@ -1546,7 +1561,7 @@ private struct SpotifyReleasePlayer: View {
                 .clipShape(.rect(cornerRadius: 12))
             if let spotifyURL {
                 Button { openURL(spotifyURL) } label: {
-                    spotifyButtonLabel("Open in Spotify", showLogo: true)
+                    spotifyButtonLabel(String(localized: "Open in Spotify"), showLogo: true)
                 }
                 .buttonStyle(.plain)
             }
@@ -1582,7 +1597,8 @@ private struct SpotifyPendingRelease: View {
                     .frame(height: 352)
                     .frame(maxWidth: .infinity)
                     .clipShape(.rect(cornerRadius: 12))
-                Text("Spotify hasn't linked \"\(title)\" yet (new releases can take a few days), so this plays \(artistName ?? "the artist")'s popular songs. Open in Spotify searches for the new release.")
+                Text(artistName.map { String(localized: "Spotify hasn't linked \"\(title)\" yet (new releases can take a few days), so this plays \($0)'s popular songs. Open in Spotify searches for the new release.") }
+                     ?? String(localized: "Spotify hasn't linked \"\(title)\" yet (new releases can take a few days), so this plays the artist's popular songs. Open in Spotify searches for the new release."))
                     .font(.system(size: 12))
                     .foregroundStyle(Theme.textSecondary)
                     .multilineTextAlignment(.center)
@@ -1609,7 +1625,7 @@ private struct FindOnSpotifyButton: View {
             let encoded = query.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed.subtracting(CharacterSet(charactersIn: "/?#"))) ?? ""
             if let url = URL(string: "https://open.spotify.com/search/\(encoded)/episodes") { openURL(url) }
         } label: {
-            spotifyButtonLabel("Find on Spotify", showLogo: true)
+            spotifyButtonLabel(String(localized: "Find on Spotify"), showLogo: true)
         }
         .buttonStyle(.plain)
     }
@@ -1689,13 +1705,13 @@ private struct PodcastPlayerView: View {
                 .clipShape(.rect(cornerRadius: 10))
 
                 VStack(alignment: .leading, spacing: 4) {
-                    Text((totalLength > 0 ? "\(Self.clock(totalLength)) long" : "Full episode") + (url.isFileURL ? " · Downloaded" : ""))
+                    Text((totalLength > 0 ? String(localized: "\(Self.clock(totalLength)) long") : String(localized: "Full episode")) + (url.isFileURL ? String(localized: " · Downloaded") : ""))
                         .font(.system(size: 13))
                         .foregroundStyle(Theme.textSecondary)
                     Button {
                         togglePlay()
                     } label: {
-                        Label(isPlaying ? "Pause" : "Play", systemImage: isPlaying ? "pause.fill" : "play.fill")
+                        Label(isPlaying ? String(localized: "Pause") : String(localized: "Play"), systemImage: isPlaying ? "pause.fill" : "play.fill")
                             .font(.system(size: 15, weight: .bold))
                             .foregroundStyle(.white)
                             .padding(.horizontal, 16)
@@ -1729,21 +1745,21 @@ private struct PodcastPlayerView: View {
             }
 
             HStack(spacing: 8) {
-                controlButton("Back 15s", systemImage: "gobackward.15") { skip(-15) }
-                controlButton("Forward 30s", systemImage: "goforward.30") { skip(30) }
+                controlButton(String(localized: "Back 15s"), systemImage: "gobackward.15") { skip(-15) }
+                controlButton(String(localized: "Forward 30s"), systemImage: "goforward.30") { skip(30) }
                 Button {
                     let next = Self.speeds[((Self.speeds.firstIndex(of: speed) ?? 0) + 1) % Self.speeds.count]
                     speed = next
                     if isPlaying { player?.rate = next }
                 } label: {
-                    Text(speed == 1 ? "1×" : String(format: "%g×", speed))
+                    Text(verbatim: speed == 1 ? "1×" : "\(speed.formatted())×")
                         .font(.system(size: 13, weight: .bold))
                         .foregroundStyle(Theme.textPrimary)
                         .frame(minWidth: 52, minHeight: 40)
                         .overlay(RoundedRectangle(cornerRadius: 8).stroke(Theme.border, lineWidth: 1))
                 }
                 .buttonStyle(.plain)
-                .accessibilityLabel("Playback speed \(String(format: "%g", speed)) times")
+                .accessibilityLabel("Playback speed \(speed.formatted()) times")
             }
         }
         .padding(12)

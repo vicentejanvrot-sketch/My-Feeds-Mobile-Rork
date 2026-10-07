@@ -1,12 +1,62 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    " · Downloaded" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : " · Baixado"
+          }
+        }
+      }
+    },
     "%@ %@" : {
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "%1$@: %2$@"
+          }
+        }
+      }
+    },
+    "%@ View" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ visualização"
+          }
+        }
+      }
+    },
+    "%@ Views" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ visualizações"
+          }
+        }
+      }
+    },
+    "%@ comment" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ comentário"
+          }
+        }
+      }
+    },
+    "%@ comments" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ comentários"
           }
         }
       }
@@ -77,6 +127,56 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%@ está pronta"
+          }
+        }
+      }
+    },
+    "%@ long" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ de duração"
+          }
+        }
+      }
+    },
+    "%@ repost" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ repost"
+          }
+        }
+      }
+    },
+    "%@ reposts" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ reposts"
+          }
+        }
+      }
+    },
+    "%@ share" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ compartilhamento"
+          }
+        }
+      }
+    },
+    "%@ shares" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ compartilhamentos"
           }
         }
       }
@@ -412,6 +512,66 @@
                     "stringUnit" : {
                       "state" : "translated",
                       "value" : "%arg videos watched"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "%lld photos and videos, showing %lld" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@items@, mostrando o %2$lld"
+          },
+          "substitutions" : {
+            "items" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "one" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg foto ou vídeo"
+                    }
+                  },
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg fotos e vídeos"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@items@, showing %2$lld"
+          },
+          "substitutions" : {
+            "items" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "one" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg photo or video"
+                    }
+                  },
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg photos and videos"
                     }
                   }
                 }
@@ -1545,6 +1705,16 @@
         }
       }
     },
+    "Back 15s" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Voltar 15 s"
+          }
+        }
+      }
+    },
     "Back to sign in" : {
       "localizations" : {
         "pt-BR" : {
@@ -1591,6 +1761,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "A biometria não está disponível ou não está configurada neste dispositivo."
+          }
+        }
+      }
+    },
+    "Bookmark (Read Later)" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Salvar nos favoritos (Ler depois)"
           }
         }
       }
@@ -1985,6 +2165,36 @@
         }
       }
     },
+    "Comment" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Comentar"
+          }
+        }
+      }
+    },
+    "Comment on Instagram" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Comentar no Instagram"
+          }
+        }
+      }
+    },
+    "Comment on TikTok" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Comentar no TikTok"
+          }
+        }
+      }
+    },
     "Completed with issues" : {
       "localizations" : {
         "pt-BR" : {
@@ -2221,6 +2431,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Não foi possível carregar a coleção"
+          }
+        }
+      }
+    },
+    "Couldn't load this post. Check your connection." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Não foi possível carregar este post. Verifique sua conexão."
           }
         }
       }
@@ -2775,6 +2995,16 @@
         }
       }
     },
+    "Downvote (mark as read)" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Downvote (marcar como lido)"
+          }
+        }
+      }
+    },
     "Duration:" : {
       "localizations" : {
         "pt-BR" : {
@@ -2891,6 +3121,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Episódio"
+          }
+        }
+      }
+    },
+    "Episode position" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Posição no episódio"
           }
         }
       }
@@ -3055,12 +3295,42 @@
         }
       }
     },
+    "Find on Spotify" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Encontrar no Spotify"
+          }
+        }
+      }
+    },
     "Forgot password?" : {
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Esqueceu a senha?"
+          }
+        }
+      }
+    },
+    "Fork on GitHub" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fazer fork no GitHub"
+          }
+        }
+      }
+    },
+    "Forward 30s" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Avançar 30 s"
           }
         }
       }
@@ -3215,6 +3485,26 @@
         }
       }
     },
+    "Full episode" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Episódio completo"
+          }
+        }
+      }
+    },
+    "Full screen" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tela cheia"
+          }
+        }
+      }
+    },
     "GitHub & Reddit" : {
       "localizations" : {
         "pt-BR" : {
@@ -3281,6 +3571,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ocultar senha"
+          }
+        }
+      }
+    },
+    "Hide player" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ocultar player"
           }
         }
       }
@@ -3515,6 +3815,16 @@
         }
       }
     },
+    "KEY MOMENTS" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "MOMENTOS PRINCIPAIS"
+          }
+        }
+      }
+    },
     "Keep Running" : {
       "localizations" : {
         "pt-BR" : {
@@ -3591,6 +3901,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Audiolivro mais recente"
+          }
+        }
+      }
+    },
+    "Like" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Curtir"
+          }
+        }
+      }
+    },
+    "Like (save in My Feeds)" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Curtir (salvar no My Feeds)"
           }
         }
       }
@@ -3715,6 +4045,16 @@
         }
       }
     },
+    "Looking for it on Spotify…" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Procurando no Spotify…"
+          }
+        }
+      }
+    },
     "Looking up the account…" : {
       "localizations" : {
         "pt-BR" : {
@@ -3751,6 +4091,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Manual"
+          }
+        }
+      }
+    },
+    "Mark as read" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Marcar como lido"
           }
         }
       }
@@ -4285,6 +4635,16 @@
         }
       }
     },
+    "No sample for this one. The full book plays in Apple Books." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sem amostra para este. O livro completo toca no Apple Books."
+          }
+        }
+      }
+    },
     "No saved credentials. Please sign in with your password first." : {
       "localizations" : {
         "pt-BR" : {
@@ -4491,6 +4851,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Abra um post, episódio de podcast ou vídeo e toque no ícone de download no topo. Ele fica neste celular para você ler ou ouvir sem conexão."
+          }
+        }
+      }
+    },
+    "Open comments on Reddit" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abrir os comentários no Reddit"
           }
         }
       }
@@ -4765,6 +5135,26 @@
         }
       }
     },
+    "Pause" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pausar"
+          }
+        }
+      }
+    },
+    "Pause sample" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pausar amostra"
+          }
+        }
+      }
+    },
     "People" : {
       "localizations" : {
         "pt-BR" : {
@@ -4841,6 +5231,46 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Plataforma"
+          }
+        }
+      }
+    },
+    "Play" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tocar"
+          }
+        }
+      }
+    },
+    "Play on Spotify" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tocar no Spotify"
+          }
+        }
+      }
+    },
+    "Play sample" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tocar amostra"
+          }
+        }
+      }
+    },
+    "Playback speed %@ times" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Velocidade de reprodução %@ vezes"
           }
         }
       }
@@ -5065,6 +5495,16 @@
         }
       }
     },
+    "Read" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lido"
+          }
+        }
+      }
+    },
     "Recent" : {
       "localizations" : {
         "pt-BR" : {
@@ -5225,12 +5665,82 @@
         }
       }
     },
+    "Remove from Later" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remover de Depois"
+          }
+        }
+      }
+    },
+    "Remove from Read Later" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remover de Ler depois"
+          }
+        }
+      }
+    },
+    "Remove from Saved" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remover dos curtidos"
+          }
+        }
+      }
+    },
+    "Remove upvote (Saved)" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remover upvote (curtido)"
+          }
+        }
+      }
+    },
     "Reopen My Feeds to apply" : {
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Reabra o My Feeds para aplicar"
+          }
+        }
+      }
+    },
+    "Reply on X" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Responder no X"
+          }
+        }
+      }
+    },
+    "Repost" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Repostar"
+          }
+        }
+      }
+    },
+    "Repost on X" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Repostar no X"
           }
         }
       }
@@ -5375,12 +5885,32 @@
         }
       }
     },
+    "SUMMARY" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "RESUMO"
+          }
+        }
+      }
+    },
     "Same person, matched from their profile links. Add those too?" : {
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "A mesma pessoa, identificada pelos links do perfil. Adicionar essas também?"
+          }
+        }
+      }
+    },
+    "Sample from Apple Books. The full book plays in Apple Books." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Amostra do Apple Books. O livro completo toca no Apple Books."
           }
         }
       }
@@ -5395,12 +5925,32 @@
         }
       }
     },
+    "Save (Read Later)" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Salvar (Ler depois)"
+          }
+        }
+      }
+    },
     "Save Changes" : {
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Salvar alterações"
+          }
+        }
+      }
+    },
+    "Save for Later" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Salvar para depois"
           }
         }
       }
@@ -5431,6 +5981,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Salve seu login saindo e entrando de novo com sua senha."
+          }
+        }
+      }
+    },
+    "Saved" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Salvo"
           }
         }
       }
@@ -5635,6 +6195,16 @@
         }
       }
     },
+    "Send" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enviar"
+          }
+        }
+      }
+    },
     "Send reset link" : {
       "localizations" : {
         "pt-BR" : {
@@ -5731,6 +6301,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Configurações salvas."
+          }
+        }
+      }
+    },
+    "Share" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Compartilhar"
           }
         }
       }
@@ -5975,6 +6555,36 @@
         }
       }
     },
+    "Spotify hasn't linked \"%@\" yet (new releases can take a few days), so this plays %@'s popular songs. Open in Spotify searches for the new release." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O Spotify ainda não vinculou \"%1$@\" (lançamentos novos podem levar alguns dias), então aqui tocam as músicas populares de %2$@. Abrir no Spotify busca o novo lançamento."
+          }
+        }
+      }
+    },
+    "Spotify hasn't linked \"%@\" yet (new releases can take a few days), so this plays the artist's popular songs. Open in Spotify searches for the new release." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O Spotify ainda não vinculou \"%@\" (lançamentos novos podem levar alguns dias), então aqui tocam as músicas populares do artista. Abrir no Spotify busca o novo lançamento."
+          }
+        }
+      }
+    },
+    "Star (save in My Feeds)" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dar estrela (salvar no My Feeds)"
+          }
+        }
+      }
+    },
     "Status" : {
       "localizations" : {
         "pt-BR" : {
@@ -6081,6 +6691,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "ESTA SEMANA"
+          }
+        }
+      }
+    },
+    "THREAD SUMMARY" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "RESUMO DA DISCUSSÃO"
           }
         }
       }
@@ -6581,6 +7201,16 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "Upvote (save in My Feeds)" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Upvote (salvar no My Feeds)"
           }
         }
       }
