@@ -1255,6 +1255,16 @@
         }
       }
     },
+    "+ Add" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "+ Adicionar"
+          }
+        }
+      }
+    },
     "+ Add Source" : {
       "localizations" : {
         "pt-BR" : {
