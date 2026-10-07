@@ -637,13 +637,13 @@
                   "one" : {
                     "stringUnit" : {
                       "state" : "translated",
-                      "value" : "%arg vídeo"
+                      "value" : "%arg feed"
                     }
                   },
                   "other" : {
                     "stringUnit" : {
                       "state" : "translated",
-                      "value" : "%arg vídeos"
+                      "value" : "%arg feeds"
                     }
                   }
                 }
@@ -665,13 +665,13 @@
                   "one" : {
                     "stringUnit" : {
                       "state" : "translated",
-                      "value" : "%arg video"
+                      "value" : "%arg feed"
                     }
                   },
                   "other" : {
                     "stringUnit" : {
                       "state" : "translated",
-                      "value" : "%arg videos"
+                      "value" : "%arg feeds"
                     }
                   }
                 }
@@ -697,13 +697,13 @@
                   "one" : {
                     "stringUnit" : {
                       "state" : "translated",
-                      "value" : "%arg vídeo assistido"
+                      "value" : "%arg feed assistido"
                     }
                   },
                   "other" : {
                     "stringUnit" : {
                       "state" : "translated",
-                      "value" : "%arg vídeos assistidos"
+                      "value" : "%arg feeds assistidos"
                     }
                   }
                 }
@@ -725,13 +725,13 @@
                   "one" : {
                     "stringUnit" : {
                       "state" : "translated",
-                      "value" : "%arg video watched"
+                      "value" : "%arg feed watched"
                     }
                   },
                   "other" : {
                     "stringUnit" : {
                       "state" : "translated",
-                      "value" : "%arg videos watched"
+                      "value" : "%arg feeds watched"
                     }
                   }
                 }
@@ -1019,13 +1019,13 @@
               "one" : {
                 "stringUnit" : {
                   "state" : "translated",
-                  "value" : "%lld video"
+                  "value" : "%lld feed"
                 }
               },
               "other" : {
                 "stringUnit" : {
                   "state" : "translated",
-                  "value" : "%lld videos"
+                  "value" : "%lld feeds"
                 }
               }
             }
@@ -1037,13 +1037,13 @@
               "one" : {
                 "stringUnit" : {
                   "state" : "translated",
-                  "value" : "%lld vídeo"
+                  "value" : "%lld feed"
                 }
               },
               "other" : {
                 "stringUnit" : {
                   "state" : "translated",
-                  "value" : "%lld vídeos"
+                  "value" : "%lld feeds"
                 }
               }
             }
@@ -1211,13 +1211,13 @@
                   "one" : {
                     "stringUnit" : {
                       "state" : "translated",
-                      "value" : "%arg vídeo"
+                      "value" : "%arg feed"
                     }
                   },
                   "other" : {
                     "stringUnit" : {
                       "state" : "translated",
-                      "value" : "%arg vídeos"
+                      "value" : "%arg feeds"
                     }
                   }
                 }
@@ -1239,13 +1239,13 @@
                   "one" : {
                     "stringUnit" : {
                       "state" : "translated",
-                      "value" : "%arg video"
+                      "value" : "%arg feed"
                     }
                   },
                   "other" : {
                     "stringUnit" : {
                       "state" : "translated",
-                      "value" : "%arg videos"
+                      "value" : "%arg feeds"
                     }
                   }
                 }
@@ -3417,10 +3417,16 @@
     },
     "Couldn't load videos: %@" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Couldn't load feeds: %@"
+          }
+        },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Não foi possível carregar os vídeos: %@"
+            "value" : "Não foi possível carregar os feeds: %@"
           }
         }
       }
@@ -3587,10 +3593,16 @@
     },
     "Couldn't update selected videos" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Couldn't update selected feeds"
+          }
+        },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Não foi possível atualizar os vídeos selecionados"
+            "value" : "Não foi possível atualizar os feeds selecionados"
           }
         }
       }
@@ -3897,10 +3909,16 @@
     },
     "Deselect video" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Deselect feed"
+          }
+        },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Desmarcar vídeo"
+            "value" : "Desmarcar feed"
           }
         }
       }
@@ -4617,20 +4635,32 @@
     },
     "Found %@ new video" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Found %@ new feed"
+          }
+        },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%@ vídeo novo encontrado"
+            "value" : "%@ feed novo encontrado"
           }
         }
       }
     },
     "Found %@ new videos" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Found %@ new feeds"
+          }
+        },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%@ vídeos novos encontrados"
+            "value" : "%@ feeds novos encontrados"
           }
         }
       }
@@ -4643,13 +4673,13 @@
               "one" : {
                 "stringUnit" : {
                   "state" : "translated",
-                  "value" : "Found %lld new video"
+                  "value" : "Found %lld new feed"
                 }
               },
               "other" : {
                 "stringUnit" : {
                   "state" : "translated",
-                  "value" : "Found %lld new videos"
+                  "value" : "Found %lld new feeds"
                 }
               }
             }
@@ -4661,13 +4691,13 @@
               "one" : {
                 "stringUnit" : {
                   "state" : "translated",
-                  "value" : "%lld vídeo novo encontrado"
+                  "value" : "%lld feed novo encontrado"
                 }
               },
               "other" : {
                 "stringUnit" : {
                   "state" : "translated",
-                  "value" : "%lld vídeos novos encontrados"
+                  "value" : "%lld feeds novos encontrados"
                 }
               }
             }
@@ -4683,13 +4713,13 @@
               "one" : {
                 "stringUnit" : {
                   "state" : "translated",
-                  "value" : "Found %lld new video (some channels couldn't be scanned)"
+                  "value" : "Found %lld new feed (some channels couldn't be scanned)"
                 }
               },
               "other" : {
                 "stringUnit" : {
                   "state" : "translated",
-                  "value" : "Found %lld new videos (some channels couldn't be scanned)"
+                  "value" : "Found %lld new feeds (some channels couldn't be scanned)"
                 }
               }
             }
@@ -4701,13 +4731,13 @@
               "one" : {
                 "stringUnit" : {
                   "state" : "translated",
-                  "value" : "%lld vídeo novo encontrado (alguns canais não puderam ser verificados)"
+                  "value" : "%lld feed novo encontrado (alguns canais não puderam ser verificados)"
                 }
               },
               "other" : {
                 "stringUnit" : {
                   "state" : "translated",
-                  "value" : "%lld vídeos novos encontrados (alguns canais não puderam ser verificados)"
+                  "value" : "%lld feeds novos encontrados (alguns canais não puderam ser verificados)"
                 }
               }
             }
@@ -5877,10 +5907,16 @@
     },
     "My Feeds lets you create collections that follow YouTube channels and other accounts, automatically surface new videos and posts into your Feed, and track which videos you've watched." : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "My Feeds lets you create collections that follow YouTube channels and other accounts, automatically surface new feeds into your Feeds, and track which feeds you've watched."
+          }
+        },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "O My Feeds permite criar coleções que seguem canais do YouTube e outras contas, trazem automaticamente novos vídeos e posts para o seu feed e registram quais vídeos você já assistiu."
+            "value" : "O My Feeds permite criar coleções que seguem canais do YouTube e outras contas, trazem automaticamente novos feeds para os seus Feeds e registram quais feeds você já assistiu."
           }
         }
       }
@@ -5971,13 +6007,13 @@
                   "one" : {
                     "stringUnit" : {
                       "state" : "translated",
-                      "value" : "%arg vídeo"
+                      "value" : "%arg feed"
                     }
                   },
                   "other" : {
                     "stringUnit" : {
                       "state" : "translated",
-                      "value" : "%arg vídeos"
+                      "value" : "%arg feeds"
                     }
                   }
                 }
@@ -5999,13 +6035,13 @@
                   "one" : {
                     "stringUnit" : {
                       "state" : "translated",
-                      "value" : "%arg video"
+                      "value" : "%arg feed"
                     }
                   },
                   "other" : {
                     "stringUnit" : {
                       "state" : "translated",
-                      "value" : "%arg videos"
+                      "value" : "%arg feeds"
                     }
                   }
                 }
@@ -6287,10 +6323,16 @@
     },
     "No new videos found" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No new feeds found"
+          }
+        },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Nenhum vídeo novo encontrado"
+            "value" : "Nenhum feed novo encontrado"
           }
         }
       }
@@ -6377,20 +6419,32 @@
     },
     "No videos match your filters" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No feeds match your filters"
+          }
+        },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Nenhum vídeo corresponde aos seus filtros"
+            "value" : "Nenhum feed corresponde aos seus filtros"
           }
         }
       }
     },
     "No videos yet" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No feeds yet"
+          }
+        },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Nenhum vídeo ainda"
+            "value" : "Nenhum feed ainda"
           }
         }
       }
@@ -8067,10 +8121,16 @@
     },
     "Run a collection to start discovering videos." : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Run a collection to start discovering feeds."
+          }
+        },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Atualize uma coleção para começar a descobrir vídeos."
+            "value" : "Atualize uma coleção para começar a descobrir feeds."
           }
         }
       }
@@ -8367,10 +8427,16 @@
     },
     "Search videos, channels, tags..." : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Search feeds, channels, tags..."
+          }
+        },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Buscar vídeos, canais, tags..."
+            "value" : "Buscar feeds, canais, tags..."
           }
         }
       }
@@ -8511,13 +8577,13 @@
                   "one" : {
                     "stringUnit" : {
                       "state" : "translated",
-                      "value" : "%arg vídeo"
+                      "value" : "%arg feed"
                     }
                   },
                   "other" : {
                     "stringUnit" : {
                       "state" : "translated",
-                      "value" : "%arg vídeos"
+                      "value" : "%arg feeds"
                     }
                   }
                 }
@@ -8539,13 +8605,13 @@
                   "one" : {
                     "stringUnit" : {
                       "state" : "translated",
-                      "value" : "%arg video"
+                      "value" : "%arg feed"
                     }
                   },
                   "other" : {
                     "stringUnit" : {
                       "state" : "translated",
-                      "value" : "%arg videos"
+                      "value" : "%arg feeds"
                     }
                   }
                 }
@@ -8587,10 +8653,16 @@
     },
     "Select video" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Select feed"
+          }
+        },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Selecionar vídeo"
+            "value" : "Selecionar feed"
           }
         }
       }
@@ -8703,13 +8775,13 @@
               "one" : {
                 "stringUnit" : {
                   "state" : "translated",
-                  "value" : "Set status for %lld video"
+                  "value" : "Set status for %lld feed"
                 }
               },
               "other" : {
                 "stringUnit" : {
                   "state" : "translated",
-                  "value" : "Set status for %lld videos"
+                  "value" : "Set status for %lld feeds"
                 }
               }
             }
@@ -8721,13 +8793,13 @@
               "one" : {
                 "stringUnit" : {
                   "state" : "translated",
-                  "value" : "Definir status de %lld vídeo"
+                  "value" : "Definir status de %lld feed"
                 }
               },
               "other" : {
                 "stringUnit" : {
                   "state" : "translated",
-                  "value" : "Definir status de %lld vídeos"
+                  "value" : "Definir status de %lld feeds"
                 }
               }
             }
@@ -9587,10 +9659,16 @@
     },
     "This clears the Run History list only. Your videos, feed, and statistics are kept. This cannot be undone." : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This clears the Run History list only. Your feeds and statistics are kept. This cannot be undone."
+          }
+        },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Isso limpa só a lista do Histórico de atualizações. Seus vídeos, feed e estatísticas são mantidos. Não dá para desfazer."
+            "value" : "Isso limpa só a lista do Histórico de atualizações. Seus feeds e estatísticas são mantidos. Não dá para desfazer."
           }
         }
       }
@@ -9603,13 +9681,13 @@
               "one" : {
                 "stringUnit" : {
                   "state" : "translated",
-                  "value" : "This deletes the collection, its %lld source, its email recipients, its run history and every video and post it found, including ones you saved. It can't be undone. Your accounts on YouTube, X and the other platforms aren't touched."
+                  "value" : "This deletes the collection, its %lld source, its email recipients, its run history and every feed it found, including ones you saved. It can't be undone. Your accounts on YouTube, X and the other platforms aren't touched."
                 }
               },
               "other" : {
                 "stringUnit" : {
                   "state" : "translated",
-                  "value" : "This deletes the collection, its %lld sources, its email recipients, its run history and every video and post it found, including ones you saved. It can't be undone. Your accounts on YouTube, X and the other platforms aren't touched."
+                  "value" : "This deletes the collection, its %lld sources, its email recipients, its run history and every feed it found, including ones you saved. It can't be undone. Your accounts on YouTube, X and the other platforms aren't touched."
                 }
               }
             }
@@ -9621,13 +9699,13 @@
               "one" : {
                 "stringUnit" : {
                   "state" : "translated",
-                  "value" : "Isso exclui a coleção, a %lld fonte dela, os destinatários de e-mail, o histórico de atualizações e todos os vídeos e posts que ela encontrou, inclusive os que você salvou. Não dá para desfazer. Suas contas no YouTube, X e nas outras plataformas não são afetadas."
+                  "value" : "Isso exclui a coleção, a %lld fonte dela, os destinatários de e-mail, o histórico de atualizações e todos os feeds que ela encontrou, inclusive os que você salvou. Não dá para desfazer. Suas contas no YouTube, X e nas outras plataformas não são afetadas."
                 }
               },
               "other" : {
                 "stringUnit" : {
                   "state" : "translated",
-                  "value" : "Isso exclui a coleção, as %lld fontes dela, os destinatários de e-mail, o histórico de atualizações e todos os vídeos e posts que ela encontrou, inclusive os que você salvou. Não dá para desfazer. Suas contas no YouTube, X e nas outras plataformas não são afetadas."
+                  "value" : "Isso exclui a coleção, as %lld fontes dela, os destinatários de e-mail, o histórico de atualizações e todos os feeds que ela encontrou, inclusive os que você salvou. Não dá para desfazer. Suas contas no YouTube, X e nas outras plataformas não são afetadas."
                 }
               }
             }
@@ -9963,13 +10041,13 @@
               "one" : {
                 "stringUnit" : {
                   "state" : "translated",
-                  "value" : "Updated %lld video"
+                  "value" : "Updated %lld feed"
                 }
               },
               "other" : {
                 "stringUnit" : {
                   "state" : "translated",
-                  "value" : "Updated %lld videos"
+                  "value" : "Updated %lld feeds"
                 }
               }
             }
@@ -9981,13 +10059,13 @@
               "one" : {
                 "stringUnit" : {
                   "state" : "translated",
-                  "value" : "%lld vídeo atualizado"
+                  "value" : "%lld feed atualizado"
                 }
               },
               "other" : {
                 "stringUnit" : {
                   "state" : "translated",
-                  "value" : "%lld vídeos atualizados"
+                  "value" : "%lld feeds atualizados"
                 }
               }
             }
