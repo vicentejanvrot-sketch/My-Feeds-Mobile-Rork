@@ -9303,6 +9303,26 @@
         }
       }
     },
+    "This collection has no sources turned on" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Esta coleção não tem fontes ativadas"
+          }
+        }
+      }
+    },
+    "This collection took too long and was stopped" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Esta coleção demorou demais e foi interrompida"
+          }
+        }
+      }
+    },
     "THIS WEEK" : {
       "localizations" : {
         "pt-BR" : {

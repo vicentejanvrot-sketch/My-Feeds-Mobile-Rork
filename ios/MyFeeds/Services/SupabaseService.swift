@@ -347,11 +347,30 @@ final class SupabaseService {
             .select().single().execute().value
     }
 
-    func invokeRunAgent(agentId: String, runId: String) async throws {
+    /// run-agent does the whole scan before it replies, so the reply already
+    /// says how the run ended (see RunningOverlayStore.runAndWait).
+    func invokeRunAgent(agentId: String, runId: String) async throws -> RunAgentReply {
         try await client.functions.invoke(
             "run-agent",
-            options: FunctionInvokeOptions(body: ["agentId": agentId, "runId": runId])
+            options: FunctionInvokeOptions(body: ["agentId": agentId, "runId": runId]),
+            decoder: JSONDecoder()
         )
+    }
+
+    /// True when run-agent may still be working after this error, so the run
+    /// row will still finish: the gateway gives up after 150 seconds (504) and
+    /// a dropped connection doesn't stop the function either. A reply we
+    /// couldn't read counts too, since the run itself went through.
+    static func runMayStillBeRunning(after error: Error) -> Bool {
+        if case FunctionsError.httpError(let code, _) = error { return code == 504 }
+        if let urlError = error as? URLError {
+            return urlError.code == .timedOut || urlError.code == .networkConnectionLost
+        }
+        return error is DecodingError
+    }
+
+    func deleteRun(id: String) async throws {
+        try await db.from("runs").delete().eq("id", value: id).execute()
     }
 
     func markRunFailed(runId: String, message: String) async throws {
