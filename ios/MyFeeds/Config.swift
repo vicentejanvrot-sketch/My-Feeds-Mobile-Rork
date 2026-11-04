@@ -10,5 +10,27 @@
 import Foundation
 
 enum Config {
-    nonisolated static let allValues: [String: String] = [:]
+    nonisolated static let EXPO_PUBLIC_PROJECT_ID = ""
+    nonisolated static let EXPO_PUBLIC_RORK_API_BASE_URL = ""
+    nonisolated static let EXPO_PUBLIC_RORK_AUTH_URL = ""
+    nonisolated static let EXPO_PUBLIC_RORK_FUNCTIONS_URL = ""
+    nonisolated static let EXPO_PUBLIC_RORK_TOOLKIT_SECRET_KEY = ""
+    nonisolated static let EXPO_PUBLIC_SUPABASE_ANON_KEY = ""
+    nonisolated static let EXPO_PUBLIC_SUPABASE_ANON_KEY_NEW = ""
+    nonisolated static let EXPO_PUBLIC_SUPABASE_URL = ""
+    nonisolated static let EXPO_PUBLIC_TEAM_ID = ""
+    nonisolated static let EXPO_PUBLIC_TOOLKIT_URL = ""
+
+    nonisolated static let allValues: [String: String] = [
+        "EXPO_PUBLIC_PROJECT_ID": EXPO_PUBLIC_PROJECT_ID,
+        "EXPO_PUBLIC_RORK_API_BASE_URL": EXPO_PUBLIC_RORK_API_BASE_URL,
+        "EXPO_PUBLIC_RORK_AUTH_URL": EXPO_PUBLIC_RORK_AUTH_URL,
+        "EXPO_PUBLIC_RORK_FUNCTIONS_URL": EXPO_PUBLIC_RORK_FUNCTIONS_URL,
+        "EXPO_PUBLIC_RORK_TOOLKIT_SECRET_KEY": EXPO_PUBLIC_RORK_TOOLKIT_SECRET_KEY,
+        "EXPO_PUBLIC_SUPABASE_ANON_KEY": EXPO_PUBLIC_SUPABASE_ANON_KEY,
+        "EXPO_PUBLIC_SUPABASE_ANON_KEY_NEW": EXPO_PUBLIC_SUPABASE_ANON_KEY_NEW,
+        "EXPO_PUBLIC_SUPABASE_URL": EXPO_PUBLIC_SUPABASE_URL,
+        "EXPO_PUBLIC_TEAM_ID": EXPO_PUBLIC_TEAM_ID,
+        "EXPO_PUBLIC_TOOLKIT_URL": EXPO_PUBLIC_TOOLKIT_URL,
+    ]
 }
