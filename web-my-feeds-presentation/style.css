@@ -1,0 +1,185 @@
+@import "@fontsource-variable/plus-jakarta-sans";
+
+/* My Feeds palette, taken from the app's Theme (deep navy + sky blue). */
+:root {
+  --mf-night: #000108;
+  --mf-bg: #0e131b;
+  --mf-card: #131a25;
+  --mf-input: #19212e;
+  --mf-border: #2f3542;
+  --mf-card-border: #232b3a;
+  --mf-text: #e8ebf0;
+  --mf-text-2: #7d8a9c;
+  --mf-muted: #61697a;
+  --mf-accent: #0ea5e9;
+  --mf-accent-2: #22d3ee;
+  --mf-accent-deep: #0369a1;
+  --mf-success: #22c55e;
+  --mf-warning: #f59e0b;
+  --mf-danger: #ef4444;
+  --mf-font: "Plus Jakarta Sans Variable", "Plus Jakarta Sans", Arial, sans-serif;
+}
+
+.slidev-layout {
+  position: relative;
+  height: 100%;
+  padding: 64px 72px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  overflow: hidden;
+  color: var(--mf-text);
+  font-family: var(--mf-font);
+  background:
+    radial-gradient(900px 520px at 88% -10%, rgba(14, 165, 233, 0.16), transparent 60%),
+    radial-gradient(700px 500px at -10% 110%, rgba(3, 105, 161, 0.18), transparent 60%),
+    linear-gradient(180deg, var(--mf-bg) 0%, var(--mf-night) 100%);
+}
+
+/* Faint broadcast arcs from the app icon, in the corner of every slide. */
+.slidev-layout::after {
+  content: "";
+  position: absolute;
+  right: -160px;
+  top: -160px;
+  width: 420px;
+  height: 420px;
+  border-radius: 50%;
+  border: 34px solid rgba(14, 165, 233, 0.05);
+  box-shadow: 0 0 0 70px rgba(14, 165, 233, 0.025);
+  pointer-events: none;
+}
+
+.slidev-layout h1 {
+  font-size: 48px;
+  line-height: 1.1;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin: 0 0 18px;
+  max-width: 1000px;
+}
+.slidev-layout h1 em { font-style: normal; color: var(--mf-accent); }
+.slidev-layout p, .slidev-layout li { font-size: 21px; line-height: 1.5; color: var(--mf-text); }
+.slidev-layout .lead { font-size: 23px; color: #b6c0ce; max-width: 900px; margin: 0; }
+.slidev-layout .small { font-size: 17px; color: var(--mf-text-2); line-height: 1.45; }
+
+/* Uppercase section label, like the app's SectionHeader. */
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--mf-accent);
+  margin-bottom: 14px;
+}
+.eyebrow::before { content: ""; width: 26px; height: 2px; background: var(--mf-accent); border-radius: 2px; }
+
+.mark { position: absolute; left: 72px; bottom: 26px; display: flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 700; color: var(--mf-muted); letter-spacing: 0.04em; }
+.mark img { width: 22px; height: 22px; border-radius: 6px; }
+
+/* Layout helpers */
+.split { display: grid; grid-template-columns: 1.05fr 0.95fr; gap: 56px; align-items: center; }
+.split.wide-right { grid-template-columns: 0.9fr 1.1fr; }
+.row { display: flex; gap: 18px; }
+.grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+.grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+.slidev-layout .mt { margin-top: 30px; }
+
+/* Cards, matching the app's card style */
+.card {
+  background: linear-gradient(180deg, rgba(25, 33, 46, 0.92), rgba(19, 26, 37, 0.92));
+  border: 1px solid var(--mf-card-border);
+  border-radius: 14px;
+  padding: 24px 26px;
+}
+.card h3 { font-size: 23px; font-weight: 800; margin: 0 0 6px; color: var(--mf-text); }
+.slidev-layout .card p { font-size: 18px; line-height: 1.45; color: #a9b3c1; margin: 0; }
+.card .num {
+  width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center;
+  font-size: 16px; font-weight: 800; color: #fff; margin-bottom: 14px;
+  background: linear-gradient(135deg, var(--mf-accent-2), var(--mf-accent-deep));
+}
+.card.accent { border-color: rgba(14, 165, 233, 0.55); box-shadow: 0 0 40px rgba(14, 165, 233, 0.12); }
+
+/* Steps list */
+.steps { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 14px; }
+.slidev-layout .steps li { display: flex; gap: 16px; align-items: flex-start; font-size: 20px; line-height: 1.45; color: #c3ccd8; }
+.steps li b { color: var(--mf-text); }
+.steps .dot {
+  flex: none; width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center;
+  font-size: 14px; font-weight: 800; color: var(--mf-accent); border: 1.5px solid rgba(14, 165, 233, 0.6);
+  background: rgba(14, 165, 233, 0.08); margin-top: 1px;
+}
+
+/* Chips */
+.chips { display: flex; flex-wrap: wrap; gap: 10px; }
+.chip {
+  display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px; border-radius: 999px;
+  background: var(--mf-input); border: 1px solid var(--mf-border); font-size: 15px; font-weight: 600; color: var(--mf-text);
+}
+.chip i { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
+.chip.on { background: rgba(14, 165, 233, 0.16); border-color: rgba(14, 165, 233, 0.6); color: #bfe9fb; }
+
+/* Phone mockup built from the app's own UI language */
+.phone {
+  width: 300px; height: 560px; border-radius: 44px; padding: 12px; flex: none;
+  background: #05070c; border: 1.5px solid #2a3140;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.55), 0 0 60px rgba(14, 165, 233, 0.14);
+}
+.phone .screen {
+  height: 100%; border-radius: 33px; overflow: hidden; background: var(--mf-bg);
+  display: flex; flex-direction: column; padding: 34px 14px 0; position: relative;
+}
+.phone .screen::before { content: ""; position: absolute; top: 10px; left: 50%; transform: translateX(-50%); width: 84px; height: 22px; border-radius: 12px; background: #000; }
+.phone .title { font-size: 22px; font-weight: 800; margin: 4px 4px 10px; }
+.phone .label { font-size: 10px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--mf-text-2); margin: 10px 4px 6px; }
+.phone .tabbar {
+  margin: auto -14px 0; padding: 10px 6px 16px; display: flex; justify-content: space-around;
+  border-top: 1px solid var(--mf-card-border); background: rgba(10, 14, 20, 0.95);
+}
+.phone .tabbar span { font-size: 9px; font-weight: 700; color: var(--mf-muted); display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.phone .tabbar span::before { content: ""; width: 16px; height: 16px; border-radius: 5px; border: 1.5px solid currentColor; }
+.phone .tabbar span.on { color: var(--mf-accent); }
+
+.stat { background: var(--mf-card); border: 1px solid var(--mf-card-border); border-radius: 12px; padding: 10px 12px; }
+.stat b { display: block; font-size: 20px; font-weight: 800; }
+.stat span { font-size: 9.5px; color: var(--mf-text-2); font-weight: 600; }
+.mini { background: var(--mf-card); border: 1px solid var(--mf-card-border); border-radius: 12px; padding: 10px 12px; margin-bottom: 8px; }
+.mini .t { font-size: 12.5px; font-weight: 700; line-height: 1.3; }
+.mini .s { font-size: 10px; color: var(--mf-text-2); margin-top: 3px; }
+.mini .bar { height: 4px; border-radius: 4px; background: var(--mf-input); margin-top: 8px; overflow: hidden; }
+.mini .bar i { display: block; height: 100%; background: linear-gradient(90deg, var(--mf-accent-2), var(--mf-accent)); border-radius: 4px; }
+.thumb { height: 92px; border-radius: 10px; margin-bottom: 8px; position: relative; overflow: hidden;
+  background: linear-gradient(135deg, #0b3a5c, #0e1f35 55%, #111827); }
+.thumb::after { content: ""; position: absolute; left: 50%; top: 50%; transform: translate(-40%, -50%);
+  border-left: 18px solid rgba(255, 255, 255, 0.9); border-top: 11px solid transparent; border-bottom: 11px solid transparent; }
+.pill { display: inline-block; font-size: 9px; font-weight: 800; padding: 3px 7px; border-radius: 6px; margin-right: 4px; }
+.pill.seen { background: rgba(34, 197, 94, 0.16); color: #4ade80; }
+.pill.later { background: rgba(245, 158, 11, 0.16); color: #fbbf24; }
+.pill.liked { background: rgba(14, 165, 233, 0.18); color: #7dd3fc; }
+
+/* Big quote / statement */
+.slidev-layout .statement { margin: 0; font-size: 54px; font-weight: 800; line-height: 1.2; letter-spacing: -0.015em; max-width: 980px; }
+.statement em { font-style: normal; color: var(--mf-accent); }
+
+/* Platform tiles */
+.platforms { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
+.platforms .p { background: var(--mf-card); border: 1px solid var(--mf-card-border); border-radius: 12px; padding: 18px 16px 16px; }
+.platforms .p b { display: flex; align-items: center; gap: 8px; font-size: 18px; }
+.platforms .p b i { width: 10px; height: 10px; border-radius: 50%; }
+.platforms .p span { display: block; font-size: 14.5px; color: var(--mf-text-2); margin-top: 5px; line-height: 1.35; }
+
+/* Two-column action table for reading posts */
+.actions { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 18px; }
+.actions th { text-align: left; font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--mf-text-2); padding: 0 14px 10px; }
+.actions td { padding: 14px 14px; border-top: 1px solid var(--mf-card-border); color: #c3ccd8; line-height: 1.4; vertical-align: top; }
+.actions td:first-child { font-weight: 800; color: var(--mf-text); white-space: nowrap; }
+.actions td.out { color: var(--mf-text-2); }
+
+@media (prefers-reduced-motion: reduce) {
+  .slidev-vclick-target { transition: none !important; }
+}

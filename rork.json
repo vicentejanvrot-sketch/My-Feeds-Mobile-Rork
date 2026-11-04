@@ -10,6 +10,14 @@
       "name": "My Feeds",
       "path": "ios",
       "framework": "swift"
+    },
+    {
+      "name": "My Feeds Presentation",
+      "path": "web-my-feeds-presentation",
+      "framework": "web",
+      "settings": {
+        "kind": "presentation"
+      }
     }
   ]
 }
