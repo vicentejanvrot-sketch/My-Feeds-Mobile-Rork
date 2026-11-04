@@ -52,7 +52,6 @@ import {
   useChannels,
   useRecipients,
   useAgentRuns,
-  useStartRun,
   useToggleChannel,
   useDeleteChannel,
   useMoveChannels,
@@ -68,9 +67,8 @@ import {
   useDeleteAgent,
   useAgents,
   qk,
-  extractEdgeFunctionErrorMessage,
 } from "@/lib/hooks";
-import { supabase } from "@/lib/supabase";
+import { startRunRow, runAgentAndWait, outcomeMessage } from "@/lib/runAgent";
 import { useRunningOverlay } from "@/lib/running-overlay";
 import { useToast } from "@/components/Toast";
 import { StatusPill } from "@/components/StatusPill";
@@ -555,7 +553,6 @@ export default function AgentDetailScreen() {
   const recipientsQ = useRecipients(agentId ?? null);
   const runsQ = useAgentRuns(agentId ?? null);
 
-  const startRun = useStartRun();
   const toggleChannel = useToggleChannel();
   const deleteChannel = useDeleteChannel();
   const moveChannels = useMoveChannels();
@@ -633,61 +630,22 @@ export default function AgentDetailScreen() {
   }, [router]);
 
   // ── Run trigger (overlay pattern, same as agents.tsx) ────────────
+  // lib/runAgent uses run-agent's own reply and never waits forever on a run
+  // row. The old loop here missed "partial" runs and kept polling for good.
   const runOne = useCallback(
     async (aId: string, aName: string) => {
-      const run = await startRun.mutateAsync(aId);
+      const run = await startRunRow(aId);
       overlay.showRunning(aName, run.id);
 
-      const { error } = await supabase.functions.invoke("run-agent", {
-        body: { agentId: aId, runId: run.id },
-      });
-      if (error) {
-        await supabase
-          .from("runs")
-          .update({
-            status: "failed",
-            finished_at: new Date().toISOString(),
-            error_summary: await extractEdgeFunctionErrorMessage(error),
-          })
-          .eq("id", run.id);
-        overlay.showError(aName, await extractEdgeFunctionErrorMessage(error));
-        void queryClient.invalidateQueries({ queryKey: qk.runs });
-        return;
+      const outcome = await runAgentAndWait(aId, run.id);
+      if (outcome.status === "failed" || outcome.status === "skipped") {
+        overlay.showError(aName, outcome.error ?? t("runs.unknownError"));
+      } else {
+        overlay.showSuccess(aName, outcomeMessage(outcome));
       }
-
-      while (true) {
-        await new Promise((r) => setTimeout(r, 1500));
-        const { data: polled } = await supabase
-          .from("runs")
-          .select("status, videos_new_count, error_summary")
-          .eq("id", run.id)
-          .single();
-
-        if (!polled) continue;
-
-        if (polled.status === "success") {
-          const count = (polled.videos_new_count as number) ?? 0;
-          overlay.showSuccess(
-            aName,
-            count > 0 ? t("runs.foundNew", { count }) : t("runs.noNewFound"),
-          );
-          await new Promise((r) => setTimeout(r, 2000));
-          break;
-        }
-
-        if (polled.status === "failed" || polled.status === "cancelled") {
-          overlay.showError(
-            aName,
-            (polled.error_summary as string) || t("runs.unknownError"),
-          );
-          await new Promise((r) => setTimeout(r, 2000));
-          break;
-        }
-      }
-
       void queryClient.invalidateQueries({ queryKey: qk.runs });
     },
-    [startRun, overlay, queryClient, t],
+    [overlay, queryClient, t],
   );
 
   const triggerRun = useCallback(async () => {

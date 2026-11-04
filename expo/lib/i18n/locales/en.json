@@ -155,7 +155,9 @@
     "foundNew_other": "Found {{count}} new feeds",
     "noNewFound": "No new feeds found",
     "startFailed": "Failed to start run",
-    "failed": "Run failed"
+    "failed": "Run failed",
+    "noSources": "This collection has no sources turned on",
+    "timedOut": "This collection took too long and was stopped"
   },
   "dashboard": {
     "settingSaveFailed": "Couldn't save that setting: {{message}}",

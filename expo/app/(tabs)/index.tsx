@@ -47,15 +47,13 @@ import {
   useRunStats,
   useItems,
   useChannelsAll,
-  useStartRun,
   useDeleteAgent,
   useDashboardRealtime,
   useAgentItemCounts,
   getAgentColor,
   qk,
-  extractEdgeFunctionErrorMessage,
 } from "@/lib/hooks";
-import { supabase } from "@/lib/supabase";
+import { startRunRow, runAgentAndWait, runAllAgents, outcomeMessage } from "@/lib/runAgent";
 import { timeAgo, relativeTime, compactNumber } from "@/lib/format";
 import { useToast } from "@/components/Toast";
 import { StatusPill } from "@/components/StatusPill";
@@ -117,7 +115,6 @@ export default function DashboardScreen() {
   const runStats = useRunStats();
   const items = useItems("all");
   const channels = useChannelsAll();
-  const runAgent = useStartRun();
   const deleteAgent = useDeleteAgent();
   const overlay = useRunningOverlay();
   const queryClient = useQueryClient();
@@ -227,76 +224,24 @@ export default function DashboardScreen() {
   const successRate = runStats.data?.success_rate ?? null;
 
   // ── run triggers ────────────────────────────────────────────────
-  type RunResult = { failed: boolean; newCount: number; error?: string };
-
-  /** Invoke run-agent for an existing run row and wait until it finishes.
-   *  Does not touch the overlay, so Run All can use it for every agent at once. */
-  const executeRun = useCallback(
-    async (agentId: string, runId: string): Promise<RunResult> => {
-      const { error } = await supabase.functions.invoke("run-agent", {
-        body: { agentId, runId },
-      });
-      if (error) {
-        const message = await extractEdgeFunctionErrorMessage(error);
-        await supabase
-          .from("runs")
-          .update({
-            status: "failed",
-            finished_at: new Date().toISOString(),
-            error_summary: message,
-          })
-          .eq("id", runId);
-        return { failed: true, newCount: 0, error: message };
-      }
-
-      // Poll the runs table until the edge function finishes processing.
-      // "partial" is a finished run too; it used to be missed here, which
-      // left Run All waiting forever.
-      while (true) {
-        const { data: polled } = await supabase
-          .from("runs")
-          .select("status, videos_new_count, error_summary")
-          .eq("id", runId)
-          .single();
-
-        if (polled) {
-          const count = (polled.videos_new_count as number) ?? 0;
-          if (polled.status === "success" || polled.status === "partial") {
-            return { failed: false, newCount: count };
-          }
-          if (polled.status === "failed" || polled.status === "cancelled") {
-            return {
-              failed: true,
-              newCount: 0,
-              error: (polled.error_summary as string) || t("runs.unknownError"),
-            };
-          }
-        }
-        await new Promise((r) => setTimeout(r, 1500));
-      }
-    },
-    [t],
-  );
-
+  // Runs go through lib/runAgent, which uses run-agent's own reply and never
+  // waits forever on a run row (see the note there).
   const runOne = useCallback(
     async (agentId: string, agentName: string) => {
       // Insert the run row first so we have a runId for the overlay + Realtime.
-      const run = await runAgent.mutateAsync(agentId);
+      const run = await startRunRow(agentId);
       // Show the overlay immediately; live progress arrives via Realtime.
       overlay.showRunning(agentName, run.id);
 
-      const result = await executeRun(agentId, run.id);
-      if (result.failed) {
-        overlay.showError(agentName, result.error ?? t("runs.unknownError"));
+      const outcome = await runAgentAndWait(agentId, run.id);
+      if (outcome.status === "failed" || outcome.status === "skipped") {
+        overlay.showError(agentName, outcome.error ?? t("runs.unknownError"));
       } else {
-        overlay.showSuccess(
-          agentName,
-          result.newCount > 0 ? t("runs.foundNew", { count: result.newCount }) : t("runs.noNewFound"),
-        );
+        overlay.showSuccess(agentName, outcomeMessage(outcome));
       }
       void queryClient.invalidateQueries({ queryKey: qk.runs });
     },
-    [runAgent, overlay, queryClient, executeRun, t],
+    [overlay, queryClient, t],
   );
 
   const triggerRun = useCallback(
@@ -322,29 +267,14 @@ export default function DashboardScreen() {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     setPendingId("all");
 
-    // Start every agent at the same time, like the web app. Running them one
-    // after another made Run All take the sum of every agent's duration.
+    // Every collection starts at the same time, like the web app.
     const total = list.length;
     const label = t("dashboard.allCollectionsCount", { count: total });
-    let done = 0;
-    let newTotal = 0;
-    const failedNames: string[] = [];
     overlay.showBatchProgress(label, 0, total, t("dashboard.runningAll"));
 
-    await Promise.all(
-      list.map(async (agent) => {
-        try {
-          const run = await runAgent.mutateAsync(agent.id);
-          const result = await executeRun(agent.id, run.id);
-          if (result.failed) failedNames.push(agent.name);
-          else newTotal += result.newCount;
-        } catch {
-          failedNames.push(agent.name);
-        }
-        done += 1;
-        overlay.showBatchProgress(label, done, total, t("dashboard.collectionFinished", { name: agent.name }));
-      }),
-    );
+    const { newTotal, failedNames } = await runAllAgents(list, (name, done) => {
+      overlay.showBatchProgress(label, done, total, t("dashboard.collectionFinished", { name }));
+    });
 
     void queryClient.invalidateQueries({ queryKey: qk.runs });
     const found = newTotal > 0 ? t("runs.foundNew", { count: newTotal }) : t("runs.noNewFound");
@@ -354,7 +284,7 @@ export default function DashboardScreen() {
       overlay.showSuccess(label, found);
     }
     setPendingId(null);
-  }, [list, runAgent, executeRun, overlay, queryClient, t]);
+  }, [list, overlay, queryClient, t]);
 
   const handleDelete = useCallback(
     (agentId: string, agentName: string) => {

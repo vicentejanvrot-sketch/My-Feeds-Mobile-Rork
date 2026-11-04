@@ -18,8 +18,8 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { Colors } from "@/constants/colors";
 import { agentAccent } from "@/lib/database";
-import { useAgents, useStartRun, useRealtimeInvalidation, qk, extractEdgeFunctionErrorMessage } from "@/lib/hooks";
-import { supabase } from "@/lib/supabase";
+import { useAgents, useRealtimeInvalidation, qk } from "@/lib/hooks";
+import { startRunRow, runAgentAndWait, runAllAgents, outcomeMessage } from "@/lib/runAgent";
 import { useRunningOverlay } from "@/lib/running-overlay";
 import { useToast } from "@/components/Toast";
 import { frequencyLabel } from "@/lib/i18n";
@@ -34,7 +34,6 @@ export default function AgentsScreen() {
   const showToast = useToast();
   const { t } = useTranslation();
   const agents = useAgents();
-  const startRun = useStartRun();
   const overlay = useRunningOverlay();
   const queryClient = useQueryClient();
   useRealtimeInvalidation("agents", qk.agents, !overlay.state.status);
@@ -57,65 +56,24 @@ export default function AgentsScreen() {
     [listUnsorted],
   );
 
+  // Runs go through lib/runAgent, which uses run-agent's own reply and never
+  // waits forever on a run row (see the note there).
   const runOne = useCallback(
     async (agentId: string, agentName: string) => {
       // Insert the run row first so we have a runId for the overlay + Realtime.
-      const run = await startRun.mutateAsync(agentId);
+      const run = await startRunRow(agentId);
       // Show the overlay immediately; live progress arrives via Realtime.
       overlay.showRunning(agentName, run.id);
 
-      // Invoke the existing edge function.
-      const { error } = await supabase.functions.invoke("run-agent", {
-        body: { agentId, runId: run.id },
-      });
-      if (error) {
-        await supabase
-          .from("runs")
-          .update({
-            status: "failed",
-            finished_at: new Date().toISOString(),
-            error_summary: await extractEdgeFunctionErrorMessage(error),
-          })
-          .eq("id", run.id);
-        overlay.showError(agentName, await extractEdgeFunctionErrorMessage(error));
-        void queryClient.invalidateQueries({ queryKey: qk.runs });
-        return;
+      const outcome = await runAgentAndWait(agentId, run.id);
+      if (outcome.status === "failed" || outcome.status === "skipped") {
+        overlay.showError(agentName, outcome.error ?? t("runs.unknownError"));
+      } else {
+        overlay.showSuccess(agentName, outcomeMessage(outcome));
       }
-
-      // Poll the runs table until the edge function finishes processing.
-      while (true) {
-        await new Promise((r) => setTimeout(r, 1500));
-        const { data: polled } = await supabase
-          .from("runs")
-          .select("status, videos_new_count, error_summary")
-          .eq("id", run.id)
-          .single();
-
-        if (!polled) continue;
-
-        if (polled.status === "success") {
-          const count = (polled.videos_new_count as number) ?? 0;
-          overlay.showSuccess(
-            agentName,
-            count > 0 ? t("runs.foundNew", { count }) : t("runs.noNewFound"),
-          );
-          await new Promise((r) => setTimeout(r, 2000));
-          break;
-        }
-
-        if (polled.status === "failed" || polled.status === "cancelled") {
-          overlay.showError(
-            agentName,
-            (polled.error_summary as string) || t("runs.unknownError"),
-          );
-          await new Promise((r) => setTimeout(r, 2000));
-          break;
-        }
-      }
-
       void queryClient.invalidateQueries({ queryKey: qk.runs });
     },
-    [startRun, overlay, queryClient, t],
+    [overlay, queryClient, t],
   );
 
   const triggerRun = useCallback(
@@ -136,19 +94,30 @@ export default function AgentsScreen() {
     [list, runOne, overlay, t],
   );
 
+  // Same as the Dashboard: every collection at once. This used to run them
+  // one after another, so Run All took as long as all of them added up.
   const triggerRunAll = useCallback(async () => {
     if (list.length === 0) return;
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     setPendingId("all");
-    for (const agent of list) {
-      try {
-        await runOne(agent.id, agent.name);
-      } catch (e) {
-        overlay.showError(agent.name, e instanceof Error ? e.message : t("runs.failed"));
-      }
+
+    const total = list.length;
+    const label = t("dashboard.allCollectionsCount", { count: total });
+    overlay.showBatchProgress(label, 0, total, t("dashboard.runningAll"));
+
+    const { newTotal, failedNames } = await runAllAgents(list, (name, done) => {
+      overlay.showBatchProgress(label, done, total, t("dashboard.collectionFinished", { name }));
+    });
+
+    void queryClient.invalidateQueries({ queryKey: qk.runs });
+    const found = newTotal > 0 ? t("runs.foundNew", { count: newTotal }) : t("runs.noNewFound");
+    if (failedNames.length > 0) {
+      overlay.showError(label, t("dashboard.foundWithFailures", { found, names: failedNames.join(", ") }));
+    } else {
+      overlay.showSuccess(label, found);
     }
     setPendingId(null);
-  }, [list, runOne, overlay, t]);
+  }, [list, overlay, queryClient, t]);
 
   return (
     <ScrollView

@@ -155,7 +155,9 @@
     "foundNew_other": "{{count}} feeds novos encontrados",
     "noNewFound": "Nenhum feed novo encontrado",
     "startFailed": "Não foi possível iniciar a atualização",
-    "failed": "A atualização falhou"
+    "failed": "A atualização falhou",
+    "noSources": "Esta coleção não tem fontes ativadas",
+    "timedOut": "Esta coleção demorou demais e foi interrompida"
   },
   "dashboard": {
     "settingSaveFailed": "Não foi possível salvar essa configuração: {{message}}",
